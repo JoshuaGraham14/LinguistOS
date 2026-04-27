@@ -5,9 +5,6 @@ pydantic-settings>=2.3
 sqlalchemy>=2.0
 psycopg[binary]>=3.2
 alembic>=1.13
-spacy>=3.7
-stanza>=1.8
-language-tool-python>=2.8
 python-dotenv>=1.0
 
 # dev

@@ -4,5 +4,11 @@ router = APIRouter()
 
 
 @router.post("/generate")
-def generate() -> dict:
-    return {"sentences": []}
+def generate():
+    """
+    TODO: Generate Spanish sentences with target word and morpho-syntactic constraints.
+
+    Pipeline: Generate → Analyze → Validate → Score → Rank
+    """
+    # TODO: Implement
+    pass
