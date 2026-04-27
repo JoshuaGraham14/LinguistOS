@@ -1,8 +1,99 @@
+"use client";
+
+import {
+  BookMarked,
+  BookOpen,
+  Flame,
+  MessageSquare,
+  Target,
+  Trophy,
+  Wand2,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { useMemo } from "react";
+import { QuickActionCard } from "@/components/QuickActionCard";
+import { StatCard } from "@/components/StatCard";
+import { useVocab } from "@/lib/storage";
+
 export default function DashboardPage() {
+  const { vocab, hydrated } = useVocab();
+
+  const stats = useMemo(() => {
+    const total = vocab.length;
+    const learned = vocab.filter((v) => v.learned).length;
+    return { total, learned };
+  }, [vocab]);
+
   return (
-    <main className="mx-auto max-w-3xl p-8">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="mt-2 text-gray-600">Vocabulary list will live here.</p>
-    </main>
+    <div className="space-y-8">
+      <header>
+        <h1 className="text-3xl font-bold text-slate-900">Hello, Joshy G!</h1>
+        <p className="text-slate-500 mt-1">Ready to learn Spanish today?</p>
+      </header>
+
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <StatCard
+          icon={BookOpen}
+          value={hydrated ? String(stats.total) : "—"}
+          label="Total Words"
+          color="blue"
+        />
+        <StatCard
+          icon={Target}
+          value={hydrated ? String(stats.learned) : "—"}
+          label="Words Learned"
+          color="green"
+        />
+        <StatCard icon={Flame} value="0" label="Current Streak" color="orange" />
+        <StatCard icon={Trophy} value="0m 31s" label="Time Studied" color="purple" />
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 rounded-2xl bg-white/80 backdrop-blur shadow-card p-12 flex flex-col items-center justify-center min-h-[320px]">
+          <h2 className="text-2xl font-bold text-slate-900">No word for today</h2>
+          <p className="text-slate-500 mt-2 text-center">
+            Generate a fresh sentence to practice with.
+          </p>
+          <Link
+            href="/learn"
+            className="mt-8 inline-flex items-center gap-2 bg-btn-purple text-white font-medium rounded-full px-6 py-3 shadow-card transition hover:brightness-110"
+          >
+            <Wand2 className="h-4 w-4" strokeWidth={2} />
+            Generate word
+          </Link>
+        </div>
+
+        <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6">
+          <h3 className="font-bold text-slate-900 mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <QuickActionCard
+              href="/learn/flashcards"
+              label="Flashcards"
+              icon={BookOpen}
+              color="blue"
+            />
+            <QuickActionCard
+              href="/learn/sentences"
+              label="Sentences"
+              icon={MessageSquare}
+              color="purple"
+            />
+            <QuickActionCard
+              href="/learn"
+              label="All modes"
+              icon={Zap}
+              color="red"
+            />
+            <QuickActionCard
+              href="/words"
+              label="Words"
+              icon={BookMarked}
+              color="green"
+            />
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
