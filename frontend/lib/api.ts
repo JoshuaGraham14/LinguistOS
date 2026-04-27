@@ -18,6 +18,8 @@ export interface GenerateRequest {
   person: string;
   number: string;
   num_candidates?: number;
+  sentence_length?: string;
+  direction?: string;
 }
 
 export interface GenerateResponse {

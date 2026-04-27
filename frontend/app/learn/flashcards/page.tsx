@@ -6,7 +6,6 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Volume2,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -155,17 +154,6 @@ export default function FlashcardsPage() {
           disabled={!current}
           className="flex-1 rounded-3xl bg-white/90 shadow-card p-12 min-h-[360px] relative flex flex-col items-center justify-center group disabled:opacity-50"
         >
-          {current && (
-            <button
-              type="button"
-              onClick={(e) => e.stopPropagation()}
-              className="absolute top-5 left-5 h-10 w-10 rounded-xl bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition"
-              aria-label="Play audio"
-            >
-              <Volume2 className="h-5 w-5" strokeWidth={2} />
-            </button>
-          )}
-
           {current ? (
             <>
               <div className="text-4xl md:text-5xl font-bold text-slate-900 text-center">
