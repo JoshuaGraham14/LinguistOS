@@ -9,10 +9,8 @@ import {
   SlidersHorizontal,
   Trash2,
   Upload,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/Modal";
 import { cn } from "@/lib/cn";
 import { useVocab } from "@/lib/storage";
@@ -48,13 +46,21 @@ function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString("en-GB");
 }
 
+interface WordFormValues {
+  word: string;
+  translation: string;
+  tags: VocabTag[];
+}
+
 export default function WordsPage() {
-  const { vocab, hydrated, addVocab, removeVocab } = useVocab();
+  const { vocab, hydrated, addVocab, removeVocab, updateVocab } = useVocab();
   const [search, setSearch] = useState("");
   const [activeTags, setActiveTags] = useState<VocabTag[]>([]);
   const [sort, setSort] = useState<SortOrder>("newest");
   const [sortOpen, setSortOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [editing, setEditing] = useState<VocabItem | null>(null);
 
   function toggleActiveTag(tag: VocabTag) {
     setActiveTags((t) =>
@@ -92,6 +98,7 @@ export default function WordsPage() {
         <div className="flex gap-3">
           <button
             type="button"
+            onClick={() => setImportOpen(true)}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium px-5 py-3 shadow-soft hover:brightness-110 transition"
           >
             <Upload className="h-4 w-4" strokeWidth={2.5} />
@@ -183,12 +190,40 @@ export default function WordsPage() {
       ) : (
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {filtered.map((v) => (
-            <WordCard key={v.id} item={v} onDelete={() => removeVocab(v.id)} />
+            <WordCard
+              key={v.id}
+              item={v}
+              onDelete={() => removeVocab(v.id)}
+              onEdit={() => setEditing(v)}
+            />
           ))}
         </section>
       )}
 
-      <AddWordModal open={addOpen} onClose={() => setAddOpen(false)} onAdd={addVocab} />
+      <WordFormModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        title="Add a word"
+        submitLabel="Add word"
+        onSubmit={(values) => addVocab(values)}
+      />
+      <WordFormModal
+        open={editing !== null}
+        onClose={() => setEditing(null)}
+        title="Edit word"
+        submitLabel="Save changes"
+        initial={editing}
+        onSubmit={(values) => {
+          if (editing) updateVocab(editing.id, values);
+        }}
+      />
+      <ImportWordsModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={(rows) => {
+          rows.forEach((r) => addVocab(r));
+        }}
+      />
     </div>
   );
 }
@@ -196,9 +231,11 @@ export default function WordsPage() {
 function WordCard({
   item,
   onDelete,
+  onEdit,
 }: {
   item: VocabItem;
   onDelete: () => void;
+  onEdit: () => void;
 }) {
   return (
     <div className="rounded-2xl bg-white/90 shadow-card p-6 flex flex-col gap-4 group">
@@ -210,20 +247,7 @@ function WordCard({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          className="h-9 w-9 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition shadow-soft"
-          aria-label="Play audio"
-        >
-          <Volume2 className="h-4 w-4" strokeWidth={2.5} />
-        </button>
-        <button
-          type="button"
-          className="h-9 w-9 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition shadow-soft"
-          aria-label="Slow audio"
-        >
-          <VolumeX className="h-4 w-4" strokeWidth={2.5} />
-        </button>
-        <button
-          type="button"
+          onClick={onEdit}
           className="h-9 w-9 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600 transition shadow-soft"
           aria-label="Edit"
         >
@@ -272,18 +296,31 @@ function WordCard({
   );
 }
 
-function AddWordModal({
+function WordFormModal({
   open,
   onClose,
-  onAdd,
+  onSubmit,
+  title,
+  submitLabel,
+  initial,
 }: {
   open: boolean;
   onClose: () => void;
-  onAdd: (input: { word: string; translation: string; tags: VocabTag[] }) => void;
+  onSubmit: (input: WordFormValues) => void;
+  title: string;
+  submitLabel: string;
+  initial?: VocabItem | null;
 }) {
-  const [word, setWord] = useState("");
-  const [translation, setTranslation] = useState("");
-  const [tags, setTags] = useState<VocabTag[]>([]);
+  const [word, setWord] = useState(initial?.word ?? "");
+  const [translation, setTranslation] = useState(initial?.translation ?? "");
+  const [tags, setTags] = useState<VocabTag[]>(initial?.tags ?? []);
+
+  useEffect(() => {
+    if (!open) return;
+    setWord(initial?.word ?? "");
+    setTranslation(initial?.translation ?? "");
+    setTags(initial?.tags ?? []);
+  }, [open, initial?.id, initial?.word, initial?.translation, initial?.tags]);
 
   function toggleTag(tag: VocabTag) {
     setTags((t) =>
@@ -294,15 +331,12 @@ function AddWordModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!word.trim() || !translation.trim()) return;
-    onAdd({ word: word.trim(), translation: translation.trim(), tags });
-    setWord("");
-    setTranslation("");
-    setTags([]);
+    onSubmit({ word: word.trim(), translation: translation.trim(), tags });
     onClose();
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Add a word">
+    <Modal open={open} onClose={onClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
           <span className="text-sm font-medium text-slate-700">Spanish</span>
@@ -356,10 +390,153 @@ function AddWordModal({
             disabled={!word.trim() || !translation.trim()}
             className="px-5 py-2 rounded-xl bg-btn-purple text-white font-medium shadow-soft hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            Add word
+            {submitLabel}
           </button>
         </div>
       </form>
+    </Modal>
+  );
+}
+
+const VALID_TAGS: VocabTag[] = [
+  "noun",
+  "verb",
+  "adjective",
+  "adverb",
+  "preposition",
+  "other",
+];
+
+function parseImportText(text: string): WordFormValues[] {
+  const rows: WordFormValues[] = [];
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const parts = line.split(",").map((p) => p.trim());
+    if (parts.length < 2) continue;
+    const [word, translation, rawTags] = parts;
+    if (!word || !translation) continue;
+    const tags: VocabTag[] = (rawTags ?? "")
+      .split(";")
+      .map((t) => t.trim().toLowerCase())
+      .filter((t): t is VocabTag => (VALID_TAGS as string[]).includes(t));
+    rows.push({ word, translation, tags });
+  }
+  return rows;
+}
+
+function ImportWordsModal({
+  open,
+  onClose,
+  onImport,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onImport: (rows: WordFormValues[]) => void;
+}) {
+  const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const parsed = useMemo(() => parseImportText(text), [text]);
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") setText(result);
+      setError(null);
+    };
+    reader.onerror = () => setError("Could not read file");
+    reader.readAsText(file);
+  }
+
+  function handleImport() {
+    if (parsed.length === 0) {
+      setError("No valid rows found");
+      return;
+    }
+    onImport(parsed);
+    setText("");
+    setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    onClose();
+  }
+
+  function handleClose() {
+    setText("");
+    setError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    onClose();
+  }
+
+  return (
+    <Modal open={open} onClose={handleClose} title="Import words">
+      <div className="space-y-4">
+        <p className="text-sm text-slate-600">
+          One word per line, comma-separated:{" "}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">
+            spanish,english,tag1;tag2
+          </code>
+          . Blank lines and lines starting with{" "}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">
+            #
+          </code>{" "}
+          are ignored.
+        </p>
+
+        <div>
+          <span className="text-sm font-medium text-slate-700">Upload a file</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.txt,text/csv,text/plain"
+            onChange={handleFile}
+            className="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-slate-700 file:hover:bg-slate-200"
+          />
+        </div>
+
+        <label className="block">
+          <span className="text-sm font-medium text-slate-700">Or paste CSV</span>
+          <textarea
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              setError(null);
+            }}
+            placeholder={"correr,to run,verb\nolor,smell,noun\ndulce,sweet,adjective"}
+            rows={6}
+            className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+          />
+        </label>
+
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-slate-500">
+            {parsed.length} row{parsed.length === 1 ? "" : "s"} ready to import
+          </span>
+          {error && <span className="text-rose-600">{error}</span>}
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleImport}
+            disabled={parsed.length === 0}
+            className="px-5 py-2 rounded-xl bg-btn-purple text-white font-medium shadow-soft hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            Import {parsed.length || ""}
+          </button>
+        </div>
+      </div>
     </Modal>
   );
 }

@@ -3,7 +3,13 @@
 import { Keyboard, Settings as SettingsIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
-import type { PracticeSettings, VocabTag } from "@/lib/types";
+import type {
+  GrammaticalNumber,
+  Person,
+  PracticeSettings,
+  Tense,
+  VocabTag,
+} from "@/lib/types";
 
 const TAGS: VocabTag[] = [
   "noun",
@@ -12,6 +18,26 @@ const TAGS: VocabTag[] = [
   "adverb",
   "preposition",
   "other",
+];
+
+const TENSES: { value: Tense; label: string }[] = [
+  { value: "present", label: "Present" },
+  { value: "preterite", label: "Preterite" },
+  { value: "imperfect", label: "Imperfect" },
+  { value: "future", label: "Future" },
+  { value: "conditional", label: "Conditional" },
+  { value: "subjunctive", label: "Subjunctive" },
+];
+
+const PERSONS: { value: Person; label: string }[] = [
+  { value: "1st", label: "1st (yo / nosotros)" },
+  { value: "2nd", label: "2nd (tú / vosotros)" },
+  { value: "3rd", label: "3rd (él / ellos)" },
+];
+
+const NUMBERS: { value: GrammaticalNumber; label: string }[] = [
+  { value: "singular", label: "Singular" },
+  { value: "plural", label: "Plural" },
 ];
 
 export function SettingsPopover({
@@ -140,6 +166,69 @@ export function SettingsPopover({
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-4 space-y-3">
+            <div className="text-sm font-semibold text-slate-700">
+              Generation constraints
+            </div>
+            <label className="block">
+              <span className="text-xs uppercase tracking-wide text-slate-500">
+                Tense
+              </span>
+              <select
+                value={settings.tense}
+                onChange={(e) =>
+                  onChange({ ...settings, tense: e.target.value as Tense })
+                }
+                className="mt-1 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-400"
+              >
+                {TENSES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs uppercase tracking-wide text-slate-500">
+                Person
+              </span>
+              <select
+                value={settings.person}
+                onChange={(e) =>
+                  onChange({ ...settings, person: e.target.value as Person })
+                }
+                className="mt-1 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-400"
+              >
+                {PERSONS.map((p) => (
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-xs uppercase tracking-wide text-slate-500">
+                Number
+              </span>
+              <select
+                value={settings.number}
+                onChange={(e) =>
+                  onChange({
+                    ...settings,
+                    number: e.target.value as GrammaticalNumber,
+                  })
+                }
+                className="mt-1 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-400"
+              >
+                {NUMBERS.map((n) => (
+                  <option key={n.value} value={n.value}>
+                    {n.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         </div>
       )}
