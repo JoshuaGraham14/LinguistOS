@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PracticeSettings, VocabItem } from "./types";
+import type { PracticeSettings, Profile, VocabItem } from "./types";
 
 /** Bumped when the default seed list changes so users get fresh words without manual DevTools clears. */
 const VOCAB_KEY = "linguistos.vocab.v2";
 const SETTINGS_KEY = "linguistos.settings.v2";
+const PROFILE_KEY = "linguistos.profile.v1";
 
 const DEFAULT_SETTINGS: PracticeSettings = {
   mode: "typing",
@@ -16,6 +17,8 @@ const DEFAULT_SETTINGS: PracticeSettings = {
   person: "3rd",
   number: "singular",
 };
+
+const DEFAULT_PROFILE: Profile = { name: "" };
 
 function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -73,7 +76,35 @@ export function useVocab() {
     );
   }
 
-  return { vocab, hydrated, addVocab, removeVocab, updateVocab, toggleLearned };
+  function clearVocab() {
+    setVocab([]);
+  }
+
+  return {
+    vocab,
+    hydrated,
+    addVocab,
+    removeVocab,
+    updateVocab,
+    toggleLearned,
+    clearVocab,
+  };
+}
+
+export function useProfile() {
+  const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setProfile(read<Profile>(PROFILE_KEY, DEFAULT_PROFILE));
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated) write(PROFILE_KEY, profile);
+  }, [profile, hydrated]);
+
+  return { profile, setProfile, hydrated };
 }
 
 export function usePracticeSettings() {

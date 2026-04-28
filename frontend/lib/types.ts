@@ -44,3 +44,7 @@ export interface SentenceCandidate {
   score: number;
   features?: Record<string, unknown>;
 }
+
+export interface Profile {
+  name: string;
+}

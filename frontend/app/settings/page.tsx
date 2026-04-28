@@ -1,8 +1,8 @@
 "use client";
 
-import { Settings as SettingsIcon } from "lucide-react";
+import { Settings as SettingsIcon, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { usePracticeSettings } from "@/lib/storage";
+import { usePracticeSettings, useProfile } from "@/lib/storage";
 import type {
   GrammaticalNumber,
   Person,
@@ -42,6 +42,7 @@ const NUMBERS: { value: GrammaticalNumber; label: string }[] = [
 
 export default function SettingsPage() {
   const { settings, setSettings, hydrated } = usePracticeSettings();
+  const { profile, setProfile, hydrated: profileHydrated } = useProfile();
 
   function update<K extends keyof PracticeSettings>(
     key: K,
@@ -71,6 +72,23 @@ export default function SettingsPage() {
           </p>
         </div>
       </header>
+
+      <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 space-y-2">
+        <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+          <UserIcon className="h-4 w-4" strokeWidth={2} />
+          Display name
+        </label>
+        <input
+          value={profileHydrated ? profile.name : ""}
+          onChange={(e) => setProfile({ name: e.target.value })}
+          placeholder="e.g. Josh"
+          disabled={!profileHydrated}
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400 disabled:bg-slate-50"
+        />
+        <p className="text-xs text-slate-500">
+          Shown on the dashboard and sidebar. Stored locally.
+        </p>
+      </div>
 
       {!hydrated ? (
         <div className="rounded-2xl bg-white/80 shadow-card p-12 text-center text-slate-400">
