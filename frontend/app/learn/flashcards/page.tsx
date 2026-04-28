@@ -6,10 +6,13 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  RotateCcw,
+  Shuffle,
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { useVocab } from "@/lib/storage";
 import type { VocabItem } from "@/lib/types";
@@ -33,8 +36,11 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export default function FlashcardsPage() {
+function FlashcardsInner() {
   const { vocab, hydrated, toggleLearned } = useVocab();
+  const searchParams = useSearchParams();
+  const wordParam = searchParams.get("word");
+
   const [shuffle, setShuffle] = useState(true);
   const [direction, setDirection] = useState<"en-to-es" | "es-to-en">("en-to-es");
   const [order, setOrder] = useState<VocabItem[]>([]);
@@ -42,23 +48,34 @@ export default function FlashcardsPage() {
   const [revealed, setRevealed] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [stats, setStats] = useState({ knew: 0, didnt: 0 });
-  const startedRef = useRef(false);
+  const [finished, setFinished] = useState(false);
 
+  const scopedVocab = useMemo(() => {
+    if (!wordParam) return vocab;
+    const match = vocab.find((v) => v.id === wordParam);
+    return match ? [match] : vocab;
+  }, [vocab, wordParam]);
+
+  // Build deck whenever vocab/shuffle/scope changes; resets the session.
   useEffect(() => {
     if (!hydrated) return;
-    setOrder(shuffle ? shuffleArray(vocab) : vocab);
+    setOrder(shuffle ? shuffleArray(scopedVocab) : scopedVocab);
     setIndex(0);
     setRevealed(false);
-  }, [vocab, hydrated, shuffle]);
+    setStats({ knew: 0, didnt: 0 });
+    setSeconds(0);
+    setFinished(false);
+  }, [scopedVocab, hydrated, shuffle]);
 
+  // Timer ticks while studying; pauses on finish/empty deck.
   useEffect(() => {
-    if (!hydrated || vocab.length === 0) return;
-    if (!startedRef.current) startedRef.current = true;
+    if (!hydrated || finished || order.length === 0) return;
     const id = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(id);
-  }, [hydrated, vocab.length]);
+  }, [hydrated, finished, order.length]);
 
   const current = order[index];
+  const total = order.length;
 
   const front = useMemo(() => {
     if (!current) return "";
@@ -70,36 +87,111 @@ export default function FlashcardsPage() {
     return direction === "en-to-es" ? current.word : current.translation;
   }, [current, direction]);
 
-  function handleNext() {
-    setRevealed(false);
-    setIndex((i) => Math.min(order.length - 1, i + 1));
-  }
-
-  function handlePrev() {
+  const handlePrev = useCallback(() => {
+    if (finished) return;
     setRevealed(false);
     setIndex((i) => Math.max(0, i - 1));
-  }
+  }, [finished]);
 
-  function handleKnew() {
-    if (!current) return;
+  const handleNext = useCallback(() => {
+    if (finished) return;
+    setRevealed(false);
+    setIndex((i) => Math.min(total - 1, i + 1));
+  }, [finished, total]);
+
+  const handleKnew = useCallback(() => {
+    if (!current || finished) return;
     if (!current.learned) toggleLearned(current.id);
     setStats((s) => ({ ...s, knew: s.knew + 1 }));
-    handleNext();
-  }
+    if (index >= total - 1) {
+      setFinished(true);
+      setRevealed(false);
+    } else {
+      setRevealed(false);
+      setIndex((i) => i + 1);
+    }
+  }, [current, finished, index, total, toggleLearned]);
 
-  function handleDidntKnow() {
+  const handleDidntKnow = useCallback(() => {
+    if (!current || finished) return;
     setStats((s) => ({ ...s, didnt: s.didnt + 1 }));
-    handleNext();
-  }
+    if (index >= total - 1) {
+      setFinished(true);
+      setRevealed(false);
+    } else {
+      setRevealed(false);
+      setIndex((i) => i + 1);
+    }
+  }, [current, finished, index, total]);
 
-  const atEnd = index >= order.length - 1 && revealed;
-  const total = order.length;
+  const handleRestart = useCallback(() => {
+    setIndex(0);
+    setRevealed(false);
+    setStats({ knew: 0, didnt: 0 });
+    setSeconds(0);
+    setFinished(false);
+  }, []);
+
+  const handleReshuffle = useCallback(() => {
+    setOrder((o) => shuffleArray(o));
+    handleRestart();
+  }, [handleRestart]);
+
+  const toggleReveal = useCallback(() => {
+    if (!current || finished) return;
+    setRevealed((r) => !r);
+  }, [current, finished]);
+
+  // Keyboard shortcuts: space=flip, ←/→=prev/next, J=didn't know, K=knew it, R=restart
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA"))
+        return;
+      if (finished) {
+        if (e.key.toLowerCase() === "r") {
+          e.preventDefault();
+          handleRestart();
+        }
+        return;
+      }
+      if (!current) return;
+      if (e.key === " " || e.code === "Space") {
+        e.preventDefault();
+        toggleReveal();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNext();
+      } else if (revealed && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        handleDidntKnow();
+      } else if (revealed && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        handleKnew();
+      }
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [
+    current,
+    finished,
+    revealed,
+    toggleReveal,
+    handlePrev,
+    handleNext,
+    handleKnew,
+    handleDidntKnow,
+    handleRestart,
+  ]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Link
-          href="/learn"
+          href={wordParam ? "/words" : "/learn"}
           className="inline-flex items-center gap-2 rounded-2xl bg-white shadow-card px-5 py-3 text-slate-700 font-medium hover:bg-slate-50 transition"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
@@ -107,7 +199,9 @@ export default function FlashcardsPage() {
         </Link>
         <div className="text-right">
           <div className="text-sm text-slate-500">
-            {total > 0 ? `${index + 1} of ${total}` : "0 of 0"}
+            {total > 0 && !finished
+              ? `${index + 1} of ${total}`
+              : `${total} of ${total}`}
           </div>
           <div className="text-fuchsia-600 font-bold">
             Time: {formatTime(seconds)}
@@ -115,12 +209,18 @@ export default function FlashcardsPage() {
         </div>
       </div>
 
+      {wordParam && current && (
+        <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-2 text-sm text-blue-700">
+          Practicing a single word from your collection.{" "}
+          <Link href="/learn/flashcards" className="underline">
+            Switch to full deck
+          </Link>
+          .
+        </div>
+      )}
+
       <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card px-6 py-4 flex items-center justify-center gap-10">
-        <ToggleSwitch
-          label="Shuffle"
-          checked={shuffle}
-          onChange={setShuffle}
-        />
+        <ToggleSwitch label="Shuffle" checked={shuffle} onChange={setShuffle} />
         <ToggleSwitch
           label="English → Spanish"
           checked={direction === "en-to-es"}
@@ -132,97 +232,170 @@ export default function FlashcardsPage() {
         <div className="h-1 bg-slate-200 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-fuchsia-500 to-purple-600 transition-all duration-300"
-            style={{ width: `${((index + 1) / total) * 100}%` }}
+            style={{
+              width: `${
+                finished ? 100 : ((index + (revealed ? 1 : 0)) / total) * 100
+              }%`,
+            }}
           />
         </div>
       )}
 
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={handlePrev}
-          disabled={index === 0}
-          className="h-10 w-10 rounded-xl bg-slate-700 text-white flex items-center justify-center hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
-          aria-label="Previous"
-        >
-          <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
-        </button>
+      {finished ? (
+        <SessionSummary
+          knew={stats.knew}
+          didnt={stats.didnt}
+          seconds={seconds}
+          onRestart={handleRestart}
+          onReshuffle={handleReshuffle}
+        />
+      ) : (
+        <>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handlePrev}
+              disabled={index === 0}
+              className="h-10 w-10 rounded-xl bg-slate-700 text-white flex items-center justify-center hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setRevealed((r) => !r)}
-          disabled={!current}
-          className="flex-1 rounded-3xl bg-white/90 shadow-card p-12 min-h-[360px] relative flex flex-col items-center justify-center group disabled:opacity-50"
-        >
-          {current ? (
-            <>
-              <div className="text-4xl md:text-5xl font-bold text-slate-900 text-center">
-                {revealed ? back : front}
-              </div>
-              <div className="text-xs text-slate-400 mt-6">
-                {revealed ? "Tap to flip back" : "Tap to reveal"}
-              </div>
-            </>
-          ) : (
-            <div className="text-slate-500 text-center">
-              {hydrated
-                ? "No words yet. Add some on the Words page."
-                : "Loading…"}
+            <button
+              type="button"
+              onClick={toggleReveal}
+              disabled={!current}
+              className="flex-1 rounded-3xl bg-white/90 shadow-card p-12 min-h-[360px] relative flex flex-col items-center justify-center group disabled:opacity-50"
+            >
+              {current ? (
+                <>
+                  <div className="text-4xl md:text-5xl font-bold text-slate-900 text-center">
+                    {revealed ? back : front}
+                  </div>
+                  <div className="text-xs text-slate-400 mt-6">
+                    {revealed ? "Tap to flip back · space" : "Tap to reveal · space"}
+                  </div>
+                </>
+              ) : (
+                <div className="text-slate-500 text-center">
+                  {hydrated
+                    ? "No words yet. Add some on the Words page."
+                    : "Loading…"}
+                </div>
+              )}
+
+              {current && (
+                <div className="absolute bottom-5 left-5 flex items-center gap-1.5 text-xs text-slate-500">
+                  <Calendar className="h-3.5 w-3.5" strokeWidth={2} />
+                  {formatDate(current.createdAt)}
+                </div>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={index >= total - 1}
+              className="h-10 w-10 rounded-xl bg-slate-700 text-white flex items-center justify-center hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              aria-label="Next"
+            >
+              <ChevronRight className="h-5 w-5" strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {revealed && current && (
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={handleDidntKnow}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rose-500 text-white font-medium shadow-soft hover:bg-rose-600 transition"
+              >
+                <X className="h-4 w-4" strokeWidth={2.5} />
+                Didn&apos;t Know
+                <kbd className="ml-1 px-1.5 py-0.5 rounded bg-rose-700/40 text-[10px]">J</kbd>
+              </button>
+              <button
+                type="button"
+                onClick={handleKnew}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 text-white font-medium shadow-soft hover:bg-emerald-600 transition"
+              >
+                <Check className="h-4 w-4" strokeWidth={2.5} />
+                I Knew It
+                <kbd className="ml-1 px-1.5 py-0.5 rounded bg-emerald-700/40 text-[10px]">K</kbd>
+              </button>
             </div>
           )}
 
-          {current && (
-            <div className="absolute bottom-5 left-5 flex items-center gap-1.5 text-xs text-slate-500">
-              <Calendar className="h-3.5 w-3.5" strokeWidth={2} />
-              {formatDate(current.createdAt)}
-            </div>
-          )}
-        </button>
+          <div className="text-center text-xs text-slate-400">
+            Shortcuts: space = flip · ← → = navigate · J / K = didn&apos;t / knew
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={index >= total - 1}
-          className="h-10 w-10 rounded-xl bg-slate-700 text-white flex items-center justify-center hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
-          aria-label="Next"
-        >
-          <ChevronRight className="h-5 w-5" strokeWidth={2.5} />
-        </button>
+function SessionSummary({
+  knew,
+  didnt,
+  seconds,
+  onRestart,
+  onReshuffle,
+}: {
+  knew: number;
+  didnt: number;
+  seconds: number;
+  onRestart: () => void;
+  onReshuffle: () => void;
+}) {
+  const total = knew + didnt;
+  const accuracy = total > 0 ? Math.round((knew / total) * 100) : 0;
+
+  return (
+    <div className="rounded-3xl bg-white/90 backdrop-blur shadow-card p-10 text-center space-y-6">
+      <div>
+        <div className="text-4xl">🎉</div>
+        <h2 className="text-2xl font-bold text-slate-900 mt-2">Session complete</h2>
+        <p className="text-slate-500 mt-1">
+          {total} card{total === 1 ? "" : "s"} reviewed in {formatTime(seconds)}
+        </p>
       </div>
 
-      {revealed && current && (
-        <div className="flex items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={handleDidntKnow}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-rose-500 text-white font-medium shadow-soft hover:bg-rose-600 transition"
-          >
-            <X className="h-4 w-4" strokeWidth={2.5} />
-            Didn't Know
-          </button>
-          <button
-            type="button"
-            onClick={handleKnew}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 text-white font-medium shadow-soft hover:bg-emerald-600 transition"
-          >
-            <Check className="h-4 w-4" strokeWidth={2.5} />
-            I Knew It
-          </button>
+      <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
+        <div className="rounded-2xl bg-emerald-50 p-4">
+          <div className="text-2xl font-bold text-emerald-600">{knew}</div>
+          <div className="text-xs text-emerald-700 mt-0.5">Knew it</div>
         </div>
-      )}
+        <div className="rounded-2xl bg-rose-50 p-4">
+          <div className="text-2xl font-bold text-rose-600">{didnt}</div>
+          <div className="text-xs text-rose-700 mt-0.5">Didn&apos;t know</div>
+        </div>
+        <div className="rounded-2xl bg-slate-50 p-4">
+          <div className="text-2xl font-bold text-slate-700">{accuracy}%</div>
+          <div className="text-xs text-slate-500 mt-0.5">Accuracy</div>
+        </div>
+      </div>
 
-      {atEnd && (
-        <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 text-center">
-          <div className="text-lg font-semibold text-slate-900">
-            Session complete
-          </div>
-          <div className="text-sm text-slate-500 mt-1">
-            Knew: <span className="text-emerald-600 font-medium">{stats.knew}</span>{" "}
-            · Didn't know:{" "}
-            <span className="text-rose-600 font-medium">{stats.didnt}</span>
-          </div>
-        </div>
-      )}
+      <div className="flex items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={onRestart}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 transition"
+        >
+          <RotateCcw className="h-4 w-4" strokeWidth={2.5} />
+          Restart
+          <kbd className="ml-1 px-1.5 py-0.5 rounded bg-slate-300 text-[10px] text-slate-700">R</kbd>
+        </button>
+        <button
+          type="button"
+          onClick={onReshuffle}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-btn-purple text-white font-medium shadow-soft hover:brightness-110 transition"
+        >
+          <Shuffle className="h-4 w-4" strokeWidth={2.5} />
+          Reshuffle
+        </button>
+      </div>
     </div>
   );
 }
@@ -256,5 +429,13 @@ function ToggleSwitch({
         />
       </button>
     </div>
+  );
+}
+
+export default function FlashcardsPage() {
+  return (
+    <Suspense fallback={<div className="text-slate-400 text-center py-12">Loading…</div>}>
+      <FlashcardsInner />
+    </Suspense>
   );
 }

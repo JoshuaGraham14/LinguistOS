@@ -6,6 +6,19 @@ export const metadata: Metadata = {
   title: "LinguistOS — Learn Spanish",
   description:
     "Vocabulary practice powered by morpho-syntactic sentence generation",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title: "LinguistOS — Learn Spanish",
+    description: "Vocabulary practice powered by morpho-syntactic sentence generation",
+    images: [{ url: "/opengraph-image.png" }],
+  },
+  twitter: {
+    card: "summary",
+    images: ["/twitter-image.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

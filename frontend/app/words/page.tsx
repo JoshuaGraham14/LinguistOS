@@ -1,8 +1,12 @@
 "use client";
 
 import {
+  BookOpen,
   Calendar,
+  Check,
   ChevronDown,
+  Download,
+  MessageSquare,
   Pencil,
   Plus,
   Search,
@@ -10,6 +14,7 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/Modal";
 import { cn } from "@/lib/cn";
@@ -35,11 +40,18 @@ const TAG_COLORS: Record<VocabTag, string> = {
 };
 
 type SortOrder = "newest" | "oldest" | "alpha";
+type LearnedFilter = "all" | "learned" | "unlearned";
 
 const SORT_LABELS: Record<SortOrder, string> = {
   newest: "Newest First",
   oldest: "Oldest First",
   alpha: "Alphabetical",
+};
+
+const LEARNED_LABELS: Record<LearnedFilter, string> = {
+  all: "All",
+  learned: "Learned",
+  unlearned: "Still learning",
 };
 
 function formatDate(ts: number) {
@@ -52,21 +64,61 @@ interface WordFormValues {
   tags: VocabTag[];
 }
 
+function escapeCsv(value: string) {
+  if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
+  return value;
+}
+
+function buildCsv(items: VocabItem[]) {
+  const lines = ["word,translation,tags,learned"];
+  for (const item of items) {
+    lines.push(
+      [
+        escapeCsv(item.word),
+        escapeCsv(item.translation),
+        escapeCsv(item.tags.join(";")),
+        item.learned ? "true" : "false",
+      ].join(","),
+    );
+  }
+  return lines.join("\n") + "\n";
+}
+
+function downloadCsv(filename: string, contents: string) {
+  const blob = new Blob([contents], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export default function WordsPage() {
-  const { vocab, hydrated, addVocab, removeVocab, updateVocab } = useVocab();
+  const { vocab, hydrated, addVocab, removeVocab, updateVocab, toggleLearned, clearVocab } =
+    useVocab();
   const [search, setSearch] = useState("");
   const [activeTags, setActiveTags] = useState<VocabTag[]>([]);
+  const [learnedFilter, setLearnedFilter] = useState<LearnedFilter>("all");
   const [sort, setSort] = useState<SortOrder>("newest");
   const [sortOpen, setSortOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<VocabItem | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   function toggleActiveTag(tag: VocabTag) {
     setActiveTags((t) =>
       t.includes(tag) ? t.filter((x) => x !== tag) : [...t, tag],
     );
   }
+
+  const learnedCount = useMemo(
+    () => vocab.filter((v) => v.learned).length,
+    [vocab],
+  );
 
   const filtered = useMemo(() => {
     let list = vocab;
@@ -81,28 +133,58 @@ export default function WordsPage() {
     if (activeTags.length > 0) {
       list = list.filter((v) => v.tags.some((t) => activeTags.includes(t)));
     }
+    if (learnedFilter === "learned") {
+      list = list.filter((v) => v.learned);
+    } else if (learnedFilter === "unlearned") {
+      list = list.filter((v) => !v.learned);
+    }
     const sorted = [...list];
     if (sort === "newest") sorted.sort((a, b) => b.createdAt - a.createdAt);
     else if (sort === "oldest") sorted.sort((a, b) => a.createdAt - b.createdAt);
     else sorted.sort((a, b) => a.word.localeCompare(b.word));
     return sorted;
-  }, [vocab, search, activeTags, sort]);
+  }, [vocab, search, activeTags, learnedFilter, sort]);
+
+  function handleExport() {
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadCsv(`linguistos-vocab-${stamp}.csv`, buildCsv(vocab));
+  }
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
+      <header className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">My Word Collection</h1>
-          <p className="text-slate-500 mt-1">Manage your Spanish vocabulary</p>
+          <p className="text-slate-500 mt-1">
+            {hydrated ? (
+              <>
+                {vocab.length} word{vocab.length === 1 ? "" : "s"} ·{" "}
+                <span className="text-emerald-600 font-medium">
+                  {learnedCount} learned
+                </span>
+              </>
+            ) : (
+              "Loading…"
+            )}
+          </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={!hydrated || vocab.length === 0}
+            className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium px-4 py-3 shadow-soft hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            <Download className="h-4 w-4" strokeWidth={2.5} />
+            Export
+          </button>
           <button
             type="button"
             onClick={() => setImportOpen(true)}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium px-5 py-3 shadow-soft hover:brightness-110 transition"
           >
             <Upload className="h-4 w-4" strokeWidth={2.5} />
-            Import Words
+            Import
           </button>
           <button
             type="button"
@@ -177,6 +259,37 @@ export default function WordsPage() {
             )}
           </div>
         </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs uppercase tracking-wide text-slate-500 mr-1">
+            Status:
+          </span>
+          {(Object.keys(LEARNED_LABELS) as LearnedFilter[]).map((f) => (
+            <button
+              type="button"
+              key={f}
+              onClick={() => setLearnedFilter(f)}
+              className={cn(
+                "px-3 py-1 rounded-full text-xs border transition",
+                learnedFilter === f
+                  ? "bg-emerald-100 border-emerald-300 text-emerald-700"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50",
+              )}
+            >
+              {LEARNED_LABELS[f]}
+            </button>
+          ))}
+          {hydrated && vocab.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setConfirmClear(true)}
+              className="ml-auto inline-flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 hover:underline"
+            >
+              <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+              Clear all
+            </button>
+          )}
+        </div>
       </section>
 
       {!hydrated ? (
@@ -195,6 +308,7 @@ export default function WordsPage() {
               item={v}
               onDelete={() => removeVocab(v.id)}
               onEdit={() => setEditing(v)}
+              onToggleLearned={() => toggleLearned(v.id)}
             />
           ))}
         </section>
@@ -224,6 +338,37 @@ export default function WordsPage() {
           rows.forEach((r) => addVocab(r));
         }}
       />
+      <Modal
+        open={confirmClear}
+        onClose={() => setConfirmClear(false)}
+        title="Clear all words?"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            This removes every word in your collection from this browser. There
+            is no undo. Export first if you want a backup.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmClear(false)}
+              className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                clearVocab();
+                setConfirmClear(false);
+              }}
+              className="px-5 py-2 rounded-xl bg-rose-500 text-white font-medium shadow-soft hover:bg-rose-600 transition"
+            >
+              Clear everything
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -232,23 +377,65 @@ function WordCard({
   item,
   onDelete,
   onEdit,
+  onToggleLearned,
 }: {
   item: VocabItem;
   onDelete: () => void;
   onEdit: () => void;
+  onToggleLearned: () => void;
 }) {
   return (
-    <div className="rounded-2xl bg-white/90 shadow-card p-6 flex flex-col gap-4 group">
-      <div className="text-3xl font-bold text-slate-900 text-right">
-        {item.word}
+    <div
+      className={cn(
+        "rounded-2xl bg-white/90 shadow-card p-6 flex flex-col gap-4 group transition",
+        item.learned && "ring-2 ring-emerald-200",
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <button
+          type="button"
+          onClick={onToggleLearned}
+          className={cn(
+            "h-7 px-3 rounded-full text-xs font-medium transition inline-flex items-center gap-1",
+            item.learned
+              ? "bg-emerald-500 text-white hover:bg-emerald-600"
+              : "bg-slate-100 text-slate-500 hover:bg-slate-200",
+          )}
+          aria-label={item.learned ? "Mark as still learning" : "Mark as learned"}
+          title={item.learned ? "Mark as still learning" : "Mark as learned"}
+        >
+          <Check className="h-3 w-3" strokeWidth={3} />
+          {item.learned ? "Learned" : "Mark learned"}
+        </button>
+        <div className="text-3xl font-bold text-slate-900 text-right break-words">
+          {item.word}
+        </div>
       </div>
       <div className="text-slate-600">{item.translation}</div>
 
       <div className="flex items-center gap-2">
+        <Link
+          href={`/learn/sentences?word=${encodeURIComponent(item.id)}`}
+          className="h-9 px-3 rounded-full bg-fuchsia-500 text-white text-xs font-medium flex items-center gap-1 hover:bg-fuchsia-600 transition shadow-soft"
+          aria-label="Practice with sentences"
+          title="Practice this word with sentences"
+        >
+          <MessageSquare className="h-3.5 w-3.5" strokeWidth={2.5} />
+          Sentences
+        </Link>
+        <Link
+          href={`/learn/flashcards?word=${encodeURIComponent(item.id)}`}
+          className="h-9 px-3 rounded-full bg-blue-500 text-white text-xs font-medium flex items-center gap-1 hover:bg-blue-600 transition shadow-soft"
+          aria-label="Practice with flashcards"
+          title="Practice this word with flashcards"
+        >
+          <BookOpen className="h-3.5 w-3.5" strokeWidth={2.5} />
+          Flashcard
+        </Link>
         <button
           type="button"
           onClick={onEdit}
-          className="h-9 w-9 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600 transition shadow-soft"
+          className="ml-auto h-9 w-9 rounded-full bg-amber-500 text-white flex items-center justify-center hover:bg-amber-600 transition shadow-soft"
           aria-label="Edit"
         >
           <Pencil className="h-4 w-4" strokeWidth={2.5} />
@@ -256,7 +443,7 @@ function WordCard({
         <button
           type="button"
           onClick={onDelete}
-          className="ml-auto p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition opacity-0 group-hover:opacity-100"
+          className="p-2 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition opacity-0 group-hover:opacity-100"
           aria-label="Delete"
         >
           <Trash2 className="h-4 w-4" strokeWidth={2} />
@@ -412,6 +599,7 @@ function parseImportText(text: string): WordFormValues[] {
   for (const rawLine of text.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line || line.startsWith("#")) continue;
+    if (line.toLowerCase().startsWith("word,translation")) continue;
     const parts = line.split(",").map((p) => p.trim());
     if (parts.length < 2) continue;
     const [word, translation, rawTags] = parts;
