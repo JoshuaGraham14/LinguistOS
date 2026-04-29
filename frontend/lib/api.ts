@@ -1,8 +1,13 @@
 import type {
   LanguageCode,
+  LexiconConstraint,
   MasteryOutcome,
   MasteryState,
   SentenceCandidate,
+  SentenceLink,
+  SentenceLinkRole,
+  SentenceRecord,
+  SentenceSource,
   VocabItem,
   VocabTag,
   Workspace,
@@ -28,11 +33,18 @@ export interface GenerateRequest {
   num_candidates?: number;
   sentence_length?: string;
   direction?: string;
+  // LOS-502 lexicon constraint.
+  lexicon_constraint?: LexiconConstraint;
+  workspace_id?: number;
+  stretch_count?: number;
+  extra_allowed_vocab_ids?: number[];
 }
 
 export interface GenerateResponse {
   candidates: SentenceCandidate[];
   mock?: boolean;
+  constrained?: boolean;
+  used_vocab_ids?: number[];
 }
 
 export async function generateSentences(
@@ -362,4 +374,115 @@ export async function clearVocab(workspaceId: number): Promise<void> {
   await apiFetch<{ ok: boolean }>(`/api/vocab?workspace_id=${workspaceId}`, {
     method: "DELETE",
   });
+}
+
+interface ApiSentenceLink {
+  id: number;
+  vocab_id: number;
+  surface_token: string;
+  position: number;
+  role: SentenceLinkRole;
+}
+
+interface ApiSentence {
+  id: number;
+  workspace_id: number;
+  text: string;
+  translation: string | null;
+  language: LanguageCode;
+  source: SentenceSource;
+  source_meta: Record<string, unknown> | null;
+  score: number | null;
+  created_at: string;
+  links: ApiSentenceLink[];
+}
+
+function toSentenceLink(link: ApiSentenceLink): SentenceLink {
+  return {
+    id: link.id,
+    vocabId: link.vocab_id,
+    surfaceToken: link.surface_token,
+    position: link.position,
+    role: link.role,
+  };
+}
+
+function toSentenceRecord(item: ApiSentence): SentenceRecord {
+  return {
+    id: item.id,
+    workspaceId: item.workspace_id,
+    text: item.text,
+    translation: item.translation,
+    language: item.language,
+    source: item.source,
+    sourceMeta: item.source_meta,
+    score: item.score,
+    createdAt: Date.parse(item.created_at),
+    links: item.links.map(toSentenceLink),
+  };
+}
+
+export interface CreateSentenceInput {
+  workspaceId: number;
+  text: string;
+  translation?: string | null;
+  language: LanguageCode;
+  source?: SentenceSource;
+  sourceMeta?: Record<string, unknown> | null;
+  score?: number | null;
+  links?: {
+    vocabId: number;
+    surfaceToken: string;
+    position: number;
+    role?: SentenceLinkRole;
+  }[];
+}
+
+export async function createSentence(
+  input: CreateSentenceInput,
+): Promise<SentenceRecord> {
+  const item = await apiFetch<ApiSentence>("/api/sentences", {
+    method: "POST",
+    body: JSON.stringify({
+      workspace_id: input.workspaceId,
+      text: input.text,
+      translation: input.translation ?? null,
+      language: input.language,
+      source: input.source ?? "manual",
+      source_meta: input.sourceMeta ?? null,
+      score: input.score ?? null,
+      links: (input.links ?? []).map((link) => ({
+        vocab_id: link.vocabId,
+        surface_token: link.surfaceToken,
+        position: link.position,
+        role: link.role ?? "context",
+      })),
+    }),
+  });
+  return toSentenceRecord(item);
+}
+
+export async function listSentences(params: {
+  workspaceId: number;
+  vocabId?: number;
+  limit?: number;
+}): Promise<SentenceRecord[]> {
+  const search = new URLSearchParams({
+    workspace_id: String(params.workspaceId),
+  });
+  if (params.vocabId !== undefined) search.set("vocab_id", String(params.vocabId));
+  if (params.limit !== undefined) search.set("limit", String(params.limit));
+  const res = await apiFetch<{ items: ApiSentence[] }>(
+    `/api/sentences?${search.toString()}`,
+  );
+  return res.items.map(toSentenceRecord);
+}
+
+export async function getSentence(id: number): Promise<SentenceRecord> {
+  const item = await apiFetch<ApiSentence>(`/api/sentences/${id}`);
+  return toSentenceRecord(item);
+}
+
+export async function deleteSentence(id: number): Promise<void> {
+  await apiFetch<{ ok: boolean }>(`/api/sentences/${id}`, { method: "DELETE" });
 }

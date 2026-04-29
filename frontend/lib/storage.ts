@@ -27,6 +27,8 @@ const DEFAULT_SETTINGS: PracticeSettings = {
   tense: "present",
   person: "3rd",
   number: "singular",
+  lexiconConstraint: "off",
+  stretchCount: 0,
 };
 
 const DEFAULT_PROFILE: Profile = { name: "", wordDisplayMode: "as_encountered" };
@@ -101,7 +103,10 @@ export function usePracticeSettings() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setSettings(read<PracticeSettings>(SETTINGS_KEY, DEFAULT_SETTINGS));
+    const stored = read<Partial<PracticeSettings>>(SETTINGS_KEY, DEFAULT_SETTINGS);
+    // Merge in defaults so old localStorage entries pick up new settings
+    // (e.g. lexiconConstraint added in LOS-502).
+    setSettings({ ...DEFAULT_SETTINGS, ...stored });
     setHydrated(true);
   }, []);
 

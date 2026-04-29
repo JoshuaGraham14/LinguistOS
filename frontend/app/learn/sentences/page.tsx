@@ -135,7 +135,7 @@ const ZERO_STATS: SessionStats = {
 };
 
 function SentencePracticeInner() {
-  const { vocab, hydrated, recordOutcome } = useVocab();
+  const { vocab, hydrated, recordOutcome, activeWorkspace } = useVocab();
   const { settings, setSettings, hydrated: settingsHydrated } =
     usePracticeSettings();
   const searchParams = useSearchParams();
@@ -159,6 +159,7 @@ function SentencePracticeInner() {
   const [cache, setCache] = useState<Map<number, SentenceCandidate>>(new Map());
   const [generating, setGenerating] = useState(false);
   const [isMock, setIsMock] = useState(false);
+  const [constraintFellBack, setConstraintFellBack] = useState(false);
 
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
@@ -179,12 +180,15 @@ function SentencePracticeInner() {
     setStats(ZERO_STATS);
     setFinished(false);
     setWordIndex(0);
+    setConstraintFellBack(false);
   }, [
     settings.tense,
     settings.person,
     settings.number,
     settings.sentenceLength,
     settings.direction,
+    settings.lexiconConstraint,
+    settings.stretchCount,
   ]);
 
   // Reset position when filtered list shrinks past the cursor.
@@ -220,6 +224,9 @@ function SentencePracticeInner() {
           sentence_length: settings.sentenceLength,
           direction: settings.direction,
           num_candidates: 1,
+          lexicon_constraint: settings.lexiconConstraint,
+          workspace_id: activeWorkspace?.id,
+          stretch_count: settings.stretchCount,
         });
         if (myToken !== generationToken.current) return;
         const next = res.candidates[0] ?? null;
@@ -231,6 +238,10 @@ function SentencePracticeInner() {
           });
         }
         setIsMock(Boolean(res.mock));
+        // Constraint requested but server returned unconstrained results.
+        const requested = settings.lexiconConstraint !== "off";
+        const honored = Boolean(res.constrained);
+        setConstraintFellBack(requested && !honored && !res.mock);
       } finally {
         if (myToken === generationToken.current) setGenerating(false);
       }
@@ -242,6 +253,9 @@ function SentencePracticeInner() {
       settings.number,
       settings.sentenceLength,
       settings.direction,
+      settings.lexiconConstraint,
+      settings.stretchCount,
+      activeWorkspace?.id,
     ],
   );
 
@@ -456,6 +470,14 @@ function SentencePracticeInner() {
             {isMock && (
               <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
                 Demo mode
+              </div>
+            )}
+            {!isMock && constraintFellBack && (
+              <div
+                className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200"
+                title="No candidates fit the lexicon constraint, so an unconstrained sentence was used."
+              >
+                Constraint relaxed
               </div>
             )}
             <button

@@ -178,6 +178,54 @@ class EnrichmentJob(Base):
     vocab: Mapped[Vocab] = relationship(back_populates="enrichment_jobs")
 
 
+class Sentence(Base):
+    """Persisted sentence linked to vocab atoms (LOS-501)."""
+
+    __tablename__ = "sentences"
+    __table_args__ = (Index("ix_sentence_workspace", "workspace_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    workspace_id: Mapped[int] = mapped_column(
+        ForeignKey("workspaces.id"), nullable=False, index=True
+    )
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    translation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    language: Mapped[str] = mapped_column(String(16), nullable=False)
+    source: Mapped[str] = mapped_column(String(32), default="generated", nullable=False)
+    source_meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, nullable=False
+    )
+
+    links: Mapped[list["SentenceWordLink"]] = relationship(
+        back_populates="sentence", cascade="all, delete-orphan", order_by="SentenceWordLink.position"
+    )
+
+
+class SentenceWordLink(Base):
+    """Token-level link between a sentence and a vocab atom (LOS-501)."""
+
+    __tablename__ = "sentence_word_links"
+    __table_args__ = (
+        Index("ix_link_sentence_position", "sentence_id", "position"),
+        Index("ix_link_vocab", "vocab_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sentence_id: Mapped[int] = mapped_column(
+        ForeignKey("sentences.id"), nullable=False, index=True
+    )
+    vocab_id: Mapped[int] = mapped_column(
+        ForeignKey("vocab.id"), nullable=False, index=True
+    )
+    surface_token: Mapped[str] = mapped_column(String(255), nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    role: Mapped[str] = mapped_column(String(16), default="target", nullable=False)
+
+    sentence: Mapped[Sentence] = relationship(back_populates="links")
+
+
 class PracticeLog(Base):
     __tablename__ = "practice_logs"
 

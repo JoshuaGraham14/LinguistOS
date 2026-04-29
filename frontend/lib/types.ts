@@ -86,6 +86,9 @@ export interface PracticeSettings {
   tense: Tense;
   person: Person;
   number: GrammaticalNumber;
+  // LOS-502: constrain generation to the learner's lexicon.
+  lexiconConstraint: LexiconConstraint;
+  stretchCount: number;
 }
 
 export interface SentenceCandidate {
@@ -94,6 +97,37 @@ export interface SentenceCandidate {
   score: number;
   features?: Record<string, unknown>;
 }
+
+export type SentenceSource = "generated" | "manual" | "imported" | "mistake";
+export type SentenceLinkRole = "target" | "context" | "distractor";
+
+export interface SentenceLink {
+  id: number;
+  vocabId: number;
+  surfaceToken: string;
+  position: number;
+  role: SentenceLinkRole;
+}
+
+export interface SentenceRecord {
+  id: number;
+  workspaceId: number;
+  text: string;
+  translation: string | null;
+  language: LanguageCode;
+  source: SentenceSource;
+  sourceMeta: Record<string, unknown> | null;
+  score: number | null;
+  createdAt: number;
+  links: SentenceLink[];
+}
+
+export interface WordRef {
+  vocabId: number;
+  display?: { compact?: boolean };
+}
+
+export type LexiconConstraint = "off" | "known_only" | "known_plus_stretch";
 
 export interface Profile {
   name: string;

@@ -155,3 +155,54 @@ class EnrichmentJobOut(BaseModel):
 
 class EnrichmentJobCreate(BaseModel):
     requested_fields: list[str] = Field(default_factory=list)
+
+
+SentenceSource = Literal["generated", "manual", "imported", "mistake"]
+SentenceLinkRole = Literal["target", "context", "distractor"]
+
+
+class SentenceLinkIn(BaseModel):
+    vocab_id: int
+    surface_token: str = Field(min_length=1, max_length=255)
+    position: int = Field(ge=0)
+    role: SentenceLinkRole = "context"
+
+
+class SentenceLinkOut(BaseModel):
+    id: int
+    vocab_id: int
+    surface_token: str
+    position: int
+    role: SentenceLinkRole
+
+    model_config = {"from_attributes": True}
+
+
+class SentenceCreate(BaseModel):
+    workspace_id: int
+    text: str = Field(min_length=1)
+    translation: str | None = None
+    language: LanguageCode
+    source: SentenceSource = "generated"
+    source_meta: dict[str, Any] | None = None
+    score: float | None = None
+    links: list[SentenceLinkIn] = Field(default_factory=list)
+
+
+class SentenceOut(BaseModel):
+    id: int
+    workspace_id: int
+    text: str
+    translation: str | None
+    language: LanguageCode
+    source: SentenceSource
+    source_meta: dict[str, Any] | None
+    score: float | None
+    created_at: datetime
+    links: list[SentenceLinkOut]
+
+    model_config = {"from_attributes": True}
+
+
+class SentenceListResponse(BaseModel):
+    items: list[SentenceOut]

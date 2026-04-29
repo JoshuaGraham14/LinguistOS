@@ -4,21 +4,31 @@ Baseline implementation: a single ChatGPT call with a basic prompt that asks
 the model to produce N candidate Spanish sentences for a given target word
 and morpho-syntactic constraints.
 
-The richer Generate -> Analyze -> Validate -> Score -> Rank pipeline is the
-research focus and lives elsewhere; this endpoint is intentionally thin.
+LOS-502 extends this with optional lexicon constraints so generated
+sentences only use words the learner already knows (plus optional stretch
+words). Validation is deliberately conservative — a candidate that uses any
+unknown content word is dropped, with graceful fallback to unconstrained.
 """
 
 from __future__ import annotations
 
 import json
-from typing import Any
+import re
+from random import sample
+from typing import Any, Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.db.database import get_db
+from app.db.models import Vocab
 
 router = APIRouter()
+
+LexiconConstraint = Literal["off", "known_only", "known_plus_stretch"]
 
 
 class GenerateRequest(BaseModel):
@@ -31,6 +41,12 @@ class GenerateRequest(BaseModel):
     sentence_length: str | None = None
     direction: str | None = None
 
+    # LOS-502 constrained generation.
+    lexicon_constraint: LexiconConstraint = "off"
+    workspace_id: int | None = None
+    stretch_count: int = Field(default=0, ge=0, le=20)
+    extra_allowed_vocab_ids: list[int] = Field(default_factory=list)
+
 
 class Candidate(BaseModel):
     sentence: str
@@ -41,15 +57,46 @@ class Candidate(BaseModel):
 class GenerateResponse(BaseModel):
     candidates: list[Candidate]
     mock: bool = False
+    constrained: bool = False
+    used_vocab_ids: list[int] = Field(default_factory=list)
 
 
-def _build_prompt(req: GenerateRequest) -> str:
+def _allowed_vocab(req: GenerateRequest, db: Session) -> list[Vocab]:
+    """Resolve the lexicon allowed for this generation, if any."""
+    if req.lexicon_constraint == "off" or req.workspace_id is None:
+        return []
+
+    rows = db.scalars(
+        select(Vocab).where(Vocab.workspace_id == req.workspace_id)
+    ).all()
+    if req.lexicon_constraint == "known_only":
+        return [r for r in rows if r.learned]
+    # known_plus_stretch
+    known = [r for r in rows if r.learned]
+    pool = [r for r in rows if not r.learned and r.id not in {k.id for k in known}]
+    if req.stretch_count and pool:
+        stretch = sample(pool, k=min(req.stretch_count, len(pool)))
+    else:
+        stretch = []
+    extras = [r for r in rows if r.id in set(req.extra_allowed_vocab_ids)]
+    return list({r.id: r for r in [*known, *stretch, *extras]}.values())
+
+
+def _build_prompt(req: GenerateRequest, allowed: list[Vocab]) -> str:
     length = req.sentence_length or "short"
+    constraint_block = ""
+    if allowed:
+        words = ", ".join(sorted({(r.lemma or r.word) for r in allowed}))
+        constraint_block = (
+            "\nVocabulary constraint: every content word must come from this list "
+            "(plus closed-class function words like articles, prepositions, "
+            f"pronouns, and conjugations of listed verbs):\n{words}\n"
+        )
     return (
         "You generate Spanish example sentences for vocabulary practice.\n"
         f'Target word: "{req.word}" (English: "{req.translation}")\n'
         f"Constraints: tense={req.tense}, person={req.person}, "
-        f"number={req.number}, length={length}.\n"
+        f"number={req.number}, length={length}.{constraint_block}\n"
         f"Produce {req.num_candidates} natural, {length}-length Spanish "
         "sentences that contain the target word, each with its English "
         "translation.\n"
@@ -72,10 +119,49 @@ def _parse_candidates(raw: str) -> list[Candidate]:
     return out
 
 
+def _tokenize(text: str) -> list[str]:
+    return [t.lower() for t in re.findall(r"[\w\u00C0-\u017F]+", text)]
+
+
+def _filter_by_lexicon(
+    candidates: list[Candidate],
+    allowed: list[Vocab],
+) -> tuple[list[Candidate], list[int]]:
+    """Drop candidates that use any content word outside the allowed list.
+
+    Returns ``(passing_candidates, used_vocab_ids)``.
+    """
+    if not allowed:
+        return candidates, []
+
+    allowed_terms: dict[str, int] = {}
+    for r in allowed:
+        for term in {r.word, r.lemma, r.surface_form, *(r.surface_forms or [])}:
+            if term:
+                allowed_terms[term.lower()] = r.id
+
+    passing: list[Candidate] = []
+    used_ids: set[int] = set()
+    for cand in candidates:
+        tokens = _tokenize(cand.sentence)
+        unmatched = [t for t in tokens if t not in allowed_terms and len(t) > 2]
+        if unmatched:
+            continue
+        for t in tokens:
+            vid = allowed_terms.get(t)
+            if vid is not None:
+                used_ids.add(vid)
+        passing.append(cand)
+    return passing, sorted(used_ids)
+
+
 @router.post("/generate", response_model=GenerateResponse)
-def generate(req: GenerateRequest) -> GenerateResponse:
+def generate(req: GenerateRequest, db: Session = Depends(get_db)) -> GenerateResponse:
+    allowed = _allowed_vocab(req, db)
+    constrained_requested = bool(allowed)
+
     if not settings.openai_api_key:
-        return GenerateResponse(candidates=[], mock=True)
+        return GenerateResponse(candidates=[], mock=True, constrained=False)
 
     try:
         from openai import OpenAI
@@ -90,13 +176,31 @@ def generate(req: GenerateRequest) -> GenerateResponse:
                     "content": "You are a helpful Spanish language tutor. "
                     "Always respond with valid JSON.",
                 },
-                {"role": "user", "content": _build_prompt(req)},
+                {"role": "user", "content": _build_prompt(req, allowed)},
             ],
         )
         raw = completion.choices[0].message.content or "{}"
         candidates = _parse_candidates(raw)
         if not candidates:
-            return GenerateResponse(candidates=[], mock=True)
-        return GenerateResponse(candidates=candidates, mock=False)
+            return GenerateResponse(candidates=[], mock=True, constrained=False)
+
+        if constrained_requested:
+            filtered, used_ids = _filter_by_lexicon(candidates, allowed)
+            if filtered:
+                return GenerateResponse(
+                    candidates=filtered,
+                    mock=False,
+                    constrained=True,
+                    used_vocab_ids=used_ids,
+                )
+            # Constraint dropped everything; fall back transparently.
+            return GenerateResponse(
+                candidates=candidates,
+                mock=False,
+                constrained=False,
+                used_vocab_ids=[],
+            )
+
+        return GenerateResponse(candidates=candidates, mock=False, constrained=False)
     except Exception:
-        return GenerateResponse(candidates=[], mock=True)
+        return GenerateResponse(candidates=[], mock=True, constrained=False)
