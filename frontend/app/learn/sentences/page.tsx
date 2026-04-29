@@ -65,8 +65,8 @@ function pickPromptPair(
 
 interface ClozeQuestion {
   sentenceWithBlank: string;
-  options: { id: string; word: string; translation: string }[];
-  correctId: string;
+  options: { id: number; word: string; translation: string }[];
+  correctId: number;
 }
 
 function buildCloze(
@@ -95,7 +95,7 @@ function buildCloze(
   if (distractorSource.length < 3) return null;
 
   const distractors: VocabItem[] = [];
-  const used = new Set<string>();
+  const used = new Set<number>();
   while (distractors.length < 3 && used.size < distractorSource.length) {
     const pick =
       distractorSource[Math.floor(Math.random() * distractorSource.length)];
@@ -143,7 +143,10 @@ function SentencePracticeInner() {
 
   const filteredVocab = useMemo(() => {
     if (wordParam) {
-      const match = vocab.find((v) => v.id === wordParam);
+      const wordId = Number(wordParam);
+      const match = Number.isFinite(wordId)
+        ? vocab.find((v) => v.id === wordId)
+        : undefined;
       return match ? [match] : [];
     }
     if (settings.tagFilter.length === 0) return vocab;
@@ -153,18 +156,18 @@ function SentencePracticeInner() {
   }, [vocab, wordParam, settings.tagFilter]);
 
   const [wordIndex, setWordIndex] = useState(0);
-  const [cache, setCache] = useState<Map<string, SentenceCandidate>>(new Map());
+  const [cache, setCache] = useState<Map<number, SentenceCandidate>>(new Map());
   const [generating, setGenerating] = useState(false);
   const [isMock, setIsMock] = useState(false);
 
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [hintRevealed, setHintRevealed] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
   const [stats, setStats] = useState<SessionStats>(ZERO_STATS);
   const [finished, setFinished] = useState(false);
-  const [scoredIds, setScoredIds] = useState<Set<string>>(new Set());
+  const [scoredIds, setScoredIds] = useState<Set<number>>(new Set());
 
   const generationToken = useRef(0);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -302,7 +305,7 @@ function SentencePracticeInner() {
     }
   }
 
-  function handleClozeChoose(optionId: string) {
+  function handleClozeChoose(optionId: number) {
     if (!cloze || selectedOption) return;
     setSelectedOption(optionId);
     const ok = optionId === cloze.correctId;

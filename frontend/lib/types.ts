@@ -7,13 +7,29 @@ export type VocabTag =
   | "other";
 
 export interface VocabItem {
-  id: string;
+  id: number;
+  workspaceId: number;
   word: string;
   translation: string;
-  language: "es";
+  language: LanguageCode;
   tags: VocabTag[];
   learned: boolean;
   createdAt: number;
+}
+
+export type LanguageCode =
+  | "es"
+  | "he"
+  | "fr";
+
+export interface Workspace {
+  id: number;
+  ownerId: number;
+  name: string;
+  language: LanguageCode;
+  emojiOrFlag: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export type Tense =

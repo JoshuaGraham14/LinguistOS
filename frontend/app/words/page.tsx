@@ -97,8 +97,16 @@ function downloadCsv(filename: string, contents: string) {
 }
 
 export default function WordsPage() {
-  const { vocab, hydrated, addVocab, removeVocab, updateVocab, toggleLearned, clearVocab } =
-    useVocab();
+  const {
+    vocab,
+    hydrated,
+    addVocab,
+    removeVocab,
+    updateVocab,
+    toggleLearned,
+    clearVocab,
+    activeWorkspace,
+  } = useVocab();
   const [search, setSearch] = useState("");
   const [activeTags, setActiveTags] = useState<VocabTag[]>([]);
   const [learnedFilter, setLearnedFilter] = useState<LearnedFilter>("all");
@@ -203,7 +211,7 @@ export default function WordsPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search Spanish or English..."
+            placeholder="Search source word or translation..."
             className="w-full rounded-full bg-slate-50 border border-transparent pl-12 pr-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:bg-white"
           />
         </div>
@@ -306,9 +314,13 @@ export default function WordsPage() {
             <WordCard
               key={v.id}
               item={v}
-              onDelete={() => removeVocab(v.id)}
+              onDelete={() => {
+                void removeVocab(v.id);
+              }}
               onEdit={() => setEditing(v)}
-              onToggleLearned={() => toggleLearned(v.id)}
+              onToggleLearned={() => {
+                void toggleLearned(v.id);
+              }}
             />
           ))}
         </section>
@@ -319,7 +331,10 @@ export default function WordsPage() {
         onClose={() => setAddOpen(false)}
         title="Add a word"
         submitLabel="Add word"
-        onSubmit={(values) => addVocab(values)}
+        sourceLanguageLabel={activeWorkspace?.language.toUpperCase() ?? "Source"}
+        onSubmit={(values) => {
+          void addVocab(values);
+        }}
       />
       <WordFormModal
         open={editing !== null}
@@ -327,15 +342,18 @@ export default function WordsPage() {
         title="Edit word"
         submitLabel="Save changes"
         initial={editing}
+        sourceLanguageLabel={activeWorkspace?.language.toUpperCase() ?? "Source"}
         onSubmit={(values) => {
-          if (editing) updateVocab(editing.id, values);
+          if (editing) void updateVocab(editing.id, values);
         }}
       />
       <ImportWordsModal
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImport={(rows) => {
-          rows.forEach((r) => addVocab(r));
+          rows.forEach((r) => {
+            void addVocab(r);
+          });
         }}
       />
       <Modal
@@ -359,7 +377,7 @@ export default function WordsPage() {
             <button
               type="button"
               onClick={() => {
-                clearVocab();
+                void clearVocab();
                 setConfirmClear(false);
               }}
               className="px-5 py-2 rounded-xl bg-rose-500 text-white font-medium shadow-soft hover:bg-rose-600 transition"
@@ -415,7 +433,7 @@ function WordCard({
 
       <div className="flex items-center gap-2">
         <Link
-          href={`/learn/sentences?word=${encodeURIComponent(item.id)}`}
+          href={`/learn/sentences?word=${encodeURIComponent(String(item.id))}`}
           className="h-9 px-3 rounded-full bg-fuchsia-500 text-white text-xs font-medium flex items-center gap-1 hover:bg-fuchsia-600 transition shadow-soft"
           aria-label="Practice with sentences"
           title="Practice this word with sentences"
@@ -424,7 +442,7 @@ function WordCard({
           Sentences
         </Link>
         <Link
-          href={`/learn/flashcards?word=${encodeURIComponent(item.id)}`}
+          href={`/learn/flashcards?word=${encodeURIComponent(String(item.id))}`}
           className="h-9 px-3 rounded-full bg-blue-500 text-white text-xs font-medium flex items-center gap-1 hover:bg-blue-600 transition shadow-soft"
           aria-label="Practice with flashcards"
           title="Practice this word with flashcards"
@@ -489,6 +507,7 @@ function WordFormModal({
   onSubmit,
   title,
   submitLabel,
+  sourceLanguageLabel,
   initial,
 }: {
   open: boolean;
@@ -496,6 +515,7 @@ function WordFormModal({
   onSubmit: (input: WordFormValues) => void;
   title: string;
   submitLabel: string;
+  sourceLanguageLabel: string;
   initial?: VocabItem | null;
 }) {
   const [word, setWord] = useState(initial?.word ?? "");
@@ -526,7 +546,7 @@ function WordFormModal({
     <Modal open={open} onClose={onClose} title={title}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Spanish</span>
+          <span className="text-sm font-medium text-slate-700">{sourceLanguageLabel}</span>
           <input
             value={word}
             onChange={(e) => setWord(e.target.value)}

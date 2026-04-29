@@ -1,4 +1,10 @@
-import type { SentenceCandidate } from "./types";
+import type {
+  LanguageCode,
+  SentenceCandidate,
+  VocabItem,
+  VocabTag,
+  Workspace,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -85,4 +91,134 @@ export async function generateOrMock(
   } catch {
     return mockGenerate(req);
   }
+}
+
+interface ApiWorkspace {
+  id: number;
+  owner_id: number;
+  name: string;
+  language: LanguageCode;
+  emoji_or_flag: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ApiVocab {
+  id: number;
+  workspace_id: number;
+  word: string;
+  translation: string;
+  tags: VocabTag[];
+  learned: boolean;
+  created_at: string;
+}
+
+function toWorkspace(item: ApiWorkspace): Workspace {
+  return {
+    id: item.id,
+    ownerId: item.owner_id,
+    name: item.name,
+    language: item.language,
+    emojiOrFlag: item.emoji_or_flag,
+    createdAt: Date.parse(item.created_at),
+    updatedAt: Date.parse(item.updated_at),
+  };
+}
+
+function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
+  return {
+    id: item.id,
+    workspaceId: item.workspace_id,
+    word: item.word,
+    translation: item.translation,
+    language,
+    tags: item.tags,
+    learned: item.learned,
+    createdAt: Date.parse(item.created_at),
+  };
+}
+
+export async function listWorkspaces(): Promise<Workspace[]> {
+  const items = await apiFetch<ApiWorkspace[]>("/api/workspaces");
+  return items.map(toWorkspace);
+}
+
+export async function createWorkspace(input: {
+  name: string;
+  language: LanguageCode;
+  emojiOrFlag: string;
+}): Promise<Workspace> {
+  const item = await apiFetch<ApiWorkspace>("/api/workspaces", {
+    method: "POST",
+    body: JSON.stringify({
+      name: input.name,
+      language: input.language,
+      emoji_or_flag: input.emojiOrFlag,
+    }),
+  });
+  return toWorkspace(item);
+}
+
+export async function renameWorkspace(
+  workspaceId: number,
+  name: string,
+): Promise<Workspace> {
+  const item = await apiFetch<ApiWorkspace>(`/api/workspaces/${workspaceId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ name }),
+  });
+  return toWorkspace(item);
+}
+
+export async function listVocab(
+  workspaceId: number,
+  language: LanguageCode,
+): Promise<VocabItem[]> {
+  const res = await apiFetch<{ items: ApiVocab[] }>(
+    `/api/vocab?workspace_id=${workspaceId}`,
+  );
+  return res.items.map((item) => toVocab(item, language));
+}
+
+export async function addVocab(input: {
+  workspaceId: number;
+  word: string;
+  translation: string;
+  tags: VocabTag[];
+  language: LanguageCode;
+}): Promise<VocabItem> {
+  const item = await apiFetch<ApiVocab>("/api/vocab", {
+    method: "POST",
+    body: JSON.stringify({
+      workspace_id: input.workspaceId,
+      word: input.word,
+      translation: input.translation,
+      tags: input.tags,
+    }),
+  });
+  return toVocab(item, input.language);
+}
+
+export async function updateVocab(
+  vocabId: number,
+  patch: Partial<Pick<VocabItem, "word" | "translation" | "tags" | "learned">>,
+  language: LanguageCode,
+): Promise<VocabItem> {
+  const item = await apiFetch<ApiVocab>(`/api/vocab/${vocabId}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+  return toVocab(item, language);
+}
+
+export async function removeVocab(vocabId: number): Promise<void> {
+  await apiFetch<{ ok: boolean }>(`/api/vocab/${vocabId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function clearVocab(workspaceId: number): Promise<void> {
+  await apiFetch<{ ok: boolean }>(`/api/vocab?workspace_id=${workspaceId}`, {
+    method: "DELETE",
+  });
 }

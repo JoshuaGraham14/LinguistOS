@@ -36,7 +36,12 @@ Thumbs.db
 *.log
 *.sqlite
 *.sqlite3
+*.db
 data/local/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local agent / editor configs
+.claude/
+.cursor/

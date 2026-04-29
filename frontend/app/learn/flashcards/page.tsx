@@ -52,7 +52,10 @@ function FlashcardsInner() {
 
   const scopedVocab = useMemo(() => {
     if (!wordParam) return vocab;
-    const match = vocab.find((v) => v.id === wordParam);
+    const wordId = Number(wordParam);
+    const match = Number.isFinite(wordId)
+      ? vocab.find((v) => v.id === wordId)
+      : undefined;
     return match ? [match] : vocab;
   }, [vocab, wordParam]);
 
