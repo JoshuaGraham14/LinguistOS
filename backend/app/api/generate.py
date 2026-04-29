@@ -123,13 +123,43 @@ def _tokenize(text: str) -> list[str]:
     return [t.lower() for t in re.findall(r"[\w\u00C0-\u017F]+", text)]
 
 
+# Spanish closed-class words and very common short tokens that are safe to
+# treat as "free" inside a constrained generation. Listing them avoids
+# false-positive rejections when the LLM uses ordinary connective tissue.
+_SPANISH_FREE_TOKENS: frozenset[str] = frozenset(
+    {
+        # articles
+        "el", "la", "los", "las", "un", "una", "unos", "unas",
+        # personal pronouns
+        "yo", "tú", "tu", "él", "ella", "usted", "nosotros", "nosotras",
+        "vosotros", "vosotras", "ellos", "ellas", "ustedes",
+        "me", "te", "se", "nos", "os", "lo", "le", "les",
+        # possessives
+        "mi", "mis", "tus", "su", "sus", "nuestro", "nuestra",
+        "nuestros", "nuestras",
+        # common prepositions / conjunctions / negations
+        "a", "al", "de", "del", "en", "con", "sin", "para", "por",
+        "y", "e", "o", "u", "ni", "que", "como", "pero", "si", "no",
+        "ya", "muy", "más", "menos", "también", "tampoco", "aún", "aun",
+        # demonstratives
+        "este", "esta", "estos", "estas", "ese", "esa", "esos", "esas",
+        "aquel", "aquella", "aquellos", "aquellas", "esto", "eso", "aquello",
+        # interrogatives / relatives
+        "qué", "quién", "quiénes", "cuál", "cuáles", "cuándo", "cómo",
+        "dónde", "donde", "cuanto", "cuánto",
+    }
+)
+
+
 def _filter_by_lexicon(
     candidates: list[Candidate],
     allowed: list[Vocab],
 ) -> tuple[list[Candidate], list[int]]:
     """Drop candidates that use any content word outside the allowed list.
 
-    Returns ``(passing_candidates, used_vocab_ids)``.
+    Returns ``(passing_candidates, used_vocab_ids)``. Tokens that are
+    ≤ 2 characters or that appear in :data:`_SPANISH_FREE_TOKENS` are
+    treated as closed-class function words and never rejected.
     """
     if not allowed:
         return candidates, []
@@ -144,7 +174,13 @@ def _filter_by_lexicon(
     used_ids: set[int] = set()
     for cand in candidates:
         tokens = _tokenize(cand.sentence)
-        unmatched = [t for t in tokens if t not in allowed_terms and len(t) > 2]
+        unmatched = [
+            t
+            for t in tokens
+            if t not in allowed_terms
+            and len(t) > 2
+            and t not in _SPANISH_FREE_TOKENS
+        ]
         if unmatched:
             continue
         for t in tokens:
@@ -155,13 +191,25 @@ def _filter_by_lexicon(
     return passing, sorted(used_ids)
 
 
+def _mock_response() -> GenerateResponse:
+    return GenerateResponse(candidates=[], mock=True, constrained=False)
+
+
 @router.post("/generate", response_model=GenerateResponse)
 def generate(req: GenerateRequest, db: Session = Depends(get_db)) -> GenerateResponse:
+    """Generate sentence candidates, optionally constrained to a lexicon.
+
+    When ``lexicon_constraint`` is ``"off"`` the prompt is unconstrained.
+    When it's on but the resolved allowed-list is empty (e.g. a learner
+    asked for ``"known_only"`` but has no learned words yet), the LLM is
+    still called unconstrained and the response carries ``constrained=False``
+    so the UI can surface a "Constraint relaxed" hint.
+    """
+    constraint_requested = req.lexicon_constraint != "off"
     allowed = _allowed_vocab(req, db)
-    constrained_requested = bool(allowed)
 
     if not settings.openai_api_key:
-        return GenerateResponse(candidates=[], mock=True, constrained=False)
+        return _mock_response()
 
     try:
         from openai import OpenAI
@@ -182,9 +230,9 @@ def generate(req: GenerateRequest, db: Session = Depends(get_db)) -> GenerateRes
         raw = completion.choices[0].message.content or "{}"
         candidates = _parse_candidates(raw)
         if not candidates:
-            return GenerateResponse(candidates=[], mock=True, constrained=False)
+            return _mock_response()
 
-        if constrained_requested:
+        if constraint_requested and allowed:
             filtered, used_ids = _filter_by_lexicon(candidates, allowed)
             if filtered:
                 return GenerateResponse(
@@ -193,7 +241,7 @@ def generate(req: GenerateRequest, db: Session = Depends(get_db)) -> GenerateRes
                     constrained=True,
                     used_vocab_ids=used_ids,
                 )
-            # Constraint dropped everything; fall back transparently.
+            # Constraint dropped everything; surface unconstrained results.
             return GenerateResponse(
                 candidates=candidates,
                 mock=False,
@@ -201,6 +249,9 @@ def generate(req: GenerateRequest, db: Session = Depends(get_db)) -> GenerateRes
                 used_vocab_ids=[],
             )
 
+        # Either no constraint requested, or constraint requested but the
+        # learner has no eligible vocab yet. Both cases yield
+        # ``constrained=False`` — the UI knows when it asked for one.
         return GenerateResponse(candidates=candidates, mock=False, constrained=False)
     except Exception:
-        return GenerateResponse(candidates=[], mock=True, constrained=False)
+        return _mock_response()

@@ -57,6 +57,9 @@ class Workspace(Base):
     vocab_items: Mapped[list["Vocab"]] = relationship(
         back_populates="workspace", cascade="all, delete-orphan"
     )
+    sentences: Mapped[list["Sentence"]] = relationship(
+        back_populates="workspace", cascade="all, delete-orphan"
+    )
     practice_logs: Mapped[list["PracticeLog"]] = relationship(
         back_populates="workspace", cascade="all, delete-orphan"
     )
@@ -108,6 +111,9 @@ class Vocab(Base):
         back_populates="vocab", uselist=False, cascade="all, delete-orphan"
     )
     enrichment_jobs: Mapped[list["EnrichmentJob"]] = relationship(
+        back_populates="vocab", cascade="all, delete-orphan"
+    )
+    sentence_links: Mapped[list["SentenceWordLink"]] = relationship(
         back_populates="vocab", cascade="all, delete-orphan"
     )
 
@@ -186,7 +192,7 @@ class Sentence(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     workspace_id: Mapped[int] = mapped_column(
-        ForeignKey("workspaces.id"), nullable=False, index=True
+        ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
     )
     text: Mapped[str] = mapped_column(Text, nullable=False)
     translation: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -198,8 +204,11 @@ class Sentence(Base):
         DateTime(timezone=True), default=datetime.utcnow, nullable=False
     )
 
+    workspace: Mapped[Workspace] = relationship(back_populates="sentences")
     links: Mapped[list["SentenceWordLink"]] = relationship(
-        back_populates="sentence", cascade="all, delete-orphan", order_by="SentenceWordLink.position"
+        back_populates="sentence",
+        cascade="all, delete-orphan",
+        order_by="SentenceWordLink.position",
     )
 
 
@@ -214,16 +223,17 @@ class SentenceWordLink(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     sentence_id: Mapped[int] = mapped_column(
-        ForeignKey("sentences.id"), nullable=False, index=True
+        ForeignKey("sentences.id", ondelete="CASCADE"), nullable=False, index=True
     )
     vocab_id: Mapped[int] = mapped_column(
-        ForeignKey("vocab.id"), nullable=False, index=True
+        ForeignKey("vocab.id", ondelete="CASCADE"), nullable=False, index=True
     )
     surface_token: Mapped[str] = mapped_column(String(255), nullable=False)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
     role: Mapped[str] = mapped_column(String(16), default="target", nullable=False)
 
     sentence: Mapped[Sentence] = relationship(back_populates="links")
+    vocab: Mapped["Vocab"] = relationship(back_populates="sentence_links")
 
 
 class PracticeLog(Base):

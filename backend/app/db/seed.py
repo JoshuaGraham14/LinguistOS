@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from sqlalchemy import func, select
 
+from app.api._auth import LOCAL_USER_EMAIL
 from app.db.database import SessionLocal
 from app.db.models import User, Vocab, Workspace
 
-VALID_TAGS = {"noun", "verb", "adjective", "adverb", "preposition", "other"}
+VALID_POS_TAGS = {"noun", "verb", "adjective", "adverb", "preposition"}
 
-LOCAL_USER_EMAIL = "local-user@linguistos.local"
 DEFAULT_WORKSPACE_NAME = "Spanish core"
 DEFAULT_WORKSPACE_LANGUAGE = "es"
 DEFAULT_WORKSPACE_EMOJI = "🇪🇸"
@@ -172,7 +172,7 @@ def ensure_default_workspace_and_vocab() -> None:
 def _pos_from_tags(tags: list[str]) -> str | None:
     """Infer a single POS from legacy tags. Mirrors first known POS-like tag."""
     for tag in tags:
-        if tag in VALID_TAGS and tag != "other":
+        if tag in VALID_POS_TAGS:
             return tag
     return None
 

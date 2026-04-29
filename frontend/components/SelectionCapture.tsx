@@ -2,9 +2,12 @@
 
 import { Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Toast } from "./Toast";
+import { useToast } from "@/lib/useToast";
 import { useVocab } from "@/lib/storage";
 
-interface Position {
+interface ViewportPosition {
+  /** CSS top in pixels (viewport coordinates, used with position:fixed). */
   top: number;
   left: number;
 }
@@ -19,42 +22,47 @@ interface SelectionCaptureProps {
   onCaptured?: (text: string) => void;
 }
 
+const MAX_SELECTION_LENGTH = 80;
+const CHIP_GAP_PX = 36;
+
 /**
  * Inline selection capture (LOS-402). When a user highlights a word inside
  * a watched container, a small "Add" chip appears near the selection and
- * stores the text as a new vocab item via QuickCapture's surface-only
- * contract. Multi-word selections are accepted; whitespace is collapsed.
+ * stores the text as a new vocab item via the surface-form-only contract.
+ * Multi-word selections are accepted; whitespace is collapsed.
+ *
+ * Positioning uses ``position: fixed`` against viewport coordinates, so
+ * scrolling the page keeps the chip pinned to the visible selection.
  */
 export function SelectionCapture({ containerRef, onCaptured }: SelectionCaptureProps) {
   const { addVocab, activeWorkspace } = useVocab();
   const [text, setText] = useState("");
-  const [position, setPosition] = useState<Position | null>(null);
+  const [position, setPosition] = useState<ViewportPosition | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    function handleSelection() {
+    function readSelection() {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed) {
         setPosition(null);
         return;
       }
       const range = selection.getRangeAt(0);
-      const node = range.commonAncestorContainer;
       const container = containerRef.current;
       if (!container) {
         setPosition(null);
         return;
       }
-      const owner =
-        node instanceof Element ? node : node.parentElement;
+      const node = range.commonAncestorContainer;
+      const owner = node instanceof Element ? node : node.parentElement;
       if (!owner || !container.contains(owner)) {
         setPosition(null);
         return;
       }
       const value = selection.toString().trim().replace(/\s+/g, " ");
-      if (!value || value.length > 80) {
+      if (!value || value.length > MAX_SELECTION_LENGTH) {
         setPosition(null);
         return;
       }
@@ -64,9 +72,11 @@ export function SelectionCapture({ containerRef, onCaptured }: SelectionCaptureP
         return;
       }
       setText(value);
+      // Viewport coordinates pair with position: fixed — scrolling keeps
+      // the chip pinned to the visible selection.
       setPosition({
-        top: rect.top + window.scrollY - 36,
-        left: rect.left + window.scrollX + rect.width / 2,
+        top: rect.top - CHIP_GAP_PX,
+        left: rect.left + rect.width / 2,
       });
     }
 
@@ -81,37 +91,34 @@ export function SelectionCapture({ containerRef, onCaptured }: SelectionCaptureP
       setPosition(null);
     }
 
-    document.addEventListener("mouseup", handleSelection);
-    document.addEventListener("keyup", handleSelection);
+    document.addEventListener("mouseup", readSelection);
+    document.addEventListener("keyup", readSelection);
     document.addEventListener("mousedown", handleMouseDown);
     return () => {
-      document.removeEventListener("mouseup", handleSelection);
-      document.removeEventListener("keyup", handleSelection);
+      document.removeEventListener("mouseup", readSelection);
+      document.removeEventListener("keyup", readSelection);
       document.removeEventListener("mousedown", handleMouseDown);
     };
   }, [containerRef]);
-
-  useEffect(() => {
-    if (!toast) return;
-    const id = window.setTimeout(() => setToast(null), 2000);
-    return () => window.clearTimeout(id);
-  }, [toast]);
 
   async function handleClick() {
     if (!text || submitting || !activeWorkspace) return;
     setSubmitting(true);
     try {
       const item = await addVocab({ surfaceForm: text });
-      setToast(`Added "${item.surfaceForm ?? item.word}"`);
+      showToast(`Added “${item.surfaceForm ?? item.word}”`);
       onCaptured?.(text);
       setPosition(null);
       window.getSelection()?.removeAllRanges();
     } catch {
-      setToast("Could not add word");
+      showToast("Could not add word");
     } finally {
       setSubmitting(false);
     }
   }
+
+  const truncated =
+    text.length > 24 ? `${text.slice(0, 24)}…` : text;
 
   return (
     <>
@@ -125,17 +132,10 @@ export function SelectionCapture({ containerRef, onCaptured }: SelectionCaptureP
           className="fixed z-50 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-slate-900 text-white px-3 py-1 text-xs font-medium shadow-card hover:bg-slate-800 transition"
         >
           <Plus className="h-3 w-3" strokeWidth={2.5} />
-          {submitting ? "Adding…" : `Add "${text.length > 24 ? `${text.slice(0, 24)}…` : text}"`}
+          {submitting ? "Adding…" : `Add “${truncated}”`}
         </button>
       )}
-      {toast && (
-        <div
-          className="fixed bottom-24 right-6 z-50 rounded-xl bg-slate-900 text-white px-4 py-2 text-sm shadow-card"
-          role="status"
-        >
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
     </>
   );
 }

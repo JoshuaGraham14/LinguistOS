@@ -10,18 +10,19 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.api._auth import ensure_vocab_owner
 from app.db.database import get_db
-from app.db.models import Vocab, Workspace, WordMastery
+from app.db.models import Vocab, WordMastery
 from app.db.schemas import MasteryEvent, MasteryOut
 
 router = APIRouter()
 
 # Box -> days until next review.
 _LEITNER_INTERVALS_DAYS = [1, 2, 4, 8, 16, 30]
+_GRADUATED_BOX = 4
 
 
 def _ensure_mastery(db: Session, vocab: Vocab) -> WordMastery:
@@ -34,39 +35,43 @@ def _ensure_mastery(db: Session, vocab: Vocab) -> WordMastery:
 
 
 def _apply_outcome(mastery: WordMastery, outcome: str) -> None:
+    """Apply a review outcome, mutating the mastery row in place.
+
+    Semantics:
+    - ``correct``: +0.20 strength, +1 box (cap 5), streak +1.
+    - ``incorrect``: -0.30 strength, -1 box (floor 0), streak reset.
+    - ``hinted``: +0.05 strength only; box and next_due unchanged so a
+      hinted answer doesn't disguise a half-learned word as scheduled.
+    - ``skipped``: pure no-op (no last_reviewed_at, no next_due bump);
+      skipped cards re-surface immediately on the next deck pass.
+    """
+    if outcome == "skipped":
+        return
+
     now = datetime.utcnow()
     mastery.last_reviewed_at = now
+    box_changed = False
 
     if outcome == "correct":
         mastery.strength = min(1.0, mastery.strength + 0.2)
         mastery.box = min(5, mastery.box + 1)
         mastery.streak += 1
         mastery.successes += 1
+        box_changed = True
     elif outcome == "incorrect":
         mastery.strength = max(0.0, mastery.strength - 0.3)
         mastery.box = max(0, mastery.box - 1)
         mastery.streak = 0
         mastery.failures += 1
+        box_changed = True
     elif outcome == "hinted":
         mastery.strength = min(1.0, mastery.strength + 0.05)
-    elif outcome == "skipped":
-        # No-op for strength/box; we still record the timestamp above.
-        pass
 
-    interval_days = _LEITNER_INTERVALS_DAYS[
-        min(mastery.box, len(_LEITNER_INTERVALS_DAYS) - 1)
-    ]
-    mastery.next_due = now + timedelta(days=interval_days)
-
-
-def _get_vocab_or_404(db: Session, vocab_id: int) -> Vocab:
-    item = db.get(Vocab, vocab_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Word not found")
-    workspace = db.get(Workspace, item.workspace_id)
-    if not workspace:
-        raise HTTPException(status_code=404, detail="Workspace not found")
-    return item
+    if box_changed:
+        interval_days = _LEITNER_INTERVALS_DAYS[
+            min(mastery.box, len(_LEITNER_INTERVALS_DAYS) - 1)
+        ]
+        mastery.next_due = now + timedelta(days=interval_days)
 
 
 @router.post("/vocab/{vocab_id}/mastery/event", response_model=MasteryOut)
@@ -75,12 +80,15 @@ def record_mastery_event(
     payload: MasteryEvent,
     db: Session = Depends(get_db),
 ) -> MasteryOut:
-    vocab = _get_vocab_or_404(db, vocab_id)
+    vocab = ensure_vocab_owner(db, vocab_id)
     mastery = _ensure_mastery(db, vocab)
     _apply_outcome(mastery, payload.outcome)
 
-    # Keep legacy ``learned`` boolean roughly in sync with mastery box.
-    vocab.learned = mastery.box >= 4 or vocab.learned
+    # Once a word reaches the graduated box, the legacy ``learned`` flag
+    # latches true. We don't unset it on regression because users tend
+    # to read ``learned`` as "I've recognised this word at least once".
+    if mastery.box >= _GRADUATED_BOX:
+        vocab.learned = True
 
     db.add(mastery)
     db.add(vocab)
@@ -91,10 +99,11 @@ def record_mastery_event(
 
 @router.get("/vocab/{vocab_id}/mastery", response_model=MasteryOut)
 def get_mastery(vocab_id: int, db: Session = Depends(get_db)) -> MasteryOut:
-    vocab = _get_vocab_or_404(db, vocab_id)
+    vocab = ensure_vocab_owner(db, vocab_id)
     mastery = vocab.mastery
     if mastery is None:
-        # Return a default zero-state without persisting anything.
+        # Default zero-state response; we don't persist a row until the
+        # learner actually reviews this word.
         return MasteryOut(
             strength=0.0,
             box=0,

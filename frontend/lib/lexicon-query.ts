@@ -114,6 +114,40 @@ export function serializeLexiconQuery(query: LexiconQuery): string {
   return params.toString();
 }
 
+const VALID_TAGS: ReadonlySet<VocabTag> = new Set<VocabTag>([
+  "noun",
+  "verb",
+  "adjective",
+  "adverb",
+  "preposition",
+  "other",
+]);
+const VALID_LANGUAGES: ReadonlySet<LanguageCode> = new Set<LanguageCode>([
+  "es",
+  "he",
+  "fr",
+]);
+const VALID_LEARNED: ReadonlySet<LearnedFilter> = new Set<LearnedFilter>([
+  "any",
+  "learned",
+  "not_learned",
+]);
+const VALID_DUE: ReadonlySet<DueFilter> = new Set<DueFilter>([
+  "any",
+  "due_now",
+  "due_week",
+  "not_due",
+]);
+
+function pickFromSet<T extends string>(
+  raw: string | null,
+  allowed: ReadonlySet<T>,
+  fallback: T,
+): T {
+  if (raw && (allowed as ReadonlySet<string>).has(raw)) return raw as T;
+  return fallback;
+}
+
 export function parseLexiconQuery(input: string | null): LexiconQuery {
   if (!input) return { ...EMPTY_QUERY };
   const params = new URLSearchParams(input);
@@ -128,16 +162,23 @@ export function parseLexiconQuery(input: string | null): LexiconQuery {
     const n = Number(v);
     return Number.isFinite(n) ? n : null;
   };
+  const language = pickFromSet(
+    params.get("lang"),
+    VALID_LANGUAGES,
+    "" as LanguageCode,
+  );
   return {
     search: params.get("q") ?? "",
-    tags: csv("tags") as VocabTag[],
+    tags: csv("tags").filter((t): t is VocabTag =>
+      (VALID_TAGS as ReadonlySet<string>).has(t),
+    ),
     pos: csv("pos"),
     cefr: csv("cefr"),
-    learned: (params.get("learned") as LearnedFilter | null) ?? "any",
-    due: (params.get("due") as DueFilter | null) ?? "any",
+    learned: pickFromSet(params.get("learned"), VALID_LEARNED, "any"),
+    due: pickFromSet(params.get("due"), VALID_DUE, "any"),
     boxMin: num("box_min"),
     boxMax: num("box_max"),
-    language: (params.get("lang") as LanguageCode | null) ?? null,
+    language: language || null,
   };
 }
 

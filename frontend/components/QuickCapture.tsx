@@ -3,8 +3,11 @@
 import { Plus, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Modal } from "./Modal";
+import { Toast } from "./Toast";
+import { shortcutLabel } from "@/lib/platform";
 import { useGlobalShortcut } from "@/lib/useGlobalShortcut";
 import { useVocab } from "@/lib/storage";
+import { useToast } from "@/lib/useToast";
 
 /**
  * Global low-friction word capture (LOS-401).
@@ -20,7 +23,7 @@ export function QuickCapture() {
   const [surfaceForm, setSurfaceForm] = useState("");
   const [translation, setTranslation] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const { toast, showToast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const openCapture = useCallback(() => setOpen(true), []);
@@ -31,12 +34,6 @@ export function QuickCapture() {
     const id = window.setTimeout(() => inputRef.current?.focus(), 0);
     return () => window.clearTimeout(id);
   }, [open]);
-
-  useEffect(() => {
-    if (!toast) return;
-    const id = window.setTimeout(() => setToast(null), 2200);
-    return () => window.clearTimeout(id);
-  }, [toast]);
 
   function reset() {
     setSurfaceForm("");
@@ -59,10 +56,10 @@ export function QuickCapture() {
         surfaceForm: surface,
         glossPrimary: translation.trim() || undefined,
       });
-      setToast(`Added "${item.surfaceForm ?? item.word}"`);
+      showToast(`Added “${item.surfaceForm ?? item.word}”`);
       handleClose();
     } catch {
-      setToast("Could not add word");
+      showToast("Could not add word");
       setSubmitting(false);
     }
   }
@@ -78,9 +75,7 @@ export function QuickCapture() {
         <Plus className="h-4 w-4" strokeWidth={2.5} />
         Quick add
         <kbd className="ml-1 px-1.5 py-0.5 rounded bg-white/20 text-[10px]">
-          {typeof navigator !== "undefined" && navigator.platform.includes("Mac")
-            ? "⌘K"
-            : "Ctrl+K"}
+          {shortcutLabel("k")}
         </kbd>
       </button>
 
@@ -138,14 +133,7 @@ export function QuickCapture() {
         </form>
       </Modal>
 
-      {toast && (
-        <div
-          className="fixed bottom-24 right-6 z-50 rounded-xl bg-slate-900 text-white px-4 py-2 text-sm shadow-card"
-          role="status"
-        >
-          {toast}
-        </div>
-      )}
+      <Toast message={toast} />
     </>
   );
 }

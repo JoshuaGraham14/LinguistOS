@@ -168,8 +168,7 @@ function toWorkspace(item: ApiWorkspace): Workspace {
   };
 }
 
-function toMastery(item: ApiMastery | null): MasteryState | null {
-  if (!item) return null;
+function toMastery(item: ApiMastery): MasteryState {
   return {
     strength: item.strength,
     box: item.box,
@@ -179,6 +178,10 @@ function toMastery(item: ApiMastery | null): MasteryState | null {
     failures: item.failures,
     successes: item.successes,
   };
+}
+
+function toMasteryOrNull(item: ApiMastery | null): MasteryState | null {
+  return item ? toMastery(item) : null;
 }
 
 function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
@@ -207,7 +210,7 @@ function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
     glosses: item.glosses ?? [],
     notes: item.notes,
     lastSeenAt: item.last_seen_at ? Date.parse(item.last_seen_at) : null,
-    mastery: toMastery(item.mastery),
+    mastery: toMasteryOrNull(item.mastery),
   };
 }
 
@@ -356,12 +359,12 @@ export async function recordMasteryEvent(
       body: JSON.stringify({ outcome, source }),
     },
   );
-  return toMastery(m) as MasteryState;
+  return toMastery(m);
 }
 
 export async function getMastery(vocabId: number): Promise<MasteryState> {
   const m = await apiFetch<ApiMastery>(`/api/vocab/${vocabId}/mastery`);
-  return toMastery(m) as MasteryState;
+  return toMastery(m);
 }
 
 export async function removeVocab(vocabId: number): Promise<void> {

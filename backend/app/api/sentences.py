@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.api.vocab import _ensure_workspace_owner
+from app.api._auth import ensure_workspace_owner
 from app.db.database import get_db
 from app.db.models import Sentence, SentenceWordLink, Vocab
 from app.db.schemas import SentenceCreate, SentenceListResponse, SentenceOut
@@ -21,7 +21,7 @@ router = APIRouter()
 
 @router.post("/sentences", response_model=SentenceOut)
 def create_sentence(payload: SentenceCreate, db: Session = Depends(get_db)) -> SentenceOut:
-    _ensure_workspace_owner(db, payload.workspace_id)
+    ensure_workspace_owner(db, payload.workspace_id)
 
     # Validate every link refers to a vocab in the same workspace.
     if payload.links:
@@ -67,7 +67,7 @@ def list_sentences(
     limit: int = Query(default=50, ge=1, le=200),
     db: Session = Depends(get_db),
 ) -> SentenceListResponse:
-    _ensure_workspace_owner(db, workspace_id)
+    ensure_workspace_owner(db, workspace_id)
     query = (
         select(Sentence)
         .options(selectinload(Sentence.links))
@@ -90,7 +90,7 @@ def get_sentence(sentence_id: int, db: Session = Depends(get_db)) -> SentenceOut
     )
     if not sentence:
         raise HTTPException(status_code=404, detail="Sentence not found")
-    _ensure_workspace_owner(db, sentence.workspace_id)
+    ensure_workspace_owner(db, sentence.workspace_id)
     return SentenceOut.model_validate(sentence)
 
 
@@ -99,7 +99,7 @@ def delete_sentence(sentence_id: int, db: Session = Depends(get_db)) -> dict[str
     sentence = db.get(Sentence, sentence_id)
     if not sentence:
         raise HTTPException(status_code=404, detail="Sentence not found")
-    _ensure_workspace_owner(db, sentence.workspace_id)
+    ensure_workspace_owner(db, sentence.workspace_id)
     db.delete(sentence)
     db.commit()
     return {"ok": True}
