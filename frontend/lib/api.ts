@@ -1,5 +1,7 @@
 import type {
   LanguageCode,
+  MasteryOutcome,
+  MasteryState,
   SentenceCandidate,
   VocabItem,
   VocabTag,
@@ -103,6 +105,16 @@ interface ApiWorkspace {
   updated_at: string;
 }
 
+interface ApiMastery {
+  strength: number;
+  box: number;
+  last_reviewed_at: string | null;
+  next_due: string | null;
+  streak: number;
+  failures: number;
+  successes: number;
+}
+
 interface ApiVocab {
   id: number;
   workspace_id: number;
@@ -111,6 +123,25 @@ interface ApiVocab {
   tags: VocabTag[];
   learned: boolean;
   created_at: string;
+
+  lemma: string | null;
+  surface_form: string | null;
+  surface_forms: string[];
+  pos: string | null;
+  cefr: string | null;
+  frequency_rank: number | null;
+  gender: string | null;
+  conjugation_class: string | null;
+  morph_features: Record<string, unknown> | null;
+  ipa: string | null;
+  audio_url: string | null;
+  image_url: string | null;
+  gloss_primary: string | null;
+  glosses: string[];
+  notes: string | null;
+  last_seen_at: string | null;
+
+  mastery: ApiMastery | null;
 }
 
 function toWorkspace(item: ApiWorkspace): Workspace {
@@ -125,6 +156,19 @@ function toWorkspace(item: ApiWorkspace): Workspace {
   };
 }
 
+function toMastery(item: ApiMastery | null): MasteryState | null {
+  if (!item) return null;
+  return {
+    strength: item.strength,
+    box: item.box,
+    lastReviewedAt: item.last_reviewed_at ? Date.parse(item.last_reviewed_at) : null,
+    nextDue: item.next_due ? Date.parse(item.next_due) : null,
+    streak: item.streak,
+    failures: item.failures,
+    successes: item.successes,
+  };
+}
+
 function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
   return {
     id: item.id,
@@ -135,6 +179,23 @@ function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
     tags: item.tags,
     learned: item.learned,
     createdAt: Date.parse(item.created_at),
+    lemma: item.lemma,
+    surfaceForm: item.surface_form,
+    surfaceForms: item.surface_forms ?? [],
+    pos: item.pos,
+    cefr: item.cefr,
+    frequencyRank: item.frequency_rank,
+    gender: item.gender,
+    conjugationClass: item.conjugation_class,
+    morphFeatures: item.morph_features,
+    ipa: item.ipa,
+    audioUrl: item.audio_url,
+    imageUrl: item.image_url,
+    glossPrimary: item.gloss_primary,
+    glosses: item.glosses ?? [],
+    notes: item.notes,
+    lastSeenAt: item.last_seen_at ? Date.parse(item.last_seen_at) : null,
+    mastery: toMastery(item.mastery),
   };
 }
 
@@ -180,35 +241,115 @@ export async function listVocab(
   return res.items.map((item) => toVocab(item, language));
 }
 
-export async function addVocab(input: {
+export interface AddVocabInput {
   workspaceId: number;
-  word: string;
-  translation: string;
-  tags: VocabTag[];
   language: LanguageCode;
-}): Promise<VocabItem> {
+  // Canonical (preferred): only surfaceForm is required (LOS-106).
+  surfaceForm?: string;
+  glossPrimary?: string;
+  lemma?: string;
+  pos?: string | null;
+  tags?: VocabTag[];
+  notes?: string | null;
+  // Legacy support: callers passing { word, translation } still work.
+  word?: string;
+  translation?: string;
+}
+
+export async function addVocab(input: AddVocabInput): Promise<VocabItem> {
+  const surface = input.surfaceForm ?? input.word;
+  if (!surface) {
+    throw new Error("addVocab requires either surfaceForm or word");
+  }
+  const gloss = input.glossPrimary ?? input.translation ?? "";
   const item = await apiFetch<ApiVocab>("/api/vocab", {
     method: "POST",
     body: JSON.stringify({
       workspace_id: input.workspaceId,
-      word: input.word,
-      translation: input.translation,
-      tags: input.tags,
+      surface_form: surface,
+      lemma: input.lemma,
+      gloss_primary: gloss,
+      pos: input.pos ?? null,
+      tags: input.tags ?? [],
+      notes: input.notes ?? null,
+      // Mirror legacy fields so existing list/render paths keep working
+      // until the adapter retirement criteria are met.
+      word: surface,
+      translation: gloss,
     }),
   });
   return toVocab(item, input.language);
 }
 
+export interface UpdateVocabPatch {
+  word?: string;
+  translation?: string;
+  tags?: VocabTag[];
+  learned?: boolean;
+  surfaceForm?: string;
+  lemma?: string;
+  pos?: string | null;
+  cefr?: string | null;
+  glossPrimary?: string | null;
+  glosses?: string[];
+  notes?: string | null;
+  audioUrl?: string | null;
+  imageUrl?: string | null;
+}
+
 export async function updateVocab(
   vocabId: number,
-  patch: Partial<Pick<VocabItem, "word" | "translation" | "tags" | "learned">>,
+  patch: UpdateVocabPatch,
   language: LanguageCode,
 ): Promise<VocabItem> {
+  const body: Record<string, unknown> = {};
+  if (patch.word !== undefined) body.word = patch.word;
+  if (patch.translation !== undefined) body.translation = patch.translation;
+  if (patch.tags !== undefined) body.tags = patch.tags;
+  if (patch.learned !== undefined) body.learned = patch.learned;
+  if (patch.surfaceForm !== undefined) body.surface_form = patch.surfaceForm;
+  if (patch.lemma !== undefined) body.lemma = patch.lemma;
+  if (patch.pos !== undefined) body.pos = patch.pos;
+  if (patch.cefr !== undefined) body.cefr = patch.cefr;
+  if (patch.glossPrimary !== undefined) body.gloss_primary = patch.glossPrimary;
+  if (patch.glosses !== undefined) body.glosses = patch.glosses;
+  if (patch.notes !== undefined) body.notes = patch.notes;
+  if (patch.audioUrl !== undefined) body.audio_url = patch.audioUrl;
+  if (patch.imageUrl !== undefined) body.image_url = patch.imageUrl;
+
   const item = await apiFetch<ApiVocab>(`/api/vocab/${vocabId}`, {
     method: "PATCH",
-    body: JSON.stringify(patch),
+    body: JSON.stringify(body),
   });
   return toVocab(item, language);
+}
+
+export async function getVocab(
+  vocabId: number,
+  language: LanguageCode,
+): Promise<VocabItem> {
+  const item = await apiFetch<ApiVocab>(`/api/vocab/${vocabId}`);
+  return toVocab(item, language);
+}
+
+export async function recordMasteryEvent(
+  vocabId: number,
+  outcome: MasteryOutcome,
+  source = "practice",
+): Promise<MasteryState> {
+  const m = await apiFetch<ApiMastery>(
+    `/api/vocab/${vocabId}/mastery/event`,
+    {
+      method: "POST",
+      body: JSON.stringify({ outcome, source }),
+    },
+  );
+  return toMastery(m) as MasteryState;
+}
+
+export async function getMastery(vocabId: number): Promise<MasteryState> {
+  const m = await apiFetch<ApiMastery>(`/api/vocab/${vocabId}/mastery`);
+  return toMastery(m) as MasteryState;
 }
 
 export async function removeVocab(vocabId: number): Promise<void> {

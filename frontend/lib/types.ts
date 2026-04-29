@@ -6,6 +6,18 @@ export type VocabTag =
   | "preposition"
   | "other";
 
+export type MasteryOutcome = "correct" | "incorrect" | "skipped" | "hinted";
+
+export interface MasteryState {
+  strength: number;
+  box: number;
+  lastReviewedAt: number | null;
+  nextDue: number | null;
+  streak: number;
+  failures: number;
+  successes: number;
+}
+
 export interface VocabItem {
   id: number;
   workspaceId: number;
@@ -15,12 +27,34 @@ export interface VocabItem {
   tags: VocabTag[];
   learned: boolean;
   createdAt: number;
+
+  // Canonical fields (LOS-101). Nullable until backfill / enrichment fills them.
+  lemma: string | null;
+  surfaceForm: string | null;
+  surfaceForms: string[];
+  pos: string | null;
+  cefr: string | null;
+  frequencyRank: number | null;
+  gender: string | null;
+  conjugationClass: string | null;
+  morphFeatures: Record<string, unknown> | null;
+  ipa: string | null;
+  audioUrl: string | null;
+  imageUrl: string | null;
+  glossPrimary: string | null;
+  glosses: string[];
+  notes: string | null;
+  lastSeenAt: number | null;
+
+  mastery: MasteryState | null;
 }
 
 export type LanguageCode =
   | "es"
   | "he"
   | "fr";
+
+export type WordDisplayMode = "lemma_first" | "as_encountered";
 
 export interface Workspace {
   id: number;
@@ -63,4 +97,5 @@ export interface SentenceCandidate {
 
 export interface Profile {
   name: string;
+  wordDisplayMode: WordDisplayMode;
 }

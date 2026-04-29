@@ -5,6 +5,8 @@ from sqlalchemy import func, select
 from app.db.database import SessionLocal
 from app.db.models import User, Vocab, Workspace
 
+VALID_TAGS = {"noun", "verb", "adjective", "adverb", "preposition", "other"}
+
 LOCAL_USER_EMAIL = "local-user@linguistos.local"
 DEFAULT_WORKSPACE_NAME = "Spanish core"
 DEFAULT_WORKSPACE_LANGUAGE = "es"
@@ -154,8 +156,61 @@ def ensure_default_workspace_and_vocab() -> None:
                     translation=str(entry["translation"]),
                     tags=list(entry["tags"]),  # type: ignore[arg-type]
                     learned=False,
+                    lemma=str(entry["word"]),
+                    surface_form=str(entry["word"]),
+                    surface_forms=[str(entry["word"])],
+                    gloss_primary=str(entry["translation"]),
+                    glosses=[str(entry["translation"])],
+                    pos=_pos_from_tags(list(entry["tags"])),  # type: ignore[arg-type]
                 )
                 for entry in DEFAULT_SPANISH_VOCAB
             ]
         )
         db.commit()
+
+
+def _pos_from_tags(tags: list[str]) -> str | None:
+    """Infer a single POS from legacy tags. Mirrors first known POS-like tag."""
+    for tag in tags:
+        if tag in VALID_TAGS and tag != "other":
+            return tag
+    return None
+
+
+def backfill_canonical_word_fields() -> int:
+    """Populate canonical word fields on rows captured before LOS-101.
+
+    Idempotent: only writes fields that are currently null/empty so re-runs
+    are safe. Returns number of rows updated.
+    """
+    updated = 0
+    with SessionLocal() as db:
+        rows = db.scalars(select(Vocab)).all()
+        for row in rows:
+            changed = False
+            if not row.lemma:
+                row.lemma = row.word
+                changed = True
+            if not row.surface_form:
+                row.surface_form = row.word
+                changed = True
+            if not row.surface_forms:
+                row.surface_forms = [row.word]
+                changed = True
+            if not row.gloss_primary:
+                row.gloss_primary = row.translation
+                changed = True
+            if not row.glosses:
+                row.glosses = [row.translation] if row.translation else []
+                changed = True
+            if not row.pos:
+                inferred = _pos_from_tags(list(row.tags or []))
+                if inferred:
+                    row.pos = inferred
+                    changed = True
+            if changed:
+                db.add(row)
+                updated += 1
+        if updated:
+            db.commit()
+    return updated

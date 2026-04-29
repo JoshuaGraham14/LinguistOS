@@ -80,7 +80,7 @@ export default function SettingsPage() {
         </label>
         <input
           value={profileHydrated ? profile.name : ""}
-          onChange={(e) => setProfile({ name: e.target.value })}
+          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
           placeholder="e.g. Josh"
           disabled={!profileHydrated}
           className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400 disabled:bg-slate-50"
