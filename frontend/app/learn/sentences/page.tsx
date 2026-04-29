@@ -135,7 +135,7 @@ const ZERO_STATS: SessionStats = {
 };
 
 function SentencePracticeInner() {
-  const { vocab, hydrated } = useVocab();
+  const { vocab, hydrated, recordOutcome } = useVocab();
   const { settings, setSettings, hydrated: settingsHydrated } =
     usePracticeSettings();
   const searchParams = useSearchParams();
@@ -285,13 +285,15 @@ function SentencePracticeInner() {
     }
   }, [filteredVocab.length, wordIndex]);
 
-  function recordOutcome(
+  function trackOutcome(
     kind: "correct" | "incorrect" | "skipped" | "hinted",
   ) {
     if (!current) return;
     if (scoredIds.has(current.id)) return;
     setScoredIds((s) => new Set(s).add(current.id));
     setStats((s) => ({ ...s, [kind]: s[kind] + 1 }));
+    // Persist outcome against the canonical mastery state (LOS-901).
+    void recordOutcome(current.id, kind, "sentences");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -299,7 +301,7 @@ function SentencePracticeInner() {
     if (!pair) return;
     const ok = normalize(answer) === normalize(pair.expected);
     setFeedback(ok ? "correct" : "incorrect");
-    recordOutcome(ok ? "correct" : "incorrect");
+    trackOutcome(ok ? "correct" : "incorrect");
     if (ok) {
       advanceTimer.current = setTimeout(() => advanceOrFinish(), 1200);
     }
@@ -310,19 +312,19 @@ function SentencePracticeInner() {
     setSelectedOption(optionId);
     const ok = optionId === cloze.correctId;
     setFeedback(ok ? "correct" : "incorrect");
-    recordOutcome(ok ? "correct" : "incorrect");
+    trackOutcome(ok ? "correct" : "incorrect");
     if (ok) {
       advanceTimer.current = setTimeout(() => advanceOrFinish(), 1100);
     }
   }
 
   function handleSkip() {
-    recordOutcome("skipped");
+    trackOutcome("skipped");
     advanceOrFinish();
   }
 
   function handleNotSure() {
-    if (!hintRevealed) recordOutcome("hinted");
+    if (!hintRevealed) trackOutcome("hinted");
     setHintRevealed(true);
   }
 

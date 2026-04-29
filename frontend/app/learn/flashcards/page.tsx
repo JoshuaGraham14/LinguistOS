@@ -37,7 +37,7 @@ function formatTime(seconds: number) {
 }
 
 function FlashcardsInner() {
-  const { vocab, hydrated, toggleLearned } = useVocab();
+  const { vocab, hydrated, toggleLearned, recordOutcome } = useVocab();
   const searchParams = useSearchParams();
   const wordParam = searchParams.get("word");
 
@@ -105,6 +105,7 @@ function FlashcardsInner() {
   const handleKnew = useCallback(() => {
     if (!current || finished) return;
     if (!current.learned) toggleLearned(current.id);
+    void recordOutcome(current.id, "correct", "flashcards");
     setStats((s) => ({ ...s, knew: s.knew + 1 }));
     if (index >= total - 1) {
       setFinished(true);
@@ -113,10 +114,11 @@ function FlashcardsInner() {
       setRevealed(false);
       setIndex((i) => i + 1);
     }
-  }, [current, finished, index, total, toggleLearned]);
+  }, [current, finished, index, total, toggleLearned, recordOutcome]);
 
   const handleDidntKnow = useCallback(() => {
     if (!current || finished) return;
+    void recordOutcome(current.id, "incorrect", "flashcards");
     setStats((s) => ({ ...s, didnt: s.didnt + 1 }));
     if (index >= total - 1) {
       setFinished(true);
@@ -125,7 +127,7 @@ function FlashcardsInner() {
       setRevealed(false);
       setIndex((i) => i + 1);
     }
-  }, [current, finished, index, total]);
+  }, [current, finished, index, total, recordOutcome]);
 
   const handleRestart = useCallback(() => {
     setIndex(0);
