@@ -52,8 +52,7 @@ export function WordChip({
   }
 
   const display = formatWordDisplay(resolved, profile.wordDisplayMode);
-  // TODO(P3): swap default to `/words/${resolved.id}` once Word Home ships.
-  const target = href ?? `/learn/flashcards?word=${resolved.id}`;
+  const target = href ?? `/words/${resolved.id}`;
   const tooltip = resolved.glossPrimary || resolved.translation || "";
   const showGloss = !compact && Boolean(tooltip);
 

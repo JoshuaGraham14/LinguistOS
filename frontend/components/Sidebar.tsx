@@ -7,6 +7,7 @@ import {
   Home,
   Plus,
   Settings,
+  Table2,
   User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -20,6 +21,7 @@ import type { LanguageCode } from "@/lib/types";
 const NAV = [
   { href: "/", label: "Dashboard", icon: Home },
   { href: "/words", label: "Words", icon: BookMarked },
+  { href: "/lexicon", label: "Lexicon", icon: Table2 },
   { href: "/learn", label: "Learn", icon: BookOpen },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;

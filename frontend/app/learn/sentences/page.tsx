@@ -20,6 +20,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { SelectionCapture } from "@/components/SelectionCapture";
 import { SettingsPopover } from "@/components/SettingsPopover";
 import { generateOrMock } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -172,6 +173,7 @@ function SentencePracticeInner() {
 
   const generationToken = useRef(0);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sentenceSectionRef = useRef<HTMLElement | null>(null);
 
   // Invalidate cache + reset session whenever generation constraints change.
   useEffect(() => {
@@ -380,6 +382,7 @@ function SentencePracticeInner() {
 
   return (
     <div className="space-y-6">
+      <SelectionCapture containerRef={sentenceSectionRef} />
       <div className="flex items-center justify-between">
         <Link
           href={wordParam ? "/words" : "/learn"}
@@ -466,7 +469,10 @@ function SentencePracticeInner() {
             </button>
           </section>
 
-          <section className="rounded-3xl bg-gradient-to-br from-white via-white to-slate-50 shadow-card p-12 min-h-[280px] relative flex flex-col items-center justify-center">
+          <section
+            ref={sentenceSectionRef}
+            className="rounded-3xl bg-gradient-to-br from-white via-white to-slate-50 shadow-card p-12 min-h-[280px] relative flex flex-col items-center justify-center"
+          >
             {isMock && (
               <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
                 Demo mode

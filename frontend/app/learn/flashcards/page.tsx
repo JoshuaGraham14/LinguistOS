@@ -14,6 +14,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import {
+  applyLexiconQuery,
+  isEmptyLexiconQuery,
+  parseLexiconQuery,
+} from "@/lib/lexicon-query";
 import { useVocab } from "@/lib/storage";
 import type { VocabItem } from "@/lib/types";
 
@@ -40,6 +45,7 @@ function FlashcardsInner() {
   const { vocab, hydrated, toggleLearned, recordOutcome } = useVocab();
   const searchParams = useSearchParams();
   const wordParam = searchParams.get("word");
+  const filterParam = searchParams.get("filter");
 
   const [shuffle, setShuffle] = useState(true);
   const [direction, setDirection] = useState<"en-to-es" | "es-to-en">("en-to-es");
@@ -51,13 +57,23 @@ function FlashcardsInner() {
   const [finished, setFinished] = useState(false);
 
   const scopedVocab = useMemo(() => {
-    if (!wordParam) return vocab;
-    const wordId = Number(wordParam);
-    const match = Number.isFinite(wordId)
-      ? vocab.find((v) => v.id === wordId)
-      : undefined;
-    return match ? [match] : vocab;
-  }, [vocab, wordParam]);
+    // Single-word focus (existing behaviour) takes precedence over the
+    // lexicon filter so deep links to one word continue to work.
+    if (wordParam) {
+      const wordId = Number(wordParam);
+      const match = Number.isFinite(wordId)
+        ? vocab.find((v) => v.id === wordId)
+        : undefined;
+      return match ? [match] : vocab;
+    }
+    if (filterParam) {
+      const query = parseLexiconQuery(decodeURIComponent(filterParam));
+      if (!isEmptyLexiconQuery(query)) {
+        return applyLexiconQuery(vocab, query);
+      }
+    }
+    return vocab;
+  }, [vocab, wordParam, filterParam]);
 
   // Build deck whenever vocab/shuffle/scope changes; resets the session.
   useEffect(() => {
@@ -221,6 +237,22 @@ function FlashcardsInner() {
             Switch to full deck
           </Link>
           .
+        </div>
+      )}
+
+      {!wordParam && filterParam && (
+        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700">
+          Practicing the current Lexicon view ({total} words).{" "}
+          <Link
+            href={`/lexicon?${decodeURIComponent(filterParam)}`}
+            className="underline"
+          >
+            Adjust filters
+          </Link>{" "}
+          ·{" "}
+          <Link href="/learn/flashcards" className="underline">
+            Use full deck
+          </Link>
         </div>
       )}
 
