@@ -246,6 +246,18 @@ export async function renameWorkspace(
   return toWorkspace(item);
 }
 
+export async function deleteWorkspace(workspaceId: number): Promise<void> {
+  const res = await fetch(`${API_URL}/api/workspaces/${workspaceId}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API ${res.status}: ${text || res.statusText}`);
+  }
+  // Server returns 204 No Content with an empty body — do not call res.json().
+}
+
 export async function listVocab(
   workspaceId: number,
   language: LanguageCode,

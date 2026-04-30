@@ -37,6 +37,8 @@ type Props = {
   collapsedWidth: number;
   collapseThreshold: number;
   hideBelow?: "lg" | "md";
+  onStateChange?: (collapsed: boolean) => void;
+  onToggleReady?: (toggle: () => void) => void;
   children: React.ReactNode;
 };
 
@@ -49,6 +51,8 @@ export function ResizableSidebar({
   collapsedWidth,
   collapseThreshold,
   hideBelow = "lg",
+  onStateChange,
+  onToggleReady,
   children,
 }: Props) {
   const { state, setWidth, toggleCollapsed, setCollapsed, hydrated } =
@@ -172,13 +176,25 @@ export function ResizableSidebar({
   // Effective collapsed for children: live during drag, persisted after.
   const childCollapsed = dragging ? liveCollapsed : state.collapsed;
 
+  useEffect(() => {
+    onStateChange?.(childCollapsed);
+  }, [childCollapsed, onStateChange]);
+
+  useEffect(() => {
+    if (!onToggleReady) return;
+    onToggleReady(() => toggleCollapsed());
+  }, [onToggleReady, toggleCollapsed]);
+
+  const stackClass =
+    side === "left" ? "z-30" : side === "right" ? "z-20" : "z-10";
+
   return (
     <SidebarContext.Provider
       value={{ collapsed: childCollapsed, toggle: toggleCollapsed, side }}
     >
       <div
         ref={containerRef}
-        className={`${hideClass} relative shrink-0 flex-col h-full`}
+        className={`${hideClass} ${stackClass} relative shrink-0 flex-col h-full overflow-visible`}
         style={{
           width: `${effectiveWidth}px`,
           transition: dragging

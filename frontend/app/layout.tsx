@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { AppHistoryProvider } from "@/components/AppHistoryContext";
 import { LayoutShell } from "@/components/LayoutShell";
 import { QuickCapture } from "@/components/QuickCapture";
+import { QuickCaptureProvider } from "@/components/QuickCaptureContext";
 import { WordQuickViewModal } from "@/components/WordQuickViewModal";
 import "../styles/globals.css";
 
@@ -27,9 +30,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <LayoutShell>{children}</LayoutShell>
-        <QuickCapture />
-        <WordQuickViewModal />
+        <AppHistoryProvider>
+          <QuickCaptureProvider>
+            <LayoutShell>{children}</LayoutShell>
+            <QuickCapture />
+            <Suspense fallback={null}>
+              <WordQuickViewModal />
+            </Suspense>
+          </QuickCaptureProvider>
+        </AppHistoryProvider>
       </body>
     </html>
   );

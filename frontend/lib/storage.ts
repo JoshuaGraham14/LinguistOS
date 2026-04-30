@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as api from "./api";
 import type {
   LanguageCode,
@@ -18,6 +18,7 @@ const SETTINGS_KEY = "linguistos.settings.v2";
 const PROFILE_KEY = "linguistos.profile.v1";
 const ACTIVE_WORKSPACE_KEY = "linguistos.workspace.active.v1";
 const WORKSPACE_CHANGE_EVENT = "linguistos:workspace-change";
+const WORKSPACES_LIST_SYNC_EVENT = "linguistos:workspaces-list-sync";
 
 export type SidebarState = { width: number; collapsed: boolean };
 
@@ -76,6 +77,12 @@ function read<T>(key: string, fallback: T): T {
 function write<T>(key: string, value: T) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(value));
+}
+
+function broadcastWorkspaceList(list: Workspace[]) {
+  window.dispatchEvent(
+    new CustomEvent(WORKSPACES_LIST_SYNC_EVENT, { detail: list }),
+  );
 }
 
 export function useProfile() {
@@ -162,11 +169,22 @@ export function useWorkspaces() {
   const [activeWorkspaceId, setActiveWorkspaceIdState] = useState<number | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const workspacesRef = useRef<Workspace[]>([]);
+  workspacesRef.current = workspaces;
 
   const setActiveWorkspaceId = useCallback((workspaceId: number) => {
-    setActiveWorkspaceIdState(workspaceId);
-    write(ACTIVE_WORKSPACE_KEY, workspaceId);
-    window.dispatchEvent(new CustomEvent(WORKSPACE_CHANGE_EVENT, { detail: workspaceId }));
+    setActiveWorkspaceIdState((prev) => {
+      if (prev === workspaceId) return prev;
+      write(ACTIVE_WORKSPACE_KEY, workspaceId);
+      // Only broadcast when switching between real workspaces (not initial hydrate null→id).
+      // Defer so we never dispatch during React render/commit (avoids cross-tree setState warnings).
+      if (prev !== null) {
+        queueMicrotask(() => {
+          window.dispatchEvent(new CustomEvent(WORKSPACE_CHANGE_EVENT, { detail: workspaceId }));
+        });
+      }
+      return workspaceId;
+    });
   }, []);
 
   const refresh = useCallback(async () => {
@@ -211,7 +229,9 @@ export function useWorkspaces() {
     function handleWorkspaceChange(event: Event) {
       const workspaceId = (event as CustomEvent<number>).detail;
       if (typeof workspaceId === "number") {
-        setActiveWorkspaceIdState(workspaceId);
+        queueMicrotask(() => {
+          setActiveWorkspaceIdState(workspaceId);
+        });
       }
     }
     window.addEventListener(WORKSPACE_CHANGE_EVENT, handleWorkspaceChange);
@@ -219,10 +239,23 @@ export function useWorkspaces() {
       window.removeEventListener(WORKSPACE_CHANGE_EVENT, handleWorkspaceChange);
   }, []);
 
+  useEffect(() => {
+    function handleWorkspacesListSync(event: Event) {
+      const list = (event as CustomEvent<Workspace[]>).detail;
+      if (Array.isArray(list)) {
+        setWorkspaces(list);
+      }
+    }
+    window.addEventListener(WORKSPACES_LIST_SYNC_EVENT, handleWorkspacesListSync);
+    return () =>
+      window.removeEventListener(WORKSPACES_LIST_SYNC_EVENT, handleWorkspacesListSync);
+  }, []);
+
   const createWorkspace = useCallback(
     async (input: { name: string; language: LanguageCode; emojiOrFlag: string }) => {
       const created = await api.createWorkspace(input);
-      setWorkspaces((prev) => [...prev, created]);
+      const next = [...workspacesRef.current, created];
+      broadcastWorkspaceList(next);
       setActiveWorkspaceId(created.id);
       return created;
     },
@@ -231,8 +264,29 @@ export function useWorkspaces() {
 
   const renameWorkspace = useCallback(async (workspaceId: number, name: string) => {
     const updated = await api.renameWorkspace(workspaceId, name);
-    setWorkspaces((prev) => prev.map((w) => (w.id === workspaceId ? updated : w)));
+    const next = workspacesRef.current.map((w) =>
+      w.id === workspaceId ? updated : w,
+    );
+    broadcastWorkspaceList(next);
     return updated;
+  }, []);
+
+  const deleteWorkspace = useCallback(async (workspaceId: number) => {
+    await api.deleteWorkspace(workspaceId);
+    const prev = workspacesRef.current;
+    const next = prev.filter((w) => w.id !== workspaceId);
+    broadcastWorkspaceList(next);
+    setActiveWorkspaceIdState((activeId) => {
+      if (activeId === workspaceId && next.length > 0) {
+        const nid = next[0]!.id;
+        write(ACTIVE_WORKSPACE_KEY, nid);
+        queueMicrotask(() => {
+          window.dispatchEvent(new CustomEvent(WORKSPACE_CHANGE_EVENT, { detail: nid }));
+        });
+        return nid;
+      }
+      return activeId;
+    });
   }, []);
 
   const activeWorkspace = useMemo(
@@ -247,6 +301,7 @@ export function useWorkspaces() {
     setActiveWorkspaceId,
     createWorkspace,
     renameWorkspace,
+    deleteWorkspace,
     refresh,
     loading,
     hydrated,

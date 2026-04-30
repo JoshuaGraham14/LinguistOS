@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export function Modal({
   open,
@@ -25,9 +26,9 @@ export function Modal({
 
   if (!open) return null;
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[420] flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
@@ -49,4 +50,6 @@ export function Modal({
       </div>
     </div>
   );
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }

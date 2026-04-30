@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api._auth import ensure_local_user, ensure_workspace_owner
@@ -48,3 +48,20 @@ def rename_workspace(
     db.commit()
     db.refresh(workspace)
     return WorkspaceOut.model_validate(workspace)
+
+
+@router.delete("/workspaces/{workspace_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_workspace(workspace_id: int, db: Session = Depends(get_db)) -> Response:
+    workspace = ensure_workspace_owner(db, workspace_id)
+    owner = ensure_local_user(db)
+    count = db.scalar(
+        select(func.count()).select_from(Workspace).where(Workspace.owner_id == owner.id)
+    )
+    if count is not None and count <= 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must keep at least one workspace.",
+        )
+    db.delete(workspace)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

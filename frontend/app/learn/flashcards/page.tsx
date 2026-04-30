@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowLeft,
   Calendar,
   Check,
   ChevronLeft,
@@ -210,14 +209,13 @@ function FlashcardsInner() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Link
-          href={wordParam ? "/words" : "/learn"}
-          className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
-        >
-          <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
-          Back
-        </Link>
+      <div className="flex items-start justify-between gap-4">
+        <header>
+          <h1 className="text-3xl font-bold text-slate-900">Flashcards</h1>
+          <p className="text-slate-500 mt-1">
+            Flip, score, and review your workspace deck.
+          </p>
+        </header>
         <div className="text-right">
           <div className="text-sm text-slate-500">
             {total > 0 && !finished

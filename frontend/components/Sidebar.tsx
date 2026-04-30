@@ -4,24 +4,25 @@ import {
   BookMarked,
   BookOpen,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Home,
   Layers,
-  PanelLeftClose,
-  PanelLeftOpen,
+  MoreHorizontal,
   Pencil,
   Plus,
   Settings,
   Table2,
-  User as UserIcon,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Modal } from "@/components/Modal";
 import { useSidebar } from "@/components/ResizableSidebar";
 import { cn } from "@/lib/cn";
-import { useProfile, useWorkspaces } from "@/lib/storage";
+import { useWorkspaces } from "@/lib/storage";
 import type { LanguageCode } from "@/lib/types";
 
 type NavItem = {
@@ -47,10 +48,6 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
       { href: "/learn/sentences", label: "Sentences", icon: Pencil },
     ],
   },
-  {
-    title: "General",
-    items: [{ href: "/settings", label: "Settings", icon: Settings }],
-  },
 ];
 
 const LANGUAGE_OPTIONS: { value: LanguageCode; label: string; emoji: string }[] = [
@@ -59,10 +56,66 @@ const LANGUAGE_OPTIONS: { value: LanguageCode; label: string; emoji: string }[] 
   { value: "he", label: "Hebrew", emoji: "🇮🇱" },
 ];
 
+const WORKSPACE_MENU_WIDTH = 176;
+
+type WorkspaceActionMenu = { workspaceId: number; top: number; left: number };
+
+function menuLeftForAnchor(anchorRight: number): number {
+  if (typeof window === "undefined") {
+    return Math.max(8, anchorRight - WORKSPACE_MENU_WIDTH);
+  }
+  return Math.max(
+    8,
+    Math.min(anchorRight - WORKSPACE_MENU_WIDTH, window.innerWidth - WORKSPACE_MENU_WIDTH - 8),
+  );
+}
+
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   if (href === "/learn") return pathname === "/learn";
   return pathname.startsWith(href);
+}
+
+function WorkspaceNameInput({
+  value,
+  onChange,
+  onCommit,
+  onCancel,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onCommit: () => void;
+  onCancel: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  useLayoutEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.focus();
+    el.select();
+  }, []);
+  return (
+    <input
+      ref={inputRef}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          onCommit();
+        }
+        if (e.key === "Escape") {
+          e.preventDefault();
+          onCancel();
+        }
+      }}
+      onBlur={() => {
+        window.setTimeout(() => onCommit(), 0);
+      }}
+      className="min-w-0 flex-1 rounded-md border border-violet-200/80 bg-white px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-violet-300/80"
+    />
+  );
 }
 
 function Logo({ collapsed }: { collapsed: boolean }) {
@@ -73,7 +126,7 @@ function Logo({ collapsed }: { collapsed: boolean }) {
       aria-label="Go to dashboard"
       title="Dashboard"
     >
-      <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center shrink-0 relative shadow-glass border border-white/60 bg-white/40 group-hover/logo:scale-105 transition">
+      <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center shrink-0 relative group-hover/logo:scale-105 transition">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logo.png"
@@ -83,7 +136,10 @@ function Logo({ collapsed }: { collapsed: boolean }) {
       </div>
       {!collapsed && (
         <div className="font-bold text-slate-900 leading-tight truncate">
-          Linguist<span className="text-brand-600">OS</span>
+          Linguist
+          <span className="ml-0.5 bg-[linear-gradient(90deg,#22c55e_0%,#0ea5e9_35%,#8b5cf6_68%,#ef4444_100%)] bg-clip-text text-transparent">
+            OS
+          </span>
         </div>
       )}
     </Link>
@@ -91,9 +147,8 @@ function Logo({ collapsed }: { collapsed: boolean }) {
 }
 
 export function Sidebar() {
-  const { collapsed, toggle } = useSidebar();
+  const { collapsed } = useSidebar();
   const pathname = usePathname();
-  const { profile, hydrated } = useProfile();
   const {
     workspaces,
     activeWorkspace,
@@ -101,32 +156,83 @@ export function Sidebar() {
     setActiveWorkspaceId,
     createWorkspace,
     renameWorkspace,
+    deleteWorkspace,
   } = useWorkspaces();
   const [open, setOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [renameOpen, setRenameOpen] = useState(false);
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceLanguage, setWorkspaceLanguage] = useState<LanguageCode>("es");
-  const [renameName, setRenameName] = useState("");
   const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+  const [actionMenu, setActionMenu] = useState<WorkspaceActionMenu | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement>(null);
+  const [editingWorkspaceId, setEditingWorkspaceId] = useState<number | null>(null);
+  const editingWorkspaceIdRef = useRef<number | null>(null);
+  const [editDraft, setEditDraft] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(
+    null,
+  );
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const closeFlyoutTimerRef = useRef<number | null>(null);
 
-  const displayName =
-    hydrated && profile.name.trim() ? profile.name.trim() : "Friend";
+  const cancelInlineRename = useCallback(() => {
+    editingWorkspaceIdRef.current = null;
+    setEditingWorkspaceId(null);
+    setEditDraft("");
+  }, []);
+
+  const commitInlineRename = useCallback(async () => {
+    const wid = editingWorkspaceIdRef.current;
+    if (wid === null) return;
+    const target = workspaces.find((w) => w.id === wid);
+    const next = editDraft.trim();
+    if (!next) {
+      cancelInlineRename();
+      return;
+    }
+    if (target && target.name === next) {
+      cancelInlineRename();
+      return;
+    }
+    try {
+      await renameWorkspace(wid, next);
+      setWorkspaceError(null);
+      cancelInlineRename();
+    } catch (error) {
+      setWorkspaceError(
+        error instanceof Error ? error.message : "Could not rename workspace",
+      );
+    }
+  }, [editDraft, workspaces, renameWorkspace, cancelInlineRename]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const t = e.target as Node;
+      if (dropdownRef.current?.contains(t)) return;
+      // Portal menus live outside the dropdown DOM subtree.
+      if (actionMenuRef.current?.contains(t)) return;
+      setOpen(false);
     }
     if (open) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
   useEffect(() => {
-    if (activeWorkspace) setRenameName(activeWorkspace.name);
-  }, [activeWorkspace]);
+    if (!actionMenu) return;
+    function closeIfOutside(e: MouseEvent) {
+      const t = e.target as Node;
+      if (actionMenuRef.current?.contains(t)) return;
+      setActionMenu(null);
+    }
+    function closeOnScroll() {
+      setActionMenu(null);
+    }
+    document.addEventListener("mousedown", closeIfOutside);
+    window.addEventListener("scroll", closeOnScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", closeIfOutside);
+      window.removeEventListener("scroll", closeOnScroll, true);
+    };
+  }, [actionMenu]);
 
   // Close dropdown automatically when sidebar collapses (panel can't show below it).
   useEffect(() => {
@@ -135,54 +241,198 @@ export function Sidebar() {
 
   const [wsHovered, setWsHovered] = useState(false);
 
-  // Cancel hover state on collapse change so a stale flyout doesn't linger.
+  const clearFlyoutCloseTimer = () => {
+    if (closeFlyoutTimerRef.current !== null) {
+      window.clearTimeout(closeFlyoutTimerRef.current);
+      closeFlyoutTimerRef.current = null;
+    }
+  };
+
+  const openWorkspaceFlyout = () => {
+    clearFlyoutCloseTimer();
+    setWsHovered(true);
+  };
+
+  const scheduleWorkspaceFlyoutClose = (force = false) => {
+    if (!force && actionMenu) return;
+    clearFlyoutCloseTimer();
+    closeFlyoutTimerRef.current = window.setTimeout(() => {
+      setWsHovered(false);
+    }, 180);
+  };
+
   useEffect(() => {
     setWsHovered(false);
+    clearFlyoutCloseTimer();
   }, [collapsed]);
+
+  useEffect(
+    () => () => {
+      clearFlyoutCloseTimer();
+    },
+    [],
+  );
 
   const selectedLanguageOption =
     LANGUAGE_OPTIONS.find((opt) => opt.value === workspaceLanguage) ??
     LANGUAGE_OPTIONS[0];
 
+  const openWorkspaceActionsMenu = (workspaceId: number, anchor: HTMLElement) => {
+    const r = anchor.getBoundingClientRect();
+    clearFlyoutCloseTimer();
+    if (collapsed) setWsHovered(true);
+    setActionMenu((prev) =>
+      prev?.workspaceId === workspaceId
+        ? null
+        : {
+            workspaceId,
+            top: r.bottom + 4,
+            left: menuLeftForAnchor(r.right),
+          },
+    );
+  };
+
+  const startInlineRename = (workspaceId: number) => {
+    const w = workspaces.find((x) => x.id === workspaceId);
+    if (!w) return;
+    editingWorkspaceIdRef.current = workspaceId;
+    setEditingWorkspaceId(workspaceId);
+    setEditDraft(w.name);
+    setActionMenu(null);
+    // Do not close expanded/collapsed picker — user stays in the list while renaming.
+  };
+
+  const pickWorkspace = (workspaceId: number, closePicker: () => void) => {
+    if (editingWorkspaceId !== null && editingWorkspaceId !== workspaceId) {
+      cancelInlineRename();
+    }
+    setActiveWorkspaceId(workspaceId);
+    setActionMenu(null);
+    closePicker();
+  };
+
+  const workspaceList = (closePicker: () => void) =>
+    workspaces.map((workspace) => {
+      const isActiveRow = activeWorkspaceId === workspace.id;
+      const isEditing = editingWorkspaceId === workspace.id;
+      return (
+        <div
+          key={workspace.id}
+          className={cn(
+            "flex items-center gap-0.5 rounded-xl px-2 py-1.5 transition-colors",
+            isActiveRow
+              ? "bg-violet-50/70 ring-1 ring-inset ring-violet-300/45"
+              : "hover:bg-white/55",
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => pickWorkspace(workspace.id, closePicker)}
+            className={cn(
+              "flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-0.5 text-left text-sm text-slate-800",
+              !isEditing && "select-none",
+            )}
+          >
+            <span className="shrink-0 text-base">{workspace.emojiOrFlag}</span>
+            {isEditing ? (
+              <WorkspaceNameInput
+                value={editDraft}
+                onChange={setEditDraft}
+                onCommit={() => void commitInlineRename()}
+                onCancel={cancelInlineRename}
+              />
+            ) : (
+              <span
+                className={cn(
+                  "min-w-0 flex-1 truncate select-none",
+                  isActiveRow ? "font-medium" : "font-normal",
+                )}
+              >
+                {workspace.name}
+              </span>
+            )}
+          </button>
+          {!isEditing && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openWorkspaceActionsMenu(workspace.id, e.currentTarget);
+                }}
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-white/80"
+                aria-label={`More actions for ${workspace.name}`}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </>
+          )}
+        </div>
+      );
+    });
+
+  const actionMenuPortal =
+    typeof document !== "undefined" &&
+    actionMenu &&
+    createPortal(
+      <div
+        ref={actionMenuRef}
+        className="fixed z-[380] w-44 rounded-xl border border-white/80 bg-white shadow-glass-lg backdrop-blur-md"
+        style={{ top: actionMenu.top, left: actionMenu.left }}
+        onMouseEnter={() => {
+          clearFlyoutCloseTimer();
+          if (collapsed) setWsHovered(true);
+        }}
+        onMouseLeave={() => {
+          if (collapsed) scheduleWorkspaceFlyoutClose(true);
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => startInlineRename(actionMenu.workspaceId)}
+          className="flex w-full items-center gap-2 rounded-t-xl px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+        >
+          <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+          Rename workspace
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            const w = workspaces.find((x) => x.id === actionMenu.workspaceId);
+            if (w) {
+              setWorkspaceError(null);
+              setDeleteTarget({ id: w.id, name: w.name });
+            }
+            setActionMenu(null);
+          }}
+          className="flex w-full items-center gap-2 rounded-b-xl px-3 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Delete workspace
+        </button>
+      </div>,
+      document.body,
+    );
+
   return (
     <aside
       className={cn(
-        "glass-panel rounded-r-2xl h-full flex flex-col relative",
+        "glass-panel rounded-none h-full flex flex-col relative overflow-visible",
         collapsed ? "items-center" : "",
       )}
     >
-      {/* Header: in collapsed mode the toggle sits above the logo. */}
+      {actionMenuPortal}
+
       <div
         className={cn(
           "flex border-b border-white/40 shrink-0",
           collapsed
             ? "flex-col items-center gap-2 px-3 py-3"
-            : "items-center gap-2 px-4 py-3 justify-between",
+            : "items-center gap-2 px-4 py-3",
         )}
       >
-        {collapsed && (
-          <button
-            type="button"
-            onClick={toggle}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-white/60 hover:text-slate-700 transition shrink-0"
-            aria-label="Expand sidebar"
-            title="Expand sidebar"
-          >
-            <PanelLeftOpen className="h-4 w-4" />
-          </button>
-        )}
         <Logo collapsed={collapsed} />
-        {!collapsed && (
-          <button
-            type="button"
-            onClick={toggle}
-            className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-500 hover:bg-white/60 hover:text-slate-700 transition shrink-0"
-            aria-label="Collapse sidebar"
-            title="Collapse sidebar"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </button>
-        )}
       </div>
 
       {/* Workspace switcher */}
@@ -192,8 +442,8 @@ export function Sidebar() {
           collapsed ? "px-3 py-3 w-full flex justify-center" : "px-3 py-3",
         )}
         ref={dropdownRef}
-        onMouseEnter={() => collapsed && setWsHovered(true)}
-        onMouseLeave={() => collapsed && setWsHovered(false)}
+        onMouseEnter={() => collapsed && openWorkspaceFlyout()}
+        onMouseLeave={() => collapsed && scheduleWorkspaceFlyoutClose()}
       >
         <button
           type="button"
@@ -206,13 +456,26 @@ export function Sidebar() {
           )}
           title={collapsed ? activeWorkspace?.name : undefined}
         >
-          <div
-            className={cn(
-              "rounded-lg bg-white/70 border border-white/60 flex items-center justify-center text-lg shadow-glass-inset shrink-0",
-              collapsed ? "h-8 w-8 text-base" : "h-9 w-9",
+          <div className="relative h-9 w-9 shrink-0">
+            <div
+              className={cn(
+                "absolute inset-0 rounded-lg bg-white/70 border border-white/60 flex items-center justify-center shadow-glass-inset transition-all duration-200",
+                collapsed ? "text-base" : "text-lg",
+                collapsed && wsHovered ? "opacity-0 scale-75" : "opacity-100 scale-100",
+              )}
+            >
+              {activeWorkspace?.emojiOrFlag ?? "🌐"}
+            </div>
+            {collapsed && (
+              <div
+                className={cn(
+                  "absolute inset-0 rounded-lg bg-white/70 border border-white/60 flex items-center justify-center text-slate-600 shadow-glass-inset transition-all duration-200",
+                  wsHovered ? "opacity-100 scale-100" : "opacity-0 scale-75",
+                )}
+              >
+                <ChevronRight className="h-4 w-4" strokeWidth={2.25} />
+              </div>
             )}
-          >
-            {activeWorkspace?.emojiOrFlag ?? "🌐"}
           </div>
           {!collapsed && (
             <>
@@ -232,96 +495,52 @@ export function Sidebar() {
           )}
         </button>
 
-        {/* Collapsed-mode flyout: shown on hover. Lists every workspace plus
-            a "+ New workspace" action so the user can switch or create from
-            the icon rail. Active workspace is visually highlighted. */}
-        {collapsed && wsHovered && (
-          <div className="absolute left-full top-2 ml-1 z-40 flex flex-col gap-1.5 glass-card-strong rounded-xl p-1.5">
-            {workspaces.map((w) => {
-              const active = w.id === activeWorkspaceId;
-              return (
-                <button
-                  key={w.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveWorkspaceId(w.id);
-                    setWsHovered(false);
-                  }}
-                  title={w.name}
-                  aria-label={`Switch to ${w.name}`}
-                  className={cn(
-                    "h-9 w-9 rounded-lg border flex items-center justify-center text-lg shadow-glass-inset transition",
-                    active
-                      ? "bg-white border-brand-300 ring-2 ring-brand-200"
-                      : "bg-white/70 border-white/60 hover:bg-white",
-                  )}
-                >
-                  {w.emojiOrFlag}
-                </button>
-              );
-            })}
-            {workspaces.length > 0 && (
-              <div className="h-px w-full bg-white/40 my-0.5" aria-hidden="true" />
+        {/* Collapsed-mode flyout */}
+        {collapsed && (
+          <div
+            onMouseEnter={openWorkspaceFlyout}
+            onMouseLeave={() => scheduleWorkspaceFlyoutClose()}
+            className={cn(
+              "absolute left-full top-0 mt-0 ml-2 rounded-xl p-2 z-[80] w-64 transition-all duration-200",
+              "bg-white border border-slate-200/90 shadow-xl shadow-slate-900/12 backdrop-blur-sm",
+              wsHovered
+                ? "opacity-100 translate-x-0 scale-100 pointer-events-auto"
+                : "opacity-0 translate-x-1 scale-95 pointer-events-none",
             )}
-            <button
-              type="button"
-              onClick={() => {
-                setCreateOpen(true);
-                setWsHovered(false);
-              }}
-              title="New workspace"
-              aria-label="New workspace"
-              className="h-9 w-9 rounded-lg bg-white/70 border border-white/60 flex items-center justify-center text-slate-600 hover:bg-white shadow-glass-inset transition"
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.25} />
-            </button>
+          >
+            <div className="space-y-0.5 py-0.5">
+              {workspaceList(() => setWsHovered(false))}
+            </div>
+            <div className="mt-2 border-t border-white/40 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setCreateOpen(true);
+                  setWsHovered(false);
+                }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-white/60 transition"
+              >
+                <Plus className="h-4 w-4" />
+                New workspace
+              </button>
+            </div>
           </div>
         )}
 
         {open && !collapsed && (
-          <div className="glass-card-strong absolute left-3 right-3 top-full mt-2 rounded-xl p-2 z-50">
-            <div className="max-h-64 overflow-auto">
-              {workspaces.map((workspace) => (
-                <button
-                  key={workspace.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveWorkspaceId(workspace.id);
-                    setOpen(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-white/60 transition",
-                    activeWorkspaceId === workspace.id &&
-                      "bg-white/70 text-slate-900 font-medium",
-                  )}
-                >
-                  <span className="text-base">{workspace.emojiOrFlag}</span>
-                  <span className="truncate">{workspace.name}</span>
-                </button>
-              ))}
-            </div>
-            <div className="border-t border-white/40 mt-2 pt-2 space-y-1">
+          <div className="absolute left-3 right-3 top-full z-50 mt-2 rounded-xl border border-slate-200/90 bg-white p-2 shadow-xl shadow-slate-900/12 backdrop-blur-sm">
+            <div className="space-y-0.5 py-0.5">{workspaceList(() => setOpen(false))}</div>
+            <div className="mt-2 border-t border-white/40 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setCreateOpen(true);
                   setOpen(false);
                 }}
-                className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-white/60 transition"
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-white/60 transition"
               >
                 <Plus className="h-4 w-4" />
                 New workspace
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setRenameOpen(true);
-                  setOpen(false);
-                }}
-                disabled={!activeWorkspace}
-                className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-white/60 disabled:opacity-40 transition"
-              >
-                Rename workspace
               </button>
             </div>
           </div>
@@ -392,27 +611,26 @@ export function Sidebar() {
       >
         <Link
           href="/settings"
-          title={collapsed ? displayName : undefined}
+          title="Settings"
           className={cn(
-            "glass-pill rounded-xl flex items-center hover:bg-white/70 transition",
-            collapsed ? "h-10 w-10 justify-center p-0" : "p-2.5 gap-2.5",
+            "flex items-center transition",
+            collapsed
+              ? "h-10 w-10 rounded-xl justify-center"
+              : "gap-2.5 rounded-xl px-3 py-2 text-sm",
+            isActive(pathname, "/settings")
+              ? "bg-white/80 text-slate-900 font-medium shadow-glass border border-white/60"
+              : "text-slate-700 hover:bg-white/50",
           )}
         >
-          <div
+          <Settings
             className={cn(
-              "rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white shadow-glass shrink-0",
-              collapsed ? "h-8 w-8" : "h-9 w-9",
+              "h-4 w-4 shrink-0",
+              isActive(pathname, "/settings") ? "text-brand-600" : "text-slate-500",
             )}
-          >
-            <UserIcon className="h-4 w-4" strokeWidth={2} />
-          </div>
+            strokeWidth={1.75}
+          />
           {!collapsed && (
-            <div className="min-w-0">
-              <div className="font-semibold text-sm text-slate-900 leading-tight truncate">
-                {displayName}
-              </div>
-              <div className="text-[11px] text-slate-500">Edit profile</div>
-            </div>
+            <span className="truncate">Settings</span>
           )}
         </Link>
       </div>
@@ -492,56 +710,56 @@ export function Sidebar() {
       </Modal>
 
       <Modal
-        open={renameOpen}
-        onClose={() => setRenameOpen(false)}
-        title="Rename workspace"
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete workspace"
       >
-        <form
-          className="space-y-4"
-          onSubmit={async (e) => {
-            try {
-              e.preventDefault();
-              if (!activeWorkspace) return;
-              const name = renameName.trim();
-              if (!name) return;
-              await renameWorkspace(activeWorkspace.id, name);
-              setWorkspaceError(null);
-              setRenameOpen(false);
-            } catch (error) {
-              setWorkspaceError(
-                error instanceof Error ? error.message : "Could not rename workspace",
-              );
-            }
-          }}
-        >
-          <label className="block">
-            <span className="text-sm font-medium text-slate-700">Workspace name</span>
-            <input
-              value={renameName}
-              onChange={(e) => setRenameName(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-400"
-            />
-          </label>
-          {workspaceError && (
-            <p className="text-sm text-rose-600">{workspaceError}</p>
-          )}
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={() => setRenameOpen(false)}
-              className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!renameName.trim()}
-              className="px-5 py-2 rounded-xl bg-btn-purple text-white font-medium shadow-soft hover:brightness-110 disabled:opacity-50"
-            >
-              Save
-            </button>
+        {deleteTarget && (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Delete{" "}
+              <span className="font-semibold text-slate-900">{deleteTarget.name}</span>
+              ? This cannot be undone.
+            </p>
+            {workspaceError && (
+              <p className="text-sm text-rose-600">{workspaceError}</p>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setWorkspaceError(null);
+                }}
+                className="rounded-xl px-4 py-2 text-slate-600 transition hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await deleteWorkspace(deleteTarget.id);
+                    setWorkspaceError(null);
+                    setDeleteTarget(null);
+                    setOpen(false);
+                    setWsHovered(false);
+                    setActionMenu(null);
+                  } catch (error) {
+                    setWorkspaceError(
+                      error instanceof Error
+                        ? error.message
+                        : "Could not delete workspace",
+                    );
+                  }
+                }}
+                className="rounded-xl bg-rose-600 px-5 py-2 font-medium text-white shadow-soft hover:brightness-110"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </form>
+        )}
       </Modal>
     </aside>
   );

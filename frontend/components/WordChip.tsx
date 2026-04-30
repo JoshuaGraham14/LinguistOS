@@ -68,6 +68,13 @@ export function WordChip({
   return (
     <Link
       href={target}
+      onClick={() => {
+        window.dispatchEvent(
+          new CustomEvent("linguistos:open-word-panel", {
+            detail: { source: "word_chip", known: true },
+          }),
+        );
+      }}
       title={tooltip}
       className={cn(
         "inline-flex items-baseline gap-1 rounded-md px-1.5 py-0.5",
