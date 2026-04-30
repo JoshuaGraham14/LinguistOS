@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { TokenizedText } from "@/components/TokenizedText";
 import * as api from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatWordDisplay, useProfile, useVocab } from "@/lib/storage";
@@ -289,7 +290,13 @@ export default function WordHomePage() {
           <ul className="divide-y divide-slate-100">
             {sentences.map((s) => (
               <li key={s.id} className="py-3">
-                <p className="text-slate-900">{s.text}</p>
+                <p className="text-slate-900">
+                  <TokenizedText
+                    text={s.text}
+                    language={s.language}
+                    sourceContext={{ type: "word_home_sentence", id: s.id }}
+                  />
+                </p>
                 {s.translation && (
                   <p className="text-sm text-slate-500 mt-0.5">{s.translation}</p>
                 )}

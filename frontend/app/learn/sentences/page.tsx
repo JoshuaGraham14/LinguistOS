@@ -22,6 +22,7 @@ import {
 } from "react";
 import { SelectionCapture } from "@/components/SelectionCapture";
 import { SettingsPopover } from "@/components/SettingsPopover";
+import { TokenizedText } from "@/components/TokenizedText";
 import { createSentence, generateOrMock } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { usePracticeSettings, useVocab } from "@/lib/storage";
@@ -567,7 +568,14 @@ function SentencePracticeInner() {
               <>
                 <div className="text-slate-500">Fill in the blank:</div>
                 <div className="mt-3 text-2xl md:text-3xl font-bold text-slate-900 text-center">
-                  {cloze.sentenceWithBlank}
+                  <TokenizedText
+                    text={cloze.sentenceWithBlank}
+                    language={activeWorkspace?.language ?? "es"}
+                    sourceContext={{
+                      type: "sentence_practice_cloze",
+                      id: current?.id,
+                    }}
+                  />
                 </div>
                 {candidate?.translation && (
                   <div className="mt-3 text-sm text-slate-500 italic">
@@ -579,13 +587,35 @@ function SentencePracticeInner() {
               <>
                 <div className="text-slate-500">Translate this sentence:</div>
                 <div className="mt-3 text-3xl md:text-4xl font-bold text-slate-900 text-center">
-                  {pair.prompt}
+                  {pair.promptLanguage === "es" ? (
+                    <TokenizedText
+                      text={pair.prompt}
+                      language={activeWorkspace?.language ?? "es"}
+                      sourceContext={{
+                        type: "sentence_practice_prompt",
+                        id: current?.id,
+                      }}
+                    />
+                  ) : (
+                    pair.prompt
+                  )}
                 </div>
                 {hintRevealed && (
                   <div className="mt-6 text-sm text-slate-500">
                     Expected:{" "}
                     <span className="font-medium text-slate-700">
-                      {pair.expected}
+                      {pair.promptLanguage === "en" ? (
+                        <TokenizedText
+                          text={pair.expected}
+                          language={activeWorkspace?.language ?? "es"}
+                          sourceContext={{
+                            type: "sentence_practice_expected",
+                            id: current?.id,
+                          }}
+                        />
+                      ) : (
+                        pair.expected
+                      )}
                     </span>
                   </div>
                 )}

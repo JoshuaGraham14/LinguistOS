@@ -133,3 +133,14 @@ export interface Profile {
   name: string;
   wordDisplayMode: WordDisplayMode;
 }
+
+export interface AtomRef {
+  vocabId?: number;
+  surfaceToken: string;
+  lemma?: string;
+  language: LanguageCode;
+  sourceContext: {
+    type: string;
+    id?: number | string;
+  };
+}
