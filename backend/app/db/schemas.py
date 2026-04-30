@@ -206,3 +206,56 @@ class SentenceOut(BaseModel):
 
 class SentenceListResponse(BaseModel):
     items: list[SentenceOut]
+
+
+TokenAction = Literal["open_word", "add_to_vocab", "record_occurrence"]
+
+
+class TokenResolveRequest(BaseModel):
+    workspace_id: int
+    language: LanguageCode
+    text: str = Field(min_length=1)
+
+
+class TokenCandidate(BaseModel):
+    vocab_id: int
+    word: str
+    lemma: str | None = None
+    surface_form: str | None = None
+    translation: str
+
+
+class TokenSpanOut(BaseModel):
+    token: str
+    start: int
+    end: int
+    normalized: str
+    vocab_id: int | None = None
+    candidates: list[TokenCandidate] = Field(default_factory=list)
+    confidence: float | None = None
+
+
+class TokenResolveResponse(BaseModel):
+    spans: list[TokenSpanOut]
+
+
+class TokenActionRequest(BaseModel):
+    action: TokenAction
+    workspace_id: int
+    language: LanguageCode
+    token: str = Field(min_length=1)
+    vocab_id: int | None = None
+    gloss: str | None = None
+    context_type: str = Field(default="manual", min_length=1, max_length=64)
+    context_id: str | None = Field(default=None, max_length=64)
+    char_start: int | None = Field(default=None, ge=0)
+    char_end: int | None = Field(default=None, ge=0)
+    source: str = Field(default="manual", max_length=32)
+    meta: dict[str, Any] | None = None
+
+
+class TokenActionResponse(BaseModel):
+    ok: bool = True
+    vocab: VocabOut | None = None
+    occurrence_id: int | None = None
+    destination: str | None = None
