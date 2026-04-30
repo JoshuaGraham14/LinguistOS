@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { tokenAction } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import type { AtomRef } from "@/lib/types";
+import { trackTokenMetric } from "@/lib/tokenTelemetry";
+import { useVocab } from "@/lib/storage";
 import { WordActionPopover } from "./WordActionPopover";
 
 interface ClickableTokenProps {
@@ -10,6 +13,7 @@ interface ClickableTokenProps {
 }
 
 export function ClickableToken({ atom }: ClickableTokenProps) {
+  const { activeWorkspace } = useVocab();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
 
@@ -30,7 +34,22 @@ export function ClickableToken({ atom }: ClickableTokenProps) {
     <span ref={rootRef} className="relative inline-block">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          trackTokenMetric("token_click");
+          if (activeWorkspace && atom.vocabId) {
+            void tokenAction({
+              action: "record_occurrence",
+              workspaceId: activeWorkspace.id,
+              language: atom.language,
+              token: atom.surfaceToken,
+              vocabId: atom.vocabId,
+              contextType: atom.sourceContext.type,
+              contextId: atom.sourceContext.id != null ? String(atom.sourceContext.id) : undefined,
+              source: "token_click",
+            });
+          }
+          setOpen((v) => !v);
+        }}
         className={cn(
           "rounded px-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400",
           known

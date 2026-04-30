@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { resolveTokens } from "@/lib/api";
 import { normalizeToken, splitIntoTokenParts } from "@/lib/tokenize";
 import { useVocab } from "@/lib/storage";
 import type { AtomRef, LanguageCode } from "@/lib/types";
@@ -19,7 +20,14 @@ export function TokenizedText({
   sourceContext,
   className,
 }: TokenizedTextProps) {
-  const { vocab } = useVocab();
+  const { vocab, activeWorkspace } = useVocab();
+  const [resolved, setResolved] = useState<
+    Array<{
+      token: string;
+      vocabId?: number;
+      candidates?: AtomRef["candidates"];
+    }>
+  >([]);
 
   const lookup = useMemo(() => {
     const m = new Map<string, number>();
@@ -36,19 +44,60 @@ export function TokenizedText({
 
   const parts = useMemo(() => splitIntoTokenParts(text), [text]);
 
+  useEffect(() => {
+    if (!activeWorkspace || !text.trim()) {
+      setResolved([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      try {
+        const spans = await resolveTokens({
+          workspaceId: activeWorkspace.id,
+          language,
+          text,
+        });
+        if (cancelled) return;
+        setResolved(
+          spans.map((s) => ({
+            token: s.token,
+            vocabId: s.vocab_id ?? undefined,
+            candidates: s.candidates.map((c) => ({
+              vocabId: c.vocab_id,
+              word: c.word,
+              lemma: c.lemma ?? undefined,
+              translation: c.translation,
+            })),
+          })),
+        );
+      } catch {
+        if (!cancelled) setResolved([]);
+      }
+    }, 120);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [activeWorkspace, language, text]);
+
   return (
     <span className={className}>
-      {parts.map((part, idx) => {
-        if (!part.isWord) return <span key={`sep-${idx}`}>{part.text}</span>;
-        const key = normalizeToken(part.text);
-        const atom: AtomRef = {
-          vocabId: lookup.get(key),
-          surfaceToken: part.text,
-          language,
-          sourceContext,
-        };
-        return <ClickableToken key={`tok-${idx}-${part.text}`} atom={atom} />;
-      })}
+      {(() => {
+        let wordIndex = 0;
+        return parts.map((part, idx) => {
+          if (!part.isWord) return <span key={`sep-${idx}`}>{part.text}</span>;
+          const key = normalizeToken(part.text);
+          const remote = resolved[wordIndex++];
+          const atom: AtomRef = {
+            vocabId: remote?.vocabId ?? lookup.get(key),
+            candidates: remote?.candidates,
+            surfaceToken: part.text,
+            language,
+            sourceContext,
+          };
+          return <ClickableToken key={`tok-${idx}-${part.text}`} atom={atom} />;
+        });
+      })()}
     </span>
   );
 }

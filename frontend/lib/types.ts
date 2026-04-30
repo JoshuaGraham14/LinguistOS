@@ -135,6 +135,12 @@ export interface Profile {
 }
 
 export interface AtomRef {
+  candidates?: Array<{
+    vocabId: number;
+    word: string;
+    lemma?: string;
+    translation: string;
+  }>;
   vocabId?: number;
   surfaceToken: string;
   lemma?: string;

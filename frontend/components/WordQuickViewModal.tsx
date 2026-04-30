@@ -14,6 +14,7 @@ import * as api from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatWordDisplay, useProfile, useVocab } from "@/lib/storage";
 import type { SentenceRecord, VocabItem } from "@/lib/types";
+import { TokenizedText } from "./TokenizedText";
 
 function formatDate(ts: number | null) {
   if (!ts) return "-";
@@ -236,7 +237,13 @@ function WordQuickViewBody({
           <ul className="divide-y divide-slate-100">
             {sentences.map((s) => (
               <li key={s.id} className="py-3">
-                <p className="text-slate-900">{s.text}</p>
+                <p className="text-slate-900">
+                  <TokenizedText
+                    text={s.text}
+                    language={s.language}
+                    sourceContext={{ type: "word_quick_view_sentence", id: s.id }}
+                  />
+                </p>
                 {s.translation && <p className="text-sm text-slate-500 mt-0.5">{s.translation}</p>}
                 <p className="text-xs text-slate-400 mt-1 capitalize">{s.source}</p>
               </li>

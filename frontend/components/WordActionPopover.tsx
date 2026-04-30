@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { trackTokenMetric } from "@/lib/tokenTelemetry";
 import { useVocab } from "@/lib/storage";
 import type { AtomRef } from "@/lib/types";
 
@@ -33,14 +34,26 @@ export function WordActionPopover({ atom, onClose }: WordActionPopoverProps) {
     setLoading(true);
     try {
       const item = await addVocab({ surfaceForm: atom.surfaceToken });
+      trackTokenMetric("token_add_success");
       const next = new URLSearchParams(searchParams.toString());
       next.set("word_quick", String(item.id));
       const q = next.toString();
       router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
       onClose();
+    } catch {
+      trackTokenMetric("token_add_failure");
     } finally {
       setLoading(false);
     }
+  }
+
+  function chooseCandidate(vocabId: number) {
+    trackTokenMetric("token_disambiguate_pick");
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("word_quick", String(vocabId));
+    const q = next.toString();
+    router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
+    onClose();
   }
 
   return (
@@ -71,6 +84,22 @@ export function WordActionPopover({ atom, onClose }: WordActionPopoverProps) {
         </div>
       ) : (
         <div className="space-y-2">
+          {atom.candidates && atom.candidates.length > 1 && (
+            <div className="space-y-1 rounded-lg bg-slate-50 p-2 border border-slate-200">
+              <div className="text-xs text-slate-500 px-1">Multiple matches</div>
+              {atom.candidates.slice(0, 4).map((c) => (
+                <button
+                  key={c.vocabId}
+                  type="button"
+                  onClick={() => chooseCandidate(c.vocabId)}
+                  className="w-full text-left rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-white"
+                >
+                  {c.lemma ?? c.word}
+                  <span className="text-slate-400"> · {c.translation}</span>
+                </button>
+              ))}
+            </div>
+          )}
           <button
             type="button"
             onClick={handleAdd}
