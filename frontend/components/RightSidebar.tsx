@@ -17,14 +17,14 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSidebar } from "@/components/ResizableSidebar";
 import { cn } from "@/lib/cn";
 import { formatWordDisplay, useProfile, useVocab } from "@/lib/storage";
 import type { VocabItem } from "@/lib/types";
 
 export function rightSidebarHiddenForPath(pathname: string): boolean {
-  return pathname === "/settings";
+  return false;
 }
 
 type Tab = "word" | "chat";
@@ -33,9 +33,18 @@ export function RightSidebar() {
   const { collapsed, toggle } = useSidebar();
   const [tab, setTab] = useState<Tab>("word");
 
+  useEffect(() => {
+    function onOpenWordPanel() {
+      setTab("word");
+      if (collapsed) toggle();
+    }
+    window.addEventListener("linguistos:open-word-panel", onOpenWordPanel);
+    return () => window.removeEventListener("linguistos:open-word-panel", onOpenWordPanel);
+  }, [collapsed, toggle]);
+
   if (collapsed) {
     return (
-      <div className="glass-panel rounded-l-2xl h-full flex flex-col items-center py-3 gap-2">
+      <div className="glass-panel rounded-none h-full flex flex-col items-center py-3 gap-2">
         <button
           type="button"
           onClick={toggle}
@@ -75,7 +84,7 @@ export function RightSidebar() {
   }
 
   return (
-    <aside className="glass-panel rounded-l-2xl h-full flex flex-col overflow-hidden">
+    <aside className="glass-panel rounded-none h-full flex flex-col overflow-hidden">
       <div className="flex items-center gap-1 px-2 py-2 border-b border-white/40 shrink-0">
         <TabButton
           active={tab === "word"}
@@ -139,11 +148,15 @@ function TabButton({
 function WordTab() {
   const searchParams = useSearchParams();
   const wordIdParam = searchParams.get("word_quick");
+  const unknownSurface = (searchParams.get("word_surface") ?? "").trim();
   const wordId = Number(wordIdParam);
   const hasSelection = Number.isFinite(wordId) && wordId > 0;
 
-  const { vocab, hydrated } = useVocab();
+  const { vocab, hydrated, addVocab } = useVocab();
   const { profile } = useProfile();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [addingUnknown, setAddingUnknown] = useState(false);
 
   const item = useMemo<VocabItem | undefined>(() => {
     if (!hasSelection) return undefined;
@@ -151,6 +164,28 @@ function WordTab() {
   }, [vocab, wordId, hasSelection]);
 
   if (!hasSelection) {
+    if (unknownSurface) {
+      return (
+        <WordUnknownState
+          surface={unknownSurface}
+          adding={addingUnknown}
+          onAdd={async () => {
+            if (addingUnknown) return;
+            setAddingUnknown(true);
+            try {
+              const added = await addVocab({ surfaceForm: unknownSurface });
+              const next = new URLSearchParams(searchParams.toString());
+              next.set("word_quick", String(added.id));
+              next.delete("word_surface");
+              const q = next.toString();
+              router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
+            } finally {
+              setAddingUnknown(false);
+            }
+          }}
+        />
+      );
+    }
     return <WordEmptyState />;
   }
   if (!hydrated) {
@@ -166,6 +201,36 @@ function WordTab() {
     );
   }
   return <WordDetails item={item} displayMode={profile.wordDisplayMode} />;
+}
+
+function WordUnknownState({
+  surface,
+  adding,
+  onAdd,
+}: {
+  surface: string;
+  adding: boolean;
+  onAdd: () => Promise<void>;
+}) {
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center p-6">
+      <div className="h-12 w-12 rounded-2xl bg-amber-100/80 border border-amber-200/80 flex items-center justify-center text-amber-600 shadow-glass-inset mb-3">
+        <BookOpen className="h-5 w-5" />
+      </div>
+      <h3 className="text-sm font-semibold text-slate-700">Not in vocab list</h3>
+      <p className="mt-1 text-xs text-slate-500 max-w-[220px] leading-relaxed">
+        &quot;{surface}&quot; is not in your workspace yet.
+      </p>
+      <button
+        type="button"
+        onClick={() => void onAdd()}
+        disabled={adding}
+        className="mt-3 rounded-xl bg-btn-purple text-white text-sm font-medium px-3 py-2 hover:brightness-110 disabled:opacity-60"
+      >
+        {adding ? "Adding..." : "Add to vocab list"}
+      </button>
+    </div>
+  );
 }
 
 function WordEmptyState() {

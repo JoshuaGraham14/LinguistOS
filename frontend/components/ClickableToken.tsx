@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { tokenAction } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import type { AtomRef } from "@/lib/types";
 import { trackTokenMetric } from "@/lib/tokenTelemetry";
 import { useVocab } from "@/lib/storage";
-import { WordActionPopover } from "./WordActionPopover";
 
 interface ClickableTokenProps {
   atom: AtomRef;
@@ -14,19 +14,10 @@ interface ClickableTokenProps {
 
 export function ClickableToken({ atom }: ClickableTokenProps) {
   const { activeWorkspace } = useVocab();
-  const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onDocClick(event: MouseEvent) {
-      const root = rootRef.current;
-      if (!root) return;
-      if (!root.contains(event.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [open]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const known = typeof atom.vocabId === "number";
 
@@ -48,7 +39,21 @@ export function ClickableToken({ atom }: ClickableTokenProps) {
               source: "token_click",
             });
           }
-          setOpen((v) => !v);
+          const next = new URLSearchParams(searchParams.toString());
+          if (typeof atom.vocabId === "number") {
+            next.set("word_quick", String(atom.vocabId));
+            next.delete("word_surface");
+          } else {
+            next.delete("word_quick");
+            next.set("word_surface", atom.surfaceToken);
+          }
+          const query = next.toString();
+          router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+          window.dispatchEvent(
+            new CustomEvent("linguistos:open-word-panel", {
+              detail: { source: "token", known: typeof atom.vocabId === "number" },
+            }),
+          );
         }}
         className={cn(
           "rounded px-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400",
@@ -60,7 +65,6 @@ export function ClickableToken({ atom }: ClickableTokenProps) {
       >
         {atom.surfaceToken}
       </button>
-      {open && <WordActionPopover atom={atom} onClose={() => setOpen(false)} />}
     </span>
   );
 }

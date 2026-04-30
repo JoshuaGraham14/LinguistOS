@@ -92,12 +92,12 @@ export default function LearnPage() {
 
   return (
     <div className="space-y-8">
-      <header className="text-center">
-        <h1 className="text-4xl font-bold text-slate-900">Learn Spanish</h1>
-        <p className="text-slate-500 mt-2">Choose your learning method</p>
+      <header className="text-left">
+        <h1 className="text-3xl font-bold text-slate-900">Learn Spanish</h1>
+        <p className="text-slate-500 mt-1">Choose your learning method</p>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mx-auto w-full">
         {methods.map((m) => (
           <div
             key={m.title}
