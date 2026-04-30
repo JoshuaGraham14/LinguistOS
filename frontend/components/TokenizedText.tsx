@@ -84,10 +84,37 @@ export function TokenizedText({
     <span className={className}>
       {(() => {
         let wordIndex = 0;
+        let resolvedIndex = 0;
         return parts.map((part, idx) => {
           if (!part.isWord) return <span key={`sep-${idx}`}>{part.text}</span>;
           const key = normalizeToken(part.text);
-          const remote = resolved[wordIndex++];
+          wordIndex += 1;
+
+          // Resolve spans can occasionally drift from local tokenization for
+          // edge punctuation/forms. Align defensively by normalized token.
+          let remote:
+            | {
+                token: string;
+                vocabId?: number;
+                candidates?: AtomRef["candidates"];
+              }
+            | undefined = resolved[resolvedIndex];
+          if (remote) {
+            const remoteNorm = normalizeToken(remote.token);
+            if (remoteNorm === key) {
+              resolvedIndex += 1;
+            } else {
+              const lookahead = resolved
+                .slice(resolvedIndex + 1, resolvedIndex + 4)
+                .find((r) => normalizeToken(r.token) === key);
+              if (lookahead) {
+                remote = lookahead;
+                resolvedIndex = resolved.findIndex((r, i) => i >= resolvedIndex && r === lookahead) + 1;
+              } else {
+                remote = undefined;
+              }
+            }
+          }
           const atom: AtomRef = {
             vocabId: remote?.vocabId ?? lookup.get(key),
             candidates: remote?.candidates,

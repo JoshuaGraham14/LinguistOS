@@ -6,7 +6,9 @@ export interface TokenPart {
 // Keep punctuation/spacing as separate parts so we can preserve original text.
 export function splitIntoTokenParts(text: string): TokenPart[] {
   const parts: TokenPart[] = [];
-  const re = /(\p{L}[\p{L}\p{M}'’-]*)/gu;
+  // Mirrors backend token regex semantics to keep resolve spans aligned with
+  // frontend rendering (letters/numbers/underscore plus apostrophes).
+  const re = /([\p{L}\p{N}_][\p{L}\p{N}\p{M}_'’-]*)/gu;
   let last = 0;
   for (const match of text.matchAll(re)) {
     const index = match.index ?? 0;
