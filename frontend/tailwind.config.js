@@ -21,6 +21,8 @@ module.exports = {
         "app-gradient":
           "linear-gradient(135deg, #d4f5e0 0%, #d8ecfa 35%, #e7e3fb 65%, #fbe1ec 100%)",
         "btn-purple": "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
+        "btn-rainbow":
+          "linear-gradient(135deg, #86efac 0%, #93c5fd 35%, #c4b5fd 65%, #fda4af 100%)",
         "glass-sheen":
           "linear-gradient(135deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.58) 50%, rgba(255,255,255,0.68) 100%)",
         "glass-sheen-strong":
