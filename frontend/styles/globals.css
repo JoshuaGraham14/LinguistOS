@@ -12,3 +12,33 @@
     background-attachment: fixed;
   }
 }
+
+@layer components {
+  .glass-card {
+    @apply bg-glass-sheen backdrop-blur-glass border border-glass-border shadow-glass;
+  }
+  .glass-card-strong {
+    @apply bg-glass-sheen-strong backdrop-blur-glass-strong border border-glass-border shadow-glass-lg;
+  }
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-glass-strong border border-white/50 shadow-glass-lg;
+  }
+  .glass-pill {
+    @apply bg-white/55 backdrop-blur-glass border border-white/50 shadow-glass;
+  }
+  .glass-gloss {
+    position: relative;
+  }
+  .glass-gloss::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0) 35%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+  }
+}

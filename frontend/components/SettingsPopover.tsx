@@ -79,14 +79,14 @@ export function SettingsPopover({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-2xl bg-white shadow-card px-5 py-3 text-slate-700 font-medium hover:bg-slate-50 transition"
+        className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
       >
         <SettingsIcon className="h-5 w-5" strokeWidth={1.75} />
         Settings
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-white shadow-card p-5 z-50 space-y-5">
+        <div className="glass-card-strong absolute right-0 top-full mt-2 w-80 rounded-2xl p-5 z-50 space-y-5">
           <div>
             <label className="text-sm font-semibold text-slate-700">
               Practice Mode

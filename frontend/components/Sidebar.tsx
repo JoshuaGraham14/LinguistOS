@@ -5,6 +5,8 @@ import {
   BookOpen,
   ChevronDown,
   Home,
+  Layers,
+  Pencil,
   Plus,
   Settings,
   Table2,
@@ -18,19 +20,46 @@ import { cn } from "@/lib/cn";
 import { useProfile, useWorkspaces } from "@/lib/storage";
 import type { LanguageCode } from "@/lib/types";
 
-const NAV = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/words", label: "Words", icon: BookMarked },
-  { href: "/lexicon", label: "Lexicon", icon: Table2 },
-  { href: "/learn", label: "Learn", icon: BookOpen },
-  { href: "/settings", label: "Settings", icon: Settings },
-] as const;
+type NavItem = {
+  href: string;
+  label: string;
+  icon: typeof Home;
+};
+
+const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
+  {
+    title: "Workspace",
+    items: [
+      { href: "/", label: "Dashboard", icon: Home },
+      { href: "/words", label: "Words", icon: BookMarked },
+      { href: "/lexicon", label: "Lexicon", icon: Table2 },
+    ],
+  },
+  {
+    title: "Learn",
+    items: [
+      { href: "/learn", label: "All modes", icon: BookOpen },
+      { href: "/learn/flashcards", label: "Flashcards", icon: Layers },
+      { href: "/learn/sentences", label: "Sentences", icon: Pencil },
+    ],
+  },
+  {
+    title: "General",
+    items: [{ href: "/settings", label: "Settings", icon: Settings }],
+  },
+];
 
 const LANGUAGE_OPTIONS: { value: LanguageCode; label: string; emoji: string }[] = [
   { value: "es", label: "Spanish", emoji: "🇪🇸" },
   { value: "fr", label: "French", emoji: "🇫🇷" },
   { value: "he", label: "Hebrew", emoji: "🇮🇱" },
 ];
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  if (href === "/learn") return pathname === "/learn";
+  return pathname.startsWith(href);
+}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -74,19 +103,21 @@ export function Sidebar() {
     LANGUAGE_OPTIONS[0];
 
   return (
-    <aside className="w-64 shrink-0 flex flex-col gap-3">
+    <aside className="glass-panel rounded-2xl h-full flex flex-col p-3 gap-3 overflow-hidden">
       <div className="relative" ref={ref}>
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          className="w-full rounded-2xl bg-white/80 backdrop-blur shadow-card p-4 flex items-center gap-3 hover:bg-white transition text-left"
+          className="w-full glass-pill rounded-xl p-2.5 flex items-center gap-2.5 hover:bg-white/70 transition text-left"
         >
-          <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">
+          <div className="h-9 w-9 rounded-lg bg-white/70 border border-white/60 flex items-center justify-center text-lg shadow-glass-inset">
             {activeWorkspace?.emojiOrFlag ?? "🌐"}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-sm text-slate-500 leading-tight">Workspace</div>
-            <div className="font-semibold text-slate-900 truncate">
+            <div className="text-[10px] uppercase tracking-wide text-slate-500 leading-tight">
+              Workspace
+            </div>
+            <div className="font-semibold text-sm text-slate-900 truncate">
               {activeWorkspace?.name ?? "Loading..."}
             </div>
           </div>
@@ -94,7 +125,7 @@ export function Sidebar() {
         </button>
 
         {open && (
-          <div className="absolute left-0 right-0 top-full mt-2 rounded-2xl bg-white shadow-card p-2 z-50 border border-slate-100">
+          <div className="absolute left-0 right-0 top-full mt-2 glass-card-strong rounded-xl p-2 z-50">
             <div className="max-h-64 overflow-auto">
               {workspaces.map((workspace) => (
                 <button
@@ -105,9 +136,9 @@ export function Sidebar() {
                     setOpen(false);
                   }}
                   className={cn(
-                    "w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm hover:bg-slate-50",
+                    "w-full flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-white/60 transition",
                     activeWorkspaceId === workspace.id &&
-                      "bg-slate-100 text-slate-900 font-medium",
+                      "bg-white/70 text-slate-900 font-medium",
                   )}
                 >
                   <span className="text-base">{workspace.emojiOrFlag}</span>
@@ -115,14 +146,14 @@ export function Sidebar() {
                 </button>
               ))}
             </div>
-            <div className="border-t border-slate-100 mt-2 pt-2 space-y-1">
+            <div className="border-t border-white/40 mt-2 pt-2 space-y-1">
               <button
                 type="button"
                 onClick={() => {
                   setCreateOpen(true);
                   setOpen(false);
                 }}
-                className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-white/60 transition"
               >
                 <Plus className="h-4 w-4" />
                 New workspace
@@ -134,7 +165,7 @@ export function Sidebar() {
                   setOpen(false);
                 }}
                 disabled={!activeWorkspace}
-                className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-white/60 disabled:opacity-40 transition"
               >
                 Rename workspace
               </button>
@@ -143,38 +174,52 @@ export function Sidebar() {
         )}
       </div>
 
-      <nav className="flex flex-col gap-2">
-        {NAV.map(({ href, label, icon: Icon }) => {
-          const active =
-            href === "/" ? pathname === "/" : pathname.startsWith(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-2xl bg-white/80 backdrop-blur px-5 py-3 shadow-soft text-slate-700 transition hover:bg-white hover:shadow-card",
-                active && "bg-white shadow-card text-slate-900 font-medium",
-              )}
-            >
-              <Icon className="h-5 w-5 text-slate-500" strokeWidth={1.75} />
-              <span>{label}</span>
-            </Link>
-          );
-        })}
+      <nav className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-4 pr-1">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.title} className="flex flex-col gap-1">
+            <div className="px-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              {section.title}
+            </div>
+            {section.items.map(({ href, label, icon: Icon }) => {
+              const active = isActive(pathname, href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-slate-700 transition",
+                    active
+                      ? "bg-white/80 text-slate-900 font-medium shadow-glass border border-white/60"
+                      : "hover:bg-white/50",
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      "h-4 w-4",
+                      active ? "text-brand-600" : "text-slate-500",
+                    )}
+                    strokeWidth={1.75}
+                  />
+                  <span className="truncate">{label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <Link
         href="/settings"
-        className="mt-auto rounded-2xl bg-white/80 backdrop-blur shadow-card p-3 flex items-center gap-3 hover:bg-white transition"
+        className="glass-pill rounded-xl p-2.5 flex items-center gap-2.5 hover:bg-white/70 transition"
       >
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white shadow-md">
-          <UserIcon className="h-5 w-5" strokeWidth={2} />
+        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white shadow-glass">
+          <UserIcon className="h-4 w-4" strokeWidth={2} />
         </div>
         <div className="min-w-0">
-          <div className="font-semibold text-slate-900 leading-tight truncate">
+          <div className="font-semibold text-sm text-slate-900 leading-tight truncate">
             {displayName}
           </div>
-          <div className="text-xs text-slate-500">Edit profile</div>
+          <div className="text-[11px] text-slate-500">Edit profile</div>
         </div>
       </Link>
 

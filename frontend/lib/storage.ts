@@ -19,6 +19,8 @@ const PROFILE_KEY = "linguistos.profile.v1";
 const ACTIVE_WORKSPACE_KEY = "linguistos.workspace.active.v1";
 const WORKSPACE_CHANGE_EVENT = "linguistos:workspace-change";
 
+export type SidebarState = { width: number; collapsed: boolean };
+
 const DEFAULT_SETTINGS: PracticeSettings = {
   mode: "typing",
   direction: "en-to-es",
@@ -96,6 +98,44 @@ export function useProfile() {
   }, [profile, hydrated]);
 
   return { profile, setProfile, hydrated };
+}
+
+export function useSidebarState(
+  storageKey: string,
+  defaultState: SidebarState,
+) {
+  const [state, setState] = useState<SidebarState>(defaultState);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const stored = read<Partial<SidebarState>>(storageKey, defaultState);
+    setState({
+      width: typeof stored.width === "number" ? stored.width : defaultState.width,
+      collapsed:
+        typeof stored.collapsed === "boolean" ? stored.collapsed : defaultState.collapsed,
+    });
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (hydrated) write(storageKey, state);
+  }, [state, hydrated, storageKey]);
+
+  const setWidth = useCallback(
+    (width: number) => setState((prev) => ({ ...prev, width })),
+    [],
+  );
+  const toggleCollapsed = useCallback(
+    () => setState((prev) => ({ ...prev, collapsed: !prev.collapsed })),
+    [],
+  );
+  const setCollapsed = useCallback(
+    (collapsed: boolean) => setState((prev) => ({ ...prev, collapsed })),
+    [],
+  );
+
+  return { state, setWidth, toggleCollapsed, setCollapsed, hydrated };
 }
 
 export function usePracticeSettings() {

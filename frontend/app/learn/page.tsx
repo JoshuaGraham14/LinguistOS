@@ -101,7 +101,7 @@ export default function LearnPage() {
         {methods.map((m) => (
           <div
             key={m.title}
-            className="rounded-2xl bg-white/90 shadow-card p-6 flex flex-col items-center text-center gap-4"
+            className="glass-card rounded-2xl p-6 flex flex-col items-center text-center gap-4"
           >
             <div
               className={cn(

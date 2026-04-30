@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { LayoutShell } from "@/components/LayoutShell";
 import { QuickCapture } from "@/components/QuickCapture";
-import { Sidebar } from "@/components/Sidebar";
 import { WordQuickViewModal } from "@/components/WordQuickViewModal";
 import "../styles/globals.css";
 
@@ -27,10 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <div className="flex min-h-screen p-6 gap-6">
-          <Sidebar />
-          <main className="flex-1 min-w-0">{children}</main>
-        </div>
+        <LayoutShell>{children}</LayoutShell>
         <QuickCapture />
         <WordQuickViewModal />
       </body>

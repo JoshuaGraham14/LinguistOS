@@ -22,16 +22,16 @@ export function StatCard({
   color: StatColor;
 }) {
   return (
-    <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 flex flex-col gap-3">
+    <div className="glass-card glass-gloss rounded-2xl p-6 flex flex-col gap-3">
       <div
         className={cn(
-          "h-12 w-12 rounded-xl flex items-center justify-center shadow-md",
+          "h-12 w-12 rounded-xl flex items-center justify-center shadow-glass",
           COLOR_MAP[color],
         )}
       >
         <Icon className="h-6 w-6 text-white" strokeWidth={2} />
       </div>
-      <div>
+      <div className="relative">
         <div className="text-3xl font-bold text-slate-900">{value}</div>
         <div className="text-sm text-slate-500 mt-1">{label}</div>
       </div>

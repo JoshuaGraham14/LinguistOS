@@ -31,7 +31,7 @@ function StatTile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl bg-slate-50/80 border border-slate-200 p-3">
+    <div className="glass-pill rounded-xl p-3">
       <div className="text-[11px] uppercase tracking-wide text-slate-500">{label}</div>
       <div className="text-xl font-bold text-slate-900 mt-0.5">{value}</div>
       {hint && <div className="text-xs text-slate-500 mt-0.5">{hint}</div>}
@@ -112,7 +112,7 @@ export function WordQuickViewModal() {
         aria-modal="true"
         aria-label="Word quick view"
         onClick={(e) => e.stopPropagation()}
-        className="w-[min(1100px,94vw)] h-[min(88vh,820px)] rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden"
+        className="glass-card-strong glass-gloss w-[min(1100px,94vw)] h-[min(88vh,820px)] rounded-2xl overflow-hidden"
       >
         {!item ? (
           <div className="h-full flex items-center justify-center text-slate-500">
@@ -208,7 +208,7 @@ function WordQuickViewBody({
         />
       </div>
 
-      <section className="rounded-2xl bg-white border border-slate-200 p-5 space-y-3">
+      <section className="glass-card rounded-2xl p-5 space-y-3">
         <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-fuchsia-500" /> Forms seen
         </h3>
@@ -225,7 +225,7 @@ function WordQuickViewBody({
         )}
       </section>
 
-      <section className="rounded-2xl bg-white border border-slate-200 p-5 space-y-3">
+      <section className="glass-card rounded-2xl p-5 space-y-3">
         <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
           <Calendar className="h-4 w-4 text-fuchsia-500" /> Sentences seen
         </h3>
