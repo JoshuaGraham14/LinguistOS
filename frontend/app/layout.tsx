@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { QuickCapture } from "@/components/QuickCapture";
 import { Sidebar } from "@/components/Sidebar";
 import "../styles/globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Sidebar />
           <main className="flex-1 min-w-0">{children}</main>
         </div>
+        <QuickCapture />
       </body>
     </html>
   );

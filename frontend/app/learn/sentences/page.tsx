@@ -20,8 +20,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { SelectionCapture } from "@/components/SelectionCapture";
 import { SettingsPopover } from "@/components/SettingsPopover";
-import { generateOrMock } from "@/lib/api";
+import { createSentence, generateOrMock } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { usePracticeSettings, useVocab } from "@/lib/storage";
 import type {
@@ -135,7 +136,7 @@ const ZERO_STATS: SessionStats = {
 };
 
 function SentencePracticeInner() {
-  const { vocab, hydrated } = useVocab();
+  const { vocab, hydrated, recordOutcome, addVocab, activeWorkspace } = useVocab();
   const { settings, setSettings, hydrated: settingsHydrated } =
     usePracticeSettings();
   const searchParams = useSearchParams();
@@ -159,6 +160,8 @@ function SentencePracticeInner() {
   const [cache, setCache] = useState<Map<number, SentenceCandidate>>(new Map());
   const [generating, setGenerating] = useState(false);
   const [isMock, setIsMock] = useState(false);
+  const [constraintFellBack, setConstraintFellBack] = useState(false);
+  const [savedSentenceIds, setSavedSentenceIds] = useState<Set<number>>(new Set());
 
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
@@ -171,6 +174,7 @@ function SentencePracticeInner() {
 
   const generationToken = useRef(0);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sentenceSectionRef = useRef<HTMLElement | null>(null);
 
   // Invalidate cache + reset session whenever generation constraints change.
   useEffect(() => {
@@ -179,12 +183,15 @@ function SentencePracticeInner() {
     setStats(ZERO_STATS);
     setFinished(false);
     setWordIndex(0);
+    setConstraintFellBack(false);
   }, [
     settings.tense,
     settings.person,
     settings.number,
     settings.sentenceLength,
     settings.direction,
+    settings.lexiconConstraint,
+    settings.stretchCount,
   ]);
 
   // Reset position when filtered list shrinks past the cursor.
@@ -220,6 +227,9 @@ function SentencePracticeInner() {
           sentence_length: settings.sentenceLength,
           direction: settings.direction,
           num_candidates: 1,
+          lexicon_constraint: settings.lexiconConstraint,
+          workspace_id: activeWorkspace?.id,
+          stretch_count: settings.stretchCount,
         });
         if (myToken !== generationToken.current) return;
         const next = res.candidates[0] ?? null;
@@ -229,8 +239,52 @@ function SentencePracticeInner() {
             m.set(word.id, next);
             return m;
           });
+          if (
+            activeWorkspace &&
+            !savedSentenceIds.has(word.id) &&
+            next.sentence.trim().length > 0
+          ) {
+            const token = word.word.trim();
+            const position = next.sentence
+              .toLowerCase()
+              .indexOf(token.toLowerCase());
+            void createSentence({
+              workspaceId: activeWorkspace.id,
+              language: activeWorkspace.language,
+              text: next.sentence,
+              translation: next.translation,
+              source: "generated",
+              sourceMeta: {
+                origin: "sentence_practice",
+                vocabId: word.id,
+              },
+              links:
+                position >= 0
+                  ? [
+                      {
+                        vocabId: word.id,
+                        surfaceToken: next.sentence.slice(position, position + token.length),
+                        position,
+                        role: "target",
+                      },
+                    ]
+                  : [],
+            })
+              .then(() =>
+                setSavedSentenceIds((prev) => {
+                  const s = new Set(prev);
+                  s.add(word.id);
+                  return s;
+                }),
+              )
+              .catch(() => undefined);
+          }
         }
         setIsMock(Boolean(res.mock));
+        // Constraint requested but server returned unconstrained results.
+        const requested = settings.lexiconConstraint !== "off";
+        const honored = Boolean(res.constrained);
+        setConstraintFellBack(requested && !honored && !res.mock);
       } finally {
         if (myToken === generationToken.current) setGenerating(false);
       }
@@ -242,6 +296,11 @@ function SentencePracticeInner() {
       settings.number,
       settings.sentenceLength,
       settings.direction,
+      settings.lexiconConstraint,
+      settings.stretchCount,
+      activeWorkspace?.id,
+      activeWorkspace?.language,
+      savedSentenceIds,
     ],
   );
 
@@ -285,13 +344,15 @@ function SentencePracticeInner() {
     }
   }, [filteredVocab.length, wordIndex]);
 
-  function recordOutcome(
+  function trackOutcome(
     kind: "correct" | "incorrect" | "skipped" | "hinted",
   ) {
     if (!current) return;
     if (scoredIds.has(current.id)) return;
     setScoredIds((s) => new Set(s).add(current.id));
     setStats((s) => ({ ...s, [kind]: s[kind] + 1 }));
+    // Persist outcome against the canonical mastery state (LOS-901).
+    void recordOutcome(current.id, kind, "sentences");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -299,7 +360,7 @@ function SentencePracticeInner() {
     if (!pair) return;
     const ok = normalize(answer) === normalize(pair.expected);
     setFeedback(ok ? "correct" : "incorrect");
-    recordOutcome(ok ? "correct" : "incorrect");
+    trackOutcome(ok ? "correct" : "incorrect");
     if (ok) {
       advanceTimer.current = setTimeout(() => advanceOrFinish(), 1200);
     }
@@ -310,19 +371,19 @@ function SentencePracticeInner() {
     setSelectedOption(optionId);
     const ok = optionId === cloze.correctId;
     setFeedback(ok ? "correct" : "incorrect");
-    recordOutcome(ok ? "correct" : "incorrect");
+    trackOutcome(ok ? "correct" : "incorrect");
     if (ok) {
       advanceTimer.current = setTimeout(() => advanceOrFinish(), 1100);
     }
   }
 
   function handleSkip() {
-    recordOutcome("skipped");
+    trackOutcome("skipped");
     advanceOrFinish();
   }
 
   function handleNotSure() {
-    if (!hintRevealed) recordOutcome("hinted");
+    if (!hintRevealed) trackOutcome("hinted");
     setHintRevealed(true);
   }
 
@@ -364,6 +425,13 @@ function SentencePracticeInner() {
 
   return (
     <div className="space-y-6">
+      <SelectionCapture
+        containerRef={sentenceSectionRef}
+        onAddWord={async (surfaceForm) => {
+          const item = await addVocab({ surfaceForm });
+          return item.surfaceForm ?? item.word;
+        }}
+      />
       <div className="flex items-center justify-between">
         <Link
           href={wordParam ? "/words" : "/learn"}
@@ -450,10 +518,21 @@ function SentencePracticeInner() {
             </button>
           </section>
 
-          <section className="rounded-3xl bg-gradient-to-br from-white via-white to-slate-50 shadow-card p-12 min-h-[280px] relative flex flex-col items-center justify-center">
+          <section
+            ref={sentenceSectionRef}
+            className="rounded-3xl bg-gradient-to-br from-white via-white to-slate-50 shadow-card p-12 min-h-[280px] relative flex flex-col items-center justify-center"
+          >
             {isMock && (
               <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
                 Demo mode
+              </div>
+            )}
+            {!isMock && constraintFellBack && (
+              <div
+                className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200"
+                title="No candidates fit the lexicon constraint, so an unconstrained sentence was used."
+              >
+                Constraint relaxed
               </div>
             )}
             <button

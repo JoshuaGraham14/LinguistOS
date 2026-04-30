@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import type {
   GrammaticalNumber,
+  LexiconConstraint,
   Person,
   PracticeSettings,
   Tense,
@@ -38,6 +39,12 @@ const PERSONS: { value: Person; label: string }[] = [
 const NUMBERS: { value: GrammaticalNumber; label: string }[] = [
   { value: "singular", label: "Singular" },
   { value: "plural", label: "Plural" },
+];
+
+const LEXICON_CONSTRAINTS: { value: LexiconConstraint; label: string }[] = [
+  { value: "off", label: "Off (any vocabulary)" },
+  { value: "known_only", label: "Only words I know" },
+  { value: "known_plus_stretch", label: "Known + stretch words" },
 ];
 
 export function SettingsPopover({
@@ -166,6 +173,51 @@ export function SettingsPopover({
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="border-t border-slate-100 pt-4 space-y-3">
+            <div className="text-sm font-semibold text-slate-700">
+              Lexicon constraint
+            </div>
+            <select
+              value={settings.lexiconConstraint}
+              onChange={(e) =>
+                onChange({
+                  ...settings,
+                  lexiconConstraint: e.target.value as LexiconConstraint,
+                })
+              }
+              className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-400"
+            >
+              {LEXICON_CONSTRAINTS.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            {settings.lexiconConstraint === "known_plus_stretch" && (
+              <label className="block">
+                <span className="text-xs uppercase tracking-wide text-slate-500">
+                  Stretch words
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  max={20}
+                  value={settings.stretchCount}
+                  onChange={(e) =>
+                    onChange({
+                      ...settings,
+                      stretchCount: Math.max(
+                        0,
+                        Math.min(20, Number(e.target.value) || 0),
+                      ),
+                    })
+                  }
+                  className="mt-1 w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-400"
+                />
+              </label>
+            )}
           </div>
 
           <div className="border-t border-slate-100 pt-4 space-y-3">

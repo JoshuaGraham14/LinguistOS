@@ -1,6 +1,13 @@
 import type {
   LanguageCode,
+  LexiconConstraint,
+  MasteryOutcome,
+  MasteryState,
   SentenceCandidate,
+  SentenceLink,
+  SentenceLinkRole,
+  SentenceRecord,
+  SentenceSource,
   VocabItem,
   VocabTag,
   Workspace,
@@ -26,11 +33,18 @@ export interface GenerateRequest {
   num_candidates?: number;
   sentence_length?: string;
   direction?: string;
+  // LOS-502 lexicon constraint.
+  lexicon_constraint?: LexiconConstraint;
+  workspace_id?: number;
+  stretch_count?: number;
+  extra_allowed_vocab_ids?: number[];
 }
 
 export interface GenerateResponse {
   candidates: SentenceCandidate[];
   mock?: boolean;
+  constrained?: boolean;
+  used_vocab_ids?: number[];
 }
 
 export async function generateSentences(
@@ -103,6 +117,16 @@ interface ApiWorkspace {
   updated_at: string;
 }
 
+interface ApiMastery {
+  strength: number;
+  box: number;
+  last_reviewed_at: string | null;
+  next_due: string | null;
+  streak: number;
+  failures: number;
+  successes: number;
+}
+
 interface ApiVocab {
   id: number;
   workspace_id: number;
@@ -111,6 +135,25 @@ interface ApiVocab {
   tags: VocabTag[];
   learned: boolean;
   created_at: string;
+
+  lemma: string | null;
+  surface_form: string | null;
+  surface_forms: string[];
+  pos: string | null;
+  cefr: string | null;
+  frequency_rank: number | null;
+  gender: string | null;
+  conjugation_class: string | null;
+  morph_features: Record<string, unknown> | null;
+  ipa: string | null;
+  audio_url: string | null;
+  image_url: string | null;
+  gloss_primary: string | null;
+  glosses: string[];
+  notes: string | null;
+  last_seen_at: string | null;
+
+  mastery: ApiMastery | null;
 }
 
 function toWorkspace(item: ApiWorkspace): Workspace {
@@ -125,6 +168,22 @@ function toWorkspace(item: ApiWorkspace): Workspace {
   };
 }
 
+function toMastery(item: ApiMastery): MasteryState {
+  return {
+    strength: item.strength,
+    box: item.box,
+    lastReviewedAt: item.last_reviewed_at ? Date.parse(item.last_reviewed_at) : null,
+    nextDue: item.next_due ? Date.parse(item.next_due) : null,
+    streak: item.streak,
+    failures: item.failures,
+    successes: item.successes,
+  };
+}
+
+function toMasteryOrNull(item: ApiMastery | null): MasteryState | null {
+  return item ? toMastery(item) : null;
+}
+
 function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
   return {
     id: item.id,
@@ -135,6 +194,23 @@ function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
     tags: item.tags,
     learned: item.learned,
     createdAt: Date.parse(item.created_at),
+    lemma: item.lemma,
+    surfaceForm: item.surface_form,
+    surfaceForms: item.surface_forms ?? [],
+    pos: item.pos,
+    cefr: item.cefr,
+    frequencyRank: item.frequency_rank,
+    gender: item.gender,
+    conjugationClass: item.conjugation_class,
+    morphFeatures: item.morph_features,
+    ipa: item.ipa,
+    audioUrl: item.audio_url,
+    imageUrl: item.image_url,
+    glossPrimary: item.gloss_primary,
+    glosses: item.glosses ?? [],
+    notes: item.notes,
+    lastSeenAt: item.last_seen_at ? Date.parse(item.last_seen_at) : null,
+    mastery: toMasteryOrNull(item.mastery),
   };
 }
 
@@ -180,35 +256,119 @@ export async function listVocab(
   return res.items.map((item) => toVocab(item, language));
 }
 
-export async function addVocab(input: {
+export interface AddVocabInput {
   workspaceId: number;
-  word: string;
-  translation: string;
-  tags: VocabTag[];
   language: LanguageCode;
-}): Promise<VocabItem> {
+  // Canonical (preferred): only surfaceForm is required (LOS-106).
+  surfaceForm?: string;
+  glossPrimary?: string;
+  lemma?: string;
+  pos?: string | null;
+  tags?: VocabTag[];
+  notes?: string | null;
+  // Legacy support: callers passing { word, translation } still work.
+  word?: string;
+  translation?: string;
+}
+
+export async function addVocab(input: AddVocabInput): Promise<VocabItem> {
+  const surface = input.surfaceForm ?? input.word;
+  if (!surface) {
+    throw new Error("addVocab requires either surfaceForm or word");
+  }
+  const gloss = (input.glossPrimary ?? input.translation ?? "").trim();
   const item = await apiFetch<ApiVocab>("/api/vocab", {
     method: "POST",
     body: JSON.stringify({
       workspace_id: input.workspaceId,
-      word: input.word,
-      translation: input.translation,
-      tags: input.tags,
+      surface_form: surface,
+      lemma: input.lemma,
+      pos: input.pos ?? null,
+      tags: input.tags ?? [],
+      notes: input.notes ?? null,
+      // Mirror legacy fields so existing list/render paths keep working
+      // until the adapter retirement criteria are met.
+      word: surface,
+      ...(gloss
+        ? {
+            gloss_primary: gloss,
+            translation: gloss,
+          }
+        : {}),
     }),
   });
   return toVocab(item, input.language);
 }
 
+export interface UpdateVocabPatch {
+  word?: string;
+  translation?: string;
+  tags?: VocabTag[];
+  learned?: boolean;
+  surfaceForm?: string;
+  lemma?: string;
+  pos?: string | null;
+  cefr?: string | null;
+  glossPrimary?: string | null;
+  glosses?: string[];
+  notes?: string | null;
+  audioUrl?: string | null;
+  imageUrl?: string | null;
+}
+
 export async function updateVocab(
   vocabId: number,
-  patch: Partial<Pick<VocabItem, "word" | "translation" | "tags" | "learned">>,
+  patch: UpdateVocabPatch,
   language: LanguageCode,
 ): Promise<VocabItem> {
+  const body: Record<string, unknown> = {};
+  if (patch.word !== undefined) body.word = patch.word;
+  if (patch.translation !== undefined) body.translation = patch.translation;
+  if (patch.tags !== undefined) body.tags = patch.tags;
+  if (patch.learned !== undefined) body.learned = patch.learned;
+  if (patch.surfaceForm !== undefined) body.surface_form = patch.surfaceForm;
+  if (patch.lemma !== undefined) body.lemma = patch.lemma;
+  if (patch.pos !== undefined) body.pos = patch.pos;
+  if (patch.cefr !== undefined) body.cefr = patch.cefr;
+  if (patch.glossPrimary !== undefined) body.gloss_primary = patch.glossPrimary;
+  if (patch.glosses !== undefined) body.glosses = patch.glosses;
+  if (patch.notes !== undefined) body.notes = patch.notes;
+  if (patch.audioUrl !== undefined) body.audio_url = patch.audioUrl;
+  if (patch.imageUrl !== undefined) body.image_url = patch.imageUrl;
+
   const item = await apiFetch<ApiVocab>(`/api/vocab/${vocabId}`, {
     method: "PATCH",
-    body: JSON.stringify(patch),
+    body: JSON.stringify(body),
   });
   return toVocab(item, language);
+}
+
+export async function getVocab(
+  vocabId: number,
+  language: LanguageCode,
+): Promise<VocabItem> {
+  const item = await apiFetch<ApiVocab>(`/api/vocab/${vocabId}`);
+  return toVocab(item, language);
+}
+
+export async function recordMasteryEvent(
+  vocabId: number,
+  outcome: MasteryOutcome,
+  source = "practice",
+): Promise<MasteryState> {
+  const m = await apiFetch<ApiMastery>(
+    `/api/vocab/${vocabId}/mastery/event`,
+    {
+      method: "POST",
+      body: JSON.stringify({ outcome, source }),
+    },
+  );
+  return toMastery(m);
+}
+
+export async function getMastery(vocabId: number): Promise<MasteryState> {
+  const m = await apiFetch<ApiMastery>(`/api/vocab/${vocabId}/mastery`);
+  return toMastery(m);
 }
 
 export async function removeVocab(vocabId: number): Promise<void> {
@@ -221,4 +381,115 @@ export async function clearVocab(workspaceId: number): Promise<void> {
   await apiFetch<{ ok: boolean }>(`/api/vocab?workspace_id=${workspaceId}`, {
     method: "DELETE",
   });
+}
+
+interface ApiSentenceLink {
+  id: number;
+  vocab_id: number;
+  surface_token: string;
+  position: number;
+  role: SentenceLinkRole;
+}
+
+interface ApiSentence {
+  id: number;
+  workspace_id: number;
+  text: string;
+  translation: string | null;
+  language: LanguageCode;
+  source: SentenceSource;
+  source_meta: Record<string, unknown> | null;
+  score: number | null;
+  created_at: string;
+  links: ApiSentenceLink[];
+}
+
+function toSentenceLink(link: ApiSentenceLink): SentenceLink {
+  return {
+    id: link.id,
+    vocabId: link.vocab_id,
+    surfaceToken: link.surface_token,
+    position: link.position,
+    role: link.role,
+  };
+}
+
+function toSentenceRecord(item: ApiSentence): SentenceRecord {
+  return {
+    id: item.id,
+    workspaceId: item.workspace_id,
+    text: item.text,
+    translation: item.translation,
+    language: item.language,
+    source: item.source,
+    sourceMeta: item.source_meta,
+    score: item.score,
+    createdAt: Date.parse(item.created_at),
+    links: item.links.map(toSentenceLink),
+  };
+}
+
+export interface CreateSentenceInput {
+  workspaceId: number;
+  text: string;
+  translation?: string | null;
+  language: LanguageCode;
+  source?: SentenceSource;
+  sourceMeta?: Record<string, unknown> | null;
+  score?: number | null;
+  links?: {
+    vocabId: number;
+    surfaceToken: string;
+    position: number;
+    role?: SentenceLinkRole;
+  }[];
+}
+
+export async function createSentence(
+  input: CreateSentenceInput,
+): Promise<SentenceRecord> {
+  const item = await apiFetch<ApiSentence>("/api/sentences", {
+    method: "POST",
+    body: JSON.stringify({
+      workspace_id: input.workspaceId,
+      text: input.text,
+      translation: input.translation ?? null,
+      language: input.language,
+      source: input.source ?? "manual",
+      source_meta: input.sourceMeta ?? null,
+      score: input.score ?? null,
+      links: (input.links ?? []).map((link) => ({
+        vocab_id: link.vocabId,
+        surface_token: link.surfaceToken,
+        position: link.position,
+        role: link.role ?? "context",
+      })),
+    }),
+  });
+  return toSentenceRecord(item);
+}
+
+export async function listSentences(params: {
+  workspaceId: number;
+  vocabId?: number;
+  limit?: number;
+}): Promise<SentenceRecord[]> {
+  const search = new URLSearchParams({
+    workspace_id: String(params.workspaceId),
+  });
+  if (params.vocabId !== undefined) search.set("vocab_id", String(params.vocabId));
+  if (params.limit !== undefined) search.set("limit", String(params.limit));
+  const res = await apiFetch<{ items: ApiSentence[] }>(
+    `/api/sentences?${search.toString()}`,
+  );
+  return res.items.map(toSentenceRecord);
+}
+
+export async function getSentence(id: number): Promise<SentenceRecord> {
+  const item = await apiFetch<ApiSentence>(`/api/sentences/${id}`);
+  return toSentenceRecord(item);
+}
+
+export async function deleteSentence(id: number): Promise<void> {
+  await apiFetch<{ ok: boolean }>(`/api/sentences/${id}`, { method: "DELETE" });
 }

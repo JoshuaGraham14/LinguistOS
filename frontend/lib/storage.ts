@@ -4,10 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import * as api from "./api";
 import type {
   LanguageCode,
+  MasteryOutcome,
+  MasteryState,
   PracticeSettings,
   Profile,
   VocabItem,
   VocabTag,
+  WordDisplayMode,
   Workspace,
 } from "./types";
 
@@ -24,9 +27,34 @@ const DEFAULT_SETTINGS: PracticeSettings = {
   tense: "present",
   person: "3rd",
   number: "singular",
+  lexiconConstraint: "off",
+  stretchCount: 0,
 };
 
-const DEFAULT_PROFILE: Profile = { name: "" };
+const DEFAULT_PROFILE: Profile = { name: "", wordDisplayMode: "as_encountered" };
+
+/**
+ * Single rendering helper for any surface that displays a word (LOS-107).
+ * Returns the form to show as primary plus the counterpart form, so callers
+ * can render both without ever reading raw vocab fields directly.
+ */
+export function formatWordDisplay(
+  item: VocabItem,
+  mode: WordDisplayMode,
+): { primary: string; secondary: string | null } {
+  const lemma = item.lemma ?? item.word;
+  const surface = item.surfaceForm ?? item.word;
+  if (mode === "lemma_first") {
+    return {
+      primary: lemma,
+      secondary: surface !== lemma ? surface : null,
+    };
+  }
+  return {
+    primary: surface,
+    secondary: lemma !== surface ? lemma : null,
+  };
+}
 const DEFAULT_WORKSPACE: Pick<Workspace, "name" | "language" | "emojiOrFlag"> = {
   name: "Spanish core",
   language: "es",
@@ -53,7 +81,13 @@ export function useProfile() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setProfile(read<Profile>(PROFILE_KEY, DEFAULT_PROFILE));
+    const stored = read<Partial<Profile>>(PROFILE_KEY, DEFAULT_PROFILE);
+    // Migrate old profile shapes that pre-date wordDisplayMode (LOS-107).
+    setProfile({
+      name: stored.name ?? DEFAULT_PROFILE.name,
+      wordDisplayMode:
+        stored.wordDisplayMode ?? DEFAULT_PROFILE.wordDisplayMode,
+    });
     setHydrated(true);
   }, []);
 
@@ -69,7 +103,10 @@ export function usePracticeSettings() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setSettings(read<PracticeSettings>(SETTINGS_KEY, DEFAULT_SETTINGS));
+    const stored = read<Partial<PracticeSettings>>(SETTINGS_KEY, DEFAULT_SETTINGS);
+    // Merge in defaults so old localStorage entries pick up new settings
+    // (e.g. lexiconConstraint added in LOS-502).
+    setSettings({ ...DEFAULT_SETTINGS, ...stored });
     setHydrated(true);
   }, []);
 
@@ -212,14 +249,26 @@ export function useVocab() {
   }, [refresh, workspacesHydrated, activeWorkspaceId]);
 
   const addVocab = useCallback(
-    async (input: { word: string; translation: string; tags: VocabTag[] }) => {
+    async (input: {
+      word?: string;
+      translation?: string;
+      surfaceForm?: string;
+      glossPrimary?: string;
+      tags?: VocabTag[];
+      pos?: string | null;
+      notes?: string | null;
+    }) => {
       if (!activeWorkspaceId || !activeWorkspace) throw new Error("No active workspace");
       const item = await api.addVocab({
         workspaceId: activeWorkspaceId,
+        language: activeWorkspace.language,
+        surfaceForm: input.surfaceForm ?? input.word,
+        glossPrimary: input.glossPrimary ?? input.translation,
+        tags: input.tags ?? [],
+        pos: input.pos ?? null,
+        notes: input.notes ?? null,
         word: input.word,
         translation: input.translation,
-        tags: input.tags,
-        language: activeWorkspace.language,
       });
       setVocab((prev) => [item, ...prev]);
       return item;
@@ -233,10 +282,7 @@ export function useVocab() {
   }, []);
 
   const updateVocab = useCallback(
-    async (
-      id: number,
-      patch: Partial<Pick<VocabItem, "word" | "translation" | "tags" | "learned">>,
-    ) => {
+    async (id: number, patch: api.UpdateVocabPatch) => {
       if (!activeWorkspace) throw new Error("No active workspace");
       const updated = await api.updateVocab(id, patch, activeWorkspace.language);
       setVocab((prev) => prev.map((v) => (v.id === id ? updated : v)));
@@ -260,6 +306,30 @@ export function useVocab() {
     setVocab([]);
   }, [activeWorkspaceId]);
 
+  /**
+   * Record a review outcome against the canonical mastery state (LOS-901).
+   * Optimistically merges the returned mastery into local vocab so views
+   * reflect the new strength/box/next_due immediately.
+   */
+  const recordOutcome = useCallback(
+    async (
+      id: number,
+      outcome: MasteryOutcome,
+      source = "practice",
+    ): Promise<MasteryState | null> => {
+      try {
+        const next = await api.recordMasteryEvent(id, outcome, source);
+        setVocab((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, mastery: next } : v)),
+        );
+        return next;
+      } catch {
+        return null;
+      }
+    },
+    [],
+  );
+
   return {
     vocab,
     hydrated: hydrated && workspacesHydrated,
@@ -269,6 +339,7 @@ export function useVocab() {
     toggleLearned,
     clearVocab,
     refresh,
+    recordOutcome,
     activeWorkspace,
   };
 }

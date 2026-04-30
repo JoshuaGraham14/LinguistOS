@@ -15,7 +15,8 @@ import {
   Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/Modal";
 import { cn } from "@/lib/cn";
 import { useVocab } from "@/lib/storage";
@@ -97,6 +98,17 @@ function downloadCsv(filename: string, contents: string) {
 }
 
 export default function WordsPage() {
+  return (
+    <Suspense fallback={null}>
+      <WordsPageInner />
+    </Suspense>
+  );
+}
+
+function WordsPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editParam = searchParams.get("edit");
   const {
     vocab,
     hydrated,
@@ -116,6 +128,21 @@ export default function WordsPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<VocabItem | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+
+  // Open the edit modal from a deep link such as /words?edit=42
+  // (used by Word Home's Edit action).
+  useEffect(() => {
+    if (!hydrated || !editParam) return;
+    const id = Number(editParam);
+    if (!Number.isFinite(id)) return;
+    const target = vocab.find((v) => v.id === id);
+    if (target) setEditing(target);
+  }, [editParam, hydrated, vocab]);
+
+  function closeEditing() {
+    setEditing(null);
+    if (editParam) router.replace("/words", { scroll: false });
+  }
 
   function toggleActiveTag(tag: VocabTag) {
     setActiveTags((t) =>
@@ -338,7 +365,7 @@ export default function WordsPage() {
       />
       <WordFormModal
         open={editing !== null}
-        onClose={() => setEditing(null)}
+        onClose={closeEditing}
         title="Edit word"
         submitLabel="Save changes"
         initial={editing}
