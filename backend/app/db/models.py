@@ -63,6 +63,9 @@ class Workspace(Base):
     practice_logs: Mapped[list["PracticeLog"]] = relationship(
         back_populates="workspace", cascade="all, delete-orphan"
     )
+    word_occurrences: Mapped[list["WordOccurrence"]] = relationship(
+        back_populates="workspace", cascade="all, delete-orphan"
+    )
 
 
 class Vocab(Base):
@@ -114,6 +117,9 @@ class Vocab(Base):
         back_populates="vocab", cascade="all, delete-orphan"
     )
     sentence_links: Mapped[list["SentenceWordLink"]] = relationship(
+        back_populates="vocab", cascade="all, delete-orphan"
+    )
+    occurrences: Mapped[list["WordOccurrence"]] = relationship(
         back_populates="vocab", cascade="all, delete-orphan"
     )
 
@@ -251,3 +257,34 @@ class PracticeLog(Base):
     )
 
     workspace: Mapped[Workspace] = relationship(back_populates="practice_logs")
+
+
+class WordOccurrence(Base):
+    """Where a vocab atom appears across learning surfaces (MVP+ thin)."""
+
+    __tablename__ = "word_occurrences"
+    __table_args__ = (
+        Index("ix_occ_workspace_vocab", "workspace_id", "vocab_id"),
+        Index("ix_occ_context", "context_type", "context_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    workspace_id: Mapped[int] = mapped_column(
+        ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    vocab_id: Mapped[int] = mapped_column(
+        ForeignKey("vocab.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    context_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    context_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    surface_token: Mapped[str] = mapped_column(String(255), nullable=False)
+    char_start: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    char_end: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    source: Mapped[str] = mapped_column(String(32), default="manual", nullable=False)
+    meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, nullable=False
+    )
+
+    workspace: Mapped[Workspace] = relationship(back_populates="word_occurrences")
+    vocab: Mapped[Vocab] = relationship(back_populates="occurrences")

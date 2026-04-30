@@ -493,3 +493,85 @@ export async function getSentence(id: number): Promise<SentenceRecord> {
 export async function deleteSentence(id: number): Promise<void> {
   await apiFetch<{ ok: boolean }>(`/api/sentences/${id}`, { method: "DELETE" });
 }
+
+interface ApiTokenCandidate {
+  vocab_id: number;
+  word: string;
+  lemma: string | null;
+  surface_form: string | null;
+  translation: string;
+}
+
+interface ApiTokenSpan {
+  token: string;
+  start: number;
+  end: number;
+  normalized: string;
+  vocab_id: number | null;
+  candidates: ApiTokenCandidate[];
+  confidence: number | null;
+}
+
+interface ApiTokenResolveResponse {
+  spans: ApiTokenSpan[];
+}
+
+export async function resolveTokens(input: {
+  workspaceId: number;
+  language: LanguageCode;
+  text: string;
+}): Promise<ApiTokenSpan[]> {
+  const res = await apiFetch<ApiTokenResolveResponse>("/api/tokens/resolve", {
+    method: "POST",
+    body: JSON.stringify({
+      workspace_id: input.workspaceId,
+      language: input.language,
+      text: input.text,
+    }),
+  });
+  return res.spans;
+}
+
+export async function tokenAction(input: {
+  action: "open_word" | "add_to_vocab" | "record_occurrence";
+  workspaceId: number;
+  language: LanguageCode;
+  token: string;
+  vocabId?: number;
+  gloss?: string;
+  contextType?: string;
+  contextId?: string;
+  charStart?: number;
+  charEnd?: number;
+  source?: string;
+  meta?: Record<string, unknown>;
+}): Promise<{ ok: boolean; destination?: string; occurrence_id?: number; vocab?: VocabItem }> {
+  const res = await apiFetch<{
+    ok: boolean;
+    destination: string | null;
+    occurrence_id: number | null;
+    vocab: ApiVocab | null;
+  }>("/api/tokens/action", {
+    method: "POST",
+    body: JSON.stringify({
+      action: input.action,
+      workspace_id: input.workspaceId,
+      language: input.language,
+      token: input.token,
+      vocab_id: input.vocabId ?? null,
+      gloss: input.gloss ?? null,
+      context_type: input.contextType ?? "manual",
+      context_id: input.contextId ?? null,
+      char_start: input.charStart ?? null,
+      char_end: input.charEnd ?? null,
+      source: input.source ?? "manual",
+      meta: input.meta ?? null,
+    }),
+  });
+  return {
+    ok: res.ok,
+    destination: res.destination ?? undefined,
+    occurrence_id: res.occurrence_id ?? undefined,
+    vocab: res.vocab ? toVocab(res.vocab, input.language) : undefined,
+  };
+}

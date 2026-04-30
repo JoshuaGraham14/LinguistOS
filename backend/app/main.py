@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import generate, mastery, practice, sentences, vocab, workspaces
+from app.api import generate, mastery, practice, sentences, tokens, vocab, workspaces
 from app.config import settings
 from app.db.database import Base, engine
 from app.db import models  # noqa: F401
@@ -27,6 +27,7 @@ app.include_router(vocab.router, prefix="/api", tags=["vocab"])
 app.include_router(workspaces.router, prefix="/api", tags=["workspaces"])
 app.include_router(mastery.router, prefix="/api", tags=["mastery"])
 app.include_router(sentences.router, prefix="/api", tags=["sentences"])
+app.include_router(tokens.router, prefix="/api", tags=["tokens"])
 
 
 @app.on_event("startup")

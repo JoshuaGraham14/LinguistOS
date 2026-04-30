@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { cn } from "@/lib/cn";
 import { formatWordDisplay, useProfile, useVocab } from "@/lib/storage";
@@ -30,6 +31,8 @@ export function WordChip({
 }: WordChipProps) {
   const { vocab } = useVocab();
   const { profile } = useProfile();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const resolved = useMemo<VocabItem | null>(() => {
     if (item) return item;
@@ -52,7 +55,13 @@ export function WordChip({
   }
 
   const display = formatWordDisplay(resolved, profile.wordDisplayMode);
-  const target = href ?? `/words/${resolved.id}`;
+  const target = useMemo(() => {
+    if (href) return href;
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("word_quick", String(resolved.id));
+    const q = next.toString();
+    return q ? `${pathname}?${q}` : pathname;
+  }, [href, pathname, resolved.id, searchParams]);
   const tooltip = resolved.glossPrimary || resolved.translation || "";
   const showGloss = !compact && Boolean(tooltip);
 
