@@ -126,7 +126,7 @@ function LexiconInner() {
         </div>
       </header>
 
-      <section className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-5 space-y-4">
+      <section className="glass-card rounded-2xl p-5 space-y-4">
         <div className="relative">
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
           <input
@@ -253,7 +253,7 @@ function LexiconInner() {
         </div>
       </section>
 
-      <section className="rounded-2xl bg-white/80 backdrop-blur shadow-card overflow-hidden">
+      <section className="glass-card rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-slate-500 uppercase text-xs tracking-wide">

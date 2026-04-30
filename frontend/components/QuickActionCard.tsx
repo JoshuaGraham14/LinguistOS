@@ -26,12 +26,12 @@ export function QuickActionCard({
     <Link
       href={href}
       className={cn(
-        "rounded-2xl shadow-card p-6 flex flex-col items-center justify-center gap-3 text-white transition hover:brightness-110 hover:-translate-y-0.5 aspect-square",
+        "glass-gloss relative rounded-2xl shadow-glass-lg p-6 flex flex-col items-center justify-center gap-3 text-white transition hover:brightness-110 hover:-translate-y-0.5 aspect-square border border-white/30",
         COLOR_MAP[color],
       )}
     >
-      <Icon className="h-8 w-8" strokeWidth={2} />
-      <div className="font-semibold">{label}</div>
+      <Icon className="h-8 w-8 relative" strokeWidth={2} />
+      <div className="font-semibold relative">{label}</div>
     </Link>
   );
 }

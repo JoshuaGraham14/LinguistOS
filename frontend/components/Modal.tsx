@@ -31,21 +31,21 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white shadow-card p-6"
+        className="glass-card-strong glass-gloss w-full max-w-md rounded-2xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="relative flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-slate-900">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition"
+            className="p-2 rounded-lg text-slate-400 hover:bg-white/60 transition"
             aria-label="Close"
           >
             <X className="h-4 w-4" strokeWidth={2.5} />
           </button>
         </div>
-        {children}
+        <div className="relative">{children}</div>
       </div>
     </div>
   );

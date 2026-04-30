@@ -436,7 +436,7 @@ function SentencePracticeInner() {
       <div className="flex items-center justify-between">
         <Link
           href={wordParam ? "/words" : "/learn"}
-          className="inline-flex items-center gap-2 rounded-2xl bg-white shadow-card px-5 py-3 text-slate-700 font-medium hover:bg-slate-50 transition"
+          className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
           Back
@@ -455,11 +455,11 @@ function SentencePracticeInner() {
       )}
 
       {!hydrated || !settingsHydrated ? (
-        <div className="rounded-2xl bg-white/80 shadow-card p-12 text-center text-slate-400">
+        <div className="glass-card rounded-2xl p-12 text-center text-slate-400">
           Loading…
         </div>
       ) : vocab.length === 0 ? (
-        <div className="rounded-2xl bg-white/80 shadow-card p-12 text-center">
+        <div className="glass-card rounded-2xl p-12 text-center">
           <p className="text-slate-600">
             Add some words on the{" "}
             <Link href="/words" className="text-brand-600 underline">
@@ -469,7 +469,7 @@ function SentencePracticeInner() {
           </p>
         </div>
       ) : filteredVocab.length === 0 ? (
-        <div className="rounded-2xl bg-white/80 shadow-card p-12 text-center">
+        <div className="glass-card rounded-2xl p-12 text-center">
           <p className="text-slate-600">
             {wordParam
               ? "That word isn't in your collection. "
@@ -485,7 +485,7 @@ function SentencePracticeInner() {
         />
       ) : (
         <>
-          <section className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-4 flex items-center justify-between gap-4">
+          <section className="glass-card rounded-2xl p-4 flex items-center justify-between gap-4">
             <button
               type="button"
               onClick={handlePrev}
@@ -661,7 +661,7 @@ function SentencePracticeInner() {
           </div>
 
           {settings.mode === "multiple-choice" && cloze ? (
-            <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 space-y-3">
+            <div className="glass-card rounded-2xl p-6 space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {cloze.options.map((opt) => {
                   const isSelected = selectedOption === opt.id;
@@ -738,7 +738,7 @@ function SentencePracticeInner() {
             (settings.mode === "multiple-choice" && !cloze && pair)) && (
             <form
               onSubmit={handleSubmit}
-              className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 flex flex-col gap-4"
+              className="glass-card rounded-2xl p-6 flex flex-col gap-4"
             >
               <input
                 value={answer}

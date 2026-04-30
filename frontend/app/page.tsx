@@ -64,7 +64,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-2xl bg-white/80 backdrop-blur shadow-card p-12 flex flex-col items-center justify-center min-h-[320px]">
+        <div className="lg:col-span-2 glass-card rounded-2xl p-12 flex flex-col items-center justify-center min-h-[320px]">
           <h2 className="text-2xl font-bold text-slate-900">Ready to practice?</h2>
           <p className="text-slate-500 mt-2 text-center max-w-md">
             Pick a learning method, or jump straight into a generated sentence
@@ -79,7 +79,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6">
+        <div className="glass-card rounded-2xl p-6">
           <h3 className="font-bold text-slate-900 mb-4">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-3">
             <QuickActionCard

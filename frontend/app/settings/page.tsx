@@ -73,7 +73,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 space-y-2">
+      <div className="glass-card rounded-2xl p-6 space-y-2">
         <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
           <UserIcon className="h-4 w-4" strokeWidth={2} />
           Display name
@@ -91,11 +91,11 @@ export default function SettingsPage() {
       </div>
 
       {!hydrated ? (
-        <div className="rounded-2xl bg-white/80 shadow-card p-12 text-center text-slate-400">
+        <div className="glass-card rounded-2xl p-12 text-center text-slate-400">
           Loading…
         </div>
       ) : (
-        <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 space-y-6">
+        <div className="glass-card rounded-2xl p-6 space-y-6">
           <section className="space-y-2">
             <label className="block text-sm font-semibold text-slate-700">
               Practice Mode

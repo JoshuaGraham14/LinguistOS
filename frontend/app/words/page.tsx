@@ -232,7 +232,7 @@ function WordsPageInner() {
         </div>
       </header>
 
-      <section className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-5 space-y-4">
+      <section className="glass-card rounded-2xl p-5 space-y-4">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
           <input
@@ -273,7 +273,7 @@ function WordsPageInner() {
             </button>
             {sortOpen && (
               <div
-                className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-white shadow-card border border-slate-100 py-1 z-10"
+                className="glass-card-strong absolute right-0 top-full mt-1 w-44 rounded-xl py-1 z-10"
                 onMouseLeave={() => setSortOpen(false)}
               >
                 {(Object.keys(SORT_LABELS) as SortOrder[]).map((s) => (
@@ -432,8 +432,8 @@ function WordCard({
   return (
     <div
       className={cn(
-        "rounded-2xl bg-white/90 shadow-card p-6 flex flex-col gap-4 group transition",
-        item.learned && "ring-2 ring-emerald-200",
+        "glass-card rounded-2xl p-6 flex flex-col gap-4 group transition",
+        item.learned && "ring-2 ring-emerald-300/60",
       )}
     >
       <div className="flex items-start justify-between gap-2">

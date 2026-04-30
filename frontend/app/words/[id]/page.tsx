@@ -37,7 +37,7 @@ function StatTile({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-xl bg-white/80 backdrop-blur shadow-card p-4", className)}>
+    <div className={cn("glass-pill rounded-xl p-4", className)}>
       <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
       <div className="text-2xl font-bold text-slate-900 mt-1">{value}</div>
       {hint && <div className="text-xs text-slate-500 mt-1">{hint}</div>}
@@ -96,12 +96,12 @@ export default function WordHomePage() {
       <div className="space-y-6">
         <Link
           href="/lexicon"
-          className="inline-flex items-center gap-2 rounded-2xl bg-white shadow-card px-5 py-3 text-slate-700 font-medium hover:bg-slate-50 transition"
+          className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
           Back to lexicon
         </Link>
-        <div className="rounded-2xl bg-white/80 shadow-card p-12 text-center text-slate-500">
+        <div className="glass-card rounded-2xl p-12 text-center text-slate-500">
           That word isn’t in your lexicon.
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function WordHomePage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <Link
           href="/lexicon"
-          className="inline-flex items-center gap-2 rounded-2xl bg-white shadow-card px-5 py-3 text-slate-700 font-medium hover:bg-slate-50 transition"
+          className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
           Back to lexicon
@@ -242,7 +242,7 @@ export default function WordHomePage() {
         />
       </div>
 
-      <section className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 space-y-4">
+      <section className="glass-card rounded-2xl p-6 space-y-4">
         <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-fuchsia-500" />
           Forms seen
@@ -266,7 +266,7 @@ export default function WordHomePage() {
         )}
       </section>
 
-      <section className="rounded-2xl bg-white/80 backdrop-blur shadow-card p-6 space-y-3">
+      <section className="glass-card rounded-2xl p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <Calendar className="h-4 w-4 text-fuchsia-500" />

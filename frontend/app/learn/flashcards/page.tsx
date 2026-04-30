@@ -213,7 +213,7 @@ function FlashcardsInner() {
       <div className="flex items-center justify-between">
         <Link
           href={wordParam ? "/words" : "/learn"}
-          className="inline-flex items-center gap-2 rounded-2xl bg-white shadow-card px-5 py-3 text-slate-700 font-medium hover:bg-slate-50 transition"
+          className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
           Back
@@ -256,7 +256,7 @@ function FlashcardsInner() {
         </div>
       )}
 
-      <div className="rounded-2xl bg-white/80 backdrop-blur shadow-card px-6 py-4 flex items-center justify-center gap-10">
+      <div className="glass-card rounded-2xl px-6 py-4 flex items-center justify-center gap-10">
         <ToggleSwitch label="Shuffle" checked={shuffle} onChange={setShuffle} />
         <ToggleSwitch
           label="English → Spanish"
@@ -303,7 +303,7 @@ function FlashcardsInner() {
               type="button"
               onClick={toggleReveal}
               disabled={!current}
-              className="flex-1 rounded-3xl bg-white/90 shadow-card p-12 min-h-[360px] relative flex flex-col items-center justify-center group disabled:opacity-50"
+              className="flex-1 glass-card-strong glass-gloss rounded-3xl p-12 min-h-[360px] relative flex flex-col items-center justify-center group disabled:opacity-50"
             >
               {current ? (
                 <>
