@@ -276,21 +276,25 @@ export async function addVocab(input: AddVocabInput): Promise<VocabItem> {
   if (!surface) {
     throw new Error("addVocab requires either surfaceForm or word");
   }
-  const gloss = input.glossPrimary ?? input.translation ?? "";
+  const gloss = (input.glossPrimary ?? input.translation ?? "").trim();
   const item = await apiFetch<ApiVocab>("/api/vocab", {
     method: "POST",
     body: JSON.stringify({
       workspace_id: input.workspaceId,
       surface_form: surface,
       lemma: input.lemma,
-      gloss_primary: gloss,
       pos: input.pos ?? null,
       tags: input.tags ?? [],
       notes: input.notes ?? null,
       // Mirror legacy fields so existing list/render paths keep working
       // until the adapter retirement criteria are met.
       word: surface,
-      translation: gloss,
+      ...(gloss
+        ? {
+            gloss_primary: gloss,
+            translation: gloss,
+          }
+        : {}),
     }),
   });
   return toVocab(item, input.language);

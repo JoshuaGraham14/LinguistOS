@@ -97,3 +97,19 @@ def test_patch_keeps_legacy_and_canonical_in_sync(client, workspace) -> None:
     body2 = resp2.json()
     assert body2["gloss_primary"] == "little milk"
     assert body2["translation"] == "little milk"
+
+
+def test_patch_surface_form_accumulates_surface_forms(client, workspace) -> None:
+    created = client.post(
+        "/api/vocab",
+        json={"workspace_id": workspace["id"], "surface_form": "hablo"},
+    ).json()
+    vocab_id = created["id"]
+
+    updated = client.patch(
+        f"/api/vocab/{vocab_id}",
+        json={"surface_form": "hablamos"},
+    ).json()
+    assert updated["surface_form"] == "hablamos"
+    assert "hablo" in updated["surface_forms"]
+    assert "hablamos" in updated["surface_forms"]

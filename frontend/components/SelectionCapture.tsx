@@ -4,7 +4,6 @@ import { Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Toast } from "./Toast";
 import { useToast } from "@/lib/useToast";
-import { useVocab } from "@/lib/storage";
 
 interface ViewportPosition {
   /** CSS top in pixels (viewport coordinates, used with position:fixed). */
@@ -18,6 +17,11 @@ interface SelectionCaptureProps {
    * the capture chip. Selecting text outside these regions is ignored.
    */
   containerRef: React.RefObject<HTMLElement | null>;
+  /**
+   * Caller-provided persistence hook. This keeps SelectionCapture stateless
+   * with respect to workspace/vocab stores and avoids duplicate hook trees.
+   */
+  onAddWord: (surfaceForm: string) => Promise<string>;
   /** Optional callback invoked after a successful capture. */
   onCaptured?: (text: string) => void;
 }
@@ -34,8 +38,11 @@ const CHIP_GAP_PX = 36;
  * Positioning uses ``position: fixed`` against viewport coordinates, so
  * scrolling the page keeps the chip pinned to the visible selection.
  */
-export function SelectionCapture({ containerRef, onCaptured }: SelectionCaptureProps) {
-  const { addVocab, activeWorkspace } = useVocab();
+export function SelectionCapture({
+  containerRef,
+  onAddWord,
+  onCaptured,
+}: SelectionCaptureProps) {
   const [text, setText] = useState("");
   const [position, setPosition] = useState<ViewportPosition | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -102,11 +109,11 @@ export function SelectionCapture({ containerRef, onCaptured }: SelectionCaptureP
   }, [containerRef]);
 
   async function handleClick() {
-    if (!text || submitting || !activeWorkspace) return;
+    if (!text || submitting) return;
     setSubmitting(true);
     try {
-      const item = await addVocab({ surfaceForm: text });
-      showToast(`Added “${item.surfaceForm ?? item.word}”`);
+      const saved = await onAddWord(text);
+      showToast(`Added “${saved}”`);
       onCaptured?.(text);
       setPosition(null);
       window.getSelection()?.removeAllRanges();

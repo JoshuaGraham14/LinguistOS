@@ -22,7 +22,7 @@ import {
 } from "react";
 import { SelectionCapture } from "@/components/SelectionCapture";
 import { SettingsPopover } from "@/components/SettingsPopover";
-import { generateOrMock } from "@/lib/api";
+import { createSentence, generateOrMock } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { usePracticeSettings, useVocab } from "@/lib/storage";
 import type {
@@ -136,7 +136,7 @@ const ZERO_STATS: SessionStats = {
 };
 
 function SentencePracticeInner() {
-  const { vocab, hydrated, recordOutcome, activeWorkspace } = useVocab();
+  const { vocab, hydrated, recordOutcome, addVocab, activeWorkspace } = useVocab();
   const { settings, setSettings, hydrated: settingsHydrated } =
     usePracticeSettings();
   const searchParams = useSearchParams();
@@ -161,6 +161,7 @@ function SentencePracticeInner() {
   const [generating, setGenerating] = useState(false);
   const [isMock, setIsMock] = useState(false);
   const [constraintFellBack, setConstraintFellBack] = useState(false);
+  const [savedSentenceIds, setSavedSentenceIds] = useState<Set<number>>(new Set());
 
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
@@ -238,6 +239,46 @@ function SentencePracticeInner() {
             m.set(word.id, next);
             return m;
           });
+          if (
+            activeWorkspace &&
+            !savedSentenceIds.has(word.id) &&
+            next.sentence.trim().length > 0
+          ) {
+            const token = word.word.trim();
+            const position = next.sentence
+              .toLowerCase()
+              .indexOf(token.toLowerCase());
+            void createSentence({
+              workspaceId: activeWorkspace.id,
+              language: activeWorkspace.language,
+              text: next.sentence,
+              translation: next.translation,
+              source: "generated",
+              sourceMeta: {
+                origin: "sentence_practice",
+                vocabId: word.id,
+              },
+              links:
+                position >= 0
+                  ? [
+                      {
+                        vocabId: word.id,
+                        surfaceToken: next.sentence.slice(position, position + token.length),
+                        position,
+                        role: "target",
+                      },
+                    ]
+                  : [],
+            })
+              .then(() =>
+                setSavedSentenceIds((prev) => {
+                  const s = new Set(prev);
+                  s.add(word.id);
+                  return s;
+                }),
+              )
+              .catch(() => undefined);
+          }
         }
         setIsMock(Boolean(res.mock));
         // Constraint requested but server returned unconstrained results.
@@ -258,6 +299,8 @@ function SentencePracticeInner() {
       settings.lexiconConstraint,
       settings.stretchCount,
       activeWorkspace?.id,
+      activeWorkspace?.language,
+      savedSentenceIds,
     ],
   );
 
@@ -382,7 +425,13 @@ function SentencePracticeInner() {
 
   return (
     <div className="space-y-6">
-      <SelectionCapture containerRef={sentenceSectionRef} />
+      <SelectionCapture
+        containerRef={sentenceSectionRef}
+        onAddWord={async (surfaceForm) => {
+          const item = await addVocab({ surfaceForm });
+          return item.surfaceForm ?? item.word;
+        }}
+      />
       <div className="flex items-center justify-between">
         <Link
           href={wordParam ? "/words" : "/learn"}

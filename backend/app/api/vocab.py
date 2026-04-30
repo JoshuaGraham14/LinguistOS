@@ -120,6 +120,17 @@ def update_vocab(vocab_id: int, payload: VocabUpdate, db: Session = Depends(get_
         elif canonical in patch and legacy not in patch:
             patch[legacy] = patch[canonical]
 
+    # Keep the "forms seen" history accumulating as the displayed surface
+    # changes over time (Word Home depends on this list).
+    patched_surface = patch.get("surface_form")
+    if isinstance(patched_surface, str):
+        normalized = patched_surface.strip()
+        if normalized:
+            forms = list(item.surface_forms or [])
+            if normalized not in forms:
+                forms.append(normalized)
+                patch["surface_forms"] = forms
+
     for field, value in patch.items():
         setattr(item, field, value)
     db.add(item)
