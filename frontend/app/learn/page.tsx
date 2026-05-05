@@ -62,12 +62,11 @@ export default function LearnPage() {
     {
       title: "Voice Practice",
       description: "Practice pronunciation with speech recognition",
-      href: "/learn",
+      href: "/learn/sentences?mode=voice",
       icon: Mic,
       color: "green",
-      cta: "Coming soon",
+      cta: "Start Voice",
       available: total,
-      disabled: true,
     },
     {
       title: "Sentence Practice",

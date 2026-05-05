@@ -1,13 +1,18 @@
 "use client";
 
 import {
+  Check,
   ChevronLeft,
   ChevronRight,
   HelpCircle,
   Loader2,
+  Mic,
+  MicOff,
   RefreshCw,
   RotateCcw,
   SkipForward,
+  Volume2,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -25,6 +30,7 @@ import { TokenizedText } from "@/components/TokenizedText";
 import { createSentence, generateOrMock } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { usePracticeSettings, useVocab } from "@/lib/storage";
+import { playTTS, useVoiceCapture } from "@/lib/voice";
 import type {
   PracticeSettings,
   SentenceCandidate,
@@ -176,6 +182,14 @@ function SentencePracticeInner() {
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sentenceSectionRef = useRef<HTMLElement | null>(null);
 
+  // Voice mode plumbing (LOS voice mode). Tracks whether we've already kicked
+  // off the prompt-read-then-listen sequence for the current word so the
+  // effect doesn't restart mid-question.
+  const voicePromptToken = useRef<number | null>(null);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const modeParamApplied = useRef(false);
+
   // Invalidate cache + reset session whenever generation constraints change.
   useEffect(() => {
     setCache(new Map());
@@ -211,6 +225,20 @@ function SentencePracticeInner() {
 
   const current = filteredVocab[wordIndex];
   const candidate = current ? cache.get(current.id) ?? null : null;
+
+  const targetLanguage = activeWorkspace?.language ?? "es";
+
+  // ?mode=voice in the URL pre-selects voice mode once settings are hydrated.
+  // We only apply this once per page mount so the user can switch modes
+  // afterwards via the settings popover without it snapping back.
+  const modeParam = searchParams.get("mode");
+  useEffect(() => {
+    if (!settingsHydrated || modeParamApplied.current) return;
+    if (modeParam === "voice" && settings.mode !== "voice") {
+      setSettings({ ...settings, mode: "voice" });
+    }
+    modeParamApplied.current = true;
+  }, [settingsHydrated, modeParam, settings, setSettings]);
 
   const generateFor = useCallback(
     async (word: VocabItem, force = false) => {
@@ -310,6 +338,8 @@ function SentencePracticeInner() {
     setFeedback(null);
     setHintRevealed(false);
     setSelectedOption(null);
+    setVoiceTranscript("");
+    setVoiceError(null);
     if (advanceTimer.current) {
       clearTimeout(advanceTimer.current);
       advanceTimer.current = null;
@@ -325,6 +355,74 @@ function SentencePracticeInner() {
   }, [hydrated, settingsHydrated, current, finished, cache, generateFor]);
 
   const pair = pickPromptPair(candidate, settings.direction);
+
+  // ── Voice mode capture ─────────────────────────────────────────────────
+  // The hook owns the WebSocket + mic stream. We pass it a callback that
+  // reads the latest `pair` / settings via closure; the hook stores it in
+  // a ref so we don't need to re-bind on every render.
+  const voice = useVoiceCapture({
+    onTranscript: (transcript) => {
+      setVoiceTranscript(transcript);
+      if (!pair) return;
+      const ok = normalize(transcript) === normalize(pair.expected);
+      setFeedback(ok ? "correct" : "incorrect");
+      trackOutcome(ok ? "correct" : "incorrect");
+      voice.stop();
+      if (ok) {
+        // Read the correct answer back for pronunciation reinforcement,
+        // then optionally auto-advance.
+        playTTS(pair.expected, targetLanguage)
+          .catch(() => undefined)
+          .finally(() => {
+            if (settings.autoAdvance) {
+              advanceTimer.current = setTimeout(advanceOrFinish, 600);
+            }
+          });
+      } else {
+        // Restart listening so the user can try again without tapping.
+        advanceTimer.current = setTimeout(() => {
+          setFeedback(null);
+          setVoiceTranscript("");
+          void voice.start();
+        }, 1600);
+      }
+    },
+    onError: (msg) => setVoiceError(msg),
+  });
+
+  // Voice mode: when the prompt for a new word is ready, read it aloud and
+  // then start listening. We guard with a per-word token so re-renders don't
+  // restart the audio mid-question.
+  useEffect(() => {
+    if (settings.mode !== "voice") return;
+    if (!pair || !current) return;
+    if (voicePromptToken.current === current.id) return;
+    voicePromptToken.current = current.id;
+    voice.stop();
+    setVoiceTranscript("");
+    setVoiceError(null);
+    const promptLang = pair.promptLanguage;
+    playTTS(pair.prompt, promptLang)
+      .catch(() => undefined)
+      .finally(() => {
+        // Don't start listening if the user has switched word/mode in the
+        // meantime — token check guards against that race.
+        if (voicePromptToken.current !== current.id) return;
+        if (settings.mode !== "voice") return;
+        void voice.start();
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current?.id, pair, settings.mode]);
+
+  // Switching away from voice mode (or unmounting) tears down the mic + WS.
+  useEffect(() => {
+    if (settings.mode !== "voice") {
+      voice.stop();
+      voicePromptToken.current = null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.mode]);
+
   const cloze = useMemo(() => {
     if (settings.mode !== "multiple-choice") return null;
     if (!current || !candidate) return null;
@@ -439,7 +537,26 @@ function SentencePracticeInner() {
             Practice words in context with generated sentence drills.
           </p>
         </header>
-        <SettingsPopover settings={settings} onChange={setSettings} />
+        <div className="flex items-center gap-2">
+          {settings.mode === "voice" && (
+            <button
+              type="button"
+              onClick={() =>
+                setSettings({ ...settings, autoAdvance: !settings.autoAdvance })
+              }
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-2xl px-4 py-3 text-xs font-bold tracking-wider transition shadow-soft",
+                settings.autoAdvance
+                  ? "bg-emerald-500 text-white"
+                  : "bg-white/70 text-slate-500 border border-slate-200",
+              )}
+              title="Auto-advance to the next sentence after a correct answer"
+            >
+              AUTO {settings.autoAdvance ? "ON" : "OFF"}
+            </button>
+          )}
+          <SettingsPopover settings={settings} onChange={setSettings} />
+        </div>
       </div>
 
       {wordParam && filteredVocab.length > 0 && (
@@ -732,6 +849,29 @@ function SentencePracticeInner() {
             </div>
           ) : null}
 
+          {settings.mode === "voice" && pair && (
+            <VoiceCard
+              expected={pair.expected}
+              promptLanguage={pair.promptLanguage}
+              targetLanguage={targetLanguage}
+              promptText={pair.prompt}
+              voiceState={voice.state}
+              level={voice.level}
+              transcript={voiceTranscript}
+              error={voiceError}
+              feedback={feedback}
+              onReplayPrompt={() =>
+                playTTS(pair.prompt, pair.promptLanguage).catch(() => undefined)
+              }
+              onTryAgain={() => {
+                setFeedback(null);
+                setVoiceTranscript("");
+                setVoiceError(null);
+                void voice.start();
+              }}
+            />
+          )}
+
           {(settings.mode === "typing" ||
             (settings.mode === "multiple-choice" && !cloze && pair)) && (
             <form
@@ -854,6 +994,178 @@ function SummaryStat({
     <div className={cn("rounded-2xl p-4", p.bg)}>
       <div className={cn("text-2xl font-bold", p.text)}>{value}</div>
       <div className={cn("text-xs mt-0.5", p.sub)}>{label}</div>
+    </div>
+  );
+}
+
+/** Five animated bars that visualise mic activity. Heights respond to the
+ *  live RMS amplitude (`level`, 0-1) so the waveform reads as the user's
+ *  actual voice rather than just a canned animation. */
+function WaveformBars({ active, level }: { active: boolean; level: number }) {
+  // Bar heights are a blend of the staggered base animation (CSS) and the
+  // live RMS level so silence collapses the bars and louder speech expands
+  // them. Each bar gets a different multiplier for a wave-like envelope.
+  const multipliers = [0.6, 0.85, 1, 0.85, 0.6];
+  const animClasses = [
+    "animate-wave-1",
+    "animate-wave-2",
+    "animate-wave-3",
+    "animate-wave-4",
+    "animate-wave-5",
+  ];
+  return (
+    <div className="flex items-center gap-1.5 h-16">
+      {multipliers.map((mult, i) => {
+        if (!active) {
+          return (
+            <div
+              key={i}
+              className="w-2.5 h-3 rounded-full bg-slate-300"
+            />
+          );
+        }
+        const liveScale = Math.max(0.18, Math.min(1, level * mult * 1.6));
+        return (
+          <div
+            key={i}
+            className={cn(
+              "w-2.5 rounded-full bg-emerald-500 origin-center",
+              animClasses[i],
+            )}
+            style={{
+              height: `${Math.round(20 + liveScale * 44)}px`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+interface VoiceCardProps {
+  expected: string;
+  promptText: string;
+  promptLanguage: "en" | "es";
+  targetLanguage: string;
+  voiceState: "idle" | "connecting" | "listening" | "processing" | "error";
+  level: number;
+  transcript: string;
+  error: string | null;
+  feedback: "correct" | "incorrect" | null;
+  onReplayPrompt: () => void;
+  onTryAgain: () => void;
+}
+
+function VoiceCard({
+  expected,
+  promptText,
+  voiceState,
+  level,
+  transcript,
+  error,
+  feedback,
+  onReplayPrompt,
+  onTryAgain,
+}: VoiceCardProps) {
+  const isListening = voiceState === "listening";
+  const isCorrect = feedback === "correct";
+  const isIncorrect = feedback === "incorrect";
+
+  return (
+    <div className="glass-card rounded-2xl p-6 flex flex-col items-center gap-5">
+      {/* Status header */}
+      <div className="w-full flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onReplayPrompt}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-medium hover:bg-slate-200 transition"
+          title="Replay prompt"
+        >
+          <Volume2 className="h-4 w-4" strokeWidth={2} />
+          Replay
+        </button>
+        <div className="text-xs uppercase tracking-wide text-slate-400">
+          {voiceState === "connecting" && "Connecting…"}
+          {voiceState === "listening" && "Listening"}
+          {voiceState === "processing" && "Transcribing…"}
+          {voiceState === "idle" && !feedback && "Ready"}
+          {voiceState === "error" && "Mic unavailable"}
+        </div>
+      </div>
+
+      {/* Waveform visualization */}
+      <div className="flex flex-col items-center gap-2 py-3">
+        <WaveformBars active={isListening} level={level} />
+        <div className="text-sm text-slate-500 italic min-h-[1.5rem]">
+          {voiceState === "connecting" && "Opening microphone…"}
+          {voiceState === "listening" && (transcript || "Speak now…")}
+          {voiceState === "processing" && (transcript || "One sec…")}
+          {voiceState === "idle" && !feedback && "Tap Try again to start"}
+          {voiceState === "error" && (error ?? "Microphone error")}
+        </div>
+      </div>
+
+      {/* Feedback */}
+      {isCorrect && (
+        <div className="w-full flex flex-col items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+          <div className="h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center">
+            <Check className="h-6 w-6 text-white" strokeWidth={3} />
+          </div>
+          <div className="text-2xl font-bold text-emerald-700 text-center">
+            {expected}
+          </div>
+          <div className="text-xs text-emerald-600">¡Correcto!</div>
+        </div>
+      )}
+
+      {isIncorrect && (
+        <div className="w-full flex flex-col items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 p-4">
+          <div className="h-10 w-10 rounded-full bg-rose-500 flex items-center justify-center">
+            <X className="h-6 w-6 text-white" strokeWidth={3} />
+          </div>
+          <div className="text-sm text-rose-700">
+            Heard:{" "}
+            <span className="font-semibold">
+              {transcript || "—"}
+            </span>
+          </div>
+          <div className="text-sm text-rose-700">
+            Expected:{" "}
+            <span className="font-semibold">{expected}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Manual controls */}
+      <div className="flex items-center gap-3">
+        {voiceState === "error" || voiceState === "idle" ? (
+          <button
+            type="button"
+            onClick={onTryAgain}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-medium shadow-soft hover:bg-emerald-600 transition"
+          >
+            <Mic className="h-4 w-4" strokeWidth={2.5} />
+            {feedback ? "Try again" : "Start listening"}
+          </button>
+        ) : isIncorrect ? (
+          <button
+            type="button"
+            onClick={onTryAgain}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white font-medium shadow-soft hover:bg-emerald-600 transition"
+          >
+            <Mic className="h-4 w-4" strokeWidth={2.5} />
+            Try again
+          </button>
+        ) : (
+          <div className="inline-flex items-center gap-1.5 text-xs text-slate-400">
+            <MicOff className="h-3.5 w-3.5" strokeWidth={2} />
+            Mic active — speak when ready
+          </div>
+        )}
+      </div>
+
+      {/* Hidden prompt text for screen readers; the card relies on TTS for sighted users */}
+      <span className="sr-only">Prompt: {promptText}</span>
     </div>
   );
 }

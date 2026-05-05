@@ -44,6 +44,19 @@ module.exports = {
         glass: "14px",
         "glass-strong": "22px",
       },
+      keyframes: {
+        wave: {
+          "0%, 100%": { transform: "scaleY(0.25)" },
+          "50%": { transform: "scaleY(1)" },
+        },
+      },
+      animation: {
+        "wave-1": "wave 1s ease-in-out infinite 0s",
+        "wave-2": "wave 1s ease-in-out infinite 0.15s",
+        "wave-3": "wave 1s ease-in-out infinite 0.3s",
+        "wave-4": "wave 1s ease-in-out infinite 0.45s",
+        "wave-5": "wave 1s ease-in-out infinite 0.6s",
+      },
       fontFamily: {
         sans: [
           "Inter",

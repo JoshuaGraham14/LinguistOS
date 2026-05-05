@@ -102,6 +102,7 @@ export function SettingsPopover({
               >
                 <option value="typing">Typing</option>
                 <option value="multiple-choice">Multiple choice</option>
+                <option value="voice">Voice</option>
               </select>
             </div>
           </div>
