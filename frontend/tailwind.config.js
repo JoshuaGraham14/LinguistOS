@@ -45,17 +45,20 @@ module.exports = {
         "glass-strong": "22px",
       },
       keyframes: {
-        wave: {
-          "0%, 100%": { transform: "scaleY(0.25)" },
-          "50%": { transform: "scaleY(1)" },
+        // Subtle idle pulse — used while the mic is open but the user hasn't
+        // started speaking yet. Stays small and slow so it reads as "ready"
+        // rather than "active" (active = amplitude-driven, no animation).
+        "idle-pulse": {
+          "0%, 100%": { transform: "scaleY(0.55)", opacity: "0.55" },
+          "50%": { transform: "scaleY(0.85)", opacity: "0.8" },
         },
       },
       animation: {
-        "wave-1": "wave 1s ease-in-out infinite 0s",
-        "wave-2": "wave 1s ease-in-out infinite 0.15s",
-        "wave-3": "wave 1s ease-in-out infinite 0.3s",
-        "wave-4": "wave 1s ease-in-out infinite 0.45s",
-        "wave-5": "wave 1s ease-in-out infinite 0.6s",
+        "idle-pulse-1": "idle-pulse 2.4s ease-in-out infinite 0s",
+        "idle-pulse-2": "idle-pulse 2.4s ease-in-out infinite 0.2s",
+        "idle-pulse-3": "idle-pulse 2.4s ease-in-out infinite 0.4s",
+        "idle-pulse-4": "idle-pulse 2.4s ease-in-out infinite 0.6s",
+        "idle-pulse-5": "idle-pulse 2.4s ease-in-out infinite 0.8s",
       },
       fontFamily: {
         sans: [

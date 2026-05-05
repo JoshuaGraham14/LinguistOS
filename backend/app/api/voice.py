@@ -107,24 +107,27 @@ def synthesize_speech(req: TTSRequest) -> StreamingResponse:
 # Realtime API WebSocket proxy
 # ---------------------------------------------------------------------------
 
-# OpenAI's Realtime API endpoint (preview model as of the planning date).
-_REALTIME_URL = "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview"
+# OpenAI's Realtime API has a dedicated *transcription* mode that, unlike the
+# default conversational endpoint, reliably emits
+# `conversation.item.input_audio_transcription.completed` events without
+# trying to generate a model response. This is exactly what we want here.
+_REALTIME_URL = "wss://api.openai.com/v1/realtime?intent=transcription"
 
 # Initial session configuration sent right after the upstream socket opens.
-# We disable audio modality on the model side because we only need
-# transcription; TTS is handled by a separate REST call.
+# `gpt-4o-transcribe` is multilingual and noticeably more accurate than
+# `whisper-1`; fall back is automatic on the OpenAI side.
 _SESSION_UPDATE = {
-    "type": "session.update",
+    "type": "transcription_session.update",
     "session": {
-        "modalities": ["text"],
         "input_audio_format": "pcm16",
-        "input_audio_transcription": {"model": "whisper-1"},
+        "input_audio_transcription": {"model": "gpt-4o-transcribe"},
         "turn_detection": {
             "type": "server_vad",
             "threshold": 0.5,
             "prefix_padding_ms": 300,
-            "silence_duration_ms": 600,
+            "silence_duration_ms": 500,
         },
+        "input_audio_noise_reduction": {"type": "near_field"},
     },
 }
 

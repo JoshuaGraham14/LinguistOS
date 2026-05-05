@@ -86,10 +86,17 @@ function float32ToPCM16Base64(input: Float32Array): string {
  * capture session. The session is fully torn down whenever `stop` is called
  * or the component unmounts.
  */
+/** How long we'll wait for the user to start speaking before giving up. */
+const NO_SPEECH_TIMEOUT_MS = 12000;
+
 export function useVoiceCapture(callbacks: VoiceCaptureCallbacks) {
   const [state, setState] = useState<VoiceState>("idle");
   const [level, setLevel] = useState(0); // 0-1, amplitude
   const [interim, setInterim] = useState("");
+  // True between `speech_started` and `speech_stopped` from the server VAD.
+  // Drives the waveform UI: when speaking, bars track amplitude only (no
+  // CSS animation); when listening but quiet, bars do a subtle idle pulse.
+  const [speaking, setSpeaking] = useState(false);
 
   // Latest callbacks live in a ref so we don't have to re-bind WS handlers.
   const cbRef = useRef(callbacks);
@@ -102,11 +109,16 @@ export function useVoiceCapture(callbacks: VoiceCaptureCallbacks) {
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number | null>(null);
+  const noSpeechTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stop = useCallback(() => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
+    }
+    if (noSpeechTimerRef.current !== null) {
+      clearTimeout(noSpeechTimerRef.current);
+      noSpeechTimerRef.current = null;
     }
     try {
       procRef.current?.disconnect();
@@ -136,6 +148,7 @@ export function useVoiceCapture(callbacks: VoiceCaptureCallbacks) {
     wsRef.current = null;
     setLevel(0);
     setInterim("");
+    setSpeaking(false);
     setState("idle");
   }, []);
 
@@ -217,6 +230,14 @@ export function useVoiceCapture(callbacks: VoiceCaptureCallbacks) {
         rafRef.current = requestAnimationFrame(tick);
 
         setState("listening");
+
+        // Bail out if the user never speaks within the timeout window. We
+        // reset this timer the moment the server VAD reports speech_started.
+        noSpeechTimerRef.current = setTimeout(() => {
+          cbRef.current.onError?.("Didn't hear anything. Tap to try again.");
+          setState("error");
+          stop();
+        }, NO_SPEECH_TIMEOUT_MS);
       } catch (err) {
         cbRef.current.onError?.(
           err instanceof Error ? err.message : "mic permission denied",
@@ -236,17 +257,43 @@ export function useVoiceCapture(callbacks: VoiceCaptureCallbacks) {
       const type = msg?.type as string | undefined;
       if (!type) return;
 
+      // Useful for debugging during development; quiet in production.
+      if (process.env.NODE_ENV !== "production") {
+        if (type === "error" || type.includes("transcription")) {
+          // eslint-disable-next-line no-console
+          console.debug("[voice]", type, msg);
+        }
+      }
+
       if (type === "input_audio_buffer.speech_started") {
-        // VAD detected speech — keep listening state.
+        // VAD detected speech — cancel the no-speech timeout.
+        if (noSpeechTimerRef.current !== null) {
+          clearTimeout(noSpeechTimerRef.current);
+          noSpeechTimerRef.current = null;
+        }
+        setSpeaking(true);
         setInterim("");
       } else if (type === "input_audio_buffer.speech_stopped") {
+        setSpeaking(false);
         setState("processing");
       } else if (
         type === "conversation.item.input_audio_transcription.completed"
       ) {
         const transcript: string = msg.transcript ?? "";
         setInterim(transcript);
+        // Empty transcripts (just noise) — treat as no-speech and let caller
+        // decide whether to show a hint or auto-restart.
+        if (!transcript.trim()) {
+          cbRef.current.onError?.("I didn't catch that. Try again.");
+          setState("error");
+          return;
+        }
         cbRef.current.onTranscript(transcript);
+      } else if (type === "conversation.item.input_audio_transcription.failed") {
+        cbRef.current.onError?.(
+          msg.error?.message ?? "transcription failed",
+        );
+        setState("error");
       } else if (type === "error") {
         const message: string =
           msg.error?.message ?? msg.message ?? "realtime error";
@@ -271,5 +318,5 @@ export function useVoiceCapture(callbacks: VoiceCaptureCallbacks) {
     return () => stop();
   }, [stop]);
 
-  return { state, level, interim, start, stop };
+  return { state, level, interim, speaking, start, stop };
 }

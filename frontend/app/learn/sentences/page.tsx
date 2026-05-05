@@ -856,6 +856,7 @@ function SentencePracticeInner() {
               targetLanguage={targetLanguage}
               promptText={pair.prompt}
               voiceState={voice.state}
+              speaking={voice.speaking}
               level={voice.level}
               transcript={voiceTranscript}
               error={voiceError}
@@ -998,24 +999,35 @@ function SummaryStat({
   );
 }
 
-/** Five animated bars that visualise mic activity. Heights respond to the
- *  live RMS amplitude (`level`, 0-1) so the waveform reads as the user's
- *  actual voice rather than just a canned animation. */
-function WaveformBars({ active, level }: { active: boolean; level: number }) {
-  // Bar heights are a blend of the staggered base animation (CSS) and the
-  // live RMS level so silence collapses the bars and louder speech expands
-  // them. Each bar gets a different multiplier for a wave-like envelope.
-  const multipliers = [0.6, 0.85, 1, 0.85, 0.6];
-  const animClasses = [
-    "animate-wave-1",
-    "animate-wave-2",
-    "animate-wave-3",
-    "animate-wave-4",
-    "animate-wave-5",
+/** Five bars that visualise mic activity in three distinct visual states:
+ *  - inactive (mic closed): flat dim bars, no motion at all.
+ *  - listening idle (mic open, user hasn't spoken): subtle slow CSS pulse so
+ *    the user knows we're ready without a busy animation.
+ *  - speaking (server VAD detected speech): pure amplitude-driven heights;
+ *    NO CSS animation — the user's voice IS the animation. */
+function WaveformBars({
+  active,
+  speaking,
+  level,
+}: {
+  active: boolean;
+  speaking: boolean;
+  level: number;
+}) {
+  // Per-bar multiplier so the centre bar reads tallest at peak amplitude.
+  const multipliers = [0.55, 0.8, 1, 0.8, 0.55];
+  const idleClasses = [
+    "animate-idle-pulse-1",
+    "animate-idle-pulse-2",
+    "animate-idle-pulse-3",
+    "animate-idle-pulse-4",
+    "animate-idle-pulse-5",
   ];
+
   return (
     <div className="flex items-center gap-1.5 h-16">
       {multipliers.map((mult, i) => {
+        // Mic closed: flat, dim, completely still.
         if (!active) {
           return (
             <div
@@ -1024,17 +1036,25 @@ function WaveformBars({ active, level }: { active: boolean; level: number }) {
             />
           );
         }
-        const liveScale = Math.max(0.18, Math.min(1, level * mult * 1.6));
+        // Mic open + speaking: amplitude-driven heights, no animation.
+        if (speaking) {
+          const scaled = Math.max(0.15, Math.min(1, level * mult * 1.8));
+          return (
+            <div
+              key={i}
+              className="w-2.5 rounded-full bg-emerald-500 transition-[height] duration-75"
+              style={{ height: `${Math.round(8 + scaled * 52)}px` }}
+            />
+          );
+        }
+        // Mic open, no speech yet: slow gentle pulse.
         return (
           <div
             key={i}
             className={cn(
-              "w-2.5 rounded-full bg-emerald-500 origin-center",
-              animClasses[i],
+              "w-2.5 h-8 rounded-full bg-emerald-300/70 origin-center",
+              idleClasses[i],
             )}
-            style={{
-              height: `${Math.round(20 + liveScale * 44)}px`,
-            }}
           />
         );
       })}
@@ -1048,6 +1068,7 @@ interface VoiceCardProps {
   promptLanguage: "en" | "es";
   targetLanguage: string;
   voiceState: "idle" | "connecting" | "listening" | "processing" | "error";
+  speaking: boolean;
   level: number;
   transcript: string;
   error: string | null;
@@ -1060,6 +1081,7 @@ function VoiceCard({
   expected,
   promptText,
   voiceState,
+  speaking,
   level,
   transcript,
   error,
@@ -1067,7 +1089,11 @@ function VoiceCard({
   onReplayPrompt,
   onTryAgain,
 }: VoiceCardProps) {
-  const isListening = voiceState === "listening";
+  // The mic is "active" any time the WS is open and we're not in an error
+  // or post-feedback resting state. Bars track the live amplitude only when
+  // the server VAD has marked speech as happening.
+  const isMicActive =
+    voiceState === "listening" || voiceState === "processing";
   const isCorrect = feedback === "correct";
   const isIncorrect = feedback === "incorrect";
 
@@ -1095,12 +1121,17 @@ function VoiceCard({
 
       {/* Waveform visualization */}
       <div className="flex flex-col items-center gap-2 py-3">
-        <WaveformBars active={isListening} level={level} />
+        <WaveformBars
+          active={isMicActive}
+          speaking={speaking}
+          level={level}
+        />
         <div className="text-sm text-slate-500 italic min-h-[1.5rem]">
           {voiceState === "connecting" && "Opening microphone…"}
-          {voiceState === "listening" && (transcript || "Speak now…")}
-          {voiceState === "processing" && (transcript || "One sec…")}
-          {voiceState === "idle" && !feedback && "Tap Try again to start"}
+          {voiceState === "listening" &&
+            (speaking ? transcript || "Listening…" : "Speak now…")}
+          {voiceState === "processing" && (transcript || "Transcribing…")}
+          {voiceState === "idle" && !feedback && "Tap to start"}
           {voiceState === "error" && (error ?? "Microphone error")}
         </div>
       </div>
