@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import generate, mastery, practice, sentences, tokens, vocab, workspaces
+from app.api import (
+    generate,
+    mastery,
+    practice,
+    sentences,
+    tokens,
+    vocab,
+    voice,
+    workspaces,
+)
 from app.config import settings
 from app.db.database import Base, engine
 from app.db import models  # noqa: F401
@@ -28,6 +37,9 @@ app.include_router(workspaces.router, prefix="/api", tags=["workspaces"])
 app.include_router(mastery.router, prefix="/api", tags=["mastery"])
 app.include_router(sentences.router, prefix="/api", tags=["sentences"])
 app.include_router(tokens.router, prefix="/api", tags=["tokens"])
+# Voice routes mix REST (`/api/tts`) and WebSocket (`/ws/realtime`); both
+# paths are declared inside the router itself, so we mount with no prefix.
+app.include_router(voice.router, tags=["voice"])
 
 
 @app.on_event("startup")

@@ -79,7 +79,7 @@ export type Person = "1st" | "2nd" | "3rd";
 export type GrammaticalNumber = "singular" | "plural";
 
 export interface PracticeSettings {
-  mode: "typing" | "multiple-choice";
+  mode: "typing" | "multiple-choice" | "voice";
   direction: "en-to-es" | "es-to-en";
   sentenceLength: "short" | "medium" | "long";
   tagFilter: VocabTag[];
@@ -89,6 +89,9 @@ export interface PracticeSettings {
   // LOS-502: constrain generation to the learner's lexicon.
   lexiconConstraint: LexiconConstraint;
   stretchCount: number;
+  // Voice mode: when true, automatically advance to the next prompt after a
+  // correct spoken answer (with a brief pause for the answer playback).
+  autoAdvance: boolean;
 }
 
 export interface SentenceCandidate {

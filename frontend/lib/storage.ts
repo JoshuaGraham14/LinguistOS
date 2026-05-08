@@ -14,7 +14,7 @@ import type {
   Workspace,
 } from "./types";
 
-const SETTINGS_KEY = "linguistos.settings.v2";
+const SETTINGS_KEY = "linguistos.settings.v3";
 const PROFILE_KEY = "linguistos.profile.v1";
 const ACTIVE_WORKSPACE_KEY = "linguistos.workspace.active.v1";
 const WORKSPACE_CHANGE_EVENT = "linguistos:workspace-change";
@@ -32,6 +32,7 @@ const DEFAULT_SETTINGS: PracticeSettings = {
   number: "singular",
   lexiconConstraint: "off",
   stretchCount: 0,
+  autoAdvance: false,
 };
 
 const DEFAULT_PROFILE: Profile = { name: "", wordDisplayMode: "as_encountered" };

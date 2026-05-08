@@ -1,13 +1,18 @@
 "use client";
 
 import {
+  Check,
   ChevronLeft,
   ChevronRight,
   HelpCircle,
   Loader2,
+  Mic,
+  MicOff,
   RefreshCw,
   RotateCcw,
   SkipForward,
+  Volume2,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -22,32 +27,38 @@ import {
 import { SelectionCapture } from "@/components/SelectionCapture";
 import { SettingsPopover } from "@/components/SettingsPopover";
 import { TokenizedText } from "@/components/TokenizedText";
+import { checkAnswer } from "@/lib/answer-check";
 import { createSentence, generateOrMock } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { usePracticeSettings, useVocab } from "@/lib/storage";
+import {
+  playCorrectSound,
+  playTTS,
+  prefetchTTS,
+  stopAllTTS,
+  useVoiceCapture,
+} from "@/lib/voice";
 import type {
   PracticeSettings,
   SentenceCandidate,
   VocabItem,
 } from "@/lib/types";
 
-function normalize(s: string) {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/[.,!?¿¡;:"']/g, "")
-    .replace(/\s+/g, " ");
-}
-
 interface PromptPair {
   prompt: string;
   expected: string;
-  promptLanguage: "en" | "es";
+  /** ISO-639-1 code for the prompt text. */
+  promptLanguage: string;
+  /** ISO-639-1 code for the expected answer. We pin TTS playback and
+   *  Realtime transcription to this so the model only listens for this
+   *  one language (no multilingual auto-detection). */
+  expectedLanguage: string;
 }
 
 function pickPromptPair(
   candidate: SentenceCandidate | null,
   direction: PracticeSettings["direction"],
+  targetLanguage: string,
 ): PromptPair | null {
   if (!candidate || !candidate.translation) return null;
   if (direction === "en-to-es") {
@@ -55,13 +66,26 @@ function pickPromptPair(
       prompt: candidate.translation,
       expected: candidate.sentence,
       promptLanguage: "en",
+      expectedLanguage: targetLanguage,
     };
   }
   return {
     prompt: candidate.sentence,
     expected: candidate.translation,
-    promptLanguage: "es",
+    promptLanguage: targetLanguage,
+    expectedLanguage: "en",
   };
+}
+
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: "English",
+  es: "Spanish",
+  fr: "French",
+  he: "Hebrew",
+};
+
+function languageName(code: string): string {
+  return LANGUAGE_NAMES[code] ?? code.toUpperCase();
 }
 
 interface ClozeQuestion {
@@ -176,14 +200,30 @@ function SentencePracticeInner() {
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sentenceSectionRef = useRef<HTMLElement | null>(null);
 
-  // Invalidate cache + reset session whenever generation constraints change.
+  // Voice mode plumbing (LOS voice mode). Tracks whether we've already kicked
+  // off the prompt-read-then-listen sequence for the current word so the
+  // effect doesn't restart mid-question.
+  const voicePromptToken = useRef<number | null>(null);
+  // Ref that always holds the latest settings.mode so generateFor (a
+  // useCallback that doesn't include mode in its deps) can read it without a
+  // stale closure.
+  const settingsModeRef = useRef(settings.mode);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const modeParamApplied = useRef(false);
+
+  // Invalidate cache whenever generation constraints change so the next
+  // request uses the new params. We deliberately KEEP wordIndex/stats/scoredIds
+  // so the user stays on the same word with their session progress intact —
+  // changing tense or direction shouldn't kick them back to word 1.
+  // The voice prompt token is cleared so TTS re-fires for the regenerated
+  // sentence on the same word.
   useEffect(() => {
     setCache(new Map());
-    setScoredIds(new Set());
-    setStats(ZERO_STATS);
     setFinished(false);
-    setWordIndex(0);
     setConstraintFellBack(false);
+    voicePromptToken.current = null;
+    stopAllTTS();
   }, [
     settings.tense,
     settings.person,
@@ -212,6 +252,23 @@ function SentencePracticeInner() {
   const current = filteredVocab[wordIndex];
   const candidate = current ? cache.get(current.id) ?? null : null;
 
+  const targetLanguage = activeWorkspace?.language ?? "es";
+
+  // ?mode=voice in the URL pre-selects voice mode once settings are hydrated.
+  // We only apply this once per page mount so the user can switch modes
+  // afterwards via the settings popover without it snapping back.
+  // Always keep the ref current so generateFor can read it without stale closure.
+  settingsModeRef.current = settings.mode;
+
+  const modeParam = searchParams.get("mode");
+  useEffect(() => {
+    if (!settingsHydrated || modeParamApplied.current) return;
+    if (modeParam === "voice" && settings.mode !== "voice") {
+      setSettings({ ...settings, mode: "voice" });
+    }
+    modeParamApplied.current = true;
+  }, [settingsHydrated, modeParam, settings, setSettings]);
+
   const generateFor = useCallback(
     async (word: VocabItem, force = false) => {
       if (!force && cache.has(word.id)) return;
@@ -234,6 +291,33 @@ function SentencePracticeInner() {
         if (myToken !== generationToken.current) return;
         const next = res.candidates[0] ?? null;
         if (next) {
+          // ── Voice-mode TTS prefetch ────────────────────────────────────────
+          // Start the audio fetch RIGHT NOW — before setCache, before React
+          // re-renders, before the sentence is even painted. By the time the
+          // voice useEffect fires (after paint, ~30-50 ms from here), the
+          // browser has been buffering the MP3 for that entire window. This
+          // is the key fix for the 1-1.5 s display-to-audio gap: without
+          // this, the TTS request only starts after the effect fires.
+          if (settingsModeRef.current === "voice") {
+            const promptText =
+              settings.direction === "en-to-es"
+                ? (next.translation ?? "")
+                : next.sentence;
+            const promptLang =
+              settings.direction === "en-to-es" ? "en" : targetLanguage;
+            const expectedText =
+              settings.direction === "en-to-es"
+                ? next.sentence
+                : (next.translation ?? "");
+            const expectedLang =
+              settings.direction === "en-to-es" ? targetLanguage : "en";
+            // Prompt — will be played by the voice useEffect.
+            prefetchTTS(promptText, promptLang);
+            // Expected answer — will be played on correct response.
+            prefetchTTS(expectedText, expectedLang);
+          }
+          // ──────────────────────────────────────────────────────────────────
+
           setCache((prev) => {
             const m = new Map(prev);
             m.set(word.id, next);
@@ -310,6 +394,8 @@ function SentencePracticeInner() {
     setFeedback(null);
     setHintRevealed(false);
     setSelectedOption(null);
+    setVoiceTranscript("");
+    setVoiceError(null);
     if (advanceTimer.current) {
       clearTimeout(advanceTimer.current);
       advanceTimer.current = null;
@@ -324,7 +410,98 @@ function SentencePracticeInner() {
     }
   }, [hydrated, settingsHydrated, current, finished, cache, generateFor]);
 
-  const pair = pickPromptPair(candidate, settings.direction);
+  const pair = useMemo(
+    () => pickPromptPair(candidate, settings.direction, targetLanguage),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [candidate, settings.direction, targetLanguage],
+  );
+
+  // NOTE: TTS prefetch for both prompt and expected answer is now handled
+  // inside `generateFor` the moment the candidate arrives — before React
+  // re-renders or paints the sentence. No separate effect needed here.
+
+  // ── Voice mode capture ─────────────────────────────────────────────────
+  // The hook owns the WebSocket + mic stream. We pass it a callback that
+  // reads the latest `pair` / settings via closure; the hook stores it in
+  // a ref so we don't need to re-bind on every render.
+  const voice = useVoiceCapture({
+    onTranscript: (transcript) => {
+      setVoiceTranscript(transcript);
+      if (!pair) return;
+      // Lenient match (missing pronoun / missing accent) counts as correct,
+      // but the UI still shows the canonical sentence so the learner sees
+      // the fuller form they should produce next time.
+      const result = checkAnswer(transcript, pair.expected);
+      setFeedback(result.ok ? "correct" : "incorrect");
+      trackOutcome(result.ok ? "correct" : "incorrect");
+      voice.stop();
+      if (result.ok) {
+        // Brief upbeat chime — a non-verbal, immediate "yes!" confirmation
+        // that fires before the slower TTS readback so feedback feels snappy.
+        playCorrectSound();
+        // Read the correct answer back in the answer's language for
+        // pronunciation reinforcement, then optionally auto-advance. The
+        // expected-answer TTS is prefetched the moment the sentence loads
+        // (see prefetch effect above), so playback is essentially instant.
+        playTTS(pair.expected, pair.expectedLanguage)
+          .catch(() => undefined)
+          .finally(() => {
+            if (settings.autoAdvance) {
+              advanceTimer.current = setTimeout(advanceOrFinish, 600);
+            }
+          });
+      } else {
+        // Restart listening so the user can try again without tapping.
+        advanceTimer.current = setTimeout(() => {
+          setFeedback(null);
+          setVoiceTranscript("");
+          void voice.start({ language: pair.expectedLanguage, expected: pair.expected });
+        }, 1600);
+      }
+    },
+    onError: (msg) => setVoiceError(msg),
+  });
+
+  // Voice mode: when the prompt for a new word is ready, read it aloud and
+  // then start listening. We guard with a per-word token so re-renders don't
+  // restart the audio mid-question. A `cancelled` flag additionally ensures
+  // that navigating away (or switching modes) while TTS is still playing does
+  // not attempt to open the mic on an unmounted/stale component.
+  useEffect(() => {
+    if (settings.mode !== "voice") return;
+    if (!pair || !current) return;
+    if (voicePromptToken.current === current.id) return;
+    voicePromptToken.current = current.id;
+    voice.stop();
+    setVoiceTranscript("");
+    setVoiceError(null);
+    let cancelled = false;
+    const promptLang = pair.promptLanguage;
+    playTTS(pair.prompt, promptLang)
+      .catch(() => undefined)
+      .finally(() => {
+        if (cancelled) return;
+        // Don't start listening if the user has switched word/mode in the
+        // meantime — token check guards against that race.
+        if (voicePromptToken.current !== current.id) return;
+        if (settings.mode !== "voice") return;
+        void voice.start({ language: pair.expectedLanguage, expected: pair.expected });
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current?.id, pair, settings.mode]);
+
+  // Switching away from voice mode (or unmounting) tears down the mic + WS.
+  useEffect(() => {
+    if (settings.mode !== "voice") {
+      voice.stop();
+      voicePromptToken.current = null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.mode]);
+
   const cloze = useMemo(() => {
     if (settings.mode !== "multiple-choice") return null;
     if (!current || !candidate) return null;
@@ -358,11 +535,22 @@ function SentencePracticeInner() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!pair) return;
-    const ok = normalize(answer) === normalize(pair.expected);
-    setFeedback(ok ? "correct" : "incorrect");
-    trackOutcome(ok ? "correct" : "incorrect");
-    if (ok) {
-      advanceTimer.current = setTimeout(() => advanceOrFinish(), 1200);
+    // Same lenient checker as voice mode — pronoun-drop + diacritic-strip
+    // both count as correct, but the canonical sentence is shown back to
+    // the learner so they internalise the fuller form.
+    const result = checkAnswer(answer, pair.expected);
+    setFeedback(result.ok ? "correct" : "incorrect");
+    trackOutcome(result.ok ? "correct" : "incorrect");
+    if (result.ok) {
+      // Match voice mode: chime + read the canonical answer aloud so the
+      // learner hears the proper pronunciation even if they typed a lenient
+      // form. Auto-advance after the readback completes.
+      playCorrectSound();
+      playTTS(pair.expected, pair.expectedLanguage)
+        .catch(() => undefined)
+        .finally(() => {
+          advanceTimer.current = setTimeout(() => advanceOrFinish(), 600);
+        });
     }
   }
 
@@ -439,7 +627,26 @@ function SentencePracticeInner() {
             Practice words in context with generated sentence drills.
           </p>
         </header>
-        <SettingsPopover settings={settings} onChange={setSettings} />
+        <div className="flex items-center gap-2">
+          {settings.mode === "voice" && (
+            <button
+              type="button"
+              onClick={() =>
+                setSettings({ ...settings, autoAdvance: !settings.autoAdvance })
+              }
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-2xl px-4 py-3 text-xs font-bold tracking-wider transition shadow-soft",
+                settings.autoAdvance
+                  ? "bg-emerald-500 text-white"
+                  : "bg-white/70 text-slate-500 border border-slate-200",
+              )}
+              title="Auto-advance to the next sentence after a correct answer"
+            >
+              AUTO {settings.autoAdvance ? "ON" : "OFF"}
+            </button>
+          )}
+          <SettingsPopover settings={settings} onChange={setSettings} />
+        </div>
       </div>
 
       {wordParam && filteredVocab.length > 0 && (
@@ -519,7 +726,12 @@ function SentencePracticeInner() {
 
           <section
             ref={sentenceSectionRef}
-            className="rounded-3xl bg-gradient-to-br from-white via-white to-slate-50 shadow-card p-12 min-h-[280px] relative flex flex-col items-center justify-center"
+            className={cn(
+              "rounded-3xl bg-gradient-to-br from-white via-white to-slate-50 shadow-card relative flex flex-col items-center justify-center",
+              settings.mode === "voice"
+                ? "p-6 md:p-8 min-h-[420px]"
+                : "p-12 min-h-[280px]",
+            )}
           >
             {isMock && (
               <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
@@ -562,6 +774,34 @@ function SentencePracticeInner() {
                 <Loader2 className="h-5 w-5 animate-spin" />
                 Generating sentence…
               </div>
+            ) : settings.mode === "voice" && pair ? (
+              <VoiceModeContent
+                pair={pair}
+                workspaceLanguage={
+                  (activeWorkspace?.language as "es" | "he" | "fr" | undefined) ??
+                  "es"
+                }
+                wordId={current?.id}
+                voiceState={voice.state}
+                speaking={voice.speaking}
+                level={voice.level}
+                transcript={voiceTranscript}
+                liveTranscript={voice.interim}
+                error={voiceError}
+                feedback={feedback}
+                hintRevealed={hintRevealed}
+                onReplayPrompt={() =>
+                  playTTS(pair.prompt, pair.promptLanguage).catch(
+                    () => undefined,
+                  )
+                }
+                onTryAgain={() => {
+                  setFeedback(null);
+                  setVoiceTranscript("");
+                  setVoiceError(null);
+                  void voice.start({ language: pair.expectedLanguage, expected: pair.expected });
+                }}
+              />
             ) : settings.mode === "multiple-choice" && cloze ? (
               <>
                 <div className="text-slate-500">Fill in the blank:</div>
@@ -772,7 +1012,12 @@ function SentencePracticeInner() {
                   )}
                 >
                   {feedback === "correct" ? (
-                    <span>¡Correcto! Advancing…</span>
+                    <span>
+                      ¡Correcto!{" "}
+                      <strong className="font-semibold">
+                        {pair.expected}
+                      </strong>
+                    </span>
                   ) : (
                     <span>
                       Not quite. Expected:{" "}
@@ -854,6 +1099,275 @@ function SummaryStat({
     <div className={cn("rounded-2xl p-4", p.bg)}>
       <div className={cn("text-2xl font-bold", p.text)}>{value}</div>
       <div className={cn("text-xs mt-0.5", p.sub)}>{label}</div>
+    </div>
+  );
+}
+
+/** Five bars that visualise mic activity in three distinct visual states:
+ *  - inactive (mic closed): flat dim bars, no motion at all.
+ *  - listening idle (mic open, user hasn't spoken): subtle slow CSS pulse so
+ *    the user knows we're ready without a busy animation.
+ *  - speaking (server VAD detected speech): pure amplitude-driven heights;
+ *    NO CSS animation — the user's voice IS the animation. */
+function WaveformBars({
+  active,
+  speaking,
+  level,
+}: {
+  active: boolean;
+  speaking: boolean;
+  level: number;
+}) {
+  // Per-bar multiplier so the centre bar reads tallest at peak amplitude.
+  const multipliers = [0.55, 0.8, 1, 0.8, 0.55];
+  const idleClasses = [
+    "animate-idle-pulse-1",
+    "animate-idle-pulse-2",
+    "animate-idle-pulse-3",
+    "animate-idle-pulse-4",
+    "animate-idle-pulse-5",
+  ];
+
+  return (
+    <div className="flex items-center gap-1.5 h-16">
+      {multipliers.map((mult, i) => {
+        // Mic closed: flat, dim, completely still.
+        if (!active) {
+          return (
+            <div
+              key={i}
+              className="w-2.5 h-3 rounded-full bg-slate-300"
+            />
+          );
+        }
+        // Mic open + speaking: amplitude-driven heights, no animation.
+        if (speaking) {
+          const scaled = Math.max(0.15, Math.min(1, level * mult * 1.8));
+          return (
+            <div
+              key={i}
+              className="w-2.5 rounded-full bg-emerald-500 transition-[height] duration-75"
+              style={{ height: `${Math.round(8 + scaled * 52)}px` }}
+            />
+          );
+        }
+        // Mic open, no speech yet: slow gentle pulse.
+        return (
+          <div
+            key={i}
+            className={cn(
+              "w-2.5 h-8 rounded-full bg-emerald-300/70 origin-center",
+              idleClasses[i],
+            )}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+interface VoiceModeContentProps {
+  pair: PromptPair;
+  workspaceLanguage: "es" | "he" | "fr";
+  wordId: number | undefined;
+  voiceState: "idle" | "connecting" | "listening" | "processing" | "error";
+  speaking: boolean;
+  level: number;
+  /** Final transcript from a completed turn. */
+  transcript: string;
+  /** Streaming partial transcript while the user is still speaking. */
+  liveTranscript: string;
+  error: string | null;
+  feedback: "correct" | "incorrect" | null;
+  hintRevealed: boolean;
+  onReplayPrompt: () => void;
+  onTryAgain: () => void;
+}
+
+/** Compact, single-card voice-mode UI. Lives inside the main sentence
+ *  section so feedback REPLACES the waveform area instead of pushing
+ *  content below the fold. Three exclusive states share the centre slot:
+ *  waveform-while-listening / correct-readout / incorrect-with-retry. */
+function VoiceModeContent({
+  pair,
+  workspaceLanguage,
+  wordId,
+  voiceState,
+  speaking,
+  level,
+  transcript,
+  liveTranscript,
+  error,
+  feedback,
+  hintRevealed,
+  onReplayPrompt,
+  onTryAgain,
+}: VoiceModeContentProps) {
+  const isMicActive =
+    voiceState === "listening" || voiceState === "processing";
+  const isCorrect = feedback === "correct";
+  const isIncorrect = feedback === "incorrect";
+  const isErrorState = voiceState === "error" && !feedback;
+
+  // Status pill text. One-word labels keep the eye on the prompt.
+  const status =
+    voiceState === "connecting"
+      ? { label: "Connecting", tone: "slate" }
+      : voiceState === "listening"
+        ? speaking
+          ? { label: "Listening", tone: "emerald" }
+          : { label: "Speak now", tone: "emerald" }
+        : voiceState === "processing"
+          ? { label: "Transcribing", tone: "indigo" }
+          : voiceState === "error"
+            ? { label: "Mic unavailable", tone: "rose" }
+            : { label: "Ready", tone: "slate" };
+
+  const toneClasses: Record<string, string> = {
+    slate: "bg-slate-100 text-slate-500",
+    emerald: "bg-emerald-100 text-emerald-700",
+    indigo: "bg-indigo-100 text-indigo-700",
+    rose: "bg-rose-100 text-rose-700",
+  };
+
+  return (
+    <div className="w-full flex flex-col items-center">
+      {/* Direction label */}
+      <div className="text-[11px] uppercase tracking-[0.18em] font-semibold text-slate-400">
+        Translate to {languageName(pair.expectedLanguage)}
+      </div>
+
+      {/* Prompt text + replay control */}
+      <div className="mt-3 text-2xl md:text-3xl font-semibold text-slate-800 text-center max-w-2xl leading-snug">
+        {pair.promptLanguage !== "en" ? (
+          <TokenizedText
+            text={pair.prompt}
+            language={workspaceLanguage}
+            sourceContext={{ type: "sentence_practice_prompt", id: wordId }}
+          />
+        ) : (
+          pair.prompt
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onReplayPrompt}
+        className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition"
+        title="Replay prompt"
+      >
+        <Volume2 className="h-3.5 w-3.5" strokeWidth={2.2} />
+        Replay
+      </button>
+
+      {/* Centre slot: waveform / correct / incorrect / error.
+          Fixed min-height so feedback transitions don't shift the layout. */}
+      <div className="mt-6 flex flex-col items-center justify-center w-full min-h-[140px]">
+        {isCorrect ? (
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-12 w-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <Check className="h-7 w-7 text-white" strokeWidth={3} />
+            </div>
+            <div className="text-xl md:text-2xl font-semibold text-emerald-700 text-center max-w-xl">
+              {pair.expected}
+            </div>
+          </div>
+        ) : isIncorrect ? (
+          <div className="flex flex-col items-center gap-2 w-full max-w-md">
+            <div className="h-11 w-11 rounded-full bg-rose-500 flex items-center justify-center shadow-md shadow-rose-500/25">
+              <X className="h-6 w-6 text-white" strokeWidth={3} />
+            </div>
+            <div className="text-sm text-slate-600 text-center">
+              You said{" "}
+              <span className="text-rose-600 font-medium">
+                “{transcript || "—"}”
+              </span>
+            </div>
+            <div className="text-sm text-slate-600 text-center">
+              Expected{" "}
+              <span className="text-emerald-600 font-medium">
+                “{pair.expected}”
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onTryAgain}
+              className="mt-1 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-medium shadow-soft hover:bg-emerald-600 transition"
+            >
+              <Mic className="h-4 w-4" strokeWidth={2.5} />
+              Try again
+            </button>
+          </div>
+        ) : isErrorState ? (
+          <div className="flex flex-col items-center gap-3">
+            <div className="text-sm text-slate-500">
+              {error ?? "Microphone error"}
+            </div>
+            <button
+              type="button"
+              onClick={onTryAgain}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-sm font-medium shadow-soft hover:bg-emerald-600 transition"
+            >
+              <Mic className="h-4 w-4" strokeWidth={2.5} />
+              Try again
+            </button>
+          </div>
+        ) : (
+          <>
+            <WaveformBars
+              active={isMicActive}
+              speaking={speaking}
+              level={level}
+            />
+            <div className="mt-3 flex items-center gap-2">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium",
+                  toneClasses[status.tone],
+                )}
+              >
+                {isMicActive ? (
+                  <Mic className="h-3 w-3" strokeWidth={2.5} />
+                ) : (
+                  <MicOff className="h-3 w-3" strokeWidth={2.5} />
+                )}
+                {status.label}
+              </span>
+            </div>
+            {/* Live transcript display.
+                Reserved a fixed area while the mic is active so words appear
+                in place (no layout jump). Deepgram Nova-3 streams interim
+                snapshots while the user is still speaking → `liveTranscript`
+                updates in real time. When nothing has arrived yet we show a
+                pulsing cursor so the user has visual confirmation the mic
+                is hot. */}
+            {(voiceState === "listening" || voiceState === "processing") && (
+              <div className="mt-3 text-base text-slate-700 max-w-md text-center min-h-[1.75rem] px-3">
+                {liveTranscript || transcript ? (
+                  <>
+                    “{liveTranscript || transcript}
+                    {voiceState === "listening" && (
+                      <span className="inline-block w-[2px] h-4 bg-emerald-500 align-middle ml-0.5 animate-pulse" />
+                    )}
+                    ”
+                  </>
+                ) : (
+                  <span className="text-slate-300">
+                    <span className="inline-block w-[2px] h-4 bg-emerald-500 align-middle animate-pulse" />
+                  </span>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Hint reveal — appears beneath the centre slot, doesn't push it. */}
+      {hintRevealed && !feedback && (
+        <div className="mt-4 text-sm text-slate-500">
+          Expected:{" "}
+          <span className="text-slate-700 font-medium">{pair.expected}</span>
+        </div>
+      )}
     </div>
   );
 }
