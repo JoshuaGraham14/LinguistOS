@@ -2,13 +2,18 @@
 
 Provides:
 - POST /api/tts: text-to-speech via OpenAI TTS, returns audio/mpeg.
-- WS  /ws/realtime: bidirectional proxy to OpenAI Realtime API for streaming
-  speech-to-text. The browser cannot connect directly because the API key must
-  not leave the server, so this route relays JSON events both ways.
+- WS  /ws/realtime: bidirectional proxy to Deepgram's streaming speech-to-text
+  API (Nova-3). The browser cannot connect directly because the API key must
+  not leave the server, so this route relays audio upstream and translates
+  Deepgram's wire format into a stable internal event protocol shaped for
+  our UI.
 
-The Realtime API is configured for transcription only (no model audio output);
-we use OpenAI TTS separately for prompt playback so we can cache audio per
-sentence and pick the right voice/language.
+Why two providers?
+  OpenAI TTS (`tts-1`) produces high-quality MP3 audio that streams natively
+  via the <audio> element. Deepgram Nova-3 was purpose-built for non-native
+  multilingual ASR with true interim results during speech and a first-class
+  `keyterm` parameter for vocabulary biasing — exactly what a language-
+  learning app needs. We use each provider for what it does best.
 """
 
 from __future__ import annotations
@@ -16,8 +21,11 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import ssl
 from typing import Literal
+from urllib.parse import urlencode
 
+import certifi
 import websockets
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
@@ -30,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Single OpenAI client reused across requests (TTS only; the Realtime proxy
+# Single OpenAI client reused across requests (TTS only; the Deepgram proxy
 # uses raw websockets to keep streaming control).
 _openai_client: OpenAI | None = None
 
@@ -68,139 +76,328 @@ class TTSRequest(BaseModel):
     language: Literal["en", "es", "fr", "he"] = "es"
 
 
-@router.post("/api/tts")
-def synthesize_speech(req: TTSRequest) -> StreamingResponse:
-    """Generate speech audio for the given text. Returns MP3 bytes."""
-    text = req.text.strip()
-    if not text:
-        raise HTTPException(status_code=400, detail="text must not be empty")
+def _stream_tts(text: str, language: str):
+    """Yield MP3 bytes from OpenAI TTS as they arrive.
 
-    voice = _VOICE_BY_LANG.get(req.language, "nova")
-
+    Using `with_streaming_response` means we start emitting bytes downstream
+    as soon as OpenAI starts producing them, instead of buffering the whole
+    file. Combined with a GET endpoint on the client (which lets the browser
+    use native progressive download via the <audio> element), this cuts the
+    perceived TTS latency roughly in half on a warm network.
+    """
+    voice = _VOICE_BY_LANG.get(language, "nova")
     try:
-        # The streaming response form lets us pipe the bytes back without
-        # buffering the entire MP3 in memory. For short prompt/answer audio
-        # (typically under a few KB) the difference is negligible, but it's
-        # the cleaner pattern.
-        response = _client().audio.speech.create(
+        with _client().audio.speech.with_streaming_response.create(
             model="tts-1",
             voice=voice,
             input=text,
             response_format="mp3",
-        )
-    except Exception as exc:  # pragma: no cover - network errors
+        ) as response:
+            for chunk in response.iter_bytes(chunk_size=4096):
+                if chunk:
+                    yield chunk
+    except Exception:  # pragma: no cover - network errors
         logger.exception("OpenAI TTS request failed")
-        raise HTTPException(status_code=502, detail=f"TTS upstream error: {exc}") from exc
+        # Re-raising mid-stream surfaces a 500 to the client; on warm network
+        # this only happens if OpenAI itself errors.
+        raise
 
-    audio_bytes: bytes = response.content
+
+@router.get("/api/tts")
+def synthesize_speech_get(
+    text: str,
+    language: Literal["en", "es", "fr", "he"] = "es",
+) -> StreamingResponse:
+    """GET variant: lets <audio src=...> stream natively + browser-cache.
+
+    Browsers progressively decode MP3 from the response body, so playback
+    can start before the full file is downloaded. The Cache-Control header
+    plus stable URL params (text + language) means revisiting a prompt is
+    instant from disk cache.
+    """
+    text = text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text must not be empty")
     return StreamingResponse(
-        iter([audio_bytes]),
+        _stream_tts(text, language),
         media_type="audio/mpeg",
-        headers={
-            "Cache-Control": "public, max-age=3600",
-            "Content-Length": str(len(audio_bytes)),
-        },
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
+@router.post("/api/tts")
+def synthesize_speech(req: TTSRequest) -> StreamingResponse:
+    """Legacy POST kept for back-compat; same streaming under the hood."""
+    text = req.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text must not be empty")
+    return StreamingResponse(
+        _stream_tts(text, req.language),
+        media_type="audio/mpeg",
+        headers={"Cache-Control": "public, max-age=3600"},
     )
 
 
 # ---------------------------------------------------------------------------
-# Realtime API WebSocket proxy
+# Deepgram Nova-3 WebSocket proxy
 # ---------------------------------------------------------------------------
 
-# OpenAI's Realtime API has a dedicated *transcription* mode that, unlike the
-# default conversational endpoint, reliably emits
-# `conversation.item.input_audio_transcription.completed` events without
-# trying to generate a model response. This is exactly what we want here.
-_REALTIME_URL = "wss://api.openai.com/v1/realtime?intent=transcription"
+# Nova-3 is Deepgram's flagship multilingual ASR. It supports en/es/fr/he
+# (and 50+ others), exposes word-level timings, and accepts `keyterm` query
+# params for vocabulary biasing — the documented technique for boosting
+# recognition of expected phrases by up to 90% Keyword Recall Rate.
+_DEEPGRAM_URL = "wss://api.deepgram.com/v1/listen"
 
-# Initial session configuration sent right after the upstream socket opens.
-# `gpt-4o-transcribe` is multilingual and noticeably more accurate than
-# `whisper-1`; fall back is automatic on the OpenAI side.
-_SESSION_UPDATE = {
-    "type": "transcription_session.update",
-    "session": {
-        "input_audio_format": "pcm16",
-        "input_audio_transcription": {"model": "gpt-4o-transcribe"},
-        "turn_detection": {
-            "type": "server_vad",
-            "threshold": 0.5,
-            "prefix_padding_ms": 300,
-            "silence_duration_ms": 500,
-        },
-        "input_audio_noise_reduction": {"type": "near_field"},
-    },
-}
+# Languages we lock transcription to. Deepgram uses ISO-639-1 codes, same as
+# OpenAI did. Pinning the language stops the model from drifting (e.g.,
+# Spanish → Italian) when accent confidence is low.
+_SUPPORTED_TRANSCRIBE_LANGS = {"en", "es", "fr", "he"}
+
+# Sample rate of the PCM16 stream the browser sends. Must match the AudioContext
+# rate set in voice.ts. Kept in sync via this constant for readability.
+_SAMPLE_RATE = 24000
+
+# Hard cap on keyterms per Deepgram's docs (500 tokens, ~100 terms). Our
+# expected sentences never approach this, but we guard against pathological
+# input just in case.
+_MAX_KEYTERMS = 100
+
+
+def _build_keyterms(expected: str) -> list[str]:
+    """Extract unique words from `expected` for `keyterm=` boosting.
+
+    Deepgram's keyterm feature biases the decoder toward specific words by
+    weighting their phonemes — exactly what we want when the learner is
+    *trying* to say a known canonical sentence. We strip punctuation,
+    deduplicate case-insensitively, and preserve original case (which lets
+    Deepgram learn capitalization for proper nouns when smart_format is on).
+    """
+    seen: set[str] = set()
+    out: list[str] = []
+    for raw in expected.split():
+        word = raw.strip(".,!?¿¡;:\"'“”„«»…—–-")
+        if not word:
+            continue
+        key = word.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(word)
+        if len(out) >= _MAX_KEYTERMS:
+            break
+    return out
+
+
+def _build_deepgram_url(language: str | None, expected: str | None) -> str:
+    """Construct the Deepgram listen URL with all streaming params.
+
+    Each parameter earns its place:
+
+      model=nova-3            best accuracy on accented multilingual speech
+      language=<iso>          pin to one language (avoid auto-detect drift)
+      encoding=linear16       raw PCM16 from our worklet
+      sample_rate=24000       matches AudioContext on the client
+      channels=1              mono (matches getUserMedia config)
+      interim_results=true    stream deltas during speech — the live UX win
+      smart_format=true       proper punctuation/capitalisation for readback
+      vad_events=true         emit SpeechStarted events for UI state
+      utterance_end_ms=1000   fire UtteranceEnd after 1s silence (failsafe)
+      endpointing=300         mark speech_final=true at 300ms pause
+      keyterm=<word>          (repeated) vocabulary biasing toward expected
+    """
+    # `urlencode` with `doseq=True` correctly emits `keyterm=foo&keyterm=bar`
+    # rather than a single comma-joined param, which is the format Deepgram
+    # documents for boosting individual terms.
+    params: list[tuple[str, str]] = [
+        ("model", "nova-3"),
+        ("encoding", "linear16"),
+        ("sample_rate", str(_SAMPLE_RATE)),
+        ("channels", "1"),
+        ("interim_results", "true"),
+        ("smart_format", "true"),
+        ("vad_events", "true"),
+        ("utterance_end_ms", "1000"),
+        ("endpointing", "300"),
+    ]
+    if language and language in _SUPPORTED_TRANSCRIBE_LANGS:
+        params.append(("language", language))
+    if expected:
+        for word in _build_keyterms(expected):
+            params.append(("keyterm", word))
+    return f"{_DEEPGRAM_URL}?{urlencode(params)}"
 
 
 @router.websocket("/ws/realtime")
-async def realtime_proxy(client_ws: WebSocket) -> None:
-    """Bidirectional proxy between the browser and OpenAI's Realtime API."""
+async def realtime_proxy(
+    client_ws: WebSocket,
+    language: str | None = None,
+    expected: str | None = None,
+) -> None:
+    """Bidirectional proxy between the browser and Deepgram's streaming API.
+
+    The browser sends raw PCM16 audio as binary WebSocket frames. We forward
+    the bytes verbatim upstream and translate Deepgram's JSON event stream
+    into a stable internal protocol consumed by `frontend/lib/voice.ts`:
+
+      {type: "speech_started"}
+      {type: "speech_stopped"}
+      {type: "transcript_interim", text: "..."}
+      {type: "transcript_final",   text: "..."}
+      {type: "error",              message: "..."}
+
+    Query params:
+      `language` — ISO-639-1 code; pins transcription to that language.
+      `expected` — canonical sentence; each unique word becomes a `keyterm=`
+                   on Deepgram for vocabulary biasing.
+    """
     await client_ws.accept()
 
-    if not settings.openai_api_key:
+    if not settings.deepgram_api_key:
         await client_ws.send_json(
-            {"type": "error", "error": {"message": "OPENAI_API_KEY not configured"}}
+            {"type": "error", "message": "DEEPGRAM_API_KEY not configured"}
         )
         await client_ws.close()
         return
 
-    headers = {
-        "Authorization": f"Bearer {settings.openai_api_key}",
-        "OpenAI-Beta": "realtime=v1",
-    }
+    # Deepgram authenticates with `Authorization: Token <key>` (NOT Bearer).
+    headers = {"Authorization": f"Token {settings.deepgram_api_key}"}
+    url = _build_deepgram_url(language, expected)
+
+    # certifi CA bundle so wss:// works on macOS Python installs that don't
+    # trust the system keychain. Same fix that was needed for OpenAI.
+    ssl_ctx = ssl.create_default_context(cafile=certifi.where())
 
     try:
         async with websockets.connect(
-            _REALTIME_URL,
+            url,
             additional_headers=headers,
+            ssl=ssl_ctx,
             max_size=None,  # audio frames can be large
         ) as upstream:
-            # Configure the session for transcription-only mode.
-            await upstream.send(json.dumps(_SESSION_UPDATE))
+            # Deepgram doesn't need a session.update message — all config
+            # comes from query params, so we connect-and-go.
 
             async def client_to_upstream() -> None:
-                """Forward client audio chunks / control messages upstream."""
+                """Forward audio (binary) and control messages (text) upstream.
+
+                The browser sends raw PCM16 ArrayBuffers as binary frames
+                (Deepgram's native input format), which is roughly half the
+                bandwidth of the previous base64-wrapped JSON approach and
+                drops the JSON-parse cost entirely.
+                """
                 try:
                     while True:
-                        msg = await client_ws.receive_text()
-                        await upstream.send(msg)
+                        msg = await client_ws.receive()
+                        # FastAPI's `receive()` returns a dict with either
+                        # "bytes" or "text" set, plus a "type" telling us
+                        # about disconnects.
+                        if msg.get("type") == "websocket.disconnect":
+                            break
+                        data_bytes = msg.get("bytes")
+                        if data_bytes is not None:
+                            await upstream.send(data_bytes)
+                            continue
+                        data_text = msg.get("text")
+                        if data_text is not None:
+                            # Reserved for future control messages
+                            # (CloseStream, KeepAlive). Currently the client
+                            # only sends audio.
+                            await upstream.send(data_text)
                 except WebSocketDisconnect:
-                    return
-                except Exception:  # pragma: no cover
+                    pass
+                except Exception:  # pragma: no cover - network errors
                     logger.exception("client→upstream relay failed")
+                finally:
+                    # Tell Deepgram we're done so it flushes any pending
+                    # final transcripts before closing.
+                    try:
+                        await upstream.send(json.dumps({"type": "CloseStream"}))
+                    except Exception:
+                        pass
 
             async def upstream_to_client() -> None:
-                """Forward Realtime events back to the browser."""
+                """Translate Deepgram events to our internal protocol."""
+                final_buffer: list[str] = []
                 try:
                     async for raw in upstream:
-                        # raw is str for text frames; pass through verbatim so
-                        # the frontend sees the official event schema.
                         if isinstance(raw, bytes):
                             raw = raw.decode("utf-8", errors="replace")
-                        await client_ws.send_text(raw)
+                        try:
+                            evt = json.loads(raw)
+                        except json.JSONDecodeError:
+                            continue
+
+                        t = evt.get("type")
+                        if t == "Results":
+                            alt = (
+                                evt.get("channel", {})
+                                .get("alternatives", [{}])[0]
+                            )
+                            text = (alt.get("transcript") or "").strip()
+                            if not text:
+                                # Silent frames produce empty transcripts;
+                                # skip to avoid flickering the UI.
+                                continue
+                            is_final = bool(evt.get("is_final"))
+                            speech_final = bool(evt.get("speech_final"))
+                            if not is_final:
+                                # Deepgram interim results REPLACE the
+                                # current interim text per frame (unlike
+                                # OpenAI's additive deltas), so we just
+                                # forward the latest snapshot.
+                                await client_ws.send_json(
+                                    {"type": "transcript_interim", "text": text}
+                                )
+                            else:
+                                final_buffer.append(text)
+                                if speech_final:
+                                    await client_ws.send_json(
+                                        {
+                                            "type": "transcript_final",
+                                            "text": " ".join(final_buffer).strip(),
+                                        }
+                                    )
+                                    final_buffer.clear()
+                        elif t == "SpeechStarted":
+                            await client_ws.send_json({"type": "speech_started"})
+                        elif t == "UtteranceEnd":
+                            # Failsafe: if endpointing didn't fire
+                            # speech_final, flush whatever we have here.
+                            if final_buffer:
+                                await client_ws.send_json(
+                                    {
+                                        "type": "transcript_final",
+                                        "text": " ".join(final_buffer).strip(),
+                                    }
+                                )
+                                final_buffer.clear()
+                            await client_ws.send_json({"type": "speech_stopped"})
+                        # Metadata, Error, and other event types are
+                        # intentionally ignored — Deepgram surfaces fatal
+                        # errors via the WebSocket close code instead.
                 except websockets.ConnectionClosed:
                     return
-                except Exception:  # pragma: no cover
+                except Exception:  # pragma: no cover - network errors
                     logger.exception("upstream→client relay failed")
 
-            # Run both relays concurrently. When either finishes (disconnect or
-            # error) we cancel the other and tear the proxy down.
+            # Run both relays concurrently. When either finishes (disconnect
+            # or error) cancel the other and tear the proxy down.
             tasks = [
                 asyncio.create_task(client_to_upstream()),
                 asyncio.create_task(upstream_to_client()),
             ]
-            done, pending = await asyncio.wait(
+            _done, pending = await asyncio.wait(
                 tasks, return_when=asyncio.FIRST_COMPLETED
             )
             for t in pending:
                 t.cancel()
     except WebSocketDisconnect:
         return
-    except Exception as exc:  # pragma: no cover
-        logger.exception("Realtime proxy error")
+    except Exception as exc:  # pragma: no cover - network errors
+        logger.exception("Deepgram proxy error")
         try:
             await client_ws.send_json(
-                {"type": "error", "error": {"message": f"proxy error: {exc}"}}
+                {"type": "error", "message": f"proxy error: {exc}"}
             )
         except Exception:
             pass
