@@ -19,7 +19,20 @@
 
 ---
 
-## Generation Direction Principle
+## Evaluation granularity (per-sentence vs distribution vs roll-ups)
+
+| Kind | What it measures | Code hook | Storage | Example metric names |
+| --- | --- | --- | --- | --- |
+| **Per-sentence (Level 1)** | One generated sentence at a time | `BaseEvaluator.evaluate(...)` | **`sentence_evaluations`** — one row per `(sentence_id, evaluator_name)` | `grammar_stub` |
+| **Distribution / joint (Level 2b)** | All samples in a batch together (per constraint set, or whole experiment) | `BaseGroupMetric.compute(list[sentences])` | **`experiment_metrics`** only (`scope` = `constraint_set` or `experiment`) | `uniqueness_ratio`, `uniqueness_ratio_experiment`; future: self-BLEU |
+| **Roll-up / aggregate (Level 2a)** | Summary statistics **computed from** per-sentence rows | `aggregate_sentence_eval_rollups()` | **`experiment_metrics`** (`metric_name` prefix `mean::`) | `mean::grammar_stub` |
+
+Distribution metrics **never** write to `sentence_evaluations`. Roll-ups **only** run when Stage 1 has produced `sentence_evaluations` (same run: `evaluate=True`).
+
+Runner order when both are enabled: Stage 1 → Stage 2b (group) → Stage 2a (roll-ups).
+
+---
+
 
 The generator always produces a **target language sentence** (e.g. Spanish) with a
 **source language translation** (English) together in a single prompt. Both are
@@ -36,7 +49,7 @@ directions -- the app decides which side to show first and which side is the
 "answer." The generator does not need to know about direction.
 
 The prompt and generator are **language-agnostic**: the target language is read
-from the constraint set's `language` field and injected into the prompt, so
+from the constraint set's `target_language` field and injected into the prompt, so
 swapping to a new language (e.g. Hebrew) requires only new constraint sets, not
 new generator code.
 
@@ -106,7 +119,12 @@ constraint_sets --< generated_sentences >-- experiments
 
 ## Phase 3 -- Metrics and Aggregation (DONE)
 
-Persist **roll-up** metrics (derived from per-sentence evaluations) and **distribution** metrics (joint over sample batches) in `experiment_metrics`.
+`experiment_metrics` stores **two different metric families** (same table, distinguished by `metric_name` and `scope`):
+
+1. **Distribution metrics** — joint over a multiset of outputs (`BaseGroupMetric`; **not** derivable from a single `sentence_evaluations` row).
+2. **Roll-ups** — `mean::<evaluator>` summaries derived entirely from **`sentence_evaluations`** (`aggregate_sentence_eval_rollups`).
+
+Persist roll-ups and distribution metrics as follows.
 
 **What was built:**
 - `research/db/models.py` — `experiment_metrics`:
@@ -208,10 +226,11 @@ generation:
 ```
 Constraint Sets → Generator → [generated_sentences]
                                     |
-              Stage 1 per-sample ───┴──→ [sentence_evaluations]
+      Stage 1: per-sentence only ───┴──→ [sentence_evaluations]  ← BaseEvaluator
                                     |
-              Stage 2a roll-ups ────┼──→ [experiment_metrics]
-              Stage 2b group-only ──┘         (mean::* + uniqueness_ratio*)
+      Stage 2b: joint batch ──────────┼──→ [experiment_metrics] ← BaseGroupMetric (e.g. uniqueness_ratio*)
+                                    |
+      Stage 2a: from Stage 1 only ────┘→ [experiment_metrics] ← mean::<evaluator> roll-ups
 ```
 
 Each `[bracket]` is a database table. Tables are added phase by phase, not all at once.
