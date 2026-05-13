@@ -1,3 +1,7 @@
+sqlalchemy>=2.0
+openai>=1.50
+python-dotenv>=1.0
+
+# dev / future phases
 streamlit>=1.38
 pandas>=2.2
-# core pipeline is consumed from ../backend (install via PYTHONPATH or editable install)
