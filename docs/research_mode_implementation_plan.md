@@ -9,13 +9,29 @@
 ## Current State (13 May 2026)
 
 - Phase 1 complete and merged to main
-- Phase 2 complete (evaluation framework)
-- 4 SQLite tables: `constraint_sets`, `experiments`, `generated_sentences`, `sentence_evaluations`
-- Baseline GPT generator extracted from backend, language-agnostic with optional CEFR level
-- Evaluation framework: `BaseEvaluator` ABC + `GrammarEvaluator` stub
-- Mock and live experiment runner via CLI (`python -m research.run_experiment`)
-- 52 unit tests passing (models, generator, evaluators, pipeline integration)
-- Separate `research.db` database, isolated from user-facing backend
+- Phase 2 complete (per-sentence evaluation); merged to **main**
+- Phase 3 complete on **`research/pipeline-phase-3`**: `experiment_metrics`, roll-ups, distribution metrics
+- 5 SQLite tables: `constraint_sets`, `experiments`, `generated_sentences`, `sentence_evaluations`, `experiment_metrics`
+- **Stage 1** — `BaseEvaluator` → `sentence_evaluations`. **Stage 2b** — `BaseGroupMetric` → `experiment_metrics` (per constraint set + optional experiment-wide). **Stage 2a** — `aggregate_sentence_eval_rollups()` → `experiment_metrics` (`mean::<evaluator>` rows).
+- Mock/live runner: `--no-eval` skips Stage 1 only; `--no-metrics` skips Stage 2a+2b
+- 61 unit tests (research/tests)
+- Separate `research.db`, isolated from backend
+
+---
+
+## Evaluation granularity (per-sentence vs distribution vs roll-ups)
+
+| Kind | What it measures | Code hook | Storage | Example metric names |
+| --- | --- | --- | --- | --- |
+| **Per-sentence (Level 1)** | One generated sentence at a time | `BaseEvaluator.evaluate(...)` | **`sentence_evaluations`** — one row per `(sentence_id, evaluator_name)` | `grammar_stub` |
+| **Distribution / joint (Level 2b)** | All samples in a batch together (per constraint set, or whole experiment) | `BaseGroupMetric.compute(list[sentences])` | **`experiment_metrics`** only (`scope` = `constraint_set` or `experiment`) | `uniqueness_ratio`, `uniqueness_ratio_experiment`; future: self-BLEU |
+| **Roll-up / aggregate (Level 2a)** | Summary statistics **computed from** per-sentence rows | `aggregate_sentence_eval_rollups()` | **`experiment_metrics`** (`metric_name` prefix `mean::`) | `mean::grammar_stub` |
+
+Distribution metrics **never** write to `sentence_evaluations`. Roll-ups **only** run when Stage 1 has produced `sentence_evaluations` (same run: `evaluate=True`).
+
+Runner order when both are enabled: Stage 1 → Stage 2b (group) → Stage 2a (roll-ups).
+
+**Package layout:** ``research/evaluation/sentence/`` — ``base.py`` plus **one module per sentence evaluator** (e.g. ``grammar.py``). ``research/evaluation/distribution/`` — ``base.py`` plus **one module per joint metric** (e.g. ``uniqueness.py``); register metrics in ``distribution/__init__.py`` (``DEFAULT_GROUP_METRICS``). ``research/evaluation/rollups.py`` — Stage 2a roll-up aggregation (``aggregate_sentence_eval_rollups``).
 
 ---
 
@@ -36,7 +52,7 @@ directions -- the app decides which side to show first and which side is the
 "answer." The generator does not need to know about direction.
 
 The prompt and generator are **language-agnostic**: the target language is read
-from the constraint set's `language` field and injected into the prompt, so
+from the constraint set's `target_language` field and injected into the prompt, so
 swapping to a new language (e.g. Hebrew) requires only new constraint sets, not
 new generator code.
 
@@ -75,18 +91,20 @@ Add the ability to score each generated sentence.
   - `sentence_evaluations` (evaluator_name, score, details JSON) -- FK to generated_sentence
   - Cascade-deletes when parent sentence is removed
   - `evaluations` relationship on `GeneratedSentence`
-- `research/evaluation/base.py` -- `BaseEvaluator` ABC with `name` property + `evaluate(sentence, translation, constraints) -> EvaluationResult`
-- `research/evaluation/grammar.py` -- `GrammarEvaluator` stub that checks keyword stem presence, non-empty sentence, and non-empty translation (3 heuristic checks → score 0.0–1.0)
+- `research/evaluation/sentence/base.py` -- shared **`BaseEvaluator`** + **`EvaluationResult`**
+- `research/evaluation/sentence/grammar.py` -- **`GrammarEvaluator`** stub (keyword stem + non-empty checks)
 - `run_experiment.py` updated:
   - `_evaluate_sentences()` runs all evaluators against every sentence in an experiment
   - `DEFAULT_EVALUATORS` list (currently `[GrammarEvaluator()]`)
-  - `--no-eval` CLI flag to skip evaluation
-  - Summary output now shows per-sentence scores inline
-- 22 new tests (5 model, 14 evaluator, 3 integration)
+  - `--no-eval` skips Stage 1 only (group metrics + roll-ups unchanged unless `--no-metrics`)
+  - `--no-metrics` skips group metrics and roll-ups (Phase 3)
+  - Summary output shows per-sentence scores inline
+- Tests for models, evaluators, and pipeline integration (extended further in Phase 3)
 
-**Adding a new evaluator:** Create a class extending `BaseEvaluator` in
-`research/evaluation/`, implement `name` and `evaluate()`, then add an instance
-to `DEFAULT_EVALUATORS` in `run_experiment.py`. No schema or pipeline changes needed.
+**Adding a new sentence evaluator:** Add ``research/evaluation/sentence/<name>.py`` with a class extending ``BaseEvaluator`` from ``sentence/base.py``, then register an instance in ``DEFAULT_EVALUATORS`` in ``run_experiment.py``. One evaluator class per file keeps additions modular.
+
+**Distribution metrics** (diversity, self-BLEU, etc.) do **not** use
+`sentence_evaluations`; implement **`BaseGroupMetric`** from ``research/evaluation/distribution/base.py`` in a new module under ``distribution/``, add it to **`DEFAULT_GROUP_METRICS`** in ``research/evaluation/distribution/__init__.py``. Stored only in **`experiment_metrics`**.
 
 **DB at this point:**
 
@@ -99,27 +117,36 @@ constraint_sets --< generated_sentences >-- experiments
 
 ---
 
-## Phase 3 -- Metrics and Aggregation
+## Phase 3 -- Metrics and Aggregation (DONE)
 
-Aggregate per-sentence scores into experiment-level metrics.
+`experiment_metrics` stores **two different metric families** (same table, distinguished by `metric_name` and `scope`):
 
-**What to build:**
-- `research/db/models.py` -- add 1 table:
-  - `experiment_metrics` (metric_name, value, breakdown) -- FK to experiment
-- `research/analysis.py` -- functions that compute and store aggregate metrics:
-  - mean score per evaluator across all sentences in an experiment
-  - per-constraint-set breakdown
-- Update `run_experiment.py` to call aggregation after evaluation
+1. **Distribution metrics** — joint over a multiset of outputs (`BaseGroupMetric`; **not** derivable from a single `sentence_evaluations` row).
+2. **Roll-ups** — `mean::<evaluator>` summaries derived entirely from **`sentence_evaluations`** (`aggregate_sentence_eval_rollups`).
 
-**Done when:** After an experiment finishes, you can query `experiment_metrics` for a summary.
+Persist roll-ups and distribution metrics as follows.
+
+**What was built:**
+- `research/db/models.py` — `experiment_metrics`:
+  - `metric_name`, `value`, `scope` (`experiment` | `constraint_set`), nullable `constraint_set_id`, `breakdown` JSON
+  - FK `experiment_id` CASCADE; optional FK `constraint_set_id` CASCADE
+  - `Experiment.metrics` relationship
+- `research/evaluation/rollups.py` — `aggregate_sentence_eval_rollups(session, experiment_id)`:
+  - Inserts `mean::<evaluator_name>` rows per constraint set and one experiment-wide row per evaluator (weighted mean across all sentence evaluations)
+- `research/evaluation/distribution/base.py` — **`BaseGroupMetric`**, **`GroupMetricResult`**
+- `research/evaluation/distribution/uniqueness.py` — **`UniquenessRatioMetric`** stub (constraint-set + experiment-wide instances registered in ``distribution/__init__.py`` as **`DEFAULT_GROUP_METRICS`**)
+- `run_experiment.py` — after Stage 1: `_compute_and_store_group_metrics()` (Stage 2b), then roll-ups when evaluations exist (Stage 2a); `--no-metrics` to skip both
+
+**Done when:** After an experiment finishes, `experiment_metrics` holds roll-ups and group metrics queryable by `scope` and `metric_name`.
 
 **DB at this point:**
 
 ```
 constraint_sets --< generated_sentences >-- experiments
                           |                      |
-                          v                      v
-                  sentence_evaluations    experiment_metrics
+                          |                      +---< experiment_metrics
+                          v
+                  sentence_evaluations
 ```
 
 ---
@@ -153,13 +180,19 @@ benchmarks --< constraint_sets --< generated_sentences >-- experiments
 Query and compare results across multiple experiments.
 
 **What to build:**
-- Extend `research/analysis.py` with:
+- Extend `research/evaluation/rollups.py` with additional aggregate functions beyond mean:
+  - `min::<evaluator>` — worst-case output quality per evaluator
+  - `std::<evaluator>` — consistency / variance of scores
+  - `pass_rate::<evaluator>` — fraction of sentences above a configurable threshold (useful for binary/near-binary evaluators like grammar, tense accuracy)
+  - Median and percentiles (p5, p25) as optional extras for dissertation analysis
+  - All aggregates write to `experiment_metrics` with no schema changes needed
+- Create `research/analysis.py` with query/comparison helpers (roll-up logic lives in `research/evaluation/rollups.py`):
   - `compare_experiments([id1, id2])` -- side-by-side metric tables
   - `get_sentences_for_constraint(experiment_id, constraint_set_id)` -- drill into individual outputs
   - `get_failure_analysis(experiment_id, evaluator)` -- sentences below a score threshold
 - `research/run_experiment.py` gets a `--compare` mode that prints comparison output
 
-**Done when:** You can run two experiments with different configs and see a comparison printed to the terminal.
+**Done when:** You can run two experiments with different configs, see richer per-evaluator summaries (mean, min, std, pass-rate), and compare them side-by-side in the terminal.
 
 ---
 
@@ -198,25 +231,13 @@ generation:
 ## Data Flow
 
 ```
-Constraint Sets (hardcoded, then YAML, then benchmarks)
-    |
-    v
-Generator (baseline GPT, then pluggable)
-    |
-    v
-[generated_sentences] -------> Evaluators
+Constraint Sets → Generator → [generated_sentences]
                                     |
-                                    v
-                            [sentence_evaluations]
+      Stage 1: per-sentence only ───┴──→ [sentence_evaluations]  ← sentence/BaseEvaluator
                                     |
-                                    v
-                              Aggregation
+      Stage 2b: joint batch ──────────┼──→ [experiment_metrics] ← distribution/BaseGroupMetric
                                     |
-                                    v
-                           [experiment_metrics]
-                                    |
-                                    v
-                             Analysis Queries
+      Stage 2a: from Stage 1 only ────┘→ [experiment_metrics] ← mean::<evaluator> roll-ups
 ```
 
 Each `[bracket]` is a database table. Tables are added phase by phase, not all at once.

@@ -5,13 +5,18 @@ from __future__ import annotations
 from research.db.models import (
     ConstraintSet,
     Experiment,
+    ExperimentMetric,
     GeneratedSentence,
     SentenceEvaluation,
 )
-from research.evaluation.grammar import GrammarEvaluator
+from research.evaluation.rollups import aggregate_sentence_eval_rollups
+from research.evaluation.distribution import DEFAULT_GROUP_METRICS
+from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
+from research.evaluation.sentence.grammar import GrammarEvaluator
 from research.run_experiment import (
     MOCK_OUTPUTS,
     PHASE1_CONSTRAINT_SETS,
+    _compute_and_store_group_metrics,
     _ensure_constraint_sets,
     _evaluate_sentences,
 )
@@ -142,8 +147,6 @@ def test_evaluate_with_multiple_evaluators(session, sample_constraint_set, sampl
     session.add(sent)
     session.commit()
 
-    from research.evaluation.base import BaseEvaluator, EvaluationResult
-
     class DummyEval(BaseEvaluator):
         @property
         def name(self):
@@ -165,3 +168,39 @@ def test_evaluate_no_sentences_produces_zero_evaluations(session, sample_experim
     total = _evaluate_sentences(session, sample_experiment, [GrammarEvaluator()])
     assert total == 0
     assert session.query(SentenceEvaluation).count() == 0
+
+
+def test_full_phase3_metrics_pipeline(session):
+    """After generation + sentence eval: group metrics + roll-ups land in experiment_metrics."""
+    constraint_sets = _ensure_constraint_sets(session)
+    experiment = Experiment(
+        name="phase3_integration",
+        method="baseline_gpt",
+        samples_per_case=3,
+        config={"live": False},
+        status="running",
+    )
+    session.add(experiment)
+    session.commit()
+
+    for cs in constraint_sets:
+        for i, cand in enumerate(MOCK_OUTPUTS.get(cs.keyword, [])[:3]):
+            session.add(GeneratedSentence(
+                experiment_id=experiment.id,
+                constraint_set_id=cs.id,
+                sentence=cand["sentence"],
+                translation=cand["translation"],
+                sample_index=i,
+            ))
+    session.commit()
+
+    _evaluate_sentences(session, experiment, [GrammarEvaluator()])
+    assert session.query(SentenceEvaluation).count() == 15
+
+    g = _compute_and_store_group_metrics(session, experiment, DEFAULT_GROUP_METRICS)
+    assert g == 6  # 5 constraint_set + 1 experiment uniqueness metrics
+
+    r = aggregate_sentence_eval_rollups(session, experiment.id)
+    assert r == 6  # mean::grammar_stub per CS + experiment-wide
+
+    assert session.query(ExperimentMetric).count() == 12

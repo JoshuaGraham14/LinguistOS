@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from research.evaluation.base import BaseEvaluator, EvaluationResult
-from research.evaluation.grammar import GrammarEvaluator
+from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
+from research.evaluation.sentence.grammar import GrammarEvaluator
 
 
 # ── EvaluationResult ─────────────────────────────────────────────────────────

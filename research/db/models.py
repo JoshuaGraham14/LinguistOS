@@ -1,4 +1,4 @@
-"""Research models: constraint_sets, experiments, generated_sentences, sentence_evaluations."""
+"""Research models: constraint sets, experiments, sentences, evaluations, metrics."""
 
 from __future__ import annotations
 
@@ -59,6 +59,9 @@ class Experiment(Base):
     sentences: Mapped[list[GeneratedSentence]] = relationship(
         back_populates="experiment", cascade="all, delete-orphan"
     )
+    metrics: Mapped[list["ExperimentMetric"]] = relationship(
+        back_populates="experiment", cascade="all, delete-orphan"
+    )
 
 
 class GeneratedSentence(Base):
@@ -80,7 +83,6 @@ class GeneratedSentence(Base):
     sentence: Mapped[str] = mapped_column(Text, nullable=False)
     translation: Mapped[str] = mapped_column(Text, nullable=False, default="")
     sample_index: Mapped[int] = mapped_column(Integer, nullable=False)
-    score: Mapped[float | None] = mapped_column(Float, nullable=True)
     generation_meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, nullable=False
@@ -114,3 +116,30 @@ class SentenceEvaluation(Base):
     )
 
     sentence: Mapped[GeneratedSentence] = relationship(back_populates="evaluations")
+
+
+class ExperimentMetric(Base):
+    """Experiment-level or constraint-set-scoped aggregate / distribution metric."""
+
+    __tablename__ = "experiment_metrics"
+    __table_args__ = (
+        Index("ix_metric_experiment", "experiment_id"),
+        Index("ix_metric_scope_cs", "scope", "constraint_set_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    experiment_id: Mapped[int] = mapped_column(
+        ForeignKey("experiments.id", ondelete="CASCADE"), nullable=False
+    )
+    metric_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    value: Mapped[float] = mapped_column(Float, nullable=False)
+    scope: Mapped[str] = mapped_column(String(32), nullable=False)
+    constraint_set_id: Mapped[int | None] = mapped_column(
+        ForeignKey("constraint_sets.id", ondelete="CASCADE"), nullable=True
+    )
+    breakdown: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, nullable=False
+    )
+
+    experiment: Mapped[Experiment] = relationship(back_populates="metrics")
