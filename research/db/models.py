@@ -83,7 +83,6 @@ class GeneratedSentence(Base):
     sentence: Mapped[str] = mapped_column(Text, nullable=False)
     translation: Mapped[str] = mapped_column(Text, nullable=False, default="")
     sample_index: Mapped[int] = mapped_column(Integer, nullable=False)
-    score: Mapped[float | None] = mapped_column(Float, nullable=True)
     generation_meta: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, nullable=False

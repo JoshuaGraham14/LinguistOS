@@ -14,7 +14,9 @@ import argparse
 from collections import defaultdict
 from datetime import datetime, timezone
 
-from research.analysis import aggregate_sentence_eval_rollups
+from sqlalchemy.orm import joinedload
+
+from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.db.database import SessionLocal, init_db
 from research.db.models import (
     ConstraintSet,
@@ -103,6 +105,7 @@ def _evaluate_sentences(
     """
     sentences = (
         session.query(GeneratedSentence)
+        .options(joinedload(GeneratedSentence.constraint_set))
         .filter_by(experiment_id=experiment.id)
         .all()
     )
@@ -140,7 +143,18 @@ def _compute_and_store_group_metrics(
     experiment: Experiment,
     group_metrics: list[BaseGroupMetric],
 ) -> int:
-    """Run distribution-level metrics; write experiment_metrics only (not sentence_evaluations)."""
+    """Run distribution-level metrics; write experiment_metrics only (not sentence_evaluations).
+
+    Idempotent: existing group-metric rows for this experiment are deleted first
+    (identified as rows whose ``metric_name`` does NOT start with ``mean::``).
+    """
+    metric_names = [m.name for m in group_metrics]
+    if metric_names:
+        session.query(ExperimentMetric).filter(
+            ExperimentMetric.experiment_id == experiment.id,
+            ExperimentMetric.metric_name.in_(metric_names),
+        ).delete(synchronize_session="fetch")
+
     sentences = (
         session.query(GeneratedSentence)
         .filter_by(experiment_id=experiment.id)
@@ -310,6 +324,11 @@ def run(
                     print(f"       {s.translation}")
                 print()
 
+    except Exception:
+        experiment.status = "failed"
+        experiment.completed_at = datetime.now(timezone.utc)
+        session.commit()
+        raise
     finally:
         session.close()
 

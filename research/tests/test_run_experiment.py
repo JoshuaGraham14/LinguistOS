@@ -9,7 +9,7 @@ from research.db.models import (
     GeneratedSentence,
     SentenceEvaluation,
 )
-from research.analysis import aggregate_sentence_eval_rollups
+from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence.grammar import GrammarEvaluator

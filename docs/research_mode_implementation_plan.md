@@ -31,7 +31,7 @@ Distribution metrics **never** write to `sentence_evaluations`. Roll-ups **only*
 
 Runner order when both are enabled: Stage 1 → Stage 2b (group) → Stage 2a (roll-ups).
 
-**Package layout:** ``research/evaluation/sentence/`` — ``base.py`` plus **one module per sentence evaluator** (e.g. ``grammar.py``). ``research/evaluation/distribution/`` — ``base.py`` plus **one module per joint metric** (e.g. ``uniqueness.py``); register metrics in ``distribution/__init__.py`` (``DEFAULT_GROUP_METRICS``).
+**Package layout:** ``research/evaluation/sentence/`` — ``base.py`` plus **one module per sentence evaluator** (e.g. ``grammar.py``). ``research/evaluation/distribution/`` — ``base.py`` plus **one module per joint metric** (e.g. ``uniqueness.py``); register metrics in ``distribution/__init__.py`` (``DEFAULT_GROUP_METRICS``). ``research/evaluation/rollups.py`` — Stage 2a roll-up aggregation (``aggregate_sentence_eval_rollups``).
 
 ---
 
@@ -131,7 +131,7 @@ Persist roll-ups and distribution metrics as follows.
   - `metric_name`, `value`, `scope` (`experiment` | `constraint_set`), nullable `constraint_set_id`, `breakdown` JSON
   - FK `experiment_id` CASCADE; optional FK `constraint_set_id` CASCADE
   - `Experiment.metrics` relationship
-- `research/analysis.py` — `aggregate_sentence_eval_rollups(session, experiment_id)`:
+- `research/evaluation/rollups.py` — `aggregate_sentence_eval_rollups(session, experiment_id)`:
   - Inserts `mean::<evaluator_name>` rows per constraint set and one experiment-wide row per evaluator (weighted mean across all sentence evaluations)
 - `research/evaluation/distribution/base.py` — **`BaseGroupMetric`**, **`GroupMetricResult`**
 - `research/evaluation/distribution/uniqueness.py` — **`UniquenessRatioMetric`** stub (constraint-set + experiment-wide instances registered in ``distribution/__init__.py`` as **`DEFAULT_GROUP_METRICS`**)
@@ -180,13 +180,19 @@ benchmarks --< constraint_sets --< generated_sentences >-- experiments
 Query and compare results across multiple experiments.
 
 **What to build:**
-- Extend `research/analysis.py` with:
+- Extend `research/evaluation/rollups.py` with additional aggregate functions beyond mean:
+  - `min::<evaluator>` — worst-case output quality per evaluator
+  - `std::<evaluator>` — consistency / variance of scores
+  - `pass_rate::<evaluator>` — fraction of sentences above a configurable threshold (useful for binary/near-binary evaluators like grammar, tense accuracy)
+  - Median and percentiles (p5, p25) as optional extras for dissertation analysis
+  - All aggregates write to `experiment_metrics` with no schema changes needed
+- Create `research/analysis.py` with query/comparison helpers (roll-up logic lives in `research/evaluation/rollups.py`):
   - `compare_experiments([id1, id2])` -- side-by-side metric tables
   - `get_sentences_for_constraint(experiment_id, constraint_set_id)` -- drill into individual outputs
   - `get_failure_analysis(experiment_id, evaluator)` -- sentences below a score threshold
 - `research/run_experiment.py` gets a `--compare` mode that prints comparison output
 
-**Done when:** You can run two experiments with different configs and see a comparison printed to the terminal.
+**Done when:** You can run two experiments with different configs, see richer per-evaluator summaries (mean, min, std, pass-rate), and compare them side-by-side in the terminal.
 
 ---
 

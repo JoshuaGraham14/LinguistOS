@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from research.analysis import aggregate_sentence_eval_rollups
+from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.db.models import ExperimentMetric, GeneratedSentence, SentenceEvaluation
 
 

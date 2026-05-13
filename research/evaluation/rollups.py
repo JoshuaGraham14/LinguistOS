@@ -13,8 +13,15 @@ def aggregate_sentence_eval_rollups(session, experiment_id: int) -> int:
     Metric names are ``mean::<evaluator_name>``. Scope is ``experiment`` for the overall
     mean (``constraint_set_id`` NULL) and ``constraint_set`` for per-set means.
 
+    Idempotent: any existing ``mean::*`` rows for this experiment are deleted first.
+
     Returns the number of metric rows inserted.
     """
+    session.query(ExperimentMetric).filter(
+        ExperimentMetric.experiment_id == experiment_id,
+        ExperimentMetric.metric_name.like("mean::%"),
+    ).delete(synchronize_session="fetch")
+
     q = (
         session.query(
             SentenceEvaluation.evaluator_name,
