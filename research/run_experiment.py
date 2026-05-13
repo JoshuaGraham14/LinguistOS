@@ -1,26 +1,31 @@
 """CLI: run baseline GPT generation, evaluate, and store results in SQLite.
 
 Usage:
-    python -m research.run_experiment                 # uses mock data (no API key needed)
+    python -m research.run_experiment                 # mock data + eval + metrics
     python -m research.run_experiment --live           # calls OpenAI for real
     python -m research.run_experiment --live --samples 5
-    python -m research.run_experiment --no-eval        # skip evaluation step
+    python -m research.run_experiment --no-eval        # skip per-sentence evaluation (still metrics)
+    python -m research.run_experiment --no-metrics     # skip group metrics + roll-ups
 """
 
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 from datetime import datetime, timezone
 
+from research.analysis import aggregate_sentence_eval_rollups
 from research.db.database import SessionLocal, init_db
 from research.db.models import (
     ConstraintSet,
     Experiment,
+    ExperimentMetric,
     GeneratedSentence,
     SentenceEvaluation,
 )
 from research.evaluation.base import BaseEvaluator
 from research.evaluation.grammar import GrammarEvaluator
+from research.evaluation.group import DEFAULT_GROUP_METRICS, BaseGroupMetric
 from research.generation.baseline_gpt import generate as gpt_generate
 
 DEFAULT_EVALUATORS: list[BaseEvaluator] = [GrammarEvaluator()]
@@ -129,11 +134,63 @@ def _evaluate_sentences(
     return total
 
 
+def _compute_and_store_group_metrics(
+    session,
+    experiment: Experiment,
+    group_metrics: list[BaseGroupMetric],
+) -> int:
+    """Run distribution-level metrics; write experiment_metrics only (not sentence_evaluations)."""
+    sentences = (
+        session.query(GeneratedSentence)
+        .filter_by(experiment_id=experiment.id)
+        .all()
+    )
+    if not sentences:
+        return 0
+
+    by_cs: dict[int, list[GeneratedSentence]] = defaultdict(list)
+    for s in sentences:
+        by_cs[s.constraint_set_id].append(s)
+
+    inserted = 0
+    for metric in group_metrics:
+        if metric.scope == "constraint_set":
+            for cs_id, group in by_cs.items():
+                result = metric.compute(group)
+                session.add(
+                    ExperimentMetric(
+                        experiment_id=experiment.id,
+                        metric_name=metric.name,
+                        value=result.value,
+                        scope="constraint_set",
+                        constraint_set_id=cs_id,
+                        breakdown=result.details,
+                    )
+                )
+                inserted += 1
+        else:
+            result = metric.compute(sentences)
+            session.add(
+                ExperimentMetric(
+                    experiment_id=experiment.id,
+                    metric_name=metric.name,
+                    value=result.value,
+                    scope="experiment",
+                    constraint_set_id=None,
+                    breakdown=result.details,
+                )
+            )
+            inserted += 1
+    session.commit()
+    return inserted
+
+
 def run(
     *,
     live: bool = False,
     samples_per_case: int = 3,
     evaluate: bool = True,
+    metrics: bool = True,
 ) -> None:
     init_db()
     session = SessionLocal()
@@ -189,14 +246,28 @@ def run(
             session.commit()
             print(f"    Stored {len(candidates)} sentences")
 
-        # ── Evaluation ───────────────────────────────────────────────────
+        # ── Evaluation (Stage 1) ─────────────────────────────────────────
         total_evals = 0
         if evaluate:
-            print("\n  Running evaluators...")
+            print("\n  Running per-sentence evaluators...")
             total_evals = _evaluate_sentences(
                 session, experiment, DEFAULT_EVALUATORS
             )
-            print(f"  Stored {total_evals} evaluations")
+            print(f"  Stored {total_evals} sentence evaluations")
+
+        # ── Metrics: distribution (Stage 2b) then roll-ups (Stage 2a) ─────
+        total_group_metrics = 0
+        total_rollups = 0
+        if metrics:
+            print("\n  Computing distribution metrics...")
+            total_group_metrics = _compute_and_store_group_metrics(
+                session, experiment, DEFAULT_GROUP_METRICS
+            )
+            print(f"  Stored {total_group_metrics} group metric rows")
+            if evaluate:
+                print("\n  Rolling up per-sentence scores...")
+                total_rollups = aggregate_sentence_eval_rollups(session, experiment.id)
+                print(f"  Stored {total_rollups} rollup metric rows")
 
         experiment.status = "completed"
         experiment.completed_at = datetime.now(timezone.utc)
@@ -207,8 +278,10 @@ def run(
         print(f"  Experiment:   {experiment.name} (id={experiment.id})")
         print(f"  Status:       {experiment.status}")
         print(f"  Constraints:  {len(constraint_sets)}")
-        print(f"  Sentences:    {total_stored}")
-        print(f"  Evaluations:  {total_evals}")
+        print(f"  Sentences:       {total_stored}")
+        print(f"  Sentence evals:  {total_evals}")
+        print(f"  Group metrics:   {total_group_metrics}")
+        print(f"  Roll-up metrics: {total_rollups}")
         print("=" * 60)
 
         print("\n  Stored sentences:\n")
@@ -244,13 +317,19 @@ def main():
     parser = argparse.ArgumentParser(description="Run a baseline GPT experiment")
     parser.add_argument("--live", action="store_true", help="Call OpenAI API (requires OPENAI_API_KEY)")
     parser.add_argument("--samples", type=int, default=3, help="Samples per constraint set (default: 3)")
-    parser.add_argument("--no-eval", action="store_true", help="Skip evaluation step")
+    parser.add_argument("--no-eval", action="store_true", help="Skip per-sentence evaluation (still runs group metrics)")
+    parser.add_argument("--no-metrics", action="store_true", help="Skip group metrics and roll-ups")
     args = parser.parse_args()
 
     mode = "LIVE (calling OpenAI)" if args.live else "MOCK (canned data)"
     print(f"\n  Running experiment: baseline_gpt [{mode}]\n")
 
-    run(live=args.live, samples_per_case=args.samples, evaluate=not args.no_eval)
+    run(
+        live=args.live,
+        samples_per_case=args.samples,
+        evaluate=not args.no_eval,
+        metrics=not args.no_metrics,
+    )
 
 
 if __name__ == "__main__":

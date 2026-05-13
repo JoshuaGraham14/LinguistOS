@@ -5,6 +5,7 @@ from __future__ import annotations
 from research.db.models import (
     ConstraintSet,
     Experiment,
+    ExperimentMetric,
     GeneratedSentence,
     SentenceEvaluation,
 )
@@ -249,3 +250,65 @@ def test_evaluation_details_nullable(session, sample_sentence):
 
     row = session.query(SentenceEvaluation).one()
     assert row.details is None
+
+
+# ── ExperimentMetric ────────────────────────────────────────────────────────
+
+
+def test_experiment_metric_creation(session, sample_experiment, sample_constraint_set):
+    m = ExperimentMetric(
+        experiment_id=sample_experiment.id,
+        metric_name="uniqueness_ratio",
+        value=0.75,
+        scope="constraint_set",
+        constraint_set_id=sample_constraint_set.id,
+        breakdown={"unique": 3, "n": 4},
+    )
+    session.add(m)
+    session.commit()
+
+    row = session.query(ExperimentMetric).one()
+    assert row.metric_name == "uniqueness_ratio"
+    assert row.value == 0.75
+    assert row.scope == "constraint_set"
+    assert row.constraint_set_id == sample_constraint_set.id
+    assert row.breakdown["n"] == 4
+
+
+def test_experiment_metric_experiment_scope_null_constraint_set(session, sample_experiment):
+    m = ExperimentMetric(
+        experiment_id=sample_experiment.id,
+        metric_name="mean::grammar_stub",
+        value=0.9,
+        scope="experiment",
+        constraint_set_id=None,
+    )
+    session.add(m)
+    session.commit()
+
+    row = session.query(ExperimentMetric).one()
+    assert row.scope == "experiment"
+    assert row.constraint_set_id is None
+
+
+def test_cascade_delete_experiment_removes_metrics(session, sample_experiment, sample_constraint_set):
+    session.add(ExperimentMetric(
+        experiment_id=sample_experiment.id,
+        metric_name="x",
+        value=1.0,
+        scope="experiment",
+        constraint_set_id=None,
+    ))
+    session.add(ExperimentMetric(
+        experiment_id=sample_experiment.id,
+        metric_name="y",
+        value=0.5,
+        scope="constraint_set",
+        constraint_set_id=sample_constraint_set.id,
+    ))
+    session.commit()
+    assert session.query(ExperimentMetric).count() == 2
+
+    session.delete(sample_experiment)
+    session.commit()
+    assert session.query(ExperimentMetric).count() == 0

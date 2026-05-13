@@ -14,6 +14,7 @@ from research.db.database import Base
 from research.db.models import (  # noqa: F401
     ConstraintSet,
     Experiment,
+    ExperimentMetric,
     GeneratedSentence,
     SentenceEvaluation,
 )
