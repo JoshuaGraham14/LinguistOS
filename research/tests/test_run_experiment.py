@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
-from research.db.models import ConstraintSet, Experiment, GeneratedSentence
+from research.db.models import (
+    ConstraintSet,
+    Experiment,
+    GeneratedSentence,
+    SentenceEvaluation,
+)
+from research.evaluation.grammar import GrammarEvaluator
 from research.run_experiment import (
     MOCK_OUTPUTS,
     PHASE1_CONSTRAINT_SETS,
     _ensure_constraint_sets,
+    _evaluate_sentences,
 )
 
 
@@ -80,3 +87,81 @@ def test_constraint_sets_have_target_language(session):
     constraint_sets = _ensure_constraint_sets(session)
     for cs in constraint_sets:
         assert cs.target_language == "es"
+
+
+# ── Evaluation integration ──────────────────────────────────────────────────
+
+
+def test_evaluate_sentences_stores_evaluations(session):
+    """Run the full pipeline with evaluation and verify evaluation rows."""
+    constraint_sets = _ensure_constraint_sets(session)
+
+    experiment = Experiment(
+        name="test_eval_run",
+        method="baseline_gpt",
+        samples_per_case=3,
+        config={"live": False},
+        status="running",
+    )
+    session.add(experiment)
+    session.commit()
+
+    for cs in constraint_sets:
+        candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:3]
+        for i, cand in enumerate(candidates):
+            session.add(GeneratedSentence(
+                experiment_id=experiment.id,
+                constraint_set_id=cs.id,
+                sentence=cand["sentence"],
+                translation=cand["translation"],
+                sample_index=i,
+            ))
+    session.commit()
+
+    evaluators = [GrammarEvaluator()]
+    total = _evaluate_sentences(session, experiment, evaluators)
+
+    assert total == 15  # 5 constraint sets × 3 sentences × 1 evaluator
+    assert session.query(SentenceEvaluation).count() == 15
+
+    for ev in session.query(SentenceEvaluation).all():
+        assert ev.evaluator_name == "grammar_stub"
+        assert 0.0 <= ev.score <= 1.0
+        assert ev.details is not None
+
+
+def test_evaluate_with_multiple_evaluators(session, sample_constraint_set, sample_experiment):
+    """Multiple evaluators each produce one evaluation per sentence."""
+    sent = GeneratedSentence(
+        experiment_id=sample_experiment.id,
+        constraint_set_id=sample_constraint_set.id,
+        sentence="Nosotros comimos pizza.",
+        translation="We ate pizza.",
+        sample_index=0,
+    )
+    session.add(sent)
+    session.commit()
+
+    from research.evaluation.base import BaseEvaluator, EvaluationResult
+
+    class DummyEval(BaseEvaluator):
+        @property
+        def name(self):
+            return "dummy"
+
+        def evaluate(self, sentence, translation, constraints):
+            return EvaluationResult(score=0.42)
+
+    total = _evaluate_sentences(
+        session, sample_experiment, [GrammarEvaluator(), DummyEval()]
+    )
+    assert total == 2
+    names = {e.evaluator_name for e in session.query(SentenceEvaluation).all()}
+    assert names == {"grammar_stub", "dummy"}
+
+
+def test_evaluate_no_sentences_produces_zero_evaluations(session, sample_experiment):
+    """If the experiment has no sentences, evaluation produces nothing."""
+    total = _evaluate_sentences(session, sample_experiment, [GrammarEvaluator()])
+    assert total == 0
+    assert session.query(SentenceEvaluation).count() == 0

@@ -6,6 +6,19 @@
 
 ---
 
+## Current State (13 May 2026)
+
+- Phase 1 complete and merged to main
+- Phase 2 complete (evaluation framework)
+- 4 SQLite tables: `constraint_sets`, `experiments`, `generated_sentences`, `sentence_evaluations`
+- Baseline GPT generator extracted from backend, language-agnostic with optional CEFR level
+- Evaluation framework: `BaseEvaluator` ABC + `GrammarEvaluator` stub
+- Mock and live experiment runner via CLI (`python -m research.run_experiment`)
+- 52 unit tests passing (models, generator, evaluators, pipeline integration)
+- Separate `research.db` database, isolated from user-facing backend
+
+---
+
 ## Generation Direction Principle
 
 The generator always produces a **target language sentence** (e.g. Spanish) with a
@@ -53,18 +66,27 @@ constraint_sets --< generated_sentences >-- experiments
 
 ---
 
-## Phase 2 -- Evaluation
+## Phase 2 -- Evaluation (DONE)
 
 Add the ability to score each generated sentence.
 
-**What to build:**
-- `research/db/models.py` -- add 1 table:
-  - `sentence_evaluations` (evaluator_name, score, details) -- FK to generated_sentence
-- `research/evaluation/base.py` -- `BaseEvaluator` abstract class: `evaluate(sentence) -> (score, details)`
-- `research/evaluation/grammar.py` -- stub evaluator (returns placeholder score for now)
-- Update `run_experiment.py` to run evaluators after generation and store `SentenceEvaluation` rows
+**What was built:**
+- `research/db/models.py` -- added `SentenceEvaluation` table:
+  - `sentence_evaluations` (evaluator_name, score, details JSON) -- FK to generated_sentence
+  - Cascade-deletes when parent sentence is removed
+  - `evaluations` relationship on `GeneratedSentence`
+- `research/evaluation/base.py` -- `BaseEvaluator` ABC with `name` property + `evaluate(sentence, translation, constraints) -> EvaluationResult`
+- `research/evaluation/grammar.py` -- `GrammarEvaluator` stub that checks keyword stem presence, non-empty sentence, and non-empty translation (3 heuristic checks → score 0.0–1.0)
+- `run_experiment.py` updated:
+  - `_evaluate_sentences()` runs all evaluators against every sentence in an experiment
+  - `DEFAULT_EVALUATORS` list (currently `[GrammarEvaluator()]`)
+  - `--no-eval` CLI flag to skip evaluation
+  - Summary output now shows per-sentence scores inline
+- 22 new tests (5 model, 14 evaluator, 3 integration)
 
-**Done when:** Each generated sentence has evaluation scores stored alongside it in the database.
+**Adding a new evaluator:** Create a class extending `BaseEvaluator` in
+`research/evaluation/`, implement `name` and `evaluate()`, then add an instance
+to `DEFAULT_EVALUATORS` in `run_experiment.py`. No schema or pipeline changes needed.
 
 **DB at this point:**
 

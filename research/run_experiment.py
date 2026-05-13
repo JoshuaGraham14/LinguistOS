@@ -1,9 +1,10 @@
-"""Phase 1 CLI: run baseline GPT generation and store results in SQLite.
+"""CLI: run baseline GPT generation, evaluate, and store results in SQLite.
 
 Usage:
     python -m research.run_experiment                 # uses mock data (no API key needed)
     python -m research.run_experiment --live           # calls OpenAI for real
     python -m research.run_experiment --live --samples 5
+    python -m research.run_experiment --no-eval        # skip evaluation step
 """
 
 from __future__ import annotations
@@ -12,8 +13,17 @@ import argparse
 from datetime import datetime, timezone
 
 from research.db.database import SessionLocal, init_db
-from research.db.models import ConstraintSet, Experiment, GeneratedSentence
+from research.db.models import (
+    ConstraintSet,
+    Experiment,
+    GeneratedSentence,
+    SentenceEvaluation,
+)
+from research.evaluation.base import BaseEvaluator
+from research.evaluation.grammar import GrammarEvaluator
 from research.generation.baseline_gpt import generate as gpt_generate
+
+DEFAULT_EVALUATORS: list[BaseEvaluator] = [GrammarEvaluator()]
 
 # ── Hardcoded constraint sets for Phase 1 ────────────────────────────────────
 
@@ -76,7 +86,55 @@ def _ensure_constraint_sets(session) -> list[ConstraintSet]:
     return sets
 
 
-def run(*, live: bool = False, samples_per_case: int = 3) -> None:
+def _evaluate_sentences(
+    session,
+    experiment: Experiment,
+    evaluators: list[BaseEvaluator],
+) -> int:
+    """Run all evaluators against every sentence in the experiment.
+
+    Returns the total number of evaluation rows created.
+    """
+    sentences = (
+        session.query(GeneratedSentence)
+        .filter_by(experiment_id=experiment.id)
+        .all()
+    )
+    total = 0
+    for sent in sentences:
+        cs = sent.constraint_set
+        constraints = {
+            "keyword": cs.keyword,
+            "translation": cs.translation,
+            "tense": cs.tense,
+            "person": cs.person,
+            "number": cs.number,
+            "target_language": cs.target_language,
+            "cefr_level": cs.cefr_level,
+        }
+        for evaluator in evaluators:
+            result = evaluator.evaluate(
+                sentence=sent.sentence,
+                translation=sent.translation,
+                constraints=constraints,
+            )
+            session.add(SentenceEvaluation(
+                sentence_id=sent.id,
+                evaluator_name=evaluator.name,
+                score=result.score,
+                details=result.details,
+            ))
+            total += 1
+    session.commit()
+    return total
+
+
+def run(
+    *,
+    live: bool = False,
+    samples_per_case: int = 3,
+    evaluate: bool = True,
+) -> None:
     init_db()
     session = SessionLocal()
 
@@ -131,16 +189,26 @@ def run(*, live: bool = False, samples_per_case: int = 3) -> None:
             session.commit()
             print(f"    Stored {len(candidates)} sentences")
 
+        # ── Evaluation ───────────────────────────────────────────────────
+        total_evals = 0
+        if evaluate:
+            print("\n  Running evaluators...")
+            total_evals = _evaluate_sentences(
+                session, experiment, DEFAULT_EVALUATORS
+            )
+            print(f"  Stored {total_evals} evaluations")
+
         experiment.status = "completed"
         experiment.completed_at = datetime.now(timezone.utc)
         session.commit()
 
         # ── Print summary ────────────────────────────────────────────────
         print("\n" + "=" * 60)
-        print(f"  Experiment: {experiment.name} (id={experiment.id})")
-        print(f"  Status:     {experiment.status}")
-        print(f"  Constraints: {len(constraint_sets)}")
-        print(f"  Sentences:  {total_stored}")
+        print(f"  Experiment:   {experiment.name} (id={experiment.id})")
+        print(f"  Status:       {experiment.status}")
+        print(f"  Constraints:  {len(constraint_sets)}")
+        print(f"  Sentences:    {total_stored}")
+        print(f"  Evaluations:  {total_evals}")
         print("=" * 60)
 
         print("\n  Stored sentences:\n")
@@ -154,7 +222,17 @@ def run(*, live: bool = False, samples_per_case: int = 3) -> None:
             if sentences:
                 print(f"  [{cs.keyword} + {cs.tense} + {cs.person} + {cs.number}]")
                 for s in sentences:
-                    print(f"    {s.sample_index}: {s.sentence}")
+                    evals = (
+                        session.query(SentenceEvaluation)
+                        .filter_by(sentence_id=s.id)
+                        .all()
+                    )
+                    scores = {e.evaluator_name: e.score for e in evals}
+                    score_str = (
+                        "  " + "  ".join(f"[{k}: {v}]" for k, v in scores.items())
+                        if scores else ""
+                    )
+                    print(f"    {s.sample_index}: {s.sentence}{score_str}")
                     print(f"       {s.translation}")
                 print()
 
@@ -163,15 +241,16 @@ def run(*, live: bool = False, samples_per_case: int = 3) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run a Phase 1 baseline GPT experiment")
+    parser = argparse.ArgumentParser(description="Run a baseline GPT experiment")
     parser.add_argument("--live", action="store_true", help="Call OpenAI API (requires OPENAI_API_KEY)")
-    parser.add_argument("--samples", type=int, default=3, help="Samples per test case (default: 3)")
+    parser.add_argument("--samples", type=int, default=3, help="Samples per constraint set (default: 3)")
+    parser.add_argument("--no-eval", action="store_true", help="Skip evaluation step")
     args = parser.parse_args()
 
     mode = "LIVE (calling OpenAI)" if args.live else "MOCK (canned data)"
     print(f"\n  Running experiment: baseline_gpt [{mode}]\n")
 
-    run(live=args.live, samples_per_case=args.samples)
+    run(live=args.live, samples_per_case=args.samples, evaluate=not args.no_eval)
 
 
 if __name__ == "__main__":

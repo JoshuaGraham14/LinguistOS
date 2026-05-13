@@ -1,4 +1,4 @@
-"""Phase 1 research models: constraint_sets, experiments, generated_sentences."""
+"""Research models: constraint_sets, experiments, generated_sentences, sentence_evaluations."""
 
 from __future__ import annotations
 
@@ -88,3 +88,29 @@ class GeneratedSentence(Base):
 
     experiment: Mapped[Experiment] = relationship(back_populates="sentences")
     constraint_set: Mapped[ConstraintSet] = relationship(back_populates="sentences")
+    evaluations: Mapped[list[SentenceEvaluation]] = relationship(
+        back_populates="sentence", cascade="all, delete-orphan"
+    )
+
+
+class SentenceEvaluation(Base):
+    """A score assigned to a generated sentence by a specific evaluator."""
+
+    __tablename__ = "sentence_evaluations"
+    __table_args__ = (
+        Index("ix_evaluation_sentence", "sentence_id"),
+        Index("ix_evaluation_evaluator", "evaluator_name"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sentence_id: Mapped[int] = mapped_column(
+        ForeignKey("generated_sentences.id", ondelete="CASCADE"), nullable=False
+    )
+    evaluator_name: Mapped[str] = mapped_column(String(128), nullable=False)
+    score: Mapped[float] = mapped_column(Float, nullable=False)
+    details: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, nullable=False
+    )
+
+    sentence: Mapped[GeneratedSentence] = relationship(back_populates="evaluations")

@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from research.db.models import ConstraintSet, Experiment, GeneratedSentence
+from research.db.models import (
+    ConstraintSet,
+    Experiment,
+    GeneratedSentence,
+    SentenceEvaluation,
+)
 
 
 def test_constraint_set_creation(session):
@@ -170,3 +175,77 @@ def test_experiment_sentences_relationship(
     session.refresh(sample_experiment)
     assert len(sample_experiment.sentences) == 2
     assert sample_experiment.sentences[0].sentence == "Sentence 0"
+
+
+# ── SentenceEvaluation ──────────────────────────────────────────────────────
+
+
+def test_sentence_evaluation_creation(session, sample_sentence):
+    ev = SentenceEvaluation(
+        sentence_id=sample_sentence.id,
+        evaluator_name="grammar_stub",
+        score=0.85,
+        details={"has_keyword_stem": True, "has_translation": True},
+    )
+    session.add(ev)
+    session.commit()
+
+    row = session.query(SentenceEvaluation).one()
+    assert row.evaluator_name == "grammar_stub"
+    assert row.score == 0.85
+    assert row.details["has_keyword_stem"] is True
+    assert row.created_at is not None
+
+
+def test_sentence_evaluation_belongs_to_sentence(session, sample_sentence):
+    ev = SentenceEvaluation(
+        sentence_id=sample_sentence.id,
+        evaluator_name="test_eval",
+        score=1.0,
+    )
+    session.add(ev)
+    session.commit()
+
+    row = session.query(SentenceEvaluation).one()
+    assert row.sentence.sentence == "Nosotros comimos pizza anoche."
+
+
+def test_sentence_evaluations_relationship(session, sample_sentence):
+    for i in range(3):
+        session.add(SentenceEvaluation(
+            sentence_id=sample_sentence.id,
+            evaluator_name=f"evaluator_{i}",
+            score=0.5 + i * 0.1,
+        ))
+    session.commit()
+
+    session.refresh(sample_sentence)
+    assert len(sample_sentence.evaluations) == 3
+
+
+def test_cascade_delete_sentence_removes_evaluations(session, sample_sentence):
+    for i in range(2):
+        session.add(SentenceEvaluation(
+            sentence_id=sample_sentence.id,
+            evaluator_name=f"evaluator_{i}",
+            score=0.9,
+        ))
+    session.commit()
+    assert session.query(SentenceEvaluation).count() == 2
+
+    session.delete(sample_sentence)
+    session.commit()
+    assert session.query(SentenceEvaluation).count() == 0
+
+
+def test_evaluation_details_nullable(session, sample_sentence):
+    ev = SentenceEvaluation(
+        sentence_id=sample_sentence.id,
+        evaluator_name="minimal",
+        score=0.5,
+    )
+    session.add(ev)
+    session.commit()
+
+    row = session.query(SentenceEvaluation).one()
+    assert row.details is None

@@ -11,7 +11,12 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 from research.db.database import Base
-from research.db.models import ConstraintSet, Experiment, GeneratedSentence  # noqa: F401
+from research.db.models import (  # noqa: F401
+    ConstraintSet,
+    Experiment,
+    GeneratedSentence,
+    SentenceEvaluation,
+)
 
 
 @pytest.fixture
@@ -66,3 +71,17 @@ def sample_experiment(session) -> Experiment:
     session.add(exp)
     session.commit()
     return exp
+
+
+@pytest.fixture
+def sample_sentence(session, sample_constraint_set, sample_experiment) -> GeneratedSentence:
+    sent = GeneratedSentence(
+        experiment_id=sample_experiment.id,
+        constraint_set_id=sample_constraint_set.id,
+        sentence="Nosotros comimos pizza anoche.",
+        translation="We ate pizza last night.",
+        sample_index=0,
+    )
+    session.add(sent)
+    session.commit()
+    return sent
