@@ -31,8 +31,11 @@ Distribution metrics **never** write to `sentence_evaluations`. Roll-ups **only*
 
 Runner order when both are enabled: Stage 1 → Stage 2b (group) → Stage 2a (roll-ups).
 
+**Package layout:** ``research/evaluation/sentence/`` — ``base.py`` plus **one module per sentence evaluator** (e.g. ``grammar.py``). ``research/evaluation/distribution/`` — ``base.py`` plus **one module per joint metric** (e.g. ``uniqueness.py``); register metrics in ``distribution/__init__.py`` (``DEFAULT_GROUP_METRICS``).
+
 ---
 
+## Generation Direction Principle
 
 The generator always produces a **target language sentence** (e.g. Spanish) with a
 **source language translation** (English) together in a single prompt. Both are
@@ -88,8 +91,8 @@ Add the ability to score each generated sentence.
   - `sentence_evaluations` (evaluator_name, score, details JSON) -- FK to generated_sentence
   - Cascade-deletes when parent sentence is removed
   - `evaluations` relationship on `GeneratedSentence`
-- `research/evaluation/base.py` -- `BaseEvaluator` ABC with `name` property + `evaluate(sentence, translation, constraints) -> EvaluationResult`
-- `research/evaluation/grammar.py` -- `GrammarEvaluator` stub that checks keyword stem presence, non-empty sentence, and non-empty translation (3 heuristic checks → score 0.0–1.0)
+- `research/evaluation/sentence/base.py` -- shared **`BaseEvaluator`** + **`EvaluationResult`**
+- `research/evaluation/sentence/grammar.py` -- **`GrammarEvaluator`** stub (keyword stem + non-empty checks)
 - `run_experiment.py` updated:
   - `_evaluate_sentences()` runs all evaluators against every sentence in an experiment
   - `DEFAULT_EVALUATORS` list (currently `[GrammarEvaluator()]`)
@@ -98,13 +101,10 @@ Add the ability to score each generated sentence.
   - Summary output shows per-sentence scores inline
 - Tests for models, evaluators, and pipeline integration (extended further in Phase 3)
 
-**Adding a new evaluator:** Create a class extending `BaseEvaluator` in
-`research/evaluation/`, implement `name` and `evaluate()`, then add an instance
-to `DEFAULT_EVALUATORS` in `run_experiment.py`. No schema change.
+**Adding a new sentence evaluator:** Add ``research/evaluation/sentence/<name>.py`` with a class extending ``BaseEvaluator`` from ``sentence/base.py``, then register an instance in ``DEFAULT_EVALUATORS`` in ``run_experiment.py``. One evaluator class per file keeps additions modular.
 
 **Distribution metrics** (diversity, self-BLEU, etc.) do **not** use
-`sentence_evaluations`; they extend `BaseGroupMetric` in
-`research/evaluation/group.py`, register in `DEFAULT_GROUP_METRICS`, and write only to **`experiment_metrics`** (Phase 3).
+`sentence_evaluations`; implement **`BaseGroupMetric`** from ``research/evaluation/distribution/base.py`` in a new module under ``distribution/``, add it to **`DEFAULT_GROUP_METRICS`** in ``research/evaluation/distribution/__init__.py``. Stored only in **`experiment_metrics`**.
 
 **DB at this point:**
 
@@ -133,7 +133,8 @@ Persist roll-ups and distribution metrics as follows.
   - `Experiment.metrics` relationship
 - `research/analysis.py` — `aggregate_sentence_eval_rollups(session, experiment_id)`:
   - Inserts `mean::<evaluator_name>` rows per constraint set and one experiment-wide row per evaluator (weighted mean across all sentence evaluations)
-- `research/evaluation/group.py` — `BaseGroupMetric`, `GroupMetricResult`, `UniquenessRatioMetric` stub (constraint-set + experiment-wide instances), `DEFAULT_GROUP_METRICS`
+- `research/evaluation/distribution/base.py` — **`BaseGroupMetric`**, **`GroupMetricResult`**
+- `research/evaluation/distribution/uniqueness.py` — **`UniquenessRatioMetric`** stub (constraint-set + experiment-wide instances registered in ``distribution/__init__.py`` as **`DEFAULT_GROUP_METRICS`**)
 - `run_experiment.py` — after Stage 1: `_compute_and_store_group_metrics()` (Stage 2b), then roll-ups when evaluations exist (Stage 2a); `--no-metrics` to skip both
 
 **Done when:** After an experiment finishes, `experiment_metrics` holds roll-ups and group metrics queryable by `scope` and `metric_name`.
@@ -226,9 +227,9 @@ generation:
 ```
 Constraint Sets → Generator → [generated_sentences]
                                     |
-      Stage 1: per-sentence only ───┴──→ [sentence_evaluations]  ← BaseEvaluator
+      Stage 1: per-sentence only ───┴──→ [sentence_evaluations]  ← sentence/BaseEvaluator
                                     |
-      Stage 2b: joint batch ──────────┼──→ [experiment_metrics] ← BaseGroupMetric (e.g. uniqueness_ratio*)
+      Stage 2b: joint batch ──────────┼──→ [experiment_metrics] ← distribution/BaseGroupMetric
                                     |
       Stage 2a: from Stage 1 only ────┘→ [experiment_metrics] ← mean::<evaluator> roll-ups
 ```

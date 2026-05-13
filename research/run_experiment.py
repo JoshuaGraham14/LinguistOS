@@ -23,9 +23,10 @@ from research.db.models import (
     GeneratedSentence,
     SentenceEvaluation,
 )
-from research.evaluation.base import BaseEvaluator
-from research.evaluation.grammar import GrammarEvaluator
-from research.evaluation.group import DEFAULT_GROUP_METRICS, BaseGroupMetric
+from research.evaluation.distribution import DEFAULT_GROUP_METRICS
+from research.evaluation.distribution.base import BaseGroupMetric
+from research.evaluation.sentence.base import BaseEvaluator
+from research.evaluation.sentence.grammar import GrammarEvaluator
 from research.generation.baseline_gpt import generate as gpt_generate
 
 DEFAULT_EVALUATORS: list[BaseEvaluator] = [GrammarEvaluator()]

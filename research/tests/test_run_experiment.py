@@ -10,8 +10,9 @@ from research.db.models import (
     SentenceEvaluation,
 )
 from research.analysis import aggregate_sentence_eval_rollups
-from research.evaluation.grammar import GrammarEvaluator
-from research.evaluation.group import DEFAULT_GROUP_METRICS
+from research.evaluation.distribution import DEFAULT_GROUP_METRICS
+from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
+from research.evaluation.sentence.grammar import GrammarEvaluator
 from research.run_experiment import (
     MOCK_OUTPUTS,
     PHASE1_CONSTRAINT_SETS,
@@ -145,8 +146,6 @@ def test_evaluate_with_multiple_evaluators(session, sample_constraint_set, sampl
     )
     session.add(sent)
     session.commit()
-
-    from research.evaluation.base import BaseEvaluator, EvaluationResult
 
     class DummyEval(BaseEvaluator):
         @property

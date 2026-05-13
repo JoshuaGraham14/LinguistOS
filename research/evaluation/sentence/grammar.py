@@ -1,18 +1,18 @@
-"""Stub grammar evaluator -- placeholder for Phase 2.
+"""Grammar-focused sentence evaluator stub (surface heuristics).
 
-Returns a heuristic score based on simple surface checks.  A real grammar
-evaluator (spaCy / Stanza morphological analysis) will replace this later.
+Replace or complement with spaCy/Stanza-backed evaluators in new modules under
+``sentence/`` (e.g. ``sentence/tense_accuracy.py``).
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from research.evaluation.base import BaseEvaluator, EvaluationResult
+from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 
 
 class GrammarEvaluator(BaseEvaluator):
-    """Placeholder evaluator that checks whether the keyword appears in the sentence."""
+    """Checks keyword stem presence, non-empty sentence and translation."""
 
     @property
     def name(self) -> str:
