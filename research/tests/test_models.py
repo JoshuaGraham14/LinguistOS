@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from research.db.models import (
     Benchmark,
     ConstraintSet,
@@ -29,7 +31,6 @@ def test_benchmark_creation(session):
 def test_benchmark_name_unique(session):
     session.add(Benchmark(name="dup", language="es"))
     session.commit()
-    import pytest
     with pytest.raises(Exception):
         session.add(Benchmark(name="dup", language="es"))
         session.commit()

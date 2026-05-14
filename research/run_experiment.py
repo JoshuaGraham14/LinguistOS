@@ -214,70 +214,77 @@ def run(
         session.add(experiment)
         session.commit()
 
-        total_stored = 0
+        try:
+            total_stored = 0
 
-        for cs in constraint_sets:
-            print(f"\n  Constraint set: {cs.keyword} + {cs.tense} + {cs.person} + {cs.number}")
+            for cs in constraint_sets:
+                print(f"\n  Constraint set: {cs.keyword} + {cs.tense} + {cs.person} + {cs.number}")
 
-            if live:
-                candidates = gpt_generate(
-                    keyword=cs.keyword,
-                    translation=cs.translation,
-                    tense=cs.tense,
-                    person=cs.person,
-                    number=cs.number,
-                    num_candidates=samples_per_case,
-                    target_language=cs.target_language,
-                    cefr_level=cs.cefr_level,
-                )
-            else:
-                candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:samples_per_case]
+                if live:
+                    candidates = gpt_generate(
+                        keyword=cs.keyword,
+                        translation=cs.translation,
+                        tense=cs.tense,
+                        person=cs.person,
+                        number=cs.number,
+                        num_candidates=samples_per_case,
+                        target_language=cs.target_language,
+                        cefr_level=cs.cefr_level,
+                    )
+                else:
+                    candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:samples_per_case]
 
-            if not candidates:
-                print(f"    No candidates generated for {cs.keyword}")
-                continue
+                if not candidates:
+                    print(f"    No candidates generated for {cs.keyword}")
+                    continue
 
-            for i, cand in enumerate(candidates):
-                gen = GeneratedSentence(
-                    experiment_id=experiment.id,
-                    constraint_set_id=cs.id,
-                    sentence=cand["sentence"],
-                    translation=cand["translation"],
-                    sample_index=i,
-                    generation_meta={"method": "baseline_gpt", "live": live},
-                )
-                session.add(gen)
-                total_stored += 1
+                for i, cand in enumerate(candidates):
+                    gen = GeneratedSentence(
+                        experiment_id=experiment.id,
+                        constraint_set_id=cs.id,
+                        sentence=cand["sentence"],
+                        translation=cand["translation"],
+                        sample_index=i,
+                        generation_meta={"method": "baseline_gpt", "live": live},
+                    )
+                    session.add(gen)
+                    total_stored += 1
 
-            session.commit()
-            print(f"    Stored {len(candidates)} sentences")
+                session.commit()
+                print(f"    Stored {len(candidates)} sentences")
 
-        # ── Evaluation (Stage 1) ─────────────────────────────────────────
-        total_evals = 0
-        if evaluate:
-            print("\n  Running per-sentence evaluators...")
-            total_evals = _evaluate_sentences(
-                session, experiment, DEFAULT_EVALUATORS
-            )
-            print(f"  Stored {total_evals} sentence evaluations")
-
-        # ── Metrics: distribution (Stage 2b) then roll-ups (Stage 2a) ─────
-        total_group_metrics = 0
-        total_rollups = 0
-        if metrics:
-            print("\n  Computing distribution metrics...")
-            total_group_metrics = _compute_and_store_group_metrics(
-                session, experiment, DEFAULT_GROUP_METRICS
-            )
-            print(f"  Stored {total_group_metrics} group metric rows")
+            # ── Evaluation (Stage 1) ─────────────────────────────────────
+            total_evals = 0
             if evaluate:
-                print("\n  Rolling up per-sentence scores...")
-                total_rollups = aggregate_sentence_eval_rollups(session, experiment.id)
-                print(f"  Stored {total_rollups} rollup metric rows")
+                print("\n  Running per-sentence evaluators...")
+                total_evals = _evaluate_sentences(
+                    session, experiment, DEFAULT_EVALUATORS
+                )
+                print(f"  Stored {total_evals} sentence evaluations")
 
-        experiment.status = "completed"
-        experiment.completed_at = datetime.now(timezone.utc)
-        session.commit()
+            # ── Metrics: distribution (Stage 2b) then roll-ups (Stage 2a) ─
+            total_group_metrics = 0
+            total_rollups = 0
+            if metrics:
+                print("\n  Computing distribution metrics...")
+                total_group_metrics = _compute_and_store_group_metrics(
+                    session, experiment, DEFAULT_GROUP_METRICS
+                )
+                print(f"  Stored {total_group_metrics} group metric rows")
+                if evaluate:
+                    print("\n  Rolling up per-sentence scores...")
+                    total_rollups = aggregate_sentence_eval_rollups(session, experiment.id)
+                    print(f"  Stored {total_rollups} rollup metric rows")
+
+            experiment.status = "completed"
+            experiment.completed_at = datetime.now(timezone.utc)
+            session.commit()
+
+        except Exception:
+            experiment.status = "failed"
+            experiment.completed_at = datetime.now(timezone.utc)
+            session.commit()
+            raise
 
         # ── Print summary ────────────────────────────────────────────────
         print("\n" + "=" * 60)
@@ -316,11 +323,6 @@ def run(
                     print(f"       {s.translation}")
                 print()
 
-    except Exception:
-        experiment.status = "failed"
-        experiment.completed_at = datetime.now(timezone.utc)
-        session.commit()
-        raise
     finally:
         session.close()
 
