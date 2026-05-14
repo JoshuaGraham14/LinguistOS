@@ -1,11 +1,10 @@
-"""CLI: run baseline GPT generation, evaluate, and store results in SQLite.
+"""CLI: run a generation config against a benchmark, evaluate, and store results.
 
 Usage:
-    python -m research.run_experiment --benchmark spanish_basic     # mock + eval + metrics
-    python -m research.run_experiment --benchmark spanish_basic --live
-    python -m research.run_experiment --benchmark spanish_basic --live --samples 5
-    python -m research.run_experiment --benchmark spanish_basic --no-eval
-    python -m research.run_experiment --benchmark spanish_basic --no-metrics
+    python -m research.run_experiment --benchmark spanish_basic --config baseline_default
+    python -m research.run_experiment --benchmark spanish_basic --config individual_default --live
+    python -m research.run_experiment --benchmark spanish_basic --config baseline_default --no-eval
+    python -m research.run_experiment --benchmark spanish_basic --config baseline_default --no-metrics
 """
 
 from __future__ import annotations
@@ -21,6 +20,7 @@ from sqlalchemy.orm import joinedload
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from research.benchmarks.loader import load_benchmark
+from research.configs.loader import load_generation_config
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.db.database import SessionLocal, init_db
 from research.db.models import (
@@ -29,13 +29,15 @@ from research.db.models import (
     Experiment,
     ExperimentMetric,
     GeneratedSentence,
+    GenerationConfig,
     SentenceEvaluation,
 )
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.distribution.base import BaseGroupMetric
 from research.evaluation.sentence.base import BaseEvaluator
 from research.evaluation.sentence.grammar import GrammarEvaluator
-from research.generation.baseline_gpt import generate as gpt_generate
+from research.generation import GENERATOR_REGISTRY
+from research.generation.base import BaseGenerator
 
 DEFAULT_EVALUATORS: list[BaseEvaluator] = [GrammarEvaluator()]
 
@@ -68,6 +70,7 @@ MOCK_OUTPUTS: dict[str, list[dict[str, str]]] = {
 }
 
 _BENCHMARKS_DIR = Path(__file__).resolve().parent / "benchmarks"
+_CONFIGS_DIR = Path(__file__).resolve().parent / "configs"
 
 
 def _resolve_benchmark(session, name: str) -> Benchmark:
@@ -76,6 +79,29 @@ def _resolve_benchmark(session, name: str) -> Benchmark:
     if not yaml_path.exists():
         raise FileNotFoundError(f"No benchmark YAML found at {yaml_path}")
     return load_benchmark(session, yaml_path)
+
+
+def _resolve_generation_config(session, name: str) -> GenerationConfig:
+    """Load a generation config by name — reads from YAML on first use."""
+    yaml_path = _CONFIGS_DIR / f"{name}.yaml"
+    if not yaml_path.exists():
+        raise FileNotFoundError(f"No config YAML found at {yaml_path}")
+    return load_generation_config(session, yaml_path)
+
+
+def _build_generator(gen_config: GenerationConfig) -> BaseGenerator:
+    """Instantiate a generator from a GenerationConfig row."""
+    cls = GENERATOR_REGISTRY.get(gen_config.method)
+    if cls is None:
+        raise ValueError(
+            f"Unknown generation method '{gen_config.method}'. "
+            f"Available: {', '.join(GENERATOR_REGISTRY)}"
+        )
+    config = gen_config.config or {}
+    return cls(
+        model=config.get("model", "gpt-4o"),
+        temperature=config.get("temperature", 0.7),
+    )
 
 
 def _evaluate_sentences(
@@ -187,8 +213,8 @@ def _compute_and_store_group_metrics(
 def run(
     *,
     benchmark_name: str,
+    config_name: str,
     live: bool = False,
-    samples_per_case: int = 3,
     evaluate: bool = True,
     metrics: bool = True,
 ) -> None:
@@ -197,6 +223,9 @@ def run(
 
     try:
         benchmark = _resolve_benchmark(session, benchmark_name)
+        gen_config = _resolve_generation_config(session, config_name)
+        generator = _build_generator(gen_config)
+
         constraint_sets = (
             session.query(ConstraintSet)
             .filter_by(benchmark_id=benchmark.id)
@@ -205,10 +234,8 @@ def run(
 
         experiment = Experiment(
             benchmark_id=benchmark.id,
-            name=f"baseline_gpt_{benchmark.name}_{'live' if live else 'mock'}",
-            method="baseline_gpt",
-            samples_per_case=samples_per_case,
-            config={"live": live, "model": "gpt-4o", "temperature": 0.7},
+            generation_config_id=gen_config.id,
+            name=f"{gen_config.method}_{benchmark.name}_{'live' if live else 'mock'}",
             status="running",
         )
         session.add(experiment)
@@ -221,18 +248,18 @@ def run(
                 print(f"\n  Constraint set: {cs.keyword} + {cs.tense} + {cs.person} + {cs.number}")
 
                 if live:
-                    candidates = gpt_generate(
+                    candidates = generator.generate(
                         keyword=cs.keyword,
                         translation=cs.translation,
                         tense=cs.tense,
                         person=cs.person,
                         number=cs.number,
-                        num_candidates=samples_per_case,
+                        num_candidates=gen_config.samples_per_case,
                         target_language=cs.target_language,
                         cefr_level=cs.cefr_level,
                     )
                 else:
-                    candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:samples_per_case]
+                    candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:gen_config.samples_per_case]
 
                 if not candidates:
                     print(f"    No candidates generated for {cs.keyword}")
@@ -245,7 +272,7 @@ def run(
                         sentence=cand["sentence"],
                         translation=cand["translation"],
                         sample_index=i,
-                        generation_meta={"method": "baseline_gpt", "live": live},
+                        generation_meta={"method": gen_config.method, "live": live},
                     )
                     session.add(gen)
                     total_stored += 1
@@ -289,6 +316,7 @@ def run(
         # ── Print summary ────────────────────────────────────────────────
         print("\n" + "=" * 60)
         print(f"  Benchmark:    {benchmark.name} (id={benchmark.id})")
+        print(f"  Config:       {gen_config.name} [{gen_config.method}] (id={gen_config.id})")
         print(f"  Experiment:   {experiment.name} (id={experiment.id})")
         print(f"  Status:       {experiment.status}")
         print(f"  Constraints:  {len(constraint_sets)}")
@@ -328,22 +356,23 @@ def run(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run a baseline GPT experiment")
+    parser = argparse.ArgumentParser(description="Run a generation experiment")
     parser.add_argument("--benchmark", type=str, required=True,
                         help="Benchmark name (matches <name>.yaml in benchmarks/)")
+    parser.add_argument("--config", type=str, required=True,
+                        help="Generation config name (matches <name>.yaml in configs/)")
     parser.add_argument("--live", action="store_true", help="Call OpenAI API (requires OPENAI_API_KEY)")
-    parser.add_argument("--samples", type=int, default=3, help="Samples per constraint set (default: 3)")
     parser.add_argument("--no-eval", action="store_true", help="Skip per-sentence evaluation (still runs group metrics)")
     parser.add_argument("--no-metrics", action="store_true", help="Skip group metrics and roll-ups")
     args = parser.parse_args()
 
     mode = "LIVE (calling OpenAI)" if args.live else "MOCK (canned data)"
-    print(f"\n  Running experiment: baseline_gpt / {args.benchmark} [{mode}]\n")
+    print(f"\n  Running experiment: {args.config} / {args.benchmark} [{mode}]\n")
 
     run(
         benchmark_name=args.benchmark,
+        config_name=args.config,
         live=args.live,
-        samples_per_case=args.samples,
         evaluate=not args.no_eval,
         metrics=not args.no_metrics,
     )
