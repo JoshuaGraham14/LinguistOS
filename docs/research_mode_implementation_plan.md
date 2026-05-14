@@ -8,12 +8,14 @@
 
 ## Current State (14 May 2026)
 
-- Phases 1–4 complete and merged to **main**
-- 6 SQLite tables: `benchmarks`, `constraint_sets`, `experiments`, `generated_sentences`, `sentence_evaluations`, `experiment_metrics`
-- Benchmarks loaded from YAML (`research/benchmarks/*.yaml`); constraint sets and experiments FK to benchmark
-- **Stage 1** — `BaseEvaluator` → `sentence_evaluations`. **Stage 2b** — `BaseGroupMetric` → `experiment_metrics` (per constraint set + optional experiment-wide). **Stage 2a** — `aggregate_sentence_eval_rollups()` → `experiment_metrics` (`mean::<evaluator>` rows).
-- Runner: `--benchmark <name>` (required), `--live`, `--samples`, `--no-eval`, `--no-metrics`
-- 72 unit tests (research/tests)
+- Phases 1–5 complete and merged to **main**
+- 7 SQLite tables: `benchmarks`, `constraint_sets`, `generation_configs`, `experiments`, `generated_sentences`, `sentence_evaluations`, `experiment_metrics`
+- Benchmarks from YAML (`research/benchmarks/*.yaml`); generation configs from YAML (`research/configs/*.yaml`)
+- `Experiment` is a thin run record linking to a `Benchmark` and a `GenerationConfig`
+- Two generators: `BaselineGPTGenerator` (batched N in one call) and `IndividualGPTGenerator` (one call per sample)
+- **Stage 1** — `BaseEvaluator` → `sentence_evaluations`. **Stage 2b** — `BaseGroupMetric` → `experiment_metrics`. **Stage 2a** — `aggregate_sentence_eval_rollups()` → `experiment_metrics`.
+- Runner: `--benchmark <name>` + `--config <name>` (both required), `--live`, `--no-eval`, `--no-metrics`
+- 91 unit tests (research/tests)
 - Separate `research.db`, isolated from backend
 
 ---
@@ -189,49 +191,37 @@ Formalise constraint set groups so experiments are repeatable and comparable.
 
 ---
 
-## Phase 5 -- Generation Methods and Experiment Refactor
+## Phase 5 -- Generation Methods and Experiment Refactor (DONE)
 
-Separate "what generation method + config" from "a specific run" so that multiple generators can be compared against the same benchmark. Currently `Experiment` conflates the method definition (model, temperature, samples) with the run record (status, timestamps, outputs). This phase splits them apart (Option A from the design discussion).
+Separated "what generation method + config" from "a specific run." `Experiment` no longer carries `method`, `samples_per_case`, or `config` — those moved to a new `GenerationConfig` table. An experiment is now a thin run record pointing to both a benchmark and a generation config.
 
-**What to build:**
-- `research/db/models.py` — add `GenerationConfig` table:
-  - `name` (UNIQUE), `method` (e.g. `"baseline_gpt"`, `"constrained_gpt"`), `samples_per_case`, `config` JSON (model, temperature, method-specific params)
-  - `Experiment` gets `generation_config_id` FK (NOT NULL); remove `method`, `samples_per_case`, `config` from `Experiment` (these move to `GenerationConfig`)
-  - `Experiment` slims to: `id`, `benchmark_id`, `generation_config_id`, `status`, `created_at`, `completed_at`
-- `research/generation/base.py` — `BaseGenerator` abstract class:
-  - `name` property, `generate(keyword, translation, tense, person, number, ...)` method
-  - Extracted from the current `baseline_gpt.py` interface
-- Refactor `research/generation/baseline_gpt.py` to extend `BaseGenerator`
-- `research/generation/[new_method].py` — a second generation approach (e.g. constrained prompt, few-shot, or different model)
-- Generation config YAML (`research/configs/*.yaml`) so you can specify which generator + settings to use:
-
-```yaml
-name: baseline_gpt_default
-method: baseline_gpt
-samples_per_case: 5
-config:
-  model: gpt-4o
-  temperature: 0.7
-```
-
-- Config loader (similar pattern to benchmark loader — idempotent, skip-if-exists)
-- Update `run_experiment.py`:
-  - `--config <name>` flag alongside `--benchmark <name>`
-  - Runner resolves both, creates a thin `Experiment` pointing to both
-  - Generator is looked up from a registry by `method` name
-
-**Done when:** You run the same benchmark with two different generation configs and each experiment links cleanly to its benchmark and generation config. Querying "all runs of method X against benchmark Y" is a simple FK join.
+**What was built:**
+- `research/db/models.py` — added `GenerationConfig` model (`name` UNIQUE, `method`, `samples_per_case`, `config` JSON):
+  - `Experiment` slimmed to: `id`, `benchmark_id`, `generation_config_id`, `name`, `status`, timestamps
+  - `generation_config_id` FK (SET NULL, nullable for backward compat)
+- `research/generation/base.py` — **`BaseGenerator`** ABC (`name` property, `generate()` method)
+- `research/generation/baseline_gpt.py` — added **`BaselineGPTGenerator`** class extending `BaseGenerator` (batched: asks for N candidates in one API call)
+- `research/generation/individual_gpt.py` — **`IndividualGPTGenerator`** (one API call per sample, N calls total)
+- `research/generation/__init__.py` — **`GENERATOR_REGISTRY`** mapping method names to classes
+- `research/configs/loader.py` — `load_generation_config(session, path)` with validation and skip-if-exists idempotency
+- `research/configs/baseline_default.yaml` — baseline config (batched, 3 samples, gpt-4o, temp 0.7)
+- `research/configs/individual_default.yaml` — individual config (per-sample, 3 samples, gpt-4o, temp 0.7)
+- `run_experiment.py` updated:
+  - `--config <name>` required flag (replaces `--samples`); `--benchmark` still required
+  - `_resolve_generation_config()` + `_build_generator()` look up config and instantiate the generator from the registry
+  - `Experiment` links to both benchmark and generation config
+- Tests: `test_generation.py` (17 tests — ABC, generators, registry, config loader, validation, YAML smoke tests); existing tests updated for `GenerationConfig` FK
 
 **DB at this point:**
 
 ```
-              benchmarks
-             /          \
-            v            v
-   constraint_sets    experiments ──< experiment_metrics
-            \          /    \
-             v        v      v
-         generated_sentences  generation_configs
+              benchmarks       generation_configs
+             /          \           /
+            v            v         v
+   constraint_sets      experiments ──< experiment_metrics
+            \              /
+             v            v
+         generated_sentences
                 |
                 v
         sentence_evaluations

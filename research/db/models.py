@@ -62,8 +62,27 @@ class ConstraintSet(Base):
     )
 
 
+class GenerationConfig(Base):
+    """A reusable generation method + parameters (model, temperature, samples)."""
+
+    __tablename__ = "generation_configs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    method: Mapped[str] = mapped_column(String(64), nullable=False)
+    samples_per_case: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
+    config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, nullable=False
+    )
+
+    experiments: Mapped[list["Experiment"]] = relationship(
+        back_populates="generation_config"
+    )
+
+
 class Experiment(Base):
-    """One experiment run: a method + config applied to a set of constraints."""
+    """A single run of a generation config against a benchmark."""
 
     __tablename__ = "experiments"
     __table_args__ = (Index("ix_experiment_status", "status"),)
@@ -72,10 +91,10 @@ class Experiment(Base):
     benchmark_id: Mapped[int | None] = mapped_column(
         ForeignKey("benchmarks.id", ondelete="SET NULL"), nullable=True
     )
+    generation_config_id: Mapped[int | None] = mapped_column(
+        ForeignKey("generation_configs.id", ondelete="SET NULL"), nullable=True
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    method: Mapped[str] = mapped_column(String(64), nullable=False)
-    samples_per_case: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
-    config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, nullable=False
@@ -85,6 +104,9 @@ class Experiment(Base):
     )
 
     benchmark: Mapped["Benchmark | None"] = relationship(back_populates="experiments")
+    generation_config: Mapped["GenerationConfig | None"] = relationship(
+        back_populates="experiments"
+    )
     sentences: Mapped[list["GeneratedSentence"]] = relationship(
         back_populates="experiment", cascade="all, delete-orphan"
     )

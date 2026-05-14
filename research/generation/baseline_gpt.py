@@ -1,4 +1,4 @@
-"""Baseline GPT generation -- same prompt strategy as the user-facing app.
+"""Baseline GPT generation -- batched: asks for N candidates in one API call.
 
 Extracted from backend/app/api/generate.py and adapted for research use:
 no FastAPI dependencies, no lexicon constraints, takes plain dicts.
@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 import os
 from typing import Any
+
+from research.generation.base import BaseGenerator
 
 LANGUAGE_NAMES: dict[str, str] = {
     "es": "Spanish",
@@ -133,3 +135,40 @@ def generate(
     )
     raw = completion.choices[0].message.content or "{}"
     return parse_candidates(raw)
+
+
+class BaselineGPTGenerator(BaseGenerator):
+    """Asks for all N candidates in a single API call."""
+
+    def __init__(self, model: str = "gpt-4o", temperature: float = 0.7):
+        self._model = model
+        self._temperature = temperature
+
+    @property
+    def name(self) -> str:
+        return "baseline_gpt"
+
+    def generate(
+        self,
+        keyword: str,
+        translation: str,
+        tense: str,
+        person: str,
+        number: str,
+        num_candidates: int,
+        *,
+        target_language: str = "es",
+        cefr_level: str | None = None,
+    ) -> list[dict[str, str]]:
+        return generate(
+            keyword=keyword,
+            translation=translation,
+            tense=tense,
+            person=person,
+            number=number,
+            num_candidates=num_candidates,
+            target_language=target_language,
+            cefr_level=cefr_level,
+            model=self._model,
+            temperature=self._temperature,
+        )
