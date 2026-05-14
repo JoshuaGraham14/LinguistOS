@@ -62,10 +62,10 @@ class ConstraintSet(Base):
     )
 
 
-class GenerationConfig(Base):
+class MethodConfig(Base):
     """A reusable generation method + parameters (model, temperature, samples)."""
 
-    __tablename__ = "generation_configs"
+    __tablename__ = "method_configs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
@@ -77,7 +77,7 @@ class GenerationConfig(Base):
     )
 
     experiments: Mapped[list["Experiment"]] = relationship(
-        back_populates="generation_config"
+        back_populates="method_config"
     )
 
 
@@ -91,8 +91,8 @@ class Experiment(Base):
     benchmark_id: Mapped[int | None] = mapped_column(
         ForeignKey("benchmarks.id", ondelete="SET NULL"), nullable=True
     )
-    generation_config_id: Mapped[int | None] = mapped_column(
-        ForeignKey("generation_configs.id", ondelete="SET NULL"), nullable=True
+    method_config_id: Mapped[int | None] = mapped_column(
+        ForeignKey("method_configs.id", ondelete="SET NULL"), nullable=True
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
@@ -104,7 +104,7 @@ class Experiment(Base):
     )
 
     benchmark: Mapped["Benchmark | None"] = relationship(back_populates="experiments")
-    generation_config: Mapped["GenerationConfig | None"] = relationship(
+    method_config: Mapped["MethodConfig | None"] = relationship(
         back_populates="experiments"
     )
     sentences: Mapped[list["GeneratedSentence"]] = relationship(

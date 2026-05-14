@@ -14,7 +14,7 @@ from research.generation.baseline_gpt import generate
 class IndividualGPTGenerator(BaseGenerator):
     """Makes N separate API calls, each requesting one candidate."""
 
-    def __init__(self, model: str = "gpt-4o", temperature: float = 0.7):
+    def __init__(self, model: str = "gpt-5.4-nano", temperature: float = 0.7):
         self._model = model
         self._temperature = temperature
 

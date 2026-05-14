@@ -90,7 +90,7 @@ def generate(
     *,
     target_language: str = "es",
     cefr_level: str | None = None,
-    model: str = "gpt-4o",
+    model: str = "gpt-5.4-nano",
     temperature: float = 0.7,
     api_key: str | None = None,
 ) -> list[dict[str, str]]:
@@ -140,7 +140,7 @@ def generate(
 class BaselineGPTGenerator(BaseGenerator):
     """Asks for all N candidates in a single API call."""
 
-    def __init__(self, model: str = "gpt-4o", temperature: float = 0.7):
+    def __init__(self, model: str = "gpt-5.4-nano", temperature: float = 0.7):
         self._model = model
         self._temperature = temperature
 

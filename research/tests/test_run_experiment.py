@@ -8,7 +8,7 @@ from research.db.models import (
     Experiment,
     ExperimentMetric,
     GeneratedSentence,
-    GenerationConfig,
+    MethodConfig,
     SentenceEvaluation,
 )
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
@@ -46,24 +46,24 @@ def _create_test_benchmark(session) -> tuple[Benchmark, list[ConstraintSet]]:
     return bm, sets
 
 
-def _create_test_gen_config(session) -> GenerationConfig:
-    gc = GenerationConfig(
+def _create_test_method_config(session) -> MethodConfig:
+    mc = MethodConfig(
         name="test_baseline", method="baseline_gpt", samples_per_case=3,
         config={"model": "gpt-4o", "temperature": 0.7},
     )
-    session.add(gc)
+    session.add(mc)
     session.commit()
-    return gc
+    return mc
 
 
 def test_full_mock_pipeline(session):
     """Run the full mock generation loop and verify everything lands in the DB."""
     benchmark, constraint_sets = _create_test_benchmark(session)
-    gen_config = _create_test_gen_config(session)
+    method_config = _create_test_method_config(session)
 
     experiment = Experiment(
         benchmark_id=benchmark.id,
-        generation_config_id=gen_config.id,
+        method_config_id=method_config.id,
         name="test_mock_run",
         status="running",
     )
@@ -108,13 +108,13 @@ def test_mock_outputs_cover_all_benchmark_keywords():
         assert len(MOCK_OUTPUTS[cs["keyword"]]) >= 3
 
 
-def test_experiment_links_to_benchmark_and_config(session):
+def test_experiment_links_to_benchmark_and_method(session):
     benchmark, _ = _create_test_benchmark(session)
-    gen_config = _create_test_gen_config(session)
+    method_config = _create_test_method_config(session)
 
     exp = Experiment(
         benchmark_id=benchmark.id,
-        generation_config_id=gen_config.id,
+        method_config_id=method_config.id,
         name="test_link",
         status="pending",
     )
@@ -124,8 +124,8 @@ def test_experiment_links_to_benchmark_and_config(session):
     row = session.query(Experiment).filter_by(name="test_link").one()
     assert row.benchmark_id == benchmark.id
     assert row.benchmark.name == "test_spanish"
-    assert row.generation_config_id == gen_config.id
-    assert row.generation_config.method == "baseline_gpt"
+    assert row.method_config_id == method_config.id
+    assert row.method_config.method == "baseline_gpt"
 
 
 # ── Evaluation integration ──────────────────────────────────────────────────
@@ -134,11 +134,11 @@ def test_experiment_links_to_benchmark_and_config(session):
 def test_evaluate_sentences_stores_evaluations(session):
     """Run the full pipeline with evaluation and verify evaluation rows."""
     benchmark, constraint_sets = _create_test_benchmark(session)
-    gen_config = _create_test_gen_config(session)
+    method_config = _create_test_method_config(session)
 
     experiment = Experiment(
         benchmark_id=benchmark.id,
-        generation_config_id=gen_config.id,
+        method_config_id=method_config.id,
         name="test_eval_run",
         status="running",
     )
@@ -207,11 +207,11 @@ def test_evaluate_no_sentences_produces_zero_evaluations(session, sample_experim
 def test_full_phase3_metrics_pipeline(session):
     """After generation + sentence eval: group metrics + roll-ups land in experiment_metrics."""
     benchmark, constraint_sets = _create_test_benchmark(session)
-    gen_config = _create_test_gen_config(session)
+    method_config = _create_test_method_config(session)
 
     experiment = Experiment(
         benchmark_id=benchmark.id,
-        generation_config_id=gen_config.id,
+        method_config_id=method_config.id,
         name="phase3_integration",
         status="running",
     )

@@ -1,4 +1,4 @@
-"""Tests for BaseGenerator ABC, generator registry, and config loading."""
+"""Tests for BaseGenerator ABC, generator registry, and method config loading."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from research.configs.loader import load_generation_config, _validate_raw
-from research.db.models import GenerationConfig
+from research.methods.loader import load_method_config, _validate_raw
+from research.db.models import MethodConfig
 from research.generation.base import BaseGenerator
 from research.generation.baseline_gpt import BaselineGPTGenerator
 from research.generation.individual_gpt import IndividualGPTGenerator
@@ -75,36 +75,36 @@ def test_registry_contains_both_methods():
     assert "individual_gpt" in GENERATOR_REGISTRY
 
 
-def test_build_generator_from_config(session):
-    gc = GenerationConfig(
+def test_build_generator_from_method_config(session):
+    mc = MethodConfig(
         name="test_build", method="baseline_gpt", samples_per_case=3,
         config={"model": "gpt-4o-mini", "temperature": 0.5},
     )
-    session.add(gc)
+    session.add(mc)
     session.commit()
 
-    gen = _build_generator(gc)
+    gen = _build_generator(mc)
     assert isinstance(gen, BaselineGPTGenerator)
     assert gen._model == "gpt-4o-mini"
     assert gen._temperature == 0.5
 
 
 def test_build_generator_unknown_method(session):
-    gc = GenerationConfig(
+    mc = MethodConfig(
         name="bad", method="nonexistent", samples_per_case=1,
     )
-    session.add(gc)
+    session.add(mc)
     session.commit()
 
     with pytest.raises(ValueError, match="Unknown generation method"):
-        _build_generator(gc)
+        _build_generator(mc)
 
 
-# ── Config loader ──────────────────────────────────────────────────────────
+# ── Method config loader ───────────────────────────────────────────────────
 
 
 @pytest.fixture
-def config_yaml_path(tmp_path) -> Path:
+def method_yaml_path(tmp_path) -> Path:
     p = tmp_path / "test_cfg.yaml"
     p.write_text(textwrap.dedent("""\
         name: test_cfg
@@ -117,19 +117,19 @@ def config_yaml_path(tmp_path) -> Path:
     return p
 
 
-def test_load_generation_config_creates_row(session, config_yaml_path):
-    gc = load_generation_config(session, config_yaml_path)
-    assert gc.name == "test_cfg"
-    assert gc.method == "baseline_gpt"
-    assert gc.samples_per_case == 5
-    assert gc.config["model"] == "gpt-4o"
+def test_load_method_config_creates_row(session, method_yaml_path):
+    mc = load_method_config(session, method_yaml_path)
+    assert mc.name == "test_cfg"
+    assert mc.method == "baseline_gpt"
+    assert mc.samples_per_case == 5
+    assert mc.config["model"] == "gpt-4o"
 
 
-def test_load_generation_config_idempotent(session, config_yaml_path):
-    first = load_generation_config(session, config_yaml_path)
-    second = load_generation_config(session, config_yaml_path)
+def test_load_method_config_idempotent(session, method_yaml_path):
+    first = load_method_config(session, method_yaml_path)
+    second = load_method_config(session, method_yaml_path)
     assert first.id == second.id
-    assert session.query(GenerationConfig).count() == 1
+    assert session.query(MethodConfig).count() == 1
 
 
 def test_validate_missing_name(tmp_path):
@@ -149,15 +149,15 @@ def test_validate_bad_samples(tmp_path):
 
 def test_load_baseline_default_yaml(session):
     """Smoke test: the real baseline_default.yaml loads without errors."""
-    yaml_path = Path(__file__).resolve().parent.parent / "configs" / "baseline_default.yaml"
-    gc = load_generation_config(session, yaml_path)
-    assert gc.name == "baseline_default"
-    assert gc.method == "baseline_gpt"
+    yaml_path = Path(__file__).resolve().parent.parent / "methods" / "baseline_default.yaml"
+    mc = load_method_config(session, yaml_path)
+    assert mc.name == "baseline_default"
+    assert mc.method == "baseline_gpt"
 
 
 def test_load_individual_default_yaml(session):
     """Smoke test: the real individual_default.yaml loads without errors."""
-    yaml_path = Path(__file__).resolve().parent.parent / "configs" / "individual_default.yaml"
-    gc = load_generation_config(session, yaml_path)
-    assert gc.name == "individual_default"
-    assert gc.method == "individual_gpt"
+    yaml_path = Path(__file__).resolve().parent.parent / "methods" / "individual_default.yaml"
+    mc = load_method_config(session, yaml_path)
+    assert mc.name == "individual_default"
+    assert mc.method == "individual_gpt"

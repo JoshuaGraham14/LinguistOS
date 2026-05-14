@@ -17,7 +17,7 @@ from research.db.models import (  # noqa: F401
     Experiment,
     ExperimentMetric,
     GeneratedSentence,
-    GenerationConfig,
+    MethodConfig,
     SentenceEvaluation,
 )
 
@@ -56,16 +56,16 @@ def sample_benchmark(session) -> Benchmark:
 
 
 @pytest.fixture
-def sample_generation_config(session) -> GenerationConfig:
-    gc = GenerationConfig(
+def sample_method_config(session) -> MethodConfig:
+    mc = MethodConfig(
         name="test_config",
         method="baseline_gpt",
         samples_per_case=3,
         config={"model": "gpt-4o", "temperature": 0.7},
     )
-    session.add(gc)
+    session.add(mc)
     session.commit()
-    return gc
+    return mc
 
 
 @pytest.fixture
@@ -85,10 +85,10 @@ def sample_constraint_set(session, sample_benchmark) -> ConstraintSet:
 
 
 @pytest.fixture
-def sample_experiment(session, sample_benchmark, sample_generation_config) -> Experiment:
+def sample_experiment(session, sample_benchmark, sample_method_config) -> Experiment:
     exp = Experiment(
         benchmark_id=sample_benchmark.id,
-        generation_config_id=sample_generation_config.id,
+        method_config_id=sample_method_config.id,
         name="test_experiment",
         status="pending",
     )

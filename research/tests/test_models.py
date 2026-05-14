@@ -10,7 +10,7 @@ from research.db.models import (
     Experiment,
     ExperimentMetric,
     GeneratedSentence,
-    GenerationConfig,
+    MethodConfig,
     SentenceEvaluation,
 )
 
@@ -115,31 +115,31 @@ def test_constraint_set_extra_constraints_json(session, sample_benchmark):
     assert row.extra_constraints["formality"] == "formal"
 
 
-# ── GenerationConfig ───────────────────────────────────────────────────────
+# ── MethodConfig ───────────────────────────────────────────────────────────
 
 
-def test_generation_config_creation(session):
-    gc = GenerationConfig(
+def test_method_config_creation(session):
+    mc = MethodConfig(
         name="test_cfg",
         method="baseline_gpt",
         samples_per_case=5,
         config={"model": "gpt-4o", "temperature": 0.7},
     )
-    session.add(gc)
+    session.add(mc)
     session.commit()
 
-    row = session.query(GenerationConfig).filter_by(name="test_cfg").one()
+    row = session.query(MethodConfig).filter_by(name="test_cfg").one()
     assert row.method == "baseline_gpt"
     assert row.samples_per_case == 5
     assert row.config["model"] == "gpt-4o"
     assert row.created_at is not None
 
 
-def test_generation_config_name_unique(session):
-    session.add(GenerationConfig(name="dup", method="x", samples_per_case=1))
+def test_method_config_name_unique(session):
+    session.add(MethodConfig(name="dup", method="x", samples_per_case=1))
     session.commit()
     with pytest.raises(Exception):
-        session.add(GenerationConfig(name="dup", method="x", samples_per_case=1))
+        session.add(MethodConfig(name="dup", method="x", samples_per_case=1))
         session.commit()
 
 
@@ -158,21 +158,21 @@ def test_experiment_creation(session):
     assert row.status == "pending"
     assert row.completed_at is None
     assert row.benchmark_id is None
-    assert row.generation_config_id is None
+    assert row.method_config_id is None
 
 
-def test_experiment_links_to_generation_config(session, sample_generation_config):
+def test_experiment_links_to_method_config(session, sample_method_config):
     exp = Experiment(
         name="linked",
-        generation_config_id=sample_generation_config.id,
+        method_config_id=sample_method_config.id,
         status="pending",
     )
     session.add(exp)
     session.commit()
 
     row = session.query(Experiment).filter_by(name="linked").one()
-    assert row.generation_config_id == sample_generation_config.id
-    assert row.generation_config.method == "baseline_gpt"
+    assert row.method_config_id == sample_method_config.id
+    assert row.method_config.method == "baseline_gpt"
 
 
 def test_generated_sentence_belongs_to_experiment_and_constraint_set(
