@@ -189,7 +189,57 @@ Formalise constraint set groups so experiments are repeatable and comparable.
 
 ---
 
-## Phase 5 -- Experiment Comparison
+## Phase 5 -- Generation Methods and Experiment Refactor
+
+Separate "what generation method + config" from "a specific run" so that multiple generators can be compared against the same benchmark. Currently `Experiment` conflates the method definition (model, temperature, samples) with the run record (status, timestamps, outputs). This phase splits them apart (Option A from the design discussion).
+
+**What to build:**
+- `research/db/models.py` — add `GenerationConfig` table:
+  - `name` (UNIQUE), `method` (e.g. `"baseline_gpt"`, `"constrained_gpt"`), `samples_per_case`, `config` JSON (model, temperature, method-specific params)
+  - `Experiment` gets `generation_config_id` FK (NOT NULL); remove `method`, `samples_per_case`, `config` from `Experiment` (these move to `GenerationConfig`)
+  - `Experiment` slims to: `id`, `benchmark_id`, `generation_config_id`, `status`, `created_at`, `completed_at`
+- `research/generation/base.py` — `BaseGenerator` abstract class:
+  - `name` property, `generate(keyword, translation, tense, person, number, ...)` method
+  - Extracted from the current `baseline_gpt.py` interface
+- Refactor `research/generation/baseline_gpt.py` to extend `BaseGenerator`
+- `research/generation/[new_method].py` — a second generation approach (e.g. constrained prompt, few-shot, or different model)
+- Generation config YAML (`research/configs/*.yaml`) so you can specify which generator + settings to use:
+
+```yaml
+name: baseline_gpt_default
+method: baseline_gpt
+samples_per_case: 5
+config:
+  model: gpt-4o
+  temperature: 0.7
+```
+
+- Config loader (similar pattern to benchmark loader — idempotent, skip-if-exists)
+- Update `run_experiment.py`:
+  - `--config <name>` flag alongside `--benchmark <name>`
+  - Runner resolves both, creates a thin `Experiment` pointing to both
+  - Generator is looked up from a registry by `method` name
+
+**Done when:** You run the same benchmark with two different generation configs and each experiment links cleanly to its benchmark and generation config. Querying "all runs of method X against benchmark Y" is a simple FK join.
+
+**DB at this point:**
+
+```
+              benchmarks
+             /          \
+            v            v
+   constraint_sets    experiments ──< experiment_metrics
+            \          /    \
+             v        v      v
+         generated_sentences  generation_configs
+                |
+                v
+        sentence_evaluations
+```
+
+---
+
+## Phase 6 -- Experiment Comparison
 
 Query and compare results across multiple experiments.
 
@@ -201,35 +251,12 @@ Query and compare results across multiple experiments.
   - Median and percentiles (p5, p25) as optional extras for dissertation analysis
   - All aggregates write to `experiment_metrics` with no schema changes needed
 - Create `research/analysis.py` with query/comparison helpers (roll-up logic lives in `research/evaluation/rollups.py`):
-  - `compare_experiments([id1, id2])` -- side-by-side metric tables
-  - `get_sentences_for_constraint(experiment_id, constraint_set_id)` -- drill into individual outputs
-  - `get_failure_analysis(experiment_id, evaluator)` -- sentences below a score threshold
+  - `compare_experiments([id1, id2])` — side-by-side metric tables (now trivially grouped by `generation_config_id` and `benchmark_id`)
+  - `get_sentences_for_constraint(experiment_id, constraint_set_id)` — drill into individual outputs
+  - `get_failure_analysis(experiment_id, evaluator)` — sentences below a score threshold
 - `research/run_experiment.py` gets a `--compare` mode that prints comparison output
 
-**Done when:** You can run two experiments with different configs, see richer per-evaluator summaries (mean, min, std, pass-rate), and compare them side-by-side in the terminal.
-
----
-
-## Phase 6 -- Second Generation Method
-
-Add a new generator to compare against the baseline.
-
-**What to build:**
-- `research/generation/base.py` -- `BaseGenerator` abstract class (extracted from baseline)
-- Refactor `baseline_gpt.py` to extend `BaseGenerator`
-- `research/generation/[new_method].py` -- a second generation approach (e.g. constrained prompt, few-shot, or different model)
-- Experiment config YAML so you can specify which generator to use:
-
-```yaml
-name: constrained_v1
-method: constrained_gpt
-samples_per_case: 5
-generation:
-  model: gpt-4o
-  temperature: 0.7
-```
-
-**Done when:** You run the same benchmark with two different generators and compare their metrics.
+**Done when:** You can run two experiments with different generation configs against the same benchmark, see richer per-evaluator summaries (mean, min, std, pass-rate), and compare them side-by-side in the terminal.
 
 ---
 
@@ -238,22 +265,23 @@ generation:
 - No frontend (Streamlit or otherwise)
 - No real grammar evaluation yet (stubs only -- spaCy/Stanza comes later)
 - No Alembic migrations (`create_all` is fine during research iteration)
-- Generator ABC is deferred to Phase 6 -- baseline works as a plain function until then
 
 ---
 
 ## Data Flow
 
 ```
-[benchmarks] YAML → Loader → DB
-     |
-     └→ Constraint Sets → Generator → [generated_sentences]
-                                            |
-          Stage 1: per-sentence only ───────┴──→ [sentence_evaluations]  ← sentence/BaseEvaluator
-                                            |
-          Stage 2b: joint batch ────────────┼──→ [experiment_metrics] ← distribution/BaseGroupMetric
-                                            |
-          Stage 2a: from Stage 1 only ──────┘→ [experiment_metrics] ← mean::<evaluator> roll-ups
+[benchmarks] YAML → Loader → DB          [generation_configs] YAML → Loader → DB
+     |                                           |
+     └→ Constraint Sets ──┐      ┌── Generator ←─┘
+                          v      v
+                    [generated_sentences]
+                              |
+    Stage 1: per-sentence ────┴──→ [sentence_evaluations]  ← sentence/BaseEvaluator
+                              |
+    Stage 2b: joint batch ────┼──→ [experiment_metrics]     ← distribution/BaseGroupMetric
+                              |
+    Stage 2a: from Stage 1 ───┘→  [experiment_metrics]      ← mean::<evaluator> roll-ups
 ```
 
 Each `[bracket]` is a database table. Tables are added phase by phase, not all at once.
