@@ -1,7 +1,15 @@
 sqlalchemy>=2.0
 openai>=1.50
 python-dotenv>=1.0
+pyyaml>=6.0
 
-# dev / future phases
-streamlit>=1.38
+# dev / testing
+pytest>=8.0
+ipykernel>=6.0
+
+# analysis / notebooks
 pandas>=2.2
+matplotlib>=3.8
+
+# future phases
+streamlit>=1.38

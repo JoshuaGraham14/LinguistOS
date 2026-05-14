@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from research.db.models import (
+    Benchmark,
     ConstraintSet,
     Experiment,
     ExperimentMetric,
@@ -15,32 +16,41 @@ from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence.grammar import GrammarEvaluator
 from research.run_experiment import (
     MOCK_OUTPUTS,
-    PHASE1_CONSTRAINT_SETS,
     _compute_and_store_group_metrics,
-    _ensure_constraint_sets,
     _evaluate_sentences,
 )
 
 
-def test_ensure_constraint_sets_inserts_on_first_call(session):
-    assert session.query(ConstraintSet).count() == 0
-    result = _ensure_constraint_sets(session)
-    assert len(result) == len(PHASE1_CONSTRAINT_SETS)
-    assert session.query(ConstraintSet).count() == len(PHASE1_CONSTRAINT_SETS)
+BENCHMARK_CONSTRAINT_SETS = [
+    {"keyword": "comer", "translation": "to eat", "tense": "past", "person": "1st", "number": "plural"},
+    {"keyword": "vivir", "translation": "to live", "tense": "future", "person": "3rd", "number": "singular"},
+    {"keyword": "hablar", "translation": "to speak", "tense": "present", "person": "2nd", "number": "singular"},
+    {"keyword": "escribir", "translation": "to write", "tense": "past", "person": "3rd", "number": "plural"},
+    {"keyword": "correr", "translation": "to run", "tense": "present", "person": "1st", "number": "singular"},
+]
 
 
-def test_ensure_constraint_sets_is_idempotent(session):
-    first = _ensure_constraint_sets(session)
-    second = _ensure_constraint_sets(session)
-    assert len(first) == len(second)
-    assert session.query(ConstraintSet).count() == len(PHASE1_CONSTRAINT_SETS)
+def _create_test_benchmark(session) -> tuple[Benchmark, list[ConstraintSet]]:
+    """Create a benchmark with the standard 5 constraint sets for tests."""
+    bm = Benchmark(name="test_spanish", language="es")
+    session.add(bm)
+    session.flush()
+
+    sets = []
+    for cs_data in BENCHMARK_CONSTRAINT_SETS:
+        cs = ConstraintSet(benchmark_id=bm.id, target_language="es", **cs_data)
+        session.add(cs)
+        sets.append(cs)
+    session.commit()
+    return bm, sets
 
 
 def test_full_mock_pipeline(session):
     """Run the full mock generation loop and verify everything lands in the DB."""
-    constraint_sets = _ensure_constraint_sets(session)
+    benchmark, constraint_sets = _create_test_benchmark(session)
 
     experiment = Experiment(
+        benchmark_id=benchmark.id,
         name="test_mock_run",
         method="baseline_gpt",
         samples_per_case=3,
@@ -81,17 +91,29 @@ def test_full_mock_pipeline(session):
         assert count == 3, f"Expected 3 sentences for {cs.keyword}, got {count}"
 
 
-def test_mock_outputs_cover_all_constraint_sets():
-    """Every hardcoded constraint set should have mock data."""
-    for cs in PHASE1_CONSTRAINT_SETS:
+def test_mock_outputs_cover_all_benchmark_keywords():
+    """Every benchmark constraint set keyword should have mock data."""
+    for cs in BENCHMARK_CONSTRAINT_SETS:
         assert cs["keyword"] in MOCK_OUTPUTS, f"No mock data for {cs['keyword']}"
         assert len(MOCK_OUTPUTS[cs["keyword"]]) >= 3
 
 
-def test_constraint_sets_have_target_language(session):
-    constraint_sets = _ensure_constraint_sets(session)
-    for cs in constraint_sets:
-        assert cs.target_language == "es"
+def test_experiment_links_to_benchmark(session):
+    benchmark, constraint_sets = _create_test_benchmark(session)
+
+    exp = Experiment(
+        benchmark_id=benchmark.id,
+        name="test_link",
+        method="baseline_gpt",
+        samples_per_case=3,
+        status="pending",
+    )
+    session.add(exp)
+    session.commit()
+
+    row = session.query(Experiment).filter_by(name="test_link").one()
+    assert row.benchmark_id == benchmark.id
+    assert row.benchmark.name == "test_spanish"
 
 
 # ── Evaluation integration ──────────────────────────────────────────────────
@@ -99,9 +121,10 @@ def test_constraint_sets_have_target_language(session):
 
 def test_evaluate_sentences_stores_evaluations(session):
     """Run the full pipeline with evaluation and verify evaluation rows."""
-    constraint_sets = _ensure_constraint_sets(session)
+    benchmark, constraint_sets = _create_test_benchmark(session)
 
     experiment = Experiment(
+        benchmark_id=benchmark.id,
         name="test_eval_run",
         method="baseline_gpt",
         samples_per_case=3,
@@ -172,8 +195,9 @@ def test_evaluate_no_sentences_produces_zero_evaluations(session, sample_experim
 
 def test_full_phase3_metrics_pipeline(session):
     """After generation + sentence eval: group metrics + roll-ups land in experiment_metrics."""
-    constraint_sets = _ensure_constraint_sets(session)
+    benchmark, constraint_sets = _create_test_benchmark(session)
     experiment = Experiment(
+        benchmark_id=benchmark.id,
         name="phase3_integration",
         method="baseline_gpt",
         samples_per_case=3,
