@@ -1,0 +1,36 @@
+name: spanish_basic
+language: es
+description: >
+  Basic Spanish verb conjugation covering five common verbs
+  across core tenses and grammatical persons.
+
+constraint_sets:
+  - keyword: comer
+    translation: to eat
+    tense: past
+    person: 1st
+    number: plural
+
+  - keyword: vivir
+    translation: to live
+    tense: future
+    person: 3rd
+    number: singular
+
+  - keyword: hablar
+    translation: to speak
+    tense: present
+    person: 2nd
+    number: singular
+
+  - keyword: escribir
+    translation: to write
+    tense: past
+    person: 3rd
+    number: plural
+
+  - keyword: correr
+    translation: to run
+    tense: present
+    person: 1st
+    number: singular

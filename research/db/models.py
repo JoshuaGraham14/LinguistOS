@@ -14,12 +14,36 @@ def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+class Benchmark(Base):
+    """A named, reusable collection of constraint sets for repeatable experiments."""
+
+    __tablename__ = "benchmarks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    language: Mapped[str] = mapped_column(String(16), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow, nullable=False
+    )
+
+    constraint_sets: Mapped[list["ConstraintSet"]] = relationship(
+        back_populates="benchmark", cascade="all, delete-orphan"
+    )
+    experiments: Mapped[list["Experiment"]] = relationship(
+        back_populates="benchmark"
+    )
+
+
 class ConstraintSet(Base):
     """A bundle of morpho-syntactic constraints (e.g. comer + past + 1pl)."""
 
     __tablename__ = "constraint_sets"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    benchmark_id: Mapped[int] = mapped_column(
+        ForeignKey("benchmarks.id", ondelete="CASCADE"), nullable=False
+    )
     keyword: Mapped[str] = mapped_column(String(255), nullable=False)
     tense: Mapped[str] = mapped_column(String(64), nullable=False)
     person: Mapped[str] = mapped_column(String(16), nullable=False)
@@ -32,7 +56,8 @@ class ConstraintSet(Base):
         DateTime(timezone=True), default=_utcnow, nullable=False
     )
 
-    sentences: Mapped[list[GeneratedSentence]] = relationship(
+    benchmark: Mapped["Benchmark"] = relationship(back_populates="constraint_sets")
+    sentences: Mapped[list["GeneratedSentence"]] = relationship(
         back_populates="constraint_set", cascade="all, delete-orphan"
     )
 
@@ -44,6 +69,9 @@ class Experiment(Base):
     __table_args__ = (Index("ix_experiment_status", "status"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    benchmark_id: Mapped[int | None] = mapped_column(
+        ForeignKey("benchmarks.id", ondelete="SET NULL"), nullable=True
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     method: Mapped[str] = mapped_column(String(64), nullable=False)
     samples_per_case: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
@@ -56,7 +84,8 @@ class Experiment(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    sentences: Mapped[list[GeneratedSentence]] = relationship(
+    benchmark: Mapped["Benchmark | None"] = relationship(back_populates="experiments")
+    sentences: Mapped[list["GeneratedSentence"]] = relationship(
         back_populates="experiment", cascade="all, delete-orphan"
     )
     metrics: Mapped[list["ExperimentMetric"]] = relationship(

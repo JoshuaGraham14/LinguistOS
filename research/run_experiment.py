@@ -1,11 +1,11 @@
 """CLI: run baseline GPT generation, evaluate, and store results in SQLite.
 
 Usage:
-    python -m research.run_experiment                 # mock data + eval + metrics
-    python -m research.run_experiment --live           # calls OpenAI for real
-    python -m research.run_experiment --live --samples 5
-    python -m research.run_experiment --no-eval        # skip per-sentence evaluation (still metrics)
-    python -m research.run_experiment --no-metrics     # skip group metrics + roll-ups
+    python -m research.run_experiment --benchmark spanish_basic     # mock + eval + metrics
+    python -m research.run_experiment --benchmark spanish_basic --live
+    python -m research.run_experiment --benchmark spanish_basic --live --samples 5
+    python -m research.run_experiment --benchmark spanish_basic --no-eval
+    python -m research.run_experiment --benchmark spanish_basic --no-metrics
 """
 
 from __future__ import annotations
@@ -13,12 +13,18 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 from datetime import datetime, timezone
+from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy.orm import joinedload
 
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
+from research.benchmarks.loader import load_benchmark
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.db.database import SessionLocal, init_db
 from research.db.models import (
+    Benchmark,
     ConstraintSet,
     Experiment,
     ExperimentMetric,
@@ -32,16 +38,6 @@ from research.evaluation.sentence.grammar import GrammarEvaluator
 from research.generation.baseline_gpt import generate as gpt_generate
 
 DEFAULT_EVALUATORS: list[BaseEvaluator] = [GrammarEvaluator()]
-
-# ── Hardcoded constraint sets for Phase 1 ────────────────────────────────────
-
-PHASE1_CONSTRAINT_SETS: list[dict[str, str]] = [
-    {"keyword": "comer", "translation": "to eat", "tense": "past", "person": "1st", "number": "plural"},
-    {"keyword": "vivir", "translation": "to live", "tense": "future", "person": "3rd", "number": "singular"},
-    {"keyword": "hablar", "translation": "to speak", "tense": "present", "person": "2nd", "number": "singular"},
-    {"keyword": "escribir", "translation": "to write", "tense": "past", "person": "3rd", "number": "plural"},
-    {"keyword": "correr", "translation": "to run", "tense": "present", "person": "1st", "number": "singular"},
-]
 
 MOCK_OUTPUTS: dict[str, list[dict[str, str]]] = {
     "comer": [
@@ -71,27 +67,15 @@ MOCK_OUTPUTS: dict[str, list[dict[str, str]]] = {
     ],
 }
 
+_BENCHMARKS_DIR = Path(__file__).resolve().parent / "benchmarks"
 
-def _ensure_constraint_sets(session) -> list[ConstraintSet]:
-    """Insert constraint sets if they don't exist yet, return all of them."""
-    existing = session.query(ConstraintSet).all()
-    if existing:
-        return existing
 
-    sets = []
-    for cs in PHASE1_CONSTRAINT_SETS:
-        row = ConstraintSet(
-            keyword=cs["keyword"],
-            translation=cs["translation"],
-            tense=cs["tense"],
-            person=cs["person"],
-            number=cs["number"],
-            target_language="es",
-        )
-        session.add(row)
-        sets.append(row)
-    session.commit()
-    return sets
+def _resolve_benchmark(session, name: str) -> Benchmark:
+    """Load a benchmark by name — reads from YAML on first use, then cached in DB."""
+    yaml_path = _BENCHMARKS_DIR / f"{name}.yaml"
+    if not yaml_path.exists():
+        raise FileNotFoundError(f"No benchmark YAML found at {yaml_path}")
+    return load_benchmark(session, yaml_path)
 
 
 def _evaluate_sentences(
@@ -202,6 +186,7 @@ def _compute_and_store_group_metrics(
 
 def run(
     *,
+    benchmark_name: str,
     live: bool = False,
     samples_per_case: int = 3,
     evaluate: bool = True,
@@ -211,10 +196,16 @@ def run(
     session = SessionLocal()
 
     try:
-        constraint_sets = _ensure_constraint_sets(session)
+        benchmark = _resolve_benchmark(session, benchmark_name)
+        constraint_sets = (
+            session.query(ConstraintSet)
+            .filter_by(benchmark_id=benchmark.id)
+            .all()
+        )
 
         experiment = Experiment(
-            name=f"baseline_gpt_{'live' if live else 'mock'}",
+            benchmark_id=benchmark.id,
+            name=f"baseline_gpt_{benchmark.name}_{'live' if live else 'mock'}",
             method="baseline_gpt",
             samples_per_case=samples_per_case,
             config={"live": live, "model": "gpt-4o", "temperature": 0.7},
@@ -290,6 +281,7 @@ def run(
 
         # ── Print summary ────────────────────────────────────────────────
         print("\n" + "=" * 60)
+        print(f"  Benchmark:    {benchmark.name} (id={benchmark.id})")
         print(f"  Experiment:   {experiment.name} (id={experiment.id})")
         print(f"  Status:       {experiment.status}")
         print(f"  Constraints:  {len(constraint_sets)}")
@@ -335,6 +327,8 @@ def run(
 
 def main():
     parser = argparse.ArgumentParser(description="Run a baseline GPT experiment")
+    parser.add_argument("--benchmark", type=str, required=True,
+                        help="Benchmark name (matches <name>.yaml in benchmarks/)")
     parser.add_argument("--live", action="store_true", help="Call OpenAI API (requires OPENAI_API_KEY)")
     parser.add_argument("--samples", type=int, default=3, help="Samples per constraint set (default: 3)")
     parser.add_argument("--no-eval", action="store_true", help="Skip per-sentence evaluation (still runs group metrics)")
@@ -342,9 +336,10 @@ def main():
     args = parser.parse_args()
 
     mode = "LIVE (calling OpenAI)" if args.live else "MOCK (canned data)"
-    print(f"\n  Running experiment: baseline_gpt [{mode}]\n")
+    print(f"\n  Running experiment: baseline_gpt / {args.benchmark} [{mode}]\n")
 
     run(
+        benchmark_name=args.benchmark,
         live=args.live,
         samples_per_case=args.samples,
         evaluate=not args.no_eval,

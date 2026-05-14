@@ -12,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 
 from research.db.database import Base
 from research.db.models import (  # noqa: F401
+    Benchmark,
     ConstraintSet,
     Experiment,
     ExperimentMetric,
@@ -46,8 +47,17 @@ def session(engine):
 
 
 @pytest.fixture
-def sample_constraint_set(session) -> ConstraintSet:
+def sample_benchmark(session) -> Benchmark:
+    bm = Benchmark(name="test_benchmark", language="es", description="Test benchmark")
+    session.add(bm)
+    session.commit()
+    return bm
+
+
+@pytest.fixture
+def sample_constraint_set(session, sample_benchmark) -> ConstraintSet:
     cs = ConstraintSet(
+        benchmark_id=sample_benchmark.id,
         keyword="comer",
         translation="to eat",
         tense="past",
@@ -61,8 +71,9 @@ def sample_constraint_set(session) -> ConstraintSet:
 
 
 @pytest.fixture
-def sample_experiment(session) -> Experiment:
+def sample_experiment(session, sample_benchmark) -> Experiment:
     exp = Experiment(
+        benchmark_id=sample_benchmark.id,
         name="test_experiment",
         method="baseline_gpt",
         samples_per_case=3,

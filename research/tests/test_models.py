@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from research.db.models import (
+    Benchmark,
     ConstraintSet,
     Experiment,
     ExperimentMetric,
@@ -11,8 +12,51 @@ from research.db.models import (
 )
 
 
-def test_constraint_set_creation(session):
+# ── Benchmark ──────────────────────────────────────────────────────────────
+
+
+def test_benchmark_creation(session):
+    bm = Benchmark(name="spanish_basic", language="es", description="Basic Spanish")
+    session.add(bm)
+    session.commit()
+
+    row = session.query(Benchmark).filter_by(name="spanish_basic").one()
+    assert row.language == "es"
+    assert row.description == "Basic Spanish"
+    assert row.created_at is not None
+
+
+def test_benchmark_name_unique(session):
+    session.add(Benchmark(name="dup", language="es"))
+    session.commit()
+    import pytest
+    with pytest.raises(Exception):
+        session.add(Benchmark(name="dup", language="es"))
+        session.commit()
+
+
+def test_cascade_delete_benchmark_removes_constraint_sets(session):
+    bm = Benchmark(name="to_delete", language="es")
+    session.add(bm)
+    session.flush()
+    session.add(ConstraintSet(
+        benchmark_id=bm.id, keyword="x", translation="y",
+        tense="present", person="1st", number="singular", target_language="es",
+    ))
+    session.commit()
+    assert session.query(ConstraintSet).count() == 1
+
+    session.delete(bm)
+    session.commit()
+    assert session.query(ConstraintSet).count() == 0
+
+
+# ── ConstraintSet ──────────────────────────────────────────────────────────
+
+
+def test_constraint_set_creation(session, sample_benchmark):
     cs = ConstraintSet(
+        benchmark_id=sample_benchmark.id,
         keyword="vivir",
         translation="to live",
         tense="future",
@@ -29,10 +73,12 @@ def test_constraint_set_creation(session):
     assert row.target_language == "es"
     assert row.cefr_level is None
     assert row.created_at is not None
+    assert row.benchmark_id == sample_benchmark.id
 
 
-def test_constraint_set_with_cefr(session):
+def test_constraint_set_with_cefr(session, sample_benchmark):
     cs = ConstraintSet(
+        benchmark_id=sample_benchmark.id,
         keyword="hablar",
         translation="to speak",
         tense="present",
@@ -48,8 +94,9 @@ def test_constraint_set_with_cefr(session):
     assert row.cefr_level == "B1"
 
 
-def test_constraint_set_extra_constraints_json(session):
+def test_constraint_set_extra_constraints_json(session, sample_benchmark):
     cs = ConstraintSet(
+        benchmark_id=sample_benchmark.id,
         keyword="ser",
         translation="to be",
         tense="present",
@@ -83,6 +130,7 @@ def test_experiment_creation(session):
     assert row.config["model"] == "gpt-4o"
     assert row.status == "pending"
     assert row.completed_at is None
+    assert row.benchmark_id is None
 
 
 def test_generated_sentence_belongs_to_experiment_and_constraint_set(

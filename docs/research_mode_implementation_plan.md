@@ -6,15 +6,14 @@
 
 ---
 
-## Current State (13 May 2026)
+## Current State (14 May 2026)
 
-- Phase 1 complete and merged to main
-- Phase 2 complete (per-sentence evaluation); merged to **main**
-- Phase 3 complete on **`research/pipeline-phase-3`**: `experiment_metrics`, roll-ups, distribution metrics
-- 5 SQLite tables: `constraint_sets`, `experiments`, `generated_sentences`, `sentence_evaluations`, `experiment_metrics`
+- Phases 1–4 complete and merged to **main**
+- 6 SQLite tables: `benchmarks`, `constraint_sets`, `experiments`, `generated_sentences`, `sentence_evaluations`, `experiment_metrics`
+- Benchmarks loaded from YAML (`research/benchmarks/*.yaml`); constraint sets and experiments FK to benchmark
 - **Stage 1** — `BaseEvaluator` → `sentence_evaluations`. **Stage 2b** — `BaseGroupMetric` → `experiment_metrics` (per constraint set + optional experiment-wide). **Stage 2a** — `aggregate_sentence_eval_rollups()` → `experiment_metrics` (`mean::<evaluator>` rows).
-- Mock/live runner: `--no-eval` skips Stage 1 only; `--no-metrics` skips Stage 2a+2b
-- 61 unit tests (research/tests)
+- Runner: `--benchmark <name>` (required), `--live`, `--samples`, `--no-eval`, `--no-metrics`
+- 72 unit tests (research/tests)
 - Separate `research.db`, isolated from backend
 
 ---
@@ -151,26 +150,41 @@ constraint_sets --< generated_sentences >-- experiments
 
 ---
 
-## Phase 4 -- Benchmarks
+## Phase 4 -- Benchmarks (DONE)
 
 Formalise constraint set groups so experiments are repeatable and comparable.
 
-**What to build:**
-- `research/db/models.py` -- add 1 table:
-  - `benchmarks` (name, language, description) -- constraint_sets now FK to benchmark
-- `research/benchmarks/loader.py` -- reads a YAML file, inserts Benchmark + ConstraintSet rows
-- `research/benchmarks/spanish_basic.yaml` -- starter benchmark (5-10 constraint sets)
-- Update `run_experiment.py` to accept `--benchmark` flag instead of hardcoded constraint sets
+**What was built:**
+- `research/db/models.py` — added `Benchmark` model (`name` UNIQUE, `language`, `description`):
+  - `constraint_sets` now FK to `benchmarks` (CASCADE delete)
+  - `experiments` has nullable `benchmark_id` FK (SET NULL on delete, nullable for pre-Phase-4 rows)
+  - `Benchmark.constraint_sets` and `Benchmark.experiments` relationships
+- `research/benchmarks/loader.py` — `load_benchmark(session, path)`:
+  - Parses YAML, validates required fields, inserts `Benchmark` + `ConstraintSet` rows
+  - Idempotent: returns existing benchmark if one with the same name already exists
+  - Runnable as `python -m research.benchmarks.loader <path>`
+- `research/benchmarks/spanish_basic.yaml` — starter benchmark (5 constraint sets: comer, vivir, hablar, escribir, correr)
+- `run_experiment.py` updated:
+  - `--benchmark <name>` required flag replaces hardcoded `PHASE1_CONSTRAINT_SETS` / `_ensure_constraint_sets`
+  - `_resolve_benchmark()` loads YAML on first use, then cached in DB
+  - Experiment name includes benchmark: `baseline_gpt_<benchmark>_<mode>`
+  - Experiment record links to benchmark via `benchmark_id`
+- `pyyaml>=6.0` added to `requirements.txt`
+- Tests: `test_benchmarks.py` (10 tests — loading, idempotency, validation, CEFR pass-through, language override, real YAML smoke test); existing tests updated for new `benchmark_id` FK
 
-**Done when:** You load a benchmark from YAML, run an experiment against it, and the experiment record links back to the benchmark.
-
-**DB at this point (final schema):**
+**DB at this point:**
 
 ```
-benchmarks --< constraint_sets --< generated_sentences >-- experiments
-                                          |                      |
-                                          v                      v
-                                  sentence_evaluations    experiment_metrics
+              benchmarks
+             /          \
+            v            v
+   constraint_sets    experiments ──< experiment_metrics
+            \           /
+             v         v
+         generated_sentences
+                |
+                v
+        sentence_evaluations
 ```
 
 ---
@@ -231,13 +245,15 @@ generation:
 ## Data Flow
 
 ```
-Constraint Sets → Generator → [generated_sentences]
-                                    |
-      Stage 1: per-sentence only ───┴──→ [sentence_evaluations]  ← sentence/BaseEvaluator
-                                    |
-      Stage 2b: joint batch ──────────┼──→ [experiment_metrics] ← distribution/BaseGroupMetric
-                                    |
-      Stage 2a: from Stage 1 only ────┘→ [experiment_metrics] ← mean::<evaluator> roll-ups
+[benchmarks] YAML → Loader → DB
+     |
+     └→ Constraint Sets → Generator → [generated_sentences]
+                                            |
+          Stage 1: per-sentence only ───────┴──→ [sentence_evaluations]  ← sentence/BaseEvaluator
+                                            |
+          Stage 2b: joint batch ────────────┼──→ [experiment_metrics] ← distribution/BaseGroupMetric
+                                            |
+          Stage 2a: from Stage 1 only ──────┘→ [experiment_metrics] ← mean::<evaluator> roll-ups
 ```
 
 Each `[bracket]` is a database table. Tables are added phase by phase, not all at once.
