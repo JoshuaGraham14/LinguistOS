@@ -1,10 +1,10 @@
-"""CLI: run a generation config against a benchmark, evaluate, and store results.
+"""CLI: run a method config against a benchmark, evaluate, and store results.
 
 Usage:
-    python -m research.run_experiment --benchmark spanish_basic --config baseline_default
-    python -m research.run_experiment --benchmark spanish_basic --config individual_default --live
-    python -m research.run_experiment --benchmark spanish_basic --config baseline_default --no-eval
-    python -m research.run_experiment --benchmark spanish_basic --config baseline_default --no-metrics
+    python -m research.run_experiment --benchmark spanish_basic --method baseline_default
+    python -m research.run_experiment --benchmark spanish_basic --method individual_default --live
+    python -m research.run_experiment --benchmark spanish_basic --method baseline_default --no-eval
+    python -m research.run_experiment --benchmark spanish_basic --method baseline_default --no-metrics
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from sqlalchemy.orm import joinedload
 load_dotenv(Path(__file__).resolve().parent / ".env")
 
 from research.benchmarks.loader import load_benchmark
-from research.configs.loader import load_generation_config
+from research.methods.loader import load_method_config
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.db.database import SessionLocal, init_db
 from research.db.models import (
@@ -29,7 +29,7 @@ from research.db.models import (
     Experiment,
     ExperimentMetric,
     GeneratedSentence,
-    GenerationConfig,
+    MethodConfig,
     SentenceEvaluation,
 )
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
@@ -70,7 +70,7 @@ MOCK_OUTPUTS: dict[str, list[dict[str, str]]] = {
 }
 
 _BENCHMARKS_DIR = Path(__file__).resolve().parent / "benchmarks"
-_CONFIGS_DIR = Path(__file__).resolve().parent / "configs"
+_METHODS_DIR = Path(__file__).resolve().parent / "methods"
 
 
 def _resolve_benchmark(session, name: str) -> Benchmark:
@@ -81,25 +81,25 @@ def _resolve_benchmark(session, name: str) -> Benchmark:
     return load_benchmark(session, yaml_path)
 
 
-def _resolve_generation_config(session, name: str) -> GenerationConfig:
-    """Load a generation config by name — reads from YAML on first use."""
-    yaml_path = _CONFIGS_DIR / f"{name}.yaml"
+def _resolve_method_config(session, name: str) -> MethodConfig:
+    """Load a method config by name — reads from YAML on first use."""
+    yaml_path = _METHODS_DIR / f"{name}.yaml"
     if not yaml_path.exists():
-        raise FileNotFoundError(f"No config YAML found at {yaml_path}")
-    return load_generation_config(session, yaml_path)
+        raise FileNotFoundError(f"No method YAML found at {yaml_path}")
+    return load_method_config(session, yaml_path)
 
 
-def _build_generator(gen_config: GenerationConfig) -> BaseGenerator:
-    """Instantiate a generator from a GenerationConfig row."""
-    cls = GENERATOR_REGISTRY.get(gen_config.method)
+def _build_generator(method_config: MethodConfig) -> BaseGenerator:
+    """Instantiate a generator from a MethodConfig row."""
+    cls = GENERATOR_REGISTRY.get(method_config.method)
     if cls is None:
         raise ValueError(
-            f"Unknown generation method '{gen_config.method}'. "
+            f"Unknown generation method '{method_config.method}'. "
             f"Available: {', '.join(GENERATOR_REGISTRY)}"
         )
-    config = gen_config.config or {}
+    config = method_config.config or {}
     return cls(
-        model=config.get("model", "gpt-4o"),
+        model=config.get("model", "gpt-5.4-nano"),
         temperature=config.get("temperature", 0.7),
     )
 
@@ -213,7 +213,7 @@ def _compute_and_store_group_metrics(
 def run(
     *,
     benchmark_name: str,
-    config_name: str,
+    method_name: str,
     live: bool = False,
     evaluate: bool = True,
     metrics: bool = True,
@@ -223,8 +223,8 @@ def run(
 
     try:
         benchmark = _resolve_benchmark(session, benchmark_name)
-        gen_config = _resolve_generation_config(session, config_name)
-        generator = _build_generator(gen_config)
+        method_config = _resolve_method_config(session, method_name)
+        generator = _build_generator(method_config)
 
         constraint_sets = (
             session.query(ConstraintSet)
@@ -234,8 +234,8 @@ def run(
 
         experiment = Experiment(
             benchmark_id=benchmark.id,
-            generation_config_id=gen_config.id,
-            name=f"{gen_config.method}_{benchmark.name}_{'live' if live else 'mock'}",
+            method_config_id=method_config.id,
+            name=f"{method_config.method}_{benchmark.name}_{'live' if live else 'mock'}",
             status="running",
         )
         session.add(experiment)
@@ -254,12 +254,12 @@ def run(
                         tense=cs.tense,
                         person=cs.person,
                         number=cs.number,
-                        num_candidates=gen_config.samples_per_case,
+                        num_candidates=method_config.samples_per_case,
                         target_language=cs.target_language,
                         cefr_level=cs.cefr_level,
                     )
                 else:
-                    candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:gen_config.samples_per_case]
+                    candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:method_config.samples_per_case]
 
                 if not candidates:
                     print(f"    No candidates generated for {cs.keyword}")
@@ -272,7 +272,7 @@ def run(
                         sentence=cand["sentence"],
                         translation=cand["translation"],
                         sample_index=i,
-                        generation_meta={"method": gen_config.method, "live": live},
+                        generation_meta={"method": method_config.method, "live": live},
                     )
                     session.add(gen)
                     total_stored += 1
@@ -316,7 +316,7 @@ def run(
         # ── Print summary ────────────────────────────────────────────────
         print("\n" + "=" * 60)
         print(f"  Benchmark:    {benchmark.name} (id={benchmark.id})")
-        print(f"  Config:       {gen_config.name} [{gen_config.method}] (id={gen_config.id})")
+        print(f"  Method:       {method_config.name} [{method_config.method}] (id={method_config.id})")
         print(f"  Experiment:   {experiment.name} (id={experiment.id})")
         print(f"  Status:       {experiment.status}")
         print(f"  Constraints:  {len(constraint_sets)}")
@@ -359,19 +359,19 @@ def main():
     parser = argparse.ArgumentParser(description="Run a generation experiment")
     parser.add_argument("--benchmark", type=str, required=True,
                         help="Benchmark name (matches <name>.yaml in benchmarks/)")
-    parser.add_argument("--config", type=str, required=True,
-                        help="Generation config name (matches <name>.yaml in configs/)")
+    parser.add_argument("--method", type=str, required=True,
+                        help="Method config name (matches <name>.yaml in methods/)")
     parser.add_argument("--live", action="store_true", help="Call OpenAI API (requires OPENAI_API_KEY)")
     parser.add_argument("--no-eval", action="store_true", help="Skip per-sentence evaluation (still runs group metrics)")
     parser.add_argument("--no-metrics", action="store_true", help="Skip group metrics and roll-ups")
     args = parser.parse_args()
 
     mode = "LIVE (calling OpenAI)" if args.live else "MOCK (canned data)"
-    print(f"\n  Running experiment: {args.config} / {args.benchmark} [{mode}]\n")
+    print(f"\n  Running experiment: {args.method} / {args.benchmark} [{mode}]\n")
 
     run(
         benchmark_name=args.benchmark,
-        config_name=args.config,
+        method_name=args.method,
         live=args.live,
         evaluate=not args.no_eval,
         metrics=not args.no_metrics,
