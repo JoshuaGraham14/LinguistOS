@@ -236,6 +236,6 @@ def test_full_phase3_metrics_pipeline(session):
     assert g == 6  # 5 constraint_set + 1 experiment uniqueness metrics
 
     r = aggregate_sentence_eval_rollups(session, experiment.id)
-    assert r == 6  # mean::grammar_stub per CS + experiment-wide
+    assert r == 24  # 4 rollup kinds × (5 constraint_set + 1 experiment) per evaluator
 
-    assert session.query(ExperimentMetric).count() == 12
+    assert session.query(ExperimentMetric).count() == 30  # 6 group + 24 roll-up
