@@ -8,15 +8,17 @@
 
 ## Current State (14 May 2026)
 
-- Phases 1–5 complete and merged to **main**
+- Phases 1–6 complete (Phase 6 on `research/pipeline-phase-6`, pending merge to **main**)
 - 7 SQLite tables: `benchmarks`, `constraint_sets`, `method_configs`, `experiments`, `generated_sentences`, `sentence_evaluations`, `experiment_metrics`
 - Benchmarks from YAML (`research/benchmarks/*.yaml`); method configs from YAML (`research/methods/*.yaml`)
 - `Experiment` is a thin run record linking to a `Benchmark` and a `MethodConfig`
 - Two generators: `BaselineGPTGenerator` (batched N in one call) and `IndividualGPTGenerator` (one call per sample)
 - **Stage 1** — `BaseEvaluator` → `sentence_evaluations`. **Stage 2b** — `BaseGroupMetric` → `experiment_metrics`. **Stage 2a** — `aggregate_sentence_eval_rollups()` → `experiment_metrics`.
 - Runner: `--benchmark <name>` + `--method <name>` (both required), `--live`, `--no-eval`, `--no-metrics`
-- 91 unit tests (research/tests)
+- 93 unit tests (research/tests)
+- `research/explore.ipynb` — interactive analysis over `research.db` (experiments, sentences, evals, metrics)
 - Separate `research.db`, isolated from backend
+- Roll-ups: `mean::`, `min::`, `std::`, `pass_rate::` per evaluator (constraint-set + experiment scope)
 
 ---
 
@@ -236,25 +238,22 @@ Separated "what generation method + config" from "a specific run." `Experiment` 
 
 ---
 
-## Phase 6 -- Experiment Comparison
+## Phase 6 -- Richer roll-ups (DONE)
 
-Query and compare results across multiple experiments.
+Extend what gets stored automatically after each run. **Comparison and exploration stay in `research/explore.ipynb`** — no dedicated `analysis.py` or `--compare` CLI.
 
-**What to build:**
+**What was built:**
 
-- Extend `research/evaluation/rollups.py` with additional aggregate functions beyond mean:
-  - `min::<evaluator>` — worst-case output quality per evaluator
-  - `std::<evaluator>` — consistency / variance of scores
-  - `pass_rate::<evaluator>` — fraction of sentences above a configurable threshold (useful for binary/near-binary evaluators like grammar, tense accuracy)
-  - Median and percentiles (p5, p25) as optional extras for dissertation analysis
-  - All aggregates write to `experiment_metrics` with no schema changes needed
-- Create `research/analysis.py` with query/comparison helpers (roll-up logic lives in `research/evaluation/rollups.py`):
-  - `compare_experiments([id1, id2])` — side-by-side metric tables (now trivially grouped by `method_config_id` and `benchmark_id`)
-  - `get_sentences_for_constraint(experiment_id, constraint_set_id)` — drill into individual outputs
-  - `get_failure_analysis(experiment_id, evaluator)` — sentences below a score threshold
-- `research/run_experiment.py` gets a `--compare` mode that prints comparison output
+- `research/evaluation/rollups.py` — roll-ups beyond mean:
+  - `min::<evaluator>`, `std::<evaluator>`, `pass_rate::<evaluator>` (default threshold 0.5)
+  - Same `scope` / `metric_name` pattern as `mean::`; idempotent delete of all rollup prefixes before insert
+- `run_experiment.py` unchanged hook (still calls `aggregate_sentence_eval_rollups` after sentence eval)
+- Tests: extended `test_analysis.py` (+2 tests); integration test counts updated
+- `explore.ipynb` — experiments table uses `MethodConfig` / `Benchmark`; new **Compare experiments** section (pivot of experiment-wide metrics including roll-ups and `uniqueness_ratio_experiment`)
 
-**Done when:** You can run two experiments with different generation configs against the same benchmark, see richer per-evaluator summaries (mean, min, std, pass-rate), and compare them side-by-side in the terminal.
+**Deliberately not built:** `analysis.py`, `--compare` CLI, median/percentiles (can add later if needed for dissertation tables).
+
+**Done when:** After a run, `experiment_metrics` includes mean, min, std, and pass-rate per evaluator (per constraint set and experiment-wide). Compare experiments in the notebook via experiment-wide metric pivot.
 
 ---
 

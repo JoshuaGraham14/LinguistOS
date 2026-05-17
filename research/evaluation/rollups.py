@@ -2,75 +2,132 @@
 
 from __future__ import annotations
 
-from sqlalchemy import func
+import math
+from collections import defaultdict
 
 from research.db.models import ExperimentMetric, GeneratedSentence, SentenceEvaluation
 
+DEFAULT_PASS_THRESHOLD = 0.5
 
-def aggregate_sentence_eval_rollups(session, experiment_id: int) -> int:
-    """Insert experiment_metrics rows: mean score per evaluator (overall + per constraint set).
+ROLLUP_PREFIXES = ("mean::", "min::", "std::", "pass_rate::")
 
-    Metric names are ``mean::<evaluator_name>``. Scope is ``experiment`` for the overall
-    mean (``constraint_set_id`` NULL) and ``constraint_set`` for per-set means.
 
-    Idempotent: any existing ``mean::*`` rows for this experiment are deleted first.
+def _stats(scores: list[float], pass_threshold: float) -> dict[str, float]:
+    """Population mean, min, std, and pass rate for a list of scores."""
+    n = len(scores)
+    if n == 0:
+        return {}
+    mean = sum(scores) / n
+    mn = min(scores)
+    if n == 1:
+        std = 0.0
+    else:
+        variance = sum((x - mean) ** 2 for x in scores) / n
+        std = math.sqrt(variance)
+    passes = sum(1 for x in scores if x >= pass_threshold)
+    return {
+        "mean": mean,
+        "min": mn,
+        "std": std,
+        "pass_rate": passes / n,
+    }
+
+
+def aggregate_sentence_eval_rollups(
+    session,
+    experiment_id: int,
+    *,
+    pass_threshold: float = DEFAULT_PASS_THRESHOLD,
+) -> int:
+    """Insert experiment_metrics: mean, min, std, pass_rate per evaluator.
+
+    Metric names are ``<kind>::<evaluator_name>`` for kind in mean, min, std,
+    pass_rate. Scope is ``experiment`` for pooled stats (``constraint_set_id``
+    NULL) and ``constraint_set`` for per-set stats.
+
+    Idempotent: existing rollup rows (any of the prefixes above) for this
+    experiment are deleted first.
 
     Returns the number of metric rows inserted.
     """
-    session.query(ExperimentMetric).filter(
-        ExperimentMetric.experiment_id == experiment_id,
-        ExperimentMetric.metric_name.like("mean::%"),
-    ).delete(synchronize_session="fetch")
+    for prefix in ROLLUP_PREFIXES:
+        session.query(ExperimentMetric).filter(
+            ExperimentMetric.experiment_id == experiment_id,
+            ExperimentMetric.metric_name.like(f"{prefix}%"),
+        ).delete(synchronize_session="fetch")
 
-    q = (
+    rows = (
         session.query(
             SentenceEvaluation.evaluator_name,
             GeneratedSentence.constraint_set_id,
-            func.avg(SentenceEvaluation.score).label("avg_score"),
-            func.count(SentenceEvaluation.id).label("cnt"),
+            SentenceEvaluation.score,
         )
         .join(GeneratedSentence, SentenceEvaluation.sentence_id == GeneratedSentence.id)
         .filter(GeneratedSentence.experiment_id == experiment_id)
-        .group_by(SentenceEvaluation.evaluator_name, GeneratedSentence.constraint_set_id)
+        .all()
     )
-
-    per_cs_rows = list(q.all())
-    if not per_cs_rows:
+    if not rows:
         return 0
 
-    inserted = 0
-    totals: dict[str, tuple[float, int]] = {}
+    by_cs: dict[tuple[str, int], list[float]] = defaultdict(list)
+    by_evaluator: dict[str, list[float]] = defaultdict(list)
 
-    for evaluator_name, cs_id, avg_score, cnt in per_cs_rows:
-        avg_f = float(avg_score)
-        n = int(cnt)
+    for evaluator_name, cs_id, score in rows:
+        s = float(score)
+        by_cs[(evaluator_name, int(cs_id))].append(s)
+        by_evaluator[evaluator_name].append(s)
+
+    inserted = 0
+
+    def _add_row(
+        *,
+        kind: str,
+        evaluator_name: str,
+        value: float,
+        scope: str,
+        constraint_set_id: int | None,
+        count: int,
+    ) -> None:
+        nonlocal inserted
+        breakdown: dict[str, object] = {
+            "evaluator": evaluator_name,
+            "count": count,
+        }
+        if kind == "pass_rate":
+            breakdown["pass_threshold"] = pass_threshold
         session.add(
             ExperimentMetric(
                 experiment_id=experiment_id,
-                metric_name=f"mean::{evaluator_name}",
-                value=round(avg_f, 6),
-                scope="constraint_set",
-                constraint_set_id=int(cs_id),
-                breakdown={"evaluator": evaluator_name, "count": n},
+                metric_name=f"{kind}::{evaluator_name}",
+                value=round(value, 6),
+                scope=scope,
+                constraint_set_id=constraint_set_id,
+                breakdown=breakdown,
             )
         )
         inserted += 1
-        acc_sum, acc_n = totals.get(evaluator_name, (0.0, 0))
-        totals[evaluator_name] = (acc_sum + avg_f * n, acc_n + n)
 
-    for evaluator_name, (sum_scores, total_n) in totals.items():
-        mean_overall = sum_scores / total_n if total_n else 0.0
-        session.add(
-            ExperimentMetric(
-                experiment_id=experiment_id,
-                metric_name=f"mean::{evaluator_name}",
-                value=round(mean_overall, 6),
+    for (evaluator_name, cs_id), scores in by_cs.items():
+        for kind, value in _stats(scores, pass_threshold).items():
+            _add_row(
+                kind=kind,
+                evaluator_name=evaluator_name,
+                value=value,
+                scope="constraint_set",
+                constraint_set_id=cs_id,
+                count=len(scores),
+            )
+
+    for evaluator_name, scores in by_evaluator.items():
+        for kind, value in _stats(scores, pass_threshold).items():
+            _add_row(
+                kind=kind,
+                evaluator_name=evaluator_name,
+                value=value,
                 scope="experiment",
                 constraint_set_id=None,
-                breakdown={"evaluator": evaluator_name, "count": total_n},
+                count=len(scores),
             )
-        )
-        inserted += 1
 
     session.commit()
     return inserted
