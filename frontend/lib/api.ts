@@ -274,8 +274,15 @@ export interface AddVocabInput {
   // Canonical (preferred): only surfaceForm is required (LOS-106).
   surfaceForm?: string;
   glossPrimary?: string;
+  glosses?: string[];
   lemma?: string;
   pos?: string | null;
+  cefr?: string | null;
+  frequencyRank?: number | null;
+  gender?: string | null;
+  conjugationClass?: string | null;
+  morphFeatures?: Record<string, unknown> | null;
+  ipa?: string | null;
   tags?: VocabTag[];
   notes?: string | null;
   // Legacy support: callers passing { word, translation } still work.
@@ -296,8 +303,15 @@ export async function addVocab(input: AddVocabInput): Promise<VocabItem> {
       surface_form: surface,
       lemma: input.lemma,
       pos: input.pos ?? null,
+      cefr: input.cefr ?? null,
+      frequency_rank: input.frequencyRank ?? null,
+      gender: input.gender ?? null,
+      conjugation_class: input.conjugationClass ?? null,
+      morph_features: input.morphFeatures ?? null,
+      ipa: input.ipa ?? null,
       tags: input.tags ?? [],
       notes: input.notes ?? null,
+      glosses: input.glosses,
       // Mirror legacy fields so existing list/render paths keep working
       // until the adapter retirement criteria are met.
       word: surface,
@@ -310,6 +324,119 @@ export async function addVocab(input: AddVocabInput): Promise<VocabItem> {
     }),
   });
   return toVocab(item, input.language);
+}
+
+export type VocabSuggestDirection = "en-to-target" | "target-to-en";
+
+export interface VocabSuggestion {
+  text: string;
+  pos: VocabTag;
+}
+
+export interface VocabDraft {
+  surfaceForm: string;
+  lemma: string;
+  glossPrimary: string;
+  glosses: string[];
+  pos: VocabTag;
+  tags: VocabTag[];
+  cefr: string | null;
+  frequencyRank: number | null;
+  gender: string | null;
+  conjugationClass: string | null;
+  morphFeatures: Record<string, unknown> | null;
+  ipa: string | null;
+  notes: string | null;
+}
+
+interface ApiVocabDraft {
+  surface_form: string;
+  lemma: string;
+  gloss_primary: string;
+  glosses: string[];
+  pos: VocabTag;
+  tags: VocabTag[];
+  cefr: string | null;
+  frequency_rank: number | null;
+  gender: string | null;
+  conjugation_class: string | null;
+  morph_features: Record<string, unknown> | null;
+  ipa: string | null;
+  notes: string | null;
+}
+
+function toVocabDraft(item: ApiVocabDraft): VocabDraft {
+  return {
+    surfaceForm: item.surface_form,
+    lemma: item.lemma,
+    glossPrimary: item.gloss_primary,
+    glosses: item.glosses ?? [],
+    pos: item.pos,
+    tags: item.tags ?? [],
+    cefr: item.cefr,
+    frequencyRank: item.frequency_rank,
+    gender: item.gender,
+    conjugationClass: item.conjugation_class,
+    morphFeatures: item.morph_features,
+    ipa: item.ipa,
+    notes: item.notes,
+  };
+}
+
+export interface VocabSuggestResult {
+  candidates: VocabSuggestion[];
+  mock: boolean;
+  fieldSwap: boolean;
+  resolvedDirection: VocabSuggestDirection | null;
+}
+
+export async function suggestVocab(input: {
+  workspaceId: number;
+  inputText: string;
+  direction: VocabSuggestDirection;
+}): Promise<VocabSuggestResult> {
+  const res = await apiFetch<{
+    candidates: VocabSuggestion[];
+    mock: boolean;
+    field_swap: boolean;
+    resolved_direction: VocabSuggestDirection | null;
+  }>("/api/vocab/suggest", {
+    method: "POST",
+    body: JSON.stringify({
+      workspace_id: input.workspaceId,
+      input_text: input.inputText,
+      direction: input.direction,
+    }),
+  });
+  return {
+    candidates: res.candidates,
+    mock: res.mock,
+    fieldSwap: res.field_swap,
+    resolvedDirection: res.resolved_direction,
+  };
+}
+
+export async function enrichVocabSuggestion(input: {
+  workspaceId: number;
+  inputText: string;
+  selectedText: string;
+  direction: VocabSuggestDirection;
+  pos: VocabTag;
+}): Promise<{ draft: VocabDraft; mock: boolean }> {
+  const res = await apiFetch<{ draft: ApiVocabDraft; mock: boolean }>(
+    "/api/vocab/suggest/enrich",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        workspace_id: input.workspaceId,
+        input_text: input.inputText,
+        selected_text: input.selectedText,
+        direction: input.direction,
+        pos: input.pos,
+      }),
+    },
+  );
+  return { draft: toVocabDraft(res.draft), mock: res.mock };
 }
 
 export interface UpdateVocabPatch {

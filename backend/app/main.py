@@ -8,6 +8,7 @@ from app.api import (
     sentences,
     tokens,
     vocab,
+    vocab_suggest,
     voice,
     workspaces,
 )
@@ -33,6 +34,7 @@ app.add_middleware(
 app.include_router(generate.router, prefix="/api", tags=["generate"])
 app.include_router(practice.router, prefix="/api", tags=["practice"])
 app.include_router(vocab.router, prefix="/api", tags=["vocab"])
+app.include_router(vocab_suggest.router, prefix="/api", tags=["vocab-suggest"])
 app.include_router(workspaces.router, prefix="/api", tags=["workspaces"])
 app.include_router(mastery.router, prefix="/api", tags=["mastery"])
 app.include_router(sentences.router, prefix="/api", tags=["sentences"])

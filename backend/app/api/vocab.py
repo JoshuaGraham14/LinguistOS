@@ -10,13 +10,20 @@ from app.db.schemas import VocabCreate, VocabListResponse, VocabOut, VocabUpdate
 router = APIRouter()
 
 
+def _capitalize_first_word(value: str) -> str:
+    stripped = value.strip()
+    if not stripped:
+        return stripped
+    return stripped[0].upper() + stripped[1:]
+
+
 class _ResolvedCapture:
     """Resolved capture fields, with legacy + canonical guaranteed populated."""
 
     __slots__ = ("word", "translation", "lemma", "surface_form", "glosses")
 
     def __init__(self, payload: VocabCreate) -> None:
-        surface = (payload.surface_form or payload.word or "").strip()
+        surface = _capitalize_first_word(payload.surface_form or payload.word or "")
         if not surface:
             raise HTTPException(
                 status_code=422,
@@ -25,7 +32,7 @@ class _ResolvedCapture:
         gloss = (payload.gloss_primary or payload.translation or "").strip()
         self.surface_form = surface
         self.word = surface
-        self.lemma = (payload.lemma or surface).strip()
+        self.lemma = _capitalize_first_word(payload.lemma or surface)
         self.translation = gloss
         if payload.glosses:
             self.glosses = list(payload.glosses)
@@ -119,6 +126,11 @@ def update_vocab(vocab_id: int, payload: VocabUpdate, db: Session = Depends(get_
             patch[canonical] = patch[legacy]
         elif canonical in patch and legacy not in patch:
             patch[legacy] = patch[canonical]
+
+    for field in ("word", "surface_form", "lemma"):
+        value = patch.get(field)
+        if isinstance(value, str):
+            patch[field] = _capitalize_first_word(value)
 
     # Keep the "forms seen" history accumulating as the displayed surface
     # changes over time (Word Home depends on this list).

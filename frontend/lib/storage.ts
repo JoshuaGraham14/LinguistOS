@@ -350,8 +350,16 @@ export function useVocab() {
       translation?: string;
       surfaceForm?: string;
       glossPrimary?: string;
+      glosses?: string[];
+      lemma?: string;
       tags?: VocabTag[];
       pos?: string | null;
+      cefr?: string | null;
+      frequencyRank?: number | null;
+      gender?: string | null;
+      conjugationClass?: string | null;
+      morphFeatures?: Record<string, unknown> | null;
+      ipa?: string | null;
       notes?: string | null;
     }) => {
       if (!activeWorkspaceId || !activeWorkspace) throw new Error("No active workspace");
@@ -360,8 +368,16 @@ export function useVocab() {
         language: activeWorkspace.language,
         surfaceForm: input.surfaceForm ?? input.word,
         glossPrimary: input.glossPrimary ?? input.translation,
+        glosses: input.glosses,
+        lemma: input.lemma,
         tags: input.tags ?? [],
         pos: input.pos ?? null,
+        cefr: input.cefr ?? null,
+        frequencyRank: input.frequencyRank ?? null,
+        gender: input.gender ?? null,
+        conjugationClass: input.conjugationClass ?? null,
+        morphFeatures: input.morphFeatures ?? null,
+        ipa: input.ipa ?? null,
         notes: input.notes ?? null,
         word: input.word,
         translation: input.translation,
