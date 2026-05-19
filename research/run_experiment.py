@@ -121,16 +121,7 @@ def _evaluate_sentences(
     )
     total = 0
     for sent in sentences:
-        cs = sent.constraint_set
-        constraints = {
-            "keyword": cs.keyword,
-            "translation": cs.translation,
-            "tense": cs.tense,
-            "person": cs.person,
-            "number": cs.number,
-            "target_language": cs.target_language,
-            "cefr_level": cs.cefr_level,
-        }
+        constraints = sent.constraint_set.to_constraints_dict()
         for evaluator in evaluators:
             result = evaluator.evaluate(
                 sentence=sent.sentence,
