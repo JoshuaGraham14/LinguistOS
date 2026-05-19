@@ -15,8 +15,8 @@ from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence.grammar import GrammarEvaluator
-from research.run_experiment import (
-    MOCK_OUTPUTS,
+from research.fixtures.mock_outputs import MOCK_OUTPUTS
+from research.pipeline import (
     _compute_and_store_group_metrics,
     _evaluate_sentences,
 )

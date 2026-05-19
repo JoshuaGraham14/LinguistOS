@@ -6,19 +6,31 @@
 
 ---
 
-## Current State (14 May 2026)
+## Current State (May 2026)
 
-- Phases 1–6 complete (Phase 6 on `research/pipeline-phase-6`, pending merge to **main**)
+- Phases 1–6 complete
 - 7 SQLite tables: `benchmarks`, `constraint_sets`, `method_configs`, `experiments`, `generated_sentences`, `sentence_evaluations`, `experiment_metrics`
 - Benchmarks from YAML (`research/benchmarks/*.yaml`); method configs from YAML (`research/methods/*.yaml`)
 - `Experiment` is a thin run record linking to a `Benchmark` and a `MethodConfig`
 - Two generators: `BaselineGPTGenerator` (batched N in one call) and `IndividualGPTGenerator` (one call per sample)
-- **Stage 1** — `BaseEvaluator` → `sentence_evaluations`. **Stage 2b** — `BaseGroupMetric` → `experiment_metrics`. **Stage 2a** — `aggregate_sentence_eval_rollups()` → `experiment_metrics`.
-- Runner: `--benchmark <name>` + `--method <name>` (both required), `--live`, `--no-eval`, `--no-metrics`
-- 93 unit tests (research/tests)
+- **Stage 1** — `BaseEvaluator` → `sentence_evaluations` (idempotent per experiment on re-run). **Stage 2b** — `BaseGroupMetric` → `experiment_metrics`. **Stage 2a** — `aggregate_sentence_eval_rollups()` → `experiment_metrics`.
+- CLI: `python -m research.run_experiment` (`--benchmark`, `--method`, `--live`, `--no-eval`, `--no-metrics`). Orchestration: `research/pipeline.py` (`run_experiment()`). Mock data: `research/fixtures/mock_outputs.py`
+- 97 unit tests (`research/tests`)
 - `research/explore.ipynb` — interactive analysis over `research.db` (experiments, sentences, evals, metrics)
 - Separate `research.db`, isolated from backend
 - Roll-ups: `mean::`, `min::`, `std::`, `pass_rate::` per evaluator (constraint-set + experiment scope)
+
+### Recent refactors
+
+Structural improvements; behaviour for a normal CLI run is unchanged.
+
+1. **`ConstraintSet.to_constraints_dict()`** — Evaluators receive constraint fields from one method on the model (keyword, tense, person, number, translation, target language, CEFR, and `extra_constraints` when set).
+
+2. **`DEFAULT_EVALUATORS` registry** — Default sentence evaluators in `research/evaluation/sentence/__init__.py` (same pattern as generators and group metrics).
+
+3. **Idempotent Stage 1** — `_evaluate_sentences` clears existing eval rows for the experiment’s sentences before insert, so re-runs do not duplicate scores or skew roll-ups.
+
+4. **Pipeline split** — `research/pipeline.py` holds orchestration (`run_experiment`, stage helpers). `research/run_experiment.py` is CLI only. Mock sentences live in `research/fixtures/mock_outputs.py`.
 
 ---
 
@@ -27,7 +39,7 @@
 
 | Kind                                | What it measures                                                          | Code hook                                  | Storage                                                                    | Example metric names                                                 |
 | ----------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| **Per-sentence (Level 1)**          | One generated sentence at a time                                          | `BaseEvaluator.evaluate(...)`              | `**sentence_evaluations`** — one row per `(sentence_id, evaluator_name)`   | `grammar_stub`                                                       |
+| **Per-sentence (Level 1)**          | One generated sentence at a time                                          | `BaseEvaluator.evaluate(...)` + `ConstraintSet.to_constraints_dict()` | `**sentence_evaluations`** — one row per `(sentence_id, evaluator_name)` per eval pass; re-run replaces rows for that experiment | `grammar_stub`                                                       |
 | **Distribution / joint (Level 2b)** | All samples in a batch together (per constraint set, or whole experiment) | `BaseGroupMetric.compute(list[sentences])` | `**experiment_metrics`** only (`scope` = `constraint_set` or `experiment`) | `uniqueness_ratio`, `uniqueness_ratio_experiment`; future: self-BLEU |
 | **Roll-up / aggregate (Level 2a)**  | Summary statistics **computed from** per-sentence rows                    | `aggregate_sentence_eval_rollups()`        | `**experiment_metrics`** (`metric_name` prefix `mean::`)                   | `mean::grammar_stub`                                                 |
 
@@ -259,7 +271,7 @@ Extend what gets stored automatically after each run. **Comparison and explorati
 
 ## What is deliberately left out
 
-- No frontend (Streamlit or otherwise)
+- No frontend (Streamlit stub in `research/app.py` only; not wired to the pipeline)
 - No real grammar evaluation yet (stubs only -- spaCy/Stanza comes later)
 - No Alembic migrations (`create_all` is fine during research iteration)
 
