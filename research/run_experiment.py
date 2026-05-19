@@ -102,6 +102,21 @@ def _build_generator(method_config: MethodConfig) -> BaseGenerator:
     )
 
 
+def _clear_sentence_evaluations(session, experiment_id: int) -> int:
+    """Remove sentence_evaluations for all sentences in an experiment."""
+    sentence_ids = [
+        row[0]
+        for row in session.query(GeneratedSentence.id)
+        .filter_by(experiment_id=experiment_id)
+        .all()
+    ]
+    if not sentence_ids:
+        return 0
+    return session.query(SentenceEvaluation).filter(
+        SentenceEvaluation.sentence_id.in_(sentence_ids)
+    ).delete(synchronize_session="fetch")
+
+
 def _evaluate_sentences(
     session,
     experiment: Experiment,
@@ -109,8 +124,13 @@ def _evaluate_sentences(
 ) -> int:
     """Run all evaluators against every sentence in the experiment.
 
+    Idempotent per experiment: existing sentence_evaluations for this
+    experiment's sentences are deleted before new rows are inserted.
+
     Returns the total number of evaluation rows created.
     """
+    _clear_sentence_evaluations(session, experiment.id)
+
     sentences = (
         session.query(GeneratedSentence)
         .options(joinedload(GeneratedSentence.constraint_set))

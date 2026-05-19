@@ -101,7 +101,7 @@ Add the ability to score each generated sentence.
 - `research/evaluation/sentence/base.py` -- shared `**BaseEvaluator`** + `**EvaluationResult**`
 - `research/evaluation/sentence/grammar.py` -- `**GrammarEvaluator**` stub (keyword stem + non-empty checks)
 - `run_experiment.py` updated:
-  - `_evaluate_sentences()` runs all evaluators against every sentence in an experiment
+  - `_evaluate_sentences()` runs all evaluators against every sentence in an experiment (idempotent: clears existing eval rows for that experiment first)
   - `DEFAULT_EVALUATORS` in `research/evaluation/sentence/__init__.py` (currently `[GrammarEvaluator()]`)
   - `--no-eval` skips Stage 1 only (group metrics + roll-ups unchanged unless `--no-metrics`)
   - `--no-metrics` skips group metrics and roll-ups (Phase 3)
