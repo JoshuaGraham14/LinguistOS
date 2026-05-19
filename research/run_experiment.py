@@ -34,12 +34,10 @@ from research.db.models import (
 )
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.distribution.base import BaseGroupMetric
+from research.evaluation.sentence import DEFAULT_EVALUATORS
 from research.evaluation.sentence.base import BaseEvaluator
-from research.evaluation.sentence.grammar import GrammarEvaluator
 from research.generation import GENERATOR_REGISTRY
 from research.generation.base import BaseGenerator
-
-DEFAULT_EVALUATORS: list[BaseEvaluator] = [GrammarEvaluator()]
 
 MOCK_OUTPUTS: dict[str, list[dict[str, str]]] = {
     "comer": [

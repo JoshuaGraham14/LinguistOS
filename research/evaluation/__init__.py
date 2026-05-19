@@ -8,12 +8,18 @@
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.distribution.base import BaseGroupMetric, GroupMetricResult
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
-from research.evaluation.sentence import BaseEvaluator, EvaluationResult, GrammarEvaluator
+from research.evaluation.sentence import (
+    DEFAULT_EVALUATORS,
+    BaseEvaluator,
+    EvaluationResult,
+    GrammarEvaluator,
+)
 
 __all__ = [
     "BaseEvaluator",
     "EvaluationResult",
     "GrammarEvaluator",
+    "DEFAULT_EVALUATORS",
     "BaseGroupMetric",
     "GroupMetricResult",
     "DEFAULT_GROUP_METRICS",

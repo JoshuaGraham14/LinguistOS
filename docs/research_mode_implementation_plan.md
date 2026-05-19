@@ -102,13 +102,13 @@ Add the ability to score each generated sentence.
 - `research/evaluation/sentence/grammar.py` -- `**GrammarEvaluator**` stub (keyword stem + non-empty checks)
 - `run_experiment.py` updated:
   - `_evaluate_sentences()` runs all evaluators against every sentence in an experiment
-  - `DEFAULT_EVALUATORS` list (currently `[GrammarEvaluator()]`)
+  - `DEFAULT_EVALUATORS` in `research/evaluation/sentence/__init__.py` (currently `[GrammarEvaluator()]`)
   - `--no-eval` skips Stage 1 only (group metrics + roll-ups unchanged unless `--no-metrics`)
   - `--no-metrics` skips group metrics and roll-ups (Phase 3)
   - Summary output shows per-sentence scores inline
 - Tests for models, evaluators, and pipeline integration (extended further in Phase 3)
 
-**Adding a new sentence evaluator:** Add `research/evaluation/sentence/<name>.py` with a class extending `BaseEvaluator` from `sentence/base.py`, then register an instance in `DEFAULT_EVALUATORS` in `run_experiment.py`. One evaluator class per file keeps additions modular.
+**Adding a new sentence evaluator:** Add `research/evaluation/sentence/<name>.py` with a class extending `BaseEvaluator` from `sentence/base.py`, then register an instance in `DEFAULT_EVALUATORS` in `research/evaluation/sentence/__init__.py`. One evaluator class per file keeps additions modular.
 
 **Distribution metrics** (diversity, self-BLEU, etc.) do **not** use
 `sentence_evaluations`; implement `**BaseGroupMetric`** from `research/evaluation/distribution/base.py` in a new module under `distribution/`, add it to `**DEFAULT_GROUP_METRICS**` in `research/evaluation/distribution/__init__.py`. Stored only in `**experiment_metrics**`.
