@@ -13,7 +13,7 @@ from research.generation.base import BaseGenerator
 from research.generation.baseline_gpt import BaselineGPTGenerator
 from research.generation.individual_gpt import IndividualGPTGenerator
 from research.generation import GENERATOR_REGISTRY
-from research.run_experiment import _build_generator
+from research.pipeline import _build_generator
 
 
 # ── BaseGenerator ABC ──────────────────────────────────────────────────────

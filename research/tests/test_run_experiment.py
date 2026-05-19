@@ -15,8 +15,8 @@ from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence.grammar import GrammarEvaluator
-from research.run_experiment import (
-    MOCK_OUTPUTS,
+from research.fixtures.mock_outputs import MOCK_OUTPUTS
+from research.pipeline import (
     _compute_and_store_group_metrics,
     _evaluate_sentences,
 )
@@ -202,6 +202,105 @@ def test_evaluate_no_sentences_produces_zero_evaluations(session, sample_experim
     total = _evaluate_sentences(session, sample_experiment, [GrammarEvaluator()])
     assert total == 0
     assert session.query(SentenceEvaluation).count() == 0
+
+
+def test_evaluate_sentences_idempotent(session, sample_constraint_set, sample_experiment):
+    """Re-running evaluation replaces rows instead of duplicating them."""
+    sent = GeneratedSentence(
+        experiment_id=sample_experiment.id,
+        constraint_set_id=sample_constraint_set.id,
+        sentence="Nosotros comimos pizza.",
+        translation="We ate pizza.",
+        sample_index=0,
+    )
+    session.add(sent)
+    session.commit()
+
+    class MutableEval(BaseEvaluator):
+        def __init__(self) -> None:
+            self._calls = 0
+
+        @property
+        def name(self) -> str:
+            return "mutable"
+
+        def evaluate(self, sentence, translation, constraints):
+            self._calls += 1
+            score = 0.1 if self._calls == 1 else 0.9
+            return EvaluationResult(score=score)
+
+    ev = MutableEval()
+    _evaluate_sentences(session, sample_experiment, [ev])
+    _evaluate_sentences(session, sample_experiment, [ev])
+
+    rows = session.query(SentenceEvaluation).all()
+    assert len(rows) == 1
+    assert rows[0].evaluator_name == "mutable"
+    assert rows[0].score == 0.9
+
+
+def test_evaluate_sentences_clear_scoped_to_experiment(
+    session, sample_benchmark, sample_method_config, sample_constraint_set
+):
+    """Re-evaluating one experiment does not delete another experiment's evals."""
+    exp_a = Experiment(
+        benchmark_id=sample_benchmark.id,
+        method_config_id=sample_method_config.id,
+        name="exp_a",
+        status="running",
+    )
+    exp_b = Experiment(
+        benchmark_id=sample_benchmark.id,
+        method_config_id=sample_method_config.id,
+        name="exp_b",
+        status="running",
+    )
+    session.add_all([exp_a, exp_b])
+    session.flush()
+
+    for exp in (exp_a, exp_b):
+        session.add(
+            GeneratedSentence(
+                experiment_id=exp.id,
+                constraint_set_id=sample_constraint_set.id,
+                sentence="Hola.",
+                translation="Hello.",
+                sample_index=0,
+            )
+        )
+    session.commit()
+
+    _evaluate_sentences(session, exp_a, [GrammarEvaluator()])
+    _evaluate_sentences(session, exp_b, [GrammarEvaluator()])
+    assert session.query(SentenceEvaluation).count() == 2
+
+    class HighScoreEval(BaseEvaluator):
+        @property
+        def name(self) -> str:
+            return "high"
+
+        def evaluate(self, sentence, translation, constraints):
+            return EvaluationResult(score=1.0)
+
+    _evaluate_sentences(session, exp_a, [HighScoreEval()])
+
+    evals_a = (
+        session.query(SentenceEvaluation)
+        .join(GeneratedSentence)
+        .filter(GeneratedSentence.experiment_id == exp_a.id)
+        .all()
+    )
+    evals_b = (
+        session.query(SentenceEvaluation)
+        .join(GeneratedSentence)
+        .filter(GeneratedSentence.experiment_id == exp_b.id)
+        .all()
+    )
+    assert len(evals_a) == 1
+    assert evals_a[0].evaluator_name == "high"
+    assert evals_a[0].score == 1.0
+    assert len(evals_b) == 1
+    assert evals_b[0].evaluator_name == "grammar_stub"
 
 
 def test_full_phase3_metrics_pipeline(session):

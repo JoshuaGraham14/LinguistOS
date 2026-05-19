@@ -3,4 +3,13 @@
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence.grammar import GrammarEvaluator
 
-__all__ = ["BaseEvaluator", "EvaluationResult", "GrammarEvaluator"]
+DEFAULT_EVALUATORS: list[BaseEvaluator] = [
+    GrammarEvaluator(),
+]
+
+__all__ = [
+    "BaseEvaluator",
+    "EvaluationResult",
+    "GrammarEvaluator",
+    "DEFAULT_EVALUATORS",
+]

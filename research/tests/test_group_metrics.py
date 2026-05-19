@@ -5,7 +5,7 @@ from __future__ import annotations
 from research.db.models import GeneratedSentence, SentenceEvaluation
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.distribution.uniqueness import UniquenessRatioMetric
-from research.run_experiment import _compute_and_store_group_metrics
+from research.pipeline import _compute_and_store_group_metrics
 
 
 def test_uniqueness_ratio_all_distinct():

@@ -115,6 +115,37 @@ def test_constraint_set_extra_constraints_json(session, sample_benchmark):
     assert row.extra_constraints["formality"] == "formal"
 
 
+def test_constraint_set_to_constraints_dict(session, sample_benchmark):
+    cs = ConstraintSet(
+        benchmark_id=sample_benchmark.id,
+        keyword="comer",
+        translation="to eat",
+        tense="past",
+        person="1st",
+        number="plural",
+        target_language="es",
+        cefr_level="A2",
+        extra_constraints={"mood": "indicative"},
+    )
+    d = cs.to_constraints_dict()
+    assert d["keyword"] == "comer"
+    assert d["translation"] == "to eat"
+    assert d["tense"] == "past"
+    assert d["person"] == "1st"
+    assert d["number"] == "plural"
+    assert d["target_language"] == "es"
+    assert d["cefr_level"] == "A2"
+    assert d["extra_constraints"] == {"mood": "indicative"}
+
+
+def test_constraint_set_to_constraints_dict_omits_extra_when_none(
+    session, sample_constraint_set
+):
+    d = sample_constraint_set.to_constraints_dict()
+    assert "extra_constraints" not in d
+    assert d["keyword"] == "comer"
+
+
 # ── MethodConfig ───────────────────────────────────────────────────────────
 
 

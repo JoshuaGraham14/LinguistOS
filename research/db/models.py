@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from typing import Any
 
 from sqlalchemy import DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -60,6 +61,21 @@ class ConstraintSet(Base):
     sentences: Mapped[list["GeneratedSentence"]] = relationship(
         back_populates="constraint_set", cascade="all, delete-orphan"
     )
+
+    def to_constraints_dict(self) -> dict[str, Any]:
+        """Fields passed to sentence evaluators and generation prompts."""
+        out: dict[str, Any] = {
+            "keyword": self.keyword,
+            "translation": self.translation,
+            "tense": self.tense,
+            "person": self.person,
+            "number": self.number,
+            "target_language": self.target_language,
+            "cefr_level": self.cefr_level,
+        }
+        if self.extra_constraints is not None:
+            out["extra_constraints"] = self.extra_constraints
+        return out
 
 
 class MethodConfig(Base):
