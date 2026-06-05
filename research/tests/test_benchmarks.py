@@ -21,11 +21,13 @@ def yaml_path(tmp_path) -> Path:
         description: "A test benchmark"
         constraint_sets:
           - keyword: comer
+            expected_form: comimos
             translation: to eat
             tense: past
             person: 1st
             number: plural
           - keyword: vivir
+            expected_form: vivirá
             translation: to live
             tense: future
             person: 3rd
@@ -66,6 +68,37 @@ def test_load_benchmark_passes_cefr_level(session, yaml_path):
         benchmark_id=bm.id, keyword="comer"
     ).one()
     assert comer.cefr_level is None
+
+
+def test_load_benchmark_passes_expected_form(session, yaml_path):
+    bm = load_benchmark(session, yaml_path)
+
+    comer = session.query(ConstraintSet).filter_by(
+        benchmark_id=bm.id, keyword="comer"
+    ).one()
+    assert comer.expected_form == "comimos"
+
+    vivir = session.query(ConstraintSet).filter_by(
+        benchmark_id=bm.id, keyword="vivir"
+    ).one()
+    assert vivir.expected_form == "vivirá"
+
+
+def test_load_benchmark_syncs_expected_form_on_reload(session, yaml_path):
+    bm = load_benchmark(session, yaml_path)
+    comer = session.query(ConstraintSet).filter_by(
+        benchmark_id=bm.id, keyword="comer"
+    ).one()
+    comer.expected_form = None
+    session.commit()
+
+    reloaded = load_benchmark(session, yaml_path)
+    assert reloaded.id == bm.id
+
+    comer = session.query(ConstraintSet).filter_by(
+        benchmark_id=bm.id, keyword="comer"
+    ).one()
+    assert comer.expected_form == "comimos"
 
 
 def test_load_benchmark_idempotent(session, yaml_path):
@@ -131,3 +164,14 @@ def test_load_spanish_basic_yaml(session):
     assert bm.name == "spanish_basic"
     assert bm.language == "es"
     assert len(bm.constraint_sets) == 5
+
+    expected = {
+        ("comer", "past", "1st", "plural"): "comimos",
+        ("vivir", "future", "3rd", "singular"): "vivirá",
+        ("hablar", "present", "2nd", "singular"): "hablas",
+        ("escribir", "past", "3rd", "plural"): "escribieron",
+        ("correr", "present", "1st", "singular"): "corro",
+    }
+    for cs in bm.constraint_sets:
+        key = (cs.keyword, cs.tense, cs.person, cs.number)
+        assert cs.expected_form == expected[key]

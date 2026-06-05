@@ -29,6 +29,14 @@ pip install -r requirements.txt
 
 For live OpenAI runs, copy `.env.example` to `.env` and set `OPENAI_API_KEY`.
 
+To wipe experiment data and recreate an empty schema:
+
+```bash
+python3 -c "from research.db.database import reset_db; reset_db()"
+```
+
+Then reload benchmarks and method configs (see **Adding components** below) before running experiments.
+
 ## Run an experiment
 
 Mock run (no API; uses `fixtures/mock_outputs.py`):

@@ -1,11 +1,17 @@
-"""Tests for evaluation framework: BaseEvaluator ABC, GrammarEvaluator stub."""
+"""Tests for evaluation framework: BaseEvaluator ABC, sentence evaluators."""
 
 from __future__ import annotations
 
 import pytest
 
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
+from research.evaluation.sentence.expected_form import (
+    ExpectedFormMatchEvaluator,
+    normalize_token,
+    tokenize,
+)
 from research.evaluation.sentence.grammar import GrammarEvaluator
+from research.fixtures.mock_outputs import MOCK_OUTPUTS
 
 
 # ── EvaluationResult ─────────────────────────────────────────────────────────
@@ -57,6 +63,7 @@ def test_concrete_subclass_works():
 
 CONSTRAINTS = {
     "keyword": "comer",
+    "expected_form": "comimos",
     "translation": "to eat",
     "tense": "past",
     "person": "1st",
@@ -154,3 +161,136 @@ def test_grammar_evaluator_no_keyword_in_constraints():
         constraints={},
     )
     assert result.details["has_keyword_stem"] is True
+
+
+# ── ExpectedFormMatchEvaluator ───────────────────────────────────────────────
+
+
+def test_expected_form_match_evaluator_name():
+    assert ExpectedFormMatchEvaluator().name == "expected_form_match"
+
+
+def test_expected_form_match_passes_on_gold_form():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Nosotros comimos pizza.",
+        translation="We ate pizza.",
+        constraints=CONSTRAINTS,
+    )
+    assert result.score == 1.0
+    assert result.details["passed"] is True
+    assert result.details["matched_token"] == "comimos"
+
+
+def test_expected_form_match_fails_on_wrong_form():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Nosotros comemos pizza.",
+        translation="We eat pizza.",
+        constraints=CONSTRAINTS,
+    )
+    assert result.score == 0.0
+    assert result.details["passed"] is False
+    assert result.details["matched_token"] is None
+
+
+def test_expected_form_match_fails_on_infinitive_when_expecting_conjugated():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Me gusta comer pizza.",
+        translation="I like to eat pizza.",
+        constraints=CONSTRAINTS,
+    )
+    assert result.score == 0.0
+
+
+def test_expected_form_match_case_insensitive():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Nosotros COMIMOS pizza.",
+        translation="We ate pizza.",
+        constraints=CONSTRAINTS,
+    )
+    assert result.score == 1.0
+    assert result.details["matched_token"] == "COMIMOS"
+
+
+def test_expected_form_match_punctuation_on_token_edges():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="¡Comimos!",
+        translation="We ate!",
+        constraints=CONSTRAINTS,
+    )
+    assert result.score == 1.0
+    assert result.details["matched_token"] == "Comimos"
+
+
+def test_expected_form_match_no_substring_inside_longer_word():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Voy a recomendar el restaurante.",
+        translation="I am going to recommend the restaurant.",
+        constraints={**CONSTRAINTS, "expected_form": "comer"},
+    )
+    assert result.score == 0.0
+
+
+def test_expected_form_match_accent_sensitive():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Ayer comio pasta.",
+        translation="Yesterday he ate pasta.",
+        constraints={**CONSTRAINTS, "expected_form": "comió"},
+    )
+    assert result.score == 0.0
+
+    result2 = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Ayer comió pasta.",
+        translation="Yesterday he ate pasta.",
+        constraints={**CONSTRAINTS, "expected_form": "comió"},
+    )
+    assert result2.score == 1.0
+
+
+def test_expected_form_match_missing_expected_form():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="Nosotros comimos pizza.",
+        translation="We ate pizza.",
+        constraints={k: v for k, v in CONSTRAINTS.items() if k != "expected_form"},
+    )
+    assert result.score == 0.0
+    assert result.details["reason"] == "missing_expected_form"
+
+
+def test_expected_form_match_empty_sentence():
+    result = ExpectedFormMatchEvaluator().evaluate(
+        sentence="",
+        translation="We ate pizza.",
+        constraints=CONSTRAINTS,
+    )
+    assert result.score == 0.0
+    assert result.details["tokens_checked"] == 0
+
+
+def test_tokenize_strips_punctuation():
+    assert tokenize("¡Hola, mundo!") == ["Hola", "mundo"]
+
+
+def test_normalize_token_casefolds():
+    assert normalize_token("COMIMOS") == normalize_token("comimos")
+
+
+@pytest.mark.parametrize(
+    ("keyword", "expected_form"),
+    [
+        ("comer", "comimos"),
+        ("vivir", "vivirá"),
+        ("hablar", "hablas"),
+        ("escribir", "escribieron"),
+        ("correr", "corro"),
+    ],
+)
+def test_mock_outputs_pass_expected_form_match(keyword, expected_form):
+    evaluator = ExpectedFormMatchEvaluator()
+    constraints = {**CONSTRAINTS, "keyword": keyword, "expected_form": expected_form}
+    for cand in MOCK_OUTPUTS[keyword]:
+        result = evaluator.evaluate(
+            sentence=cand["sentence"],
+            translation=cand["translation"],
+            constraints=constraints,
+        )
+        assert result.score == 1.0, cand["sentence"]

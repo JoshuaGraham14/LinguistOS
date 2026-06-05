@@ -35,7 +35,19 @@ def get_session():
 
 
 def init_db():
-    """Create all tables."""
+    """Create all tables if they do not exist."""
     from research.db import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+
+
+def reset_db() -> None:
+    """Delete research.db and recreate an empty schema.
+
+    Use when the schema changes or you want a clean slate. Existing experiment
+    data is discarded.
+    """
+    engine.dispose()
+    if _DB_PATH.exists():
+        _DB_PATH.unlink()
+    init_db()
