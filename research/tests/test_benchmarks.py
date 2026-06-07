@@ -23,7 +23,7 @@ def yaml_path(tmp_path) -> Path:
           - keyword: comer
             expected_form: comimos
             translation: to eat
-            tense: past
+            tense: preterite
             person: 1st
             number: plural
           - keyword: vivir
@@ -166,10 +166,10 @@ def test_load_spanish_basic_yaml(session):
     assert len(bm.constraint_sets) == 5
 
     expected = {
-        ("comer", "past", "1st", "plural"): "comimos",
+        ("comer", "preterite", "1st", "plural"): "comimos",
         ("vivir", "future", "3rd", "singular"): "vivirá",
         ("hablar", "present", "2nd", "singular"): "hablas",
-        ("escribir", "past", "3rd", "plural"): "escribieron",
+        ("escribir", "preterite", "3rd", "plural"): "escribieron",
         ("correr", "present", "1st", "singular"): "corro",
     }
     for cs in bm.constraint_sets:

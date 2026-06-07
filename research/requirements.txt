@@ -3,6 +3,9 @@ openai>=1.50
 python-dotenv>=1.0
 pyyaml>=6.0
 
+# nlp (verb_morphology evaluator + future per-language parsers)
+spacy>=3.7
+
 # dev / testing
 pytest>=8.0
 ipykernel>=6.0

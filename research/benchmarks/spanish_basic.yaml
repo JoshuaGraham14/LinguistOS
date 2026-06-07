@@ -8,7 +8,7 @@ constraint_sets:
   - keyword: comer
     expected_form: comimos
     translation: to eat
-    tense: past
+    tense: preterite
     person: 1st
     number: plural
 
@@ -29,7 +29,7 @@ constraint_sets:
   - keyword: escribir
     expected_form: escribieron
     translation: to write
-    tense: past
+    tense: preterite
     person: 3rd
     number: plural
 

@@ -121,7 +121,7 @@ def test_constraint_set_to_constraints_dict(session, sample_benchmark):
         keyword="comer",
         expected_form="comimos",
         translation="to eat",
-        tense="past",
+        tense="preterite",
         person="1st",
         number="plural",
         target_language="es",
@@ -132,7 +132,7 @@ def test_constraint_set_to_constraints_dict(session, sample_benchmark):
     assert d["keyword"] == "comer"
     assert d["expected_form"] == "comimos"
     assert d["translation"] == "to eat"
-    assert d["tense"] == "past"
+    assert d["tense"] == "preterite"
     assert d["person"] == "1st"
     assert d["number"] == "plural"
     assert d["target_language"] == "es"

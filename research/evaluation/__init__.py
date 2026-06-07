@@ -14,6 +14,7 @@ from research.evaluation.sentence import (
     EvaluationResult,
     ExpectedFormMatchEvaluator,
     GrammarEvaluator,
+    VerbMorphologyEvaluator,
 )
 
 __all__ = [
@@ -21,6 +22,7 @@ __all__ = [
     "EvaluationResult",
     "ExpectedFormMatchEvaluator",
     "GrammarEvaluator",
+    "VerbMorphologyEvaluator",
     "DEFAULT_EVALUATORS",
     "BaseGroupMetric",
     "GroupMetricResult",
