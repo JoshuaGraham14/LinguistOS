@@ -1,8 +1,12 @@
 # `verb_morphology` Evaluator — Implementation Plan
 
-> Headline dissertation metric for constraint satisfaction: does the generated sentence
-> contain a token whose lemma is the target verb and whose morphology (tense + person +
-> number) matches the requested constraints?
+> Parser-based **diagnostic** evaluator (not headline constraint satisfaction). Compares
+> spaCy morph tags against requested constraints; kept in the pipeline for tool-reliability
+> analysis until parser-based scoring is fully retired.
+>
+> **Headline metric:** `expected_form_match`. **Planned:** `llm_morph_match`.
+> See [`evaluation_metrics_implementation_plan.md`](evaluation_metrics_implementation_plan.md)
+> (Evaluator strategy note, June 2026).
 >
 > Companion to [`evaluation_metrics_implementation_plan.md`](evaluation_metrics_implementation_plan.md).
 
@@ -11,7 +15,9 @@
 ## 1. Goal
 
 Binary, parser-based check (1.0 / 0.0) that complements the deterministic
-`expected_form_match` evaluator. Comparing the two gives us:
+`expected_form_match` evaluator. **Do not use pass/fail as the primary generation metric**
+— spaCy mis-tags ~⅓ of correct mock sentences (`sm`/`md`/`lg` probed June 2026). Comparing
+the two gives us:
 
 - agreement rate (both pass) → strong evidence the model satisfied the constraint
 - expected-form passes, parser fails → spaCy mis-tagging (tool-reliability finding)
@@ -115,12 +121,12 @@ Hebrew/French configs added later as new files; no code changes required.
 2. Load language config; resolve expected `Tense`/`Person`/`Number` UD values.
 3. Lazy-load the parser (spaCy model) keyed on config's `model` name.
 4. Parse the sentence.
-5. Collect all tokens where:
-   - `token.lemma_.casefold() == keyword.casefold()`
-   - `token.pos_ in config["pos_filter"]`
-6. For each candidate, compare `token.morph.get("Tense")`, `Person`, `Number` to expected
+5. Collect all candidate tokens from two evidence sources:
+   - parser source: `token.lemma_.casefold() == keyword.casefold()` and `token.pos_ in config["pos_filter"]`
+   - gold-form source: token surface matches `constraints["expected_form"]`
+6. For each candidate, compare parser facts (`lemma`, `POS`, `Tense`, `Person`, `Number`) to expected
    (strict — first value in each list must equal the expected string).
-7. **Pass (1.0)** if any candidate matches all three; else **fail (0.0)**.
+7. **Pass (1.0)** only if any candidate matches lemma, POS, and all three morph features; else **fail (0.0)** while preserving parser-disagreement diagnostics.
 
 **`details` JSON:**
 
@@ -129,11 +135,24 @@ Hebrew/French configs added later as new files; no code changes required.
   "passed": false,
   "language": "es",
   "keyword": "comer",
+  "expected_form": "comimos",
+  "expected_form_present": true,
+  "parser_disagreement": true,
   "lemma_present": true,
   "candidates_checked": 1,
   "matched_token": "comemos",
+  "candidate_source": ["expected_form", "lemma"],
   "expected": {"Tense": "Past", "Person": "1", "Number": "Plur"},
-  "observed": {"Tense": "Pres", "Person": "1", "Number": "Plur"},
+  "observed": {
+    "Token": "comemos",
+    "Lemma": "comer",
+    "POS": "VERB",
+    "Tense": "Pres",
+    "Person": "1",
+    "Number": "Plur"
+  },
+  "lemma_match": true,
+  "pos_match": true,
   "tense_match": false,
   "person_match": true,
   "number_match": true,
@@ -142,7 +161,13 @@ Hebrew/French configs added later as new files; no code changes required.
 }
 ```
 
-`reason ∈ {missing_keyword, unsupported_language, unsupported_tense, parse_failed, lemma_not_found, morph_mismatch}`; omitted on pass.
+`reason ∈ {missing_keyword, unsupported_language, unsupported_tense, parse_failed, lemma_not_found, parser_disagreement, morph_mismatch}`; omitted on pass.
+
+The expected-form source does **not** make the evaluator circular. It only lets the
+evaluator inspect the exact token that the gold label says should be relevant. The
+score still passes only when the parser independently agrees on lemma, POS, and
+morphology. If the gold form is present but spaCy tags it as a noun or wrong lemma,
+the evaluator records `parser_disagreement: true` and fails.
 
 **Strict matching policy** (documented in module docstring):
 
@@ -206,6 +231,8 @@ def es_nlp():
 | `Nosotros comemos pizza.` + (comer, preterite, 1, pl) | `score == 0.0`, `tense_match is False` |
 | `Nosotros hablamos.` + (comer, preterite, 1, pl) | `score == 0.0`, `lemma_present is False` |
 | Substring trap (`recomendar` + keyword `comer`) | `score == 0.0` |
+| `Hablas español muy bien.` + expected form `hablas` | `score == 0.0`, `candidate_source == ["expected_form"]`, `parser_disagreement is True` |
+| `Corro todas las mañanas.` + expected form `corro` | `score == 0.0`, parser disagreement on lemma/person |
 | Unsupported language | `score == 0.0`, `reason: unsupported_language` |
 | Empty sentence | `score == 0.0`, `lemma_present is False` |
 | Mock outputs vs spaCy | Print results; assert only manually verified cases |
@@ -216,6 +243,9 @@ def es_nlp():
 - lowercase `comimos` is mis-tagged `Tense=Pres` (should be `Past`)
 - sentence-initial `Hablas` is mis-tagged `NOUN` (lemma `habla`)
 - sentence-initial `Corro` lemmatizes to `corro` with `Person=3`
+
+Using `expected_form` as a candidate locator lets the evaluator record these
+disagreements directly instead of reducing them to `lemma_not_found`.
 
 These spaCy quirks are dissertation findings, not test bugs. Tests should document
 the actual behaviour, not paper over it.
@@ -271,10 +301,22 @@ research concern of this thesis.
 
 ---
 
-## 13. Out of scope (for now)
+## 13. Status / retention (June 2026)
+
+**Keep in `DEFAULT_EVALUATORS` for now.** Each experiment run stores independent
+`sentence_evaluations` rows per evaluator; roll-ups (`pass_rate::verb_morphology`) do not
+affect `expected_form_match` or generation. Cost: one spaCy load per process + extra DB
+rows. Value: `parser_disagreement` in `details` for thesis tool-reliability chapter.
+
+Remove from the registry only after LLM + expected-form evaluation is finalised and notebook
+analysis no longer needs parser disagreement columns.
+
+---
+
+## 14. Out of scope (for now)
 
 - Hebrew or French configs
 - `extra_constraints` features (mood, voice, …)
 - Partial-credit scoring
 - Frontend label translation (research mode stays rigorous; UI labels are separate)
-- ML/LLM-judge evaluators
+- Using this evaluator as `constraint_bundle` input or headline pass rate

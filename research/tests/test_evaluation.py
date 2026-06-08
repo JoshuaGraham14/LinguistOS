@@ -343,6 +343,76 @@ def test_verb_morphology_fails_on_wrong_tense():
     assert result.details["reason"] == "morph_mismatch"
 
 
+def test_verb_morphology_expected_form_candidate_records_spacy_disagreement():
+    """Expected-form tokens are inspected even when spaCy misses lemma/POS."""
+    result = VerbMorphologyEvaluator().evaluate(
+        sentence="Hablas español muy bien.",
+        translation="You speak Spanish very well.",
+        constraints={
+            "keyword": "hablar",
+            "expected_form": "hablas",
+            "target_language": "es",
+            "tense": "present",
+            "person": "2nd",
+            "number": "singular",
+        },
+    )
+    assert result.score == 0.0
+    assert result.details["matched_token"] == "Hablas"
+    assert result.details["candidate_source"] == ["expected_form"]
+    assert result.details["expected_form_present"] is True
+    assert result.details["parser_disagreement"] is True
+    assert result.details["lemma_match"] is False
+    assert result.details["pos_match"] is False
+    assert result.details["observed"]["Lemma"] == "habla"
+    assert result.details["observed"]["POS"] == "NOUN"
+    assert result.details["reason"] == "parser_disagreement"
+
+
+def test_verb_morphology_without_expected_form_cannot_inspect_spacy_missed_token():
+    """Without expected_form, parser misses remain lemma_not_found."""
+    result = VerbMorphologyEvaluator().evaluate(
+        sentence="Hablas español muy bien.",
+        translation="You speak Spanish very well.",
+        constraints={
+            "keyword": "hablar",
+            "target_language": "es",
+            "tense": "present",
+            "person": "2nd",
+            "number": "singular",
+        },
+    )
+    assert result.score == 0.0
+    assert result.details["matched_token"] is None
+    assert result.details["expected_form_present"] is False
+    assert result.details["parser_disagreement"] is False
+    assert result.details["reason"] == "lemma_not_found"
+
+
+def test_verb_morphology_expected_form_candidate_records_wrong_spacy_lemma():
+    result = VerbMorphologyEvaluator().evaluate(
+        sentence="Corro todas las mañanas.",
+        translation="I run every morning.",
+        constraints={
+            "keyword": "correr",
+            "expected_form": "corro",
+            "target_language": "es",
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+        },
+    )
+    assert result.score == 0.0
+    assert result.details["matched_token"] == "Corro"
+    assert result.details["candidate_source"] == ["expected_form"]
+    assert result.details["parser_disagreement"] is True
+    assert result.details["lemma_match"] is False
+    assert result.details["pos_match"] is True
+    assert result.details["observed"]["Lemma"] == "corro"
+    assert result.details["observed"]["Person"] == "3"
+    assert result.details["reason"] == "parser_disagreement"
+
+
 def test_verb_morphology_fails_on_wrong_lemma():
     result = VerbMorphologyEvaluator().evaluate(
         sentence="Nosotros bebimos agua.",

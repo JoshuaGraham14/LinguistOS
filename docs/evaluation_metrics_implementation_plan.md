@@ -15,8 +15,8 @@ The thesis evaluates controlled sentence generation along four axes:
 
 | Axis | Question | Primary metric layer |
 | --- | --- | --- |
-| **Constraint satisfaction** | Does the output use the target word in the requested tense, person, and number? | Sentence evaluators |
-| **Tool reliability** | How often do spaCy / Stanza / LanguageTool agree with human judgement? | Sentence `details` + distribution diagnostics |
+| **Constraint satisfaction** | Does the output use the target word in the requested tense, person, and number? | `expected_form_match` (+ `llm_morph_match` when added) |
+| **Tool reliability** | How often do parsers / LLM judges agree with gold surface forms? | `verb_morphology` `details`, LLM disagreement, distribution diagnostics |
 | **Output quality** | Are sentences fluent and pedagogically suitable? | Sentence evaluators (+ human ratings) |
 | **Batch usefulness** | Does a run produce varied, non-repetitive practice material? | Distribution metrics |
 
@@ -25,7 +25,7 @@ Where possible, combine **automatic evaluation** (this pipeline) with **human ju
 
 ---
 
-## Current state (May 2026)
+## Current state (June 2026)
 
 ### Implemented
 
@@ -33,15 +33,38 @@ Where possible, combine **automatic evaluation** (this pipeline) with **human ju
 | --- | --- | --- |
 | Sentence evaluator interface | `research/evaluation/sentence/base.py` | Done |
 | `GrammarEvaluator` stub | `research/evaluation/sentence/grammar.py` | Stub (keyword stem + non-empty checks) |
+| `ExpectedFormMatchEvaluator` | `research/evaluation/sentence/expected_form.py` | Done — **primary constraint metric** |
+| `VerbMorphologyEvaluator` | `research/evaluation/sentence/verb_morphology.py` | Done — **diagnostic only** (see below) |
+| Morph configs | `research/evaluation/morph_configs/` | Done (Spanish) |
 | Distribution metric interface | `research/evaluation/distribution/base.py` | Done |
 | `UniquenessRatioMetric` | `research/evaluation/distribution/uniqueness.py` | Done (constraint-set + experiment scopes) |
 | Roll-ups | `research/evaluation/rollups.py` | Done (`mean::`, `min::`, `std::`, `pass_rate::`) |
 | Registries | `sentence/__init__.py`, `distribution/__init__.py` | Done |
 | Pipeline hooks | `research/pipeline.py` | Stage 1 → 2b → 2a |
 
+### Evaluator strategy (decision note, June 2026)
+
+**Primary constraint satisfaction:** `expected_form_match` — does the sentence contain the
+requested surface form? This directly matches the generation goal (use the target verb in
+*this* form). Deterministic, reproducible, and passes all mock gold outputs.
+
+**Planned:** `llm_morph_match` — structured LLM judge (separate model from generator) as a
+flexible secondary signal; compare agreement with `expected_form_match` in the notebook.
+
+**spaCy (`verb_morphology`) — keep registered, not headline:** Empirical probing on
+`spanish_basic` mock outputs (`es_core_news_sm` / `md` / `lg`) shows ~67–73% pass on
+sentences that `expected_form_match` scores 100% on. spaCy cannot accept morph hints;
+failures are parser mis-tags and homographs, not generation errors. Keep
+`VerbMorphologyEvaluator` in `DEFAULT_EVALUATORS` for now so it runs on every experiment,
+stores `details` (including `parser_disagreement`), and rolls up as
+`pass_rate::verb_morphology` — useful for tool-reliability analysis until we fully drop
+parser-based constraint scoring. It does **not** gate generation or other evaluators; report
+`pass_rate::expected_form_match` (and later `llm_morph_match`) as the headline columns.
+
 ### Not yet implemented
 
-- Real morpho-syntactic parsing (spaCy / Stanza)
+- `llm_morph_match` evaluator
+- `constraint_bundle` composite (expected_form + translation pair)
 - LanguageTool integration
 - Self-BLEU, distinct-n, template detection
 - Human rating import
@@ -204,9 +227,10 @@ Once sentence evaluators exist, `aggregate_sentence_eval_rollups()` automaticall
 
 Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence count).
 
-**Dissertation tables:** Compare methods via experiment-wide `pass_rate::constraint_bundle`,
-`mean::verb_morphology`, and distribution metrics (`self_bleu_experiment`, etc.) in
-`research/explore.ipynb`.
+**Dissertation tables:** Compare methods via experiment-wide
+`pass_rate::expected_form_match` (headline), optional `pass_rate::llm_morph_match`,
+`pass_rate::verb_morphology` (parser agreement with gold), and distribution metrics
+(`self_bleu_experiment`, etc.) in `research/explore.ipynb`.
 
 **Future roll-ups (optional):** median, p25/p75 — add to `rollups.py` only if needed for tables.
 
@@ -214,18 +238,17 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 
 ## Implementation phases
 
-### Phase A — Spanish morphology core
+### Phase A — Constraint satisfaction core *(in progress)*
 
-**Goal:** Replace stub evaluation with real constraint checking.
+**Goal:** Reliable constraint checking without depending on parser morph tags.
 
-1. Add `research/evaluation/morph_mapping.py` (YAML tense/person/number → UD features)
-2. Add spaCy dependency + model download docs
-3. Implement `keyword_presence`, `verb_morphology`, `constraint_bundle`, `translation_pair`
-4. Unit tests with fixed sentences (correct + deliberate violations per constraint dimension)
-5. Register in `DEFAULT_EVALUATORS`; keep or remove `grammar_stub`
-6. Run mock + live experiments on `spanish_basic`; inspect `details` in notebook
+1. ~~`expected_form` on constraint sets + `expected_form_match`~~ **Done**
+2. ~~`verb_morphology` + morph configs (spaCy diagnostic)~~ **Done** — keep in registry, not headline
+3. Implement `llm_morph_match` (structured judge, mockable for tests)
+4. Implement `constraint_bundle` (AND of `expected_form_match` + `translation_pair`; exclude spaCy from bundle)
+5. Run mock + live experiments; notebook compares `expected_form_match` vs `llm_morph_match` vs `verb_morphology`
 
-**Done when:** `pass_rate::constraint_bundle` and per-set breakdowns are meaningful on live GPT output.
+**Done when:** `pass_rate::expected_form_match` and LLM agreement rates are meaningful on live GPT output.
 
 ---
 
