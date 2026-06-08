@@ -9,7 +9,7 @@ from research.db.models import ExperimentMetric, GeneratedSentence, SentenceEval
 
 DEFAULT_PASS_THRESHOLD = 0.5
 
-ROLLUP_PREFIXES = ("mean::", "min::", "std::", "pass_rate::")
+ROLLUP_PREFIXES = ("mean::", "min::", "std::", "pass_rate::", "errors_per_100w::")
 
 
 def _stats(scores: list[float], pass_threshold: float) -> dict[str, float]:
@@ -61,6 +61,7 @@ def aggregate_sentence_eval_rollups(
             SentenceEvaluation.evaluator_name,
             GeneratedSentence.constraint_set_id,
             SentenceEvaluation.score,
+            SentenceEvaluation.details,
         )
         .join(GeneratedSentence, SentenceEvaluation.sentence_id == GeneratedSentence.id)
         .filter(GeneratedSentence.experiment_id == experiment_id)
@@ -71,11 +72,26 @@ def aggregate_sentence_eval_rollups(
 
     by_cs: dict[tuple[str, int], list[float]] = defaultdict(list)
     by_evaluator: dict[str, list[float]] = defaultdict(list)
+    density_cs: dict[tuple[str, int], tuple[int, int]] = defaultdict(lambda: (0, 0))
+    density_evaluator: dict[str, tuple[int, int]] = defaultdict(lambda: (0, 0))
 
-    for evaluator_name, cs_id, score in rows:
+    for evaluator_name, cs_id, score, details in rows:
         s = float(score)
         by_cs[(evaluator_name, int(cs_id))].append(s)
         by_evaluator[evaluator_name].append(s)
+
+        if isinstance(details, dict):
+            match_count = details.get("match_count")
+            token_count = details.get("token_count")
+            if isinstance(match_count, int) and isinstance(token_count, int):
+                key = (evaluator_name, int(cs_id))
+                m_sum, t_sum = density_cs[key]
+                density_cs[key] = (m_sum + match_count, t_sum + token_count)
+                e_sum, et_sum = density_evaluator[evaluator_name]
+                density_evaluator[evaluator_name] = (
+                    e_sum + match_count,
+                    et_sum + token_count,
+                )
 
     inserted = 0
 
@@ -128,6 +144,56 @@ def aggregate_sentence_eval_rollups(
                 constraint_set_id=None,
                 count=len(scores),
             )
+
+    def _add_density_row(
+        *,
+        evaluator_name: str,
+        match_sum: int,
+        token_sum: int,
+        scope: str,
+        constraint_set_id: int | None,
+        count: int,
+    ) -> None:
+        nonlocal inserted
+        if token_sum <= 0:
+            return
+        value = 100.0 * match_sum / token_sum
+        session.add(
+            ExperimentMetric(
+                experiment_id=experiment_id,
+                metric_name=f"errors_per_100w::{evaluator_name}",
+                value=round(value, 6),
+                scope=scope,
+                constraint_set_id=constraint_set_id,
+                breakdown={
+                    "evaluator": evaluator_name,
+                    "count": count,
+                    "match_sum": match_sum,
+                    "token_sum": token_sum,
+                },
+            )
+        )
+        inserted += 1
+
+    for (evaluator_name, cs_id), (match_sum, token_sum) in density_cs.items():
+        _add_density_row(
+            evaluator_name=evaluator_name,
+            match_sum=match_sum,
+            token_sum=token_sum,
+            scope="constraint_set",
+            constraint_set_id=cs_id,
+            count=len(by_cs[(evaluator_name, cs_id)]),
+        )
+
+    for evaluator_name, (match_sum, token_sum) in density_evaluator.items():
+        _add_density_row(
+            evaluator_name=evaluator_name,
+            match_sum=match_sum,
+            token_sum=token_sum,
+            scope="experiment",
+            constraint_set_id=None,
+            count=len(by_evaluator[evaluator_name]),
+        )
 
     session.commit()
     return inserted

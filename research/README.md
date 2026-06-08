@@ -28,6 +28,9 @@ pip install -r requirements.txt
 python3 -m spacy download es_core_news_sm   # required for verb_morphology evaluator
 ```
 
+`grammar_languagetool` uses a local LanguageTool server (downloaded on first use, ~259MB).
+**Java** must be installed (`java -version`). Tests mock LanguageTool and do not need Java.
+
 For live OpenAI runs, copy `.env.example` to `.env` and set `OPENAI_API_KEY`.
 
 To wipe experiment data and recreate an empty schema:
@@ -63,6 +66,8 @@ python -m pytest tests/ -q
 ## Adding components
 
 - **Benchmark:** YAML under `benchmarks/`, loaded on first use.
+  Optional `mock_only: true` marks fixture benchmarks (evaluator regression tests);
+  `run_experiment --live` rejects these. After schema changes, run `reset_db()` and reload.
 - **Method:** YAML under `methods/` (`baseline_gpt`, `individual_gpt`, etc.).
 - **Sentence evaluator:** class under `evaluation/sentence/`, register in `evaluation/sentence/__init__.py` (`DEFAULT_EVALUATORS`).
 - **Distribution metric:** class under `evaluation/distribution/`, register in `evaluation/distribution/__init__.py` (`DEFAULT_GROUP_METRICS`).

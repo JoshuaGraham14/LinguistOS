@@ -5,6 +5,7 @@ pyyaml>=6.0
 
 # nlp (verb_morphology evaluator + future per-language parsers)
 spacy>=3.7
+language-tool-python>=2.8  # grammar_languagetool (requires Java for local server)
 
 # dev / testing
 pytest>=8.0

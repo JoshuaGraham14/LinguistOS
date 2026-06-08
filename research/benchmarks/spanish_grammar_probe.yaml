@@ -1,0 +1,35 @@
+name: spanish_grammar_probe
+language: es
+mock_only: true
+description: >
+  Deliberate mix of grammatical and ungrammatical Spanish sentences for
+  testing grammar_languagetool vs expected_form_match disagreement.
+
+constraint_sets:
+  - keyword: probe_subj_verb
+    expected_form: comimos
+    translation: to eat
+    tense: preterite
+    person: 1st
+    number: plural
+
+  - keyword: probe_det_noun
+    expected_form: come
+    translation: to eat
+    tense: present
+    person: 3rd
+    number: singular
+
+  - keyword: probe_prep
+    expected_form: fui
+    translation: to go
+    tense: preterite
+    person: 1st
+    number: singular
+
+  - keyword: probe_correct
+    expected_form: hablas
+    translation: to speak
+    tense: present
+    person: 2nd
+    number: singular
