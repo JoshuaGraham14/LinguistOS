@@ -12,13 +12,17 @@ from research.evaluation.sentence import (
     DEFAULT_EVALUATORS,
     BaseEvaluator,
     EvaluationResult,
+    ExpectedFormMatchEvaluator,
     GrammarEvaluator,
+    VerbMorphologyEvaluator,
 )
 
 __all__ = [
     "BaseEvaluator",
     "EvaluationResult",
+    "ExpectedFormMatchEvaluator",
     "GrammarEvaluator",
+    "VerbMorphologyEvaluator",
     "DEFAULT_EVALUATORS",
     "BaseGroupMetric",
     "GroupMetricResult",

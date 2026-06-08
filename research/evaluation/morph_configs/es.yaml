@@ -1,0 +1,19 @@
+parser: spacy
+model: es_core_news_sm
+pos_filter: [VERB, AUX]
+
+tense_map:
+  preterite: Past
+  imperfect: Imp
+  present: Pres
+  future: Fut
+  conditional: Cnd
+
+person_map:
+  "1st": "1"
+  "2nd": "2"
+  "3rd": "3"
+
+number_map:
+  singular: Sing
+  plural: Plur

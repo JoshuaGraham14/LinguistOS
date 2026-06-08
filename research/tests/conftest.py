@@ -73,8 +73,9 @@ def sample_constraint_set(session, sample_benchmark) -> ConstraintSet:
     cs = ConstraintSet(
         benchmark_id=sample_benchmark.id,
         keyword="comer",
+        expected_form="comimos",
         translation="to eat",
-        tense="past",
+        tense="preterite",
         person="1st",
         number="plural",
         target_language="es",

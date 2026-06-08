@@ -25,9 +25,18 @@ cd research
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+python3 -m spacy download es_core_news_sm   # required for verb_morphology evaluator
 ```
 
 For live OpenAI runs, copy `.env.example` to `.env` and set `OPENAI_API_KEY`.
+
+To wipe experiment data and recreate an empty schema:
+
+```bash
+python3 -c "from research.db.database import reset_db; reset_db()"
+```
+
+Then reload benchmarks and method configs (see **Adding components** below) before running experiments.
 
 ## Run an experiment
 
@@ -57,3 +66,4 @@ python -m pytest tests/ -q
 - **Method:** YAML under `methods/` (`baseline_gpt`, `individual_gpt`, etc.).
 - **Sentence evaluator:** class under `evaluation/sentence/`, register in `evaluation/sentence/__init__.py` (`DEFAULT_EVALUATORS`).
 - **Distribution metric:** class under `evaluation/distribution/`, register in `evaluation/distribution/__init__.py` (`DEFAULT_GROUP_METRICS`).
+- **Language morph config:** YAML under `evaluation/morph_configs/<lang>.yaml` (maps benchmark tense/person/number → UD features for `verb_morphology`). Adding a new language requires no code changes — drop a file and download the parser model.

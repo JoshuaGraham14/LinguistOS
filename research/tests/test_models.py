@@ -119,8 +119,9 @@ def test_constraint_set_to_constraints_dict(session, sample_benchmark):
     cs = ConstraintSet(
         benchmark_id=sample_benchmark.id,
         keyword="comer",
+        expected_form="comimos",
         translation="to eat",
-        tense="past",
+        tense="preterite",
         person="1st",
         number="plural",
         target_language="es",
@@ -129,13 +130,22 @@ def test_constraint_set_to_constraints_dict(session, sample_benchmark):
     )
     d = cs.to_constraints_dict()
     assert d["keyword"] == "comer"
+    assert d["expected_form"] == "comimos"
     assert d["translation"] == "to eat"
-    assert d["tense"] == "past"
+    assert d["tense"] == "preterite"
     assert d["person"] == "1st"
     assert d["number"] == "plural"
     assert d["target_language"] == "es"
     assert d["cefr_level"] == "A2"
     assert d["extra_constraints"] == {"mood": "indicative"}
+
+
+def test_constraint_set_to_constraints_dict_omits_expected_form_when_none(
+    session, sample_constraint_set
+):
+    sample_constraint_set.expected_form = None
+    d = sample_constraint_set.to_constraints_dict()
+    assert "expected_form" not in d
 
 
 def test_constraint_set_to_constraints_dict_omits_extra_when_none(

@@ -23,11 +23,11 @@ from research.pipeline import (
 
 
 BENCHMARK_CONSTRAINT_SETS = [
-    {"keyword": "comer", "translation": "to eat", "tense": "past", "person": "1st", "number": "plural"},
-    {"keyword": "vivir", "translation": "to live", "tense": "future", "person": "3rd", "number": "singular"},
-    {"keyword": "hablar", "translation": "to speak", "tense": "present", "person": "2nd", "number": "singular"},
-    {"keyword": "escribir", "translation": "to write", "tense": "past", "person": "3rd", "number": "plural"},
-    {"keyword": "correr", "translation": "to run", "tense": "present", "person": "1st", "number": "singular"},
+    {"keyword": "comer", "expected_form": "comimos", "translation": "to eat", "tense": "preterite", "person": "1st", "number": "plural"},
+    {"keyword": "vivir", "expected_form": "vivirá", "translation": "to live", "tense": "future", "person": "3rd", "number": "singular"},
+    {"keyword": "hablar", "expected_form": "hablas", "translation": "to speak", "tense": "present", "person": "2nd", "number": "singular"},
+    {"keyword": "escribir", "expected_form": "escribieron", "translation": "to write", "tense": "preterite", "person": "3rd", "number": "plural"},
+    {"keyword": "correr", "expected_form": "corro", "translation": "to run", "tense": "present", "person": "1st", "number": "singular"},
 ]
 
 
@@ -39,7 +39,11 @@ def _create_test_benchmark(session) -> tuple[Benchmark, list[ConstraintSet]]:
 
     sets = []
     for cs_data in BENCHMARK_CONSTRAINT_SETS:
-        cs = ConstraintSet(benchmark_id=bm.id, target_language="es", **cs_data)
+        cs = ConstraintSet.from_yaml_dict(
+            benchmark_id=bm.id,
+            cs_data=cs_data,
+            default_language="es",
+        )
         session.add(cs)
         sets.append(cs)
     session.commit()

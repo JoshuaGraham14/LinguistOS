@@ -46,6 +46,7 @@ class ConstraintSet(Base):
         ForeignKey("benchmarks.id", ondelete="CASCADE"), nullable=False
     )
     keyword: Mapped[str] = mapped_column(String(255), nullable=False)
+    expected_form: Mapped[str | None] = mapped_column(String(255), nullable=True)
     tense: Mapped[str] = mapped_column(String(64), nullable=False)
     person: Mapped[str] = mapped_column(String(16), nullable=False)
     number: Mapped[str] = mapped_column(String(16), nullable=False)
@@ -62,6 +63,28 @@ class ConstraintSet(Base):
         back_populates="constraint_set", cascade="all, delete-orphan"
     )
 
+    @classmethod
+    def from_yaml_dict(
+        cls,
+        *,
+        benchmark_id: int,
+        cs_data: dict[str, Any],
+        default_language: str,
+    ) -> ConstraintSet:
+        """Build a row from one benchmark YAML constraint-set entry."""
+        return cls(
+            benchmark_id=benchmark_id,
+            keyword=cs_data["keyword"],
+            expected_form=cs_data.get("expected_form"),
+            translation=cs_data["translation"],
+            tense=cs_data["tense"],
+            person=cs_data["person"],
+            number=cs_data["number"],
+            target_language=cs_data.get("target_language", default_language),
+            cefr_level=cs_data.get("cefr_level"),
+            extra_constraints=cs_data.get("extra_constraints"),
+        )
+
     def to_constraints_dict(self) -> dict[str, Any]:
         """Fields passed to sentence evaluators and generation prompts."""
         out: dict[str, Any] = {
@@ -73,6 +96,8 @@ class ConstraintSet(Base):
             "target_language": self.target_language,
             "cefr_level": self.cefr_level,
         }
+        if self.expected_form is not None:
+            out["expected_form"] = self.expected_form
         if self.extra_constraints is not None:
             out["extra_constraints"] = self.extra_constraints
         return out

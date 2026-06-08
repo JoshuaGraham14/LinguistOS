@@ -21,6 +21,33 @@ from research.db.models import Benchmark, ConstraintSet
 _REQUIRED_CS_FIELDS = ("keyword", "translation", "tense", "person", "number")
 
 
+def _constraint_set_key(cs: dict[str, Any]) -> tuple[str, str, str, str]:
+    return (cs["keyword"], cs["tense"], cs["person"], cs["number"])
+
+
+def _sync_expected_forms(
+    session: Session,
+    benchmark: Benchmark,
+    cs_list: list[dict[str, Any]],
+) -> None:
+    """Update expected_form on existing rows when YAML provides gold labels."""
+    by_key = {
+        (cs.keyword, cs.tense, cs.person, cs.number): cs
+        for cs in benchmark.constraint_sets
+    }
+    changed = False
+    for cs_data in cs_list:
+        expected = cs_data.get("expected_form")
+        if not expected:
+            continue
+        row = by_key.get(_constraint_set_key(cs_data))
+        if row is not None and row.expected_form != expected:
+            row.expected_form = expected
+            changed = True
+    if changed:
+        session.commit()
+
+
 def _validate_raw(data: dict[str, Any], path: Path) -> None:
     """Raise on missing or invalid top-level fields."""
     for field in ("name", "language", "constraint_sets"):
@@ -52,6 +79,7 @@ def load_benchmark(session: Session, path: str | Path) -> Benchmark:
 
     existing = session.query(Benchmark).filter_by(name=data["name"]).first()
     if existing is not None:
+        _sync_expected_forms(session, existing, data["constraint_sets"])
         return existing
 
     language = data["language"]
@@ -65,16 +93,10 @@ def load_benchmark(session: Session, path: str | Path) -> Benchmark:
     session.flush()
 
     for cs_data in data["constraint_sets"]:
-        session.add(ConstraintSet(
+        session.add(ConstraintSet.from_yaml_dict(
             benchmark_id=benchmark.id,
-            keyword=cs_data["keyword"],
-            translation=cs_data["translation"],
-            tense=cs_data["tense"],
-            person=cs_data["person"],
-            number=cs_data["number"],
-            target_language=cs_data.get("target_language", language),
-            cefr_level=cs_data.get("cefr_level"),
-            extra_constraints=cs_data.get("extra_constraints"),
+            cs_data=cs_data,
+            default_language=language,
         ))
 
     session.commit()
