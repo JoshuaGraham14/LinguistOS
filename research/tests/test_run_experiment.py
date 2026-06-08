@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from research.db.models import (
     Benchmark,
     ConstraintSet,
@@ -14,9 +16,11 @@ from research.db.models import (
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.distribution import DEFAULT_GROUP_METRICS
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
-from research.evaluation.sentence.grammar import GrammarEvaluator
-from research.fixtures.mock_outputs import MOCK_OUTPUTS
+from research.evaluation.sentence import DEFAULT_EVALUATORS
+from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
+from research.fixtures.mock_outputs import MOCK_OUTPUTS, get_mock_candidates
 from research.pipeline import (
+    _assert_live_allowed,
     _compute_and_store_group_metrics,
     _evaluate_sentences,
 )
@@ -105,11 +109,39 @@ def test_full_mock_pipeline(session):
         assert count == 3, f"Expected 3 sentences for {cs.keyword}, got {count}"
 
 
-def test_mock_outputs_cover_all_benchmark_keywords():
-    """Every benchmark constraint set keyword should have mock data."""
+def test_assert_live_allowed_rejects_mock_only_benchmark():
+    bm = Benchmark(name="spanish_grammar_probe", language="es", mock_only=True)
+    with pytest.raises(ValueError, match="mock_only"):
+        _assert_live_allowed(bm, live=True)
+    _assert_live_allowed(bm, live=False)
+
+
+def test_mock_outputs_cover_spanish_basic_keywords():
+    """Every spanish_basic constraint set keyword should have mock data."""
     for cs in BENCHMARK_CONSTRAINT_SETS:
         assert cs["keyword"] in MOCK_OUTPUTS, f"No mock data for {cs['keyword']}"
         assert len(MOCK_OUTPUTS[cs["keyword"]]) >= 3
+
+
+def test_mock_outputs_cover_grammar_probe_keywords():
+    probe_keywords = (
+        "probe_subj_verb",
+        "probe_det_noun",
+        "probe_prep",
+        "probe_correct",
+    )
+    for keyword in probe_keywords:
+        cands = get_mock_candidates("spanish_grammar_probe", keyword)
+        assert len(cands) >= 3, f"No mock data for {keyword}"
+
+
+def test_default_evaluators_registry():
+    names = {e.name for e in DEFAULT_EVALUATORS}
+    assert names == {
+        "expected_form_match",
+        "verb_morphology",
+        "grammar_languagetool",
+    }
 
 
 def test_experiment_links_to_benchmark_and_method(session):
@@ -161,14 +193,14 @@ def test_evaluate_sentences_stores_evaluations(session):
             ))
     session.commit()
 
-    evaluators = [GrammarEvaluator()]
+    evaluators = [ExpectedFormMatchEvaluator()]
     total = _evaluate_sentences(session, experiment, evaluators)
 
     assert total == 15  # 5 constraint sets x 3 sentences x 1 evaluator
     assert session.query(SentenceEvaluation).count() == 15
 
     for ev in session.query(SentenceEvaluation).all():
-        assert ev.evaluator_name == "grammar_stub"
+        assert ev.evaluator_name == "expected_form_match"
         assert 0.0 <= ev.score <= 1.0
         assert ev.details is not None
 
@@ -194,16 +226,16 @@ def test_evaluate_with_multiple_evaluators(session, sample_constraint_set, sampl
             return EvaluationResult(score=0.42)
 
     total = _evaluate_sentences(
-        session, sample_experiment, [GrammarEvaluator(), DummyEval()]
+        session, sample_experiment, [ExpectedFormMatchEvaluator(), DummyEval()]
     )
     assert total == 2
     names = {e.evaluator_name for e in session.query(SentenceEvaluation).all()}
-    assert names == {"grammar_stub", "dummy"}
+    assert names == {"expected_form_match", "dummy"}
 
 
 def test_evaluate_no_sentences_produces_zero_evaluations(session, sample_experiment):
     """If the experiment has no sentences, evaluation produces nothing."""
-    total = _evaluate_sentences(session, sample_experiment, [GrammarEvaluator()])
+    total = _evaluate_sentences(session, sample_experiment, [ExpectedFormMatchEvaluator()])
     assert total == 0
     assert session.query(SentenceEvaluation).count() == 0
 
@@ -274,8 +306,8 @@ def test_evaluate_sentences_clear_scoped_to_experiment(
         )
     session.commit()
 
-    _evaluate_sentences(session, exp_a, [GrammarEvaluator()])
-    _evaluate_sentences(session, exp_b, [GrammarEvaluator()])
+    _evaluate_sentences(session, exp_a, [ExpectedFormMatchEvaluator()])
+    _evaluate_sentences(session, exp_b, [ExpectedFormMatchEvaluator()])
     assert session.query(SentenceEvaluation).count() == 2
 
     class HighScoreEval(BaseEvaluator):
@@ -304,7 +336,7 @@ def test_evaluate_sentences_clear_scoped_to_experiment(
     assert evals_a[0].evaluator_name == "high"
     assert evals_a[0].score == 1.0
     assert len(evals_b) == 1
-    assert evals_b[0].evaluator_name == "grammar_stub"
+    assert evals_b[0].evaluator_name == "expected_form_match"
 
 
 def test_full_phase3_metrics_pipeline(session):
@@ -332,13 +364,13 @@ def test_full_phase3_metrics_pipeline(session):
             ))
     session.commit()
 
-    _evaluate_sentences(session, experiment, [GrammarEvaluator()])
+    _evaluate_sentences(session, experiment, [ExpectedFormMatchEvaluator()])
     assert session.query(SentenceEvaluation).count() == 15
 
     g = _compute_and_store_group_metrics(session, experiment, DEFAULT_GROUP_METRICS)
-    assert g == 6  # 5 constraint_set + 1 experiment uniqueness metrics
+    assert g == 12  # uniqueness + lt_error_breakdown (×2 scopes × 6 groups)
 
     r = aggregate_sentence_eval_rollups(session, experiment.id)
-    assert r == 24  # 4 rollup kinds × (5 constraint_set + 1 experiment) per evaluator
+    assert r == 24  # 4 rollup kinds × (5 constraint_set + 1 experiment)
 
-    assert session.query(ExperimentMetric).count() == 30  # 6 group + 24 roll-up
+    assert session.query(ExperimentMetric).count() == 36  # 12 group + 24 roll-up

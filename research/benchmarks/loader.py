@@ -25,6 +25,22 @@ def _constraint_set_key(cs: dict[str, Any]) -> tuple[str, str, str, str]:
     return (cs["keyword"], cs["tense"], cs["person"], cs["number"])
 
 
+def _mock_only_from_yaml(data: dict[str, Any]) -> bool:
+    return bool(data.get("mock_only", False))
+
+
+def _sync_mock_only(
+    session: Session,
+    benchmark: Benchmark,
+    data: dict[str, Any],
+) -> None:
+    """Update mock_only when YAML flag changes."""
+    mock_only = _mock_only_from_yaml(data)
+    if benchmark.mock_only != mock_only:
+        benchmark.mock_only = mock_only
+        session.commit()
+
+
 def _sync_expected_forms(
     session: Session,
     benchmark: Benchmark,
@@ -79,6 +95,7 @@ def load_benchmark(session: Session, path: str | Path) -> Benchmark:
 
     existing = session.query(Benchmark).filter_by(name=data["name"]).first()
     if existing is not None:
+        _sync_mock_only(session, existing, data)
         _sync_expected_forms(session, existing, data["constraint_sets"])
         return existing
 
@@ -88,6 +105,7 @@ def load_benchmark(session: Session, path: str | Path) -> Benchmark:
         name=data["name"],
         language=language,
         description=data.get("description"),
+        mock_only=_mock_only_from_yaml(data),
     )
     session.add(benchmark)
     session.flush()

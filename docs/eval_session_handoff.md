@@ -46,9 +46,19 @@
 
 | `name` | Role | File |
 | --- | --- | --- |
-| `grammar_stub` | Smoke test (keyword stem, non-empty) | `sentence/grammar.py` |
 | `expected_form_match` | **Primary constraint metric** — whole-token match on gold surface form | `sentence/expected_form.py` |
 | `verb_morphology` | **Diagnostic only** — spaCy morph check + `parser_disagreement` in `details` | `sentence/verb_morphology.py` |
+| `grammar_languagetool` | **Secondary grammar quality** — LanguageTool rule check (filtered categories) | `sentence/languagetool.py` |
+
+### Distribution metrics (LT-related)
+
+- `lt_error_breakdown` / `lt_error_breakdown_experiment` — category histogram from LT `details`
+- Roll-ups: `pass_rate::grammar_languagetool` (EFSR), `errors_per_100w::grammar_languagetool`
+
+### Benchmarks
+
+- `spanish_basic` — evaluation benchmark (live + mock)
+- `spanish_grammar_probe` — `mock_only: true` fixture for LT vs `expected_form_match` disagreement
 
 ### Morph configs
 
@@ -59,7 +69,8 @@
 
 - `research/tests/test_evaluation.py` — expected_form + verb_morphology (incl. spaCy quirk docs)
 - `research/tests/test_morph_configs.py`
-- **134+ tests** passing in prior runs; run `python3 -m pytest research/tests/ -q`
+- `research/tests/test_evaluation.py` — expected_form, verb_morphology, grammar_languagetool
+- **149+ tests** passing; run `python3 -m pytest research/tests/ -q`
 
 ### Mock data
 
@@ -78,14 +89,14 @@
    the registry for tool-reliability analysis (`parser_disagreement` in `details`); do not
    use `pass_rate::verb_morphology` as the headline method-comparison column.
 
-3. **Planned next evaluator:** `llm_morph_match` — structured LLM judge (separate model
-   from generator), compare agreement with `expected_form_match`. Not started yet.
+3. **Grammar quality = LanguageTool (Phase C).** Secondary metric, independent of spaCy.
+   Not ground truth; catches agreement/concordance slips `expected_form_match` misses.
+   Full pipeline mapping documented in plan (Stage 1 / 2a / 2b).
 
-4. **Rejected for now:** paradigm lookup, Stanza as primary, bigger spaCy models as fix,
-   LLM-only primary metric without human validation.
-
-5. **`constraint_bundle`** (AND of sub-checks) not implemented yet; when added, should use
-   `expected_form_match` + `translation_pair`, **not** spaCy.
+4. **Rejected for now:** `llm_morph_match`, paradigm lookup, Stanza as primary, bigger spaCy models as fix,
+   LLM-only primary metric without human validation, `constraint_bundle`, `translation_pair`,
+   `fluency_heuristic` (LLM outputs are already fluent-looking; heuristics don't catch
+   grammar slips or unnatural phrasing).
 
 ---
 
@@ -106,25 +117,14 @@ Install: `python3 -m spacy download es_core_news_sm` (see `research/README.md`).
 
 ## Next steps (recommended order)
 
-1. **Implement `llm_morph_match`** — `research/evaluation/sentence/llm_morph_match.py`
-   - Structured JSON prompt (lemma, tense, person, number → pass/fail)
-   - Mock client for tests (no API key in CI)
-   - Register in `DEFAULT_EVALUATORS`
-   - Log prompt + response in `details`
+1. **Run mock + live experiment** on `spanish_basic`; notebook pivots
+   `pass_rate::expected_form_match` vs `pass_rate::verb_morphology`
 
-2. **Implement `constraint_bundle`** — AND of `expected_form_match` + `translation_pair`
+2. **Phase B** — distribution metrics (`self_bleu`, `distinct_n`, …) for batched vs
+   individual comparison
 
-3. **Notebook analysis** — `research/explore.ipynb`: pivot
-   `pass_rate::expected_form_match` vs `pass_rate::llm_morph_match` vs
-   `pass_rate::verb_morphology`; disagreement table for thesis
-
-4. **Run mock + live experiment** on `spanish_basic` after LLM evaluator exists
-
-5. **Phase B** — distribution metrics (`self_bleu`, `distinct_n`, …)
-
-6. **Phase D** (later) — human ratings on stratified sample
-
-7. **Deprecate `grammar_stub`** when `translation_pair` exists (low priority)
+3. **Phase D** — human ratings for naturalness / acceptability (the only reliable check
+   for "slightly off" or unnatural phrasing)
 
 ---
 

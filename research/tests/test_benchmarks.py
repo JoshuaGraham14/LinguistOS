@@ -84,6 +84,49 @@ def test_load_benchmark_passes_expected_form(session, yaml_path):
     assert vivir.expected_form == "vivirá"
 
 
+def test_load_benchmark_mock_only(session, tmp_path):
+    p = tmp_path / "fixture.yaml"
+    p.write_text(textwrap.dedent("""\
+        name: fixture_bench
+        language: es
+        mock_only: true
+        constraint_sets:
+          - keyword: comer
+            expected_form: comimos
+            translation: to eat
+            tense: preterite
+            person: 1st
+            number: plural
+    """))
+    bm = load_benchmark(session, p)
+    assert bm.mock_only is True
+
+
+def test_load_benchmark_syncs_mock_only_on_reload(session, tmp_path):
+    p = tmp_path / "toggle.yaml"
+    p.write_text(textwrap.dedent("""\
+        name: toggle_bench
+        language: es
+        mock_only: true
+        constraint_sets:
+          - keyword: comer
+            expected_form: comimos
+            translation: to eat
+            tense: preterite
+            person: 1st
+            number: plural
+    """))
+    bm = load_benchmark(session, p)
+    assert bm.mock_only is True
+
+    bm.mock_only = False
+    session.commit()
+
+    reloaded = load_benchmark(session, p)
+    assert reloaded.id == bm.id
+    assert reloaded.mock_only is True
+
+
 def test_load_benchmark_syncs_expected_form_on_reload(session, yaml_path):
     bm = load_benchmark(session, yaml_path)
     comer = session.query(ConstraintSet).filter_by(
@@ -154,6 +197,17 @@ def test_validate_missing_constraint_field(tmp_path):
     }
     with pytest.raises(ValueError, match="constraint_sets\\[0\\] missing required field"):
         _validate_raw(data, tmp_path / "x.yaml")
+
+
+def test_load_spanish_grammar_probe_yaml(session):
+    yaml_path = (
+        Path(__file__).resolve().parent.parent / "benchmarks" / "spanish_grammar_probe.yaml"
+    )
+    bm = load_benchmark(session, yaml_path)
+
+    assert bm.name == "spanish_grammar_probe"
+    assert bm.mock_only is True
+    assert len(bm.constraint_sets) == 4
 
 
 def test_load_spanish_basic_yaml(session):

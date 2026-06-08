@@ -319,4 +319,4 @@ analysis no longer needs parser disagreement columns.
 - `extra_constraints` features (mood, voice, …)
 - Partial-credit scoring
 - Frontend label translation (research mode stays rigorous; UI labels are separate)
-- Using this evaluator as `constraint_bundle` input or headline pass rate
+- Using this evaluator as headline pass rate (use `expected_form_match` instead)

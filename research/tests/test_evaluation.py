@@ -11,6 +11,13 @@ from research.evaluation.sentence.expected_form import (
     tokenize,
 )
 from research.evaluation.sentence.grammar import GrammarEvaluator
+from research.evaluation.sentence.languagetool import (
+    GRAMMAR_CATEGORIES,
+    LanguageToolGrammarEvaluator,
+    build_languagetool_details,
+    filter_grammar_matches,
+    match_to_dict,
+)
 from research.evaluation.sentence.verb_morphology import VerbMorphologyEvaluator
 from research.fixtures.mock_outputs import MOCK_OUTPUTS
 
@@ -533,3 +540,140 @@ def test_verb_morphology_mock_outputs_disagreement_documented():
     # if spaCy model updates change tagging.
     assert passes >= 8, f"Too few mock passes: {passes}"
     assert fails >= 1, "Expected at least one spaCy disagreement"
+
+
+# ── LanguageToolGrammarEvaluator ─────────────────────────────────────────────
+
+
+class _FakeMatch:
+    def __init__(
+        self,
+        *,
+        rule_id: str,
+        category: str,
+        message: str = "test",
+        offset: int = 0,
+        error_length: int = 1,
+        replacements: list[str] | None = None,
+    ) -> None:
+        self.rule_id = rule_id
+        self.category = category
+        self.message = message
+        self.offset = offset
+        self.error_length = error_length
+        self.replacements = replacements or []
+
+
+class _FakeLanguageTool:
+    def __init__(self, matches_by_text: dict[str, list[_FakeMatch]]) -> None:
+        self._matches_by_text = matches_by_text
+
+    def check(self, text: str) -> list[_FakeMatch]:
+        return self._matches_by_text.get(text, [])
+
+
+def test_filter_grammar_matches_allowlist():
+    matches = [
+        _FakeMatch(rule_id="A", category="AGREEMENT_VERBS"),
+        _FakeMatch(rule_id="B", category="TYPOS"),
+        _FakeMatch(rule_id="C", category="GRAMMAR"),
+    ]
+    filtered = filter_grammar_matches(matches)
+    assert len(filtered) == 2
+    assert {m.category for m in filtered} == {"AGREEMENT_VERBS", "GRAMMAR"}
+
+
+def test_match_to_dict_serializes_fields():
+    m = _FakeMatch(
+        rule_id="AGREEMENT_PRONOUNSUBJECT_VERB",
+        category="AGREEMENT_VERBS",
+        message="concordancia",
+        offset=3,
+        error_length=7,
+        replacements=["comí", "comiste"],
+    )
+    d = match_to_dict(m)
+    assert d["rule"] == "AGREEMENT_PRONOUNSUBJECT_VERB"
+    assert d["category"] == "AGREEMENT_VERBS"
+    assert d["replacements"] == ["comí", "comiste"]
+
+
+def test_languagetool_evaluator_name():
+    assert LanguageToolGrammarEvaluator().name == "grammar_languagetool"
+
+
+def test_languagetool_evaluator_passes_clean_sentence():
+    tool = _FakeLanguageTool({})
+    evaluator = LanguageToolGrammarEvaluator(tool_factory=lambda _lang: tool)
+    result = evaluator.evaluate(
+        "Nosotros comimos pizza anoche.",
+        "We ate pizza last night.",
+        {"target_language": "es"},
+    )
+    assert result.score == 1.0
+    assert result.details["passed"] is True
+    assert result.details["match_count"] == 0
+    assert result.details["token_count"] == 4
+
+
+def test_languagetool_evaluator_fails_agreement_error():
+    sentence = "Yo comimos pizza."
+    tool = _FakeLanguageTool(
+        {
+            sentence: [
+                _FakeMatch(
+                    rule_id="AGREEMENT_PRONOUNSUBJECT_VERB",
+                    category="AGREEMENT_VERBS",
+                    message="concordancia",
+                )
+            ]
+        }
+    )
+    evaluator = LanguageToolGrammarEvaluator(tool_factory=lambda _lang: tool)
+    result = evaluator.evaluate(sentence, "", {"target_language": "es"})
+    assert result.score == 0.0
+    assert result.details["match_count"] == 1
+    assert result.details["matches"][0]["category"] == "AGREEMENT_VERBS"
+
+
+def test_languagetool_evaluator_ignores_typo_category():
+    sentence = "El nino come."
+    tool = _FakeLanguageTool(
+        {
+            sentence: [
+                _FakeMatch(rule_id="MORFOLOGIK_RULE_ES", category="TYPOS"),
+            ]
+        }
+    )
+    evaluator = LanguageToolGrammarEvaluator(tool_factory=lambda _lang: tool)
+    result = evaluator.evaluate(sentence, "", {"target_language": "es"})
+    assert result.score == 1.0
+    assert result.details["match_count"] == 0
+    assert result.details["total_match_count"] == 1
+
+
+def test_languagetool_evaluator_server_error():
+    def _boom(_lang: str):
+        raise RuntimeError("no java")
+
+    evaluator = LanguageToolGrammarEvaluator(tool_factory=_boom)
+    result = evaluator.evaluate("Hola.", "", {"target_language": "es"})
+    assert result.score == 0.0
+    assert result.details["error"] == "no java"
+    assert result.details["matches"] == []
+
+
+def test_build_languagetool_details_includes_token_count():
+    details = build_languagetool_details(
+        sentence="Yo corro en el parque.",
+        all_matches=[],
+        grammar_matches=[],
+    )
+    assert details["token_count"] == 5
+    assert details["passed"] is True
+
+
+def test_grammar_categories_cover_expected_groups():
+    assert "AGREEMENT_VERBS" in GRAMMAR_CATEGORIES
+    assert "AGREEMENT_NOUNS" in GRAMMAR_CATEGORIES
+    assert "TYPOS" not in GRAMMAR_CATEGORIES

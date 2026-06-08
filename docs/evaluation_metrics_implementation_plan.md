@@ -17,7 +17,7 @@ The thesis evaluates controlled sentence generation along four axes:
 | --- | --- | --- |
 | **Constraint satisfaction** | Does the output use the target word in the requested tense, person, and number? | `expected_form_match` (+ `llm_morph_match` when added) |
 | **Tool reliability** | How often do parsers / LLM judges agree with gold surface forms? | `verb_morphology` `details`, LLM disagreement, distribution diagnostics |
-| **Output quality** | Are sentences fluent and pedagogically suitable? | Sentence evaluators (+ human ratings) |
+| **Output quality** | Are sentences grammatically coherent and pedagogically suitable? | `grammar_languagetool` (+ human ratings) |
 | **Batch usefulness** | Does a run produce varied, non-repetitive practice material? | Distribution metrics |
 
 Where possible, combine **automatic evaluation** (this pipeline) with **human judgement**
@@ -32,9 +32,11 @@ Where possible, combine **automatic evaluation** (this pipeline) with **human ju
 | Component | Location | Status |
 | --- | --- | --- |
 | Sentence evaluator interface | `research/evaluation/sentence/base.py` | Done |
-| `GrammarEvaluator` stub | `research/evaluation/sentence/grammar.py` | Stub (keyword stem + non-empty checks) |
 | `ExpectedFormMatchEvaluator` | `research/evaluation/sentence/expected_form.py` | Done — **primary constraint metric** |
 | `VerbMorphologyEvaluator` | `research/evaluation/sentence/verb_morphology.py` | Done — **diagnostic only** (see below) |
+| `LanguageToolGrammarEvaluator` | `research/evaluation/sentence/languagetool.py` | Done — **secondary grammar quality** |
+| `LtErrorBreakdownMetric` | `research/evaluation/distribution/lt_error_breakdown.py` | Done |
+| `grammar_stub` | `research/evaluation/sentence/grammar.py` | Retired from registry (module kept for reference) |
 | Morph configs | `research/evaluation/morph_configs/` | Done (Spanish) |
 | Distribution metric interface | `research/evaluation/distribution/base.py` | Done |
 | `UniquenessRatioMetric` | `research/evaluation/distribution/uniqueness.py` | Done (constraint-set + experiment scopes) |
@@ -63,9 +65,7 @@ parser-based constraint scoring. It does **not** gate generation or other evalua
 
 ### Not yet implemented
 
-- `llm_morph_match` evaluator
-- `constraint_bundle` composite (expected_form + translation pair)
-- LanguageTool integration
+- `llm_morph_match` evaluator (optional — skipped for now)
 - Self-BLEU, distinct-n, template detection
 - Human rating import
 - Hebrew benchmark + evaluators
@@ -84,7 +84,7 @@ Three layers already exist in the pipeline. This plan fills in **what to add** a
 | **Roll-up (Stage 2a)** | Summary of sentence scores | `aggregate_sentence_eval_rollups()` | `experiment_metrics` | N/A (is the roll-up) |
 
 **Rule:** Distribution metrics must not be derivable from a single sentence row (e.g. self-BLEU).
-Roll-ups must not duplicate joint metrics (e.g. `pass_rate::constraint_bundle` vs a separate
+Roll-ups must not duplicate joint metrics (e.g. `pass_rate::expected_form_match` vs a separate
 `constraint_pass_rate` group metric — pick one source of truth).
 
 Runner order when both enabled: **Stage 1 → Stage 2b → Stage 2a**.
@@ -136,14 +136,12 @@ These directly address morpho-syntactic control.
 
 | Evaluator | Module (proposed) | `name` | What it checks | Implementation |
 | --- | --- | --- | --- | --- |
+| Expected form match | `sentence/expected_form.py` | `expected_form_match` | Gold surface form present as whole token | **Done** — primary constraint metric |
 | Keyword presence | `sentence/keyword.py` | `keyword_presence` | Target lemma appears in sentence | spaCy/Stanza lemma match on a token; fallback to normalized string only if parse fails |
-| Verb morphology | `sentence/verb_morphology.py` | `verb_morphology` | Tense, person, number on constrained verb | Parse sentence; locate token whose lemma matches `keyword`; compare `Morph` features to mapped expected set |
-| Constraint bundle | `sentence/constraint_bundle.py` | `constraint_bundle` | All hard constraints satisfied | AND of `keyword_presence` + `verb_morphology` (+ `extra_constraints` when present); score = fraction of sub-checks passed |
-| Translation pair | `sentence/translation_pair.py` | `translation_pair` | Valid sentence–translation pair | Non-empty both sides; target ≠ translation string; optional script/language sanity check |
+| Verb morphology | `sentence/verb_morphology.py` | `verb_morphology` | Tense, person, number on constrained verb | **Done** — diagnostic only; parse sentence, compare `Morph` features to mapped expected set |
 
-**Deprecating `grammar_stub`:** Keep during early development as a fast smoke test, or replace
-with `translation_pair` + a no-parser `keyword_presence_heuristic`. Remove from
-`DEFAULT_EVALUATORS` once Tier 1 evaluators are stable.
+**Retired `grammar_stub`:** Removed from `DEFAULT_EVALUATORS`; superseded by
+`expected_form_match` and `grammar_languagetool`.
 
 **Spanish first:** Use spaCy `es_core_news_sm` (or `md`). Add model to `research/requirements.txt`
 and document download step in `research/README.md`.
@@ -154,13 +152,17 @@ and document download step in `research/README.md`.
 
 | Evaluator | Module (proposed) | `name` | What it checks | Implementation |
 | --- | --- | --- | --- | --- |
-| LanguageTool grammar | `sentence/languagetool.py` | `grammar_languagetool` | Surface grammaticality | LanguageTool API on target sentence; score = 1 if no rule matches above severity threshold |
-| Fluency heuristic | `sentence/fluency.py` | `fluency_heuristic` | Not degenerate / template-like | Token count bounds, type-token ratio, max repeated trigram within sentence |
+| LanguageTool grammar | `sentence/languagetool.py` | `grammar_languagetool` | Surface grammaticality | LanguageTool on target sentence; binary score; rich `details` for roll-ups and breakdown (see **Phase C — LanguageTool**) |
 | CEFR lexical | `sentence/cefr_lexical.py` | `cefr_lexical` | Vocabulary band | Only when `cefr_level` set; compare token frequencies against CEFR word list |
 | Alignment | `sentence/alignment.py` | `alignment` | Translation quality | Phase 1: lexical overlap; Phase 2: COMET or BLEU vs gold reference if benchmark provides one |
 
+**Rejected — `fluency_heuristic`:** Token-count / TTR / trigram checks target degenerate
+NLG collapse. GPT-class generators already produce fluent-looking sentences; the real quality
+gaps are subtle grammar errors and unnatural phrasing — use `grammar_languagetool` and human
+ratings instead.
+
 **Tool disagreement logging:** When both `verb_morphology` and `grammar_languagetool` run,
-store both verdicts in各自的 `details`. Notebook analysis can measure correlation and
+store both verdicts in their respective `details`. Notebook analysis can measure correlation and
 disagreement rate — central to the "NLP tools are imperfect" thesis narrative.
 
 ---
@@ -205,10 +207,11 @@ These summarize failure **patterns** across a batch. Prefer computing from sente
 | Metric | Module (proposed) | `name` | What it measures | Notes |
 | --- | --- | --- | --- | --- |
 | Morph failure mode | `morph_failure_mode.py` | `morph_failure_mode` | Counts of tense vs person vs number mismatches | Reads `verb_morphology` eval `details` for the batch; `breakdown` JSON holds histogram |
+| LT error breakdown | `lt_error_breakdown.py` | `lt_error_breakdown` / `lt_error_breakdown_experiment` | Histogram of LT error categories | Reads `grammar_languagetool` `details.matches` for the batch; `breakdown` JSON (see Phase C) |
 | Parse failure rate | `parse_failure_rate.py` | `parse_failure_rate` / `_experiment` | Fraction where `parse_ok: false` | Tool reliability at batch level |
 | All-fail keyword | `all_fail_keyword.py` | `all_fail_keyword` | 1.0 if every sample misses keyword | Flags broken runs |
 
-**Overlap with roll-ups:** `pass_rate::constraint_bundle` per constraint set already measures
+**Overlap with roll-ups:** `pass_rate::expected_form_match` per constraint set already measures
 batch constraint satisfaction. Do **not** duplicate as a separate group metric unless the
 group metric adds a non-redundant `breakdown` (e.g. failure-mode histogram).
 
@@ -224,13 +227,16 @@ Once sentence evaluators exist, `aggregate_sentence_eval_rollups()` automaticall
 | `min::<evaluator>` | Worst sentence in batch |
 | `std::<evaluator>` | Score spread |
 | `pass_rate::<evaluator>` | Fraction ≥ 0.5 (configurable threshold) |
+| `errors_per_100w::<evaluator>` | `100 × Σ details.match_count / Σ details.token_count` (Phase C, LT only) |
 
 Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence count).
 
 **Dissertation tables:** Compare methods via experiment-wide
-`pass_rate::expected_form_match` (headline), optional `pass_rate::llm_morph_match`,
-`pass_rate::verb_morphology` (parser agreement with gold), and distribution metrics
-(`self_bleu_experiment`, etc.) in `research/explore.ipynb`.
+`pass_rate::expected_form_match` (constraint headline),
+`pass_rate::grammar_languagetool` (grammar headline / EFSR),
+`errors_per_100w::grammar_languagetool` (length-normalised severity),
+`pass_rate::verb_morphology` (parser diagnostic), and distribution metrics
+(`lt_error_breakdown_experiment`, `self_bleu_experiment`, etc.) in `research/explore.ipynb`.
 
 **Future roll-ups (optional):** median, p25/p75 — add to `rollups.py` only if needed for tables.
 
@@ -244,9 +250,8 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 
 1. ~~`expected_form` on constraint sets + `expected_form_match`~~ **Done**
 2. ~~`verb_morphology` + morph configs (spaCy diagnostic)~~ **Done** — keep in registry, not headline
-3. Implement `llm_morph_match` (structured judge, mockable for tests)
-4. Implement `constraint_bundle` (AND of `expected_form_match` + `translation_pair`; exclude spaCy from bundle)
-5. Run mock + live experiments; notebook compares `expected_form_match` vs `llm_morph_match` vs `verb_morphology`
+3. Implement `llm_morph_match` (structured judge, mockable for tests) — optional
+4. Run mock + live experiments; notebook compares `expected_form_match` vs `verb_morphology`
 
 **Done when:** `pass_rate::expected_form_match` and LLM agreement rates are meaningful on live GPT output.
 
@@ -265,16 +270,150 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 
 ---
 
-### Phase C — Tool reliability and quality layer
+### Phase C — LanguageTool grammar quality layer
 
-**Goal:** Support thesis claims about imperfect but usable NLP tooling.
+**Goal:** Add a grammar-quality signal **independent of spaCy and gold labels**, with honest
+scoping. LanguageTool is a **secondary** metric — not ground truth, not a constraint checker.
 
-1. Add `grammar_languagetool` (Spanish)
-2. Add `fluency_heuristic`
-3. Add distribution `parse_failure_rate` and `morph_failure_mode`
-4. Optional: `cefr_lexical` when benchmarks include `cefr_level`
+#### Three independent signals (methodology framing)
 
-**Done when:** Notebook can report parser failure rate and LT vs morphology disagreement.
+| Signal | Evaluator | Role |
+| --- | --- | --- |
+| Constraint satisfaction | `expected_form_match` | **Headline** — gold surface form present |
+| Grammar quality | `grammar_languagetool` | **Secondary** — rule-based grammaticality |
+| Parser diagnostic | `verb_morphology` | **Diagnostic** — spaCy morph tags vs gold |
+
+**What LanguageTool catches that `expected_form_match` misses:** pronoun–verb disagreement
+(`Yo comimos`), det–noun agreement (`Las chico`), contractions (`a el` → `al`), some prep
+errors (`de queísmo`). **What it misses:** wrong conjugation with no surface conflict
+(`Nosotros como` for preterite), unnatural phrasing, constraint satisfaction.
+
+**Do not:** treat LT as ground truth; use LT for morphology-specific constraint checking;
+report "LanguageTool accuracy"; add FreeLing or Stanza for Spanish in this phase.
+
+#### How it maps onto the pipeline
+
+One evaluator (Stage 1) produces three derived signals at the layers they belong to:
+
+| Layer | Component | Output |
+| --- | --- | --- |
+| **Stage 1** | `grammar_languagetool` evaluator | Row in `sentence_evaluations`; binary score; rich `details` |
+| **Stage 2a** | Existing roll-ups + one extension | `pass_rate::grammar_languagetool` (EFSR, free); `errors_per_100w::grammar_languagetool` (new) |
+| **Stage 2b** | `lt_error_breakdown` distribution metric | Category histogram in `experiment_metrics.breakdown` |
+
+Runner order unchanged: **Stage 1 → Stage 2b → Stage 2a**. No schema or pipeline changes.
+
+#### Stage 1 — `grammar_languagetool` evaluator
+
+- **Module:** `research/evaluation/sentence/languagetool.py`
+- **Register:** `DEFAULT_EVALUATORS` in `sentence/__init__.py`
+- **Server:** cached `LanguageTool(language)` per process (same pattern as `_NLP_CACHE` in
+  `verb_morphology.py`); local server default; mock client in tests (no Java in CI)
+- **Language:** from `constraints["target_language"]` (default `es`)
+
+**Rule filter (allowlist):** count only matches in:
+
+- `AGREEMENT_VERBS`
+- `AGREEMENT_NOUNS`
+- `GRAMMAR`
+- `MISSPELLING` (contractions such as `a el` → `al`)
+- `CONFUSIONS` (e.g. `al tienda` → `a la tienda`)
+
+**Exclude:** `TYPOS`, `DIACRITICS`, `CASING`, `STYLE`, `REDUNDANCY` — LLMs often omit accents
+or capitals; these are not grammar slips for this thesis.
+
+**Scoring:** `1.0` if zero filtered matches, else `0.0` (binary; partial scores derivable in
+notebook from `details`).
+
+**`details` schema** (source of truth for Stage 2a and 2b):
+
+```json
+{
+  "passed": false,
+  "match_count": 1,
+  "total_match_count": 2,
+  "token_count": 6,
+  "matches": [
+    {
+      "rule": "AGREEMENT_PRONOUNSUBJECT_VERB",
+      "category": "AGREEMENT_VERBS",
+      "message": "Posible falta de concordancia…",
+      "offset": 3,
+      "error_length": 7,
+      "replacements": ["comí"]
+    }
+  ]
+}
+```
+
+On server failure: `score=0.0`, `details.error` set, `matches=[]`.
+
+#### Stage 2a — LT roll-ups
+
+| Metric | Formula | Notes |
+| --- | --- | --- |
+| **EFSR** | `pass_rate::grammar_languagetool` | Error-Free Sentence Rate; **headline LT metric**; no new code |
+| **Errors per 100 words** | `100 × Σ match_count / Σ token_count` | Length-normalised; fair across methods that differ in sentence length; **extend `rollups.py`** |
+
+Optional: mean errors per sentence (`mean::` over a derived per-sentence count) — correlated
+with EFSR; report only if a single severity number is needed.
+
+#### Stage 2b — `lt_error_breakdown`
+
+- **Module:** `research/evaluation/distribution/lt_error_breakdown.py`
+- **Scopes:** `lt_error_breakdown` (per constraint set) + `lt_error_breakdown_experiment` (pooled)
+- **Input:** `grammar_languagetool` `details.matches` from sentence rows (do not re-run LT)
+- **Output:** `metric_value` = total filtered errors; `breakdown` JSON = category histogram
+
+```json
+{
+  "AGREEMENT_VERBS": 12,
+  "AGREEMENT_NOUNS": 5,
+  "GRAMMAR": 3,
+  "MISSPELLING": 1
+}
+```
+
+#### Dissertation outputs
+
+**Method comparison table** (one row per generation method):
+
+| Column | Source |
+| --- | --- |
+| `pass_rate::expected_form_match` | Stage 2a — constraint headline |
+| `pass_rate::grammar_languagetool` | Stage 2a — grammar headline (EFSR) |
+| `errors_per_100w::grammar_languagetool` | Stage 2a — length-normalised severity |
+| Top categories | Stage 2b — `lt_error_breakdown_experiment` |
+
+**Disagreement table** (notebook, from sentence-level rows):
+
+| `expected_form_match` | `grammar_languagetool` | Interpretation |
+| --- | --- | --- |
+| PASS | PASS | Likely good |
+| FAIL | PASS | Wrong form; otherwise grammatical |
+| PASS | FAIL | **Right form, grammar slip** (e.g. `Yo comimos`) |
+| FAIL | FAIL | Broken on multiple axes |
+
+Appendix: sample of flagged `details.matches` (rule, message, sentence) for qualitative evidence.
+
+#### Implementation checklist (Phase C)
+
+1. `research/evaluation/sentence/languagetool.py` — evaluator
+2. `research/evaluation/sentence/__init__.py` — register
+3. `research/evaluation/rollups.py` — `errors_per_100w::` family
+4. `research/evaluation/distribution/lt_error_breakdown.py` — breakdown metric
+5. `research/evaluation/distribution/__init__.py` — register both scopes
+6. Tests: mock LT in `test_evaluation.py`; breakdown in `test_group_metrics.py`
+7. `research/requirements.txt` — `language-tool-python>=2.8`
+8. `research/README.md` — Java requirement for local LT server
+
+**Done when:** Live `spanish_basic` run produces EFSR, errors/100w, and category breakdown;
+notebook disagreement table is populated.
+
+#### Also in Phase C (parser diagnostics)
+
+- Distribution `parse_failure_rate` and `morph_failure_mode` (spaCy tool-reliability)
+- Optional: `cefr_lexical` when benchmarks include `cefr_level`
 
 ---
 
@@ -287,7 +426,7 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 3. Compute correlation (automatic vs human) in notebook
 4. Write up agreement / disagreement patterns for dissertation
 
-**Done when:** At least one table correlating `constraint_bundle` with human acceptability.
+**Done when:** At least one table correlating `expected_form_match` with human acceptability.
 
 ---
 
@@ -308,9 +447,9 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 
 | Chapter / claim | Sentence evaluators | Distribution metrics | Human |
 | --- | --- | --- | --- |
-| We can enforce morpho-syntax | `verb_morphology`, `constraint_bundle` | `morph_failure_mode` | Spot-check sample |
-| Automatic tools are imperfect but usable | `grammar_languagetool` vs `verb_morphology` `details` | `parse_failure_rate` | Required subset |
-| Batched vs individual generation differs | Roll-up `pass_rate::constraint_bundle` | `self_bleu`, `uniqueness_ratio`, `template_rate` | Optional |
+| We can enforce morpho-syntax | `expected_form_match`, `verb_morphology` | `morph_failure_mode` | Spot-check sample |
+| Automatic tools are imperfect but usable | `grammar_languagetool` vs `expected_form_match` vs `verb_morphology` | `lt_error_breakdown`, `parse_failure_rate` | Required subset |
+| Batched vs individual generation differs | Roll-up `pass_rate::expected_form_match` | `self_bleu`, `uniqueness_ratio`, `template_rate` | Optional |
 | Spanish vs Hebrew | Same evaluators, different parser | Same metrics, per-language runs | Yes for Hebrew |
 
 ---
@@ -354,7 +493,7 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 | --- | --- | --- |
 | `spacy` + `es_core_news_sm` | Tier 1 Spanish evaluators | Pin version; document `python -m spacy download` |
 | `stanza` | Hebrew (Phase E) | Separate model download |
-| `language-tool-python` | `grammar_languagetool` | May need Java / remote API decision |
+| `language-tool-python` | `grammar_languagetool` | Local server (Java, ~259MB first download); mock in CI |
 | `sacrebleu` or `nltk` | `self_bleu` | Prefer sacrebleu for consistency |
 | `pandas` | Human rating import | Already used in notebook |
 
@@ -375,7 +514,7 @@ generated_sentences
         |                                              (mean::, pass_rate::, ...)
         |
         +── details JSON ──>  [Stage 2b: distribution metrics]  ──>  experiment_metrics
-                                    (self_bleu, morph_failure_mode, ...)
+                                    (self_bleu, lt_error_breakdown, morph_failure_mode, ...)
 ```
 
 Analysis and dissertation figures: **`research/explore.ipynb`** (no separate `analysis.py`).
@@ -396,7 +535,7 @@ Analysis and dissertation figures: **`research/explore.ipynb`** (no separate `an
 
 The evaluation layer is **dissertation-ready** when:
 
-1. **`constraint_bundle`** produces interpretable pass rates on live GPT runs across `spanish_basic`
+1. **`expected_form_match`** produces interpretable pass rates on live GPT runs across `spanish_basic`
 2. **`details`** support error analysis (which constraint dimension fails most often)
 3. **At least two distribution metrics** distinguish batched vs individual generation
 4. **Human ratings** on a sample validate automatic constraint scores

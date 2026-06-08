@@ -24,7 +24,7 @@ from research.evaluation.distribution.base import BaseGroupMetric
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.sentence import DEFAULT_EVALUATORS
 from research.evaluation.sentence.base import BaseEvaluator
-from research.fixtures.mock_outputs import MOCK_OUTPUTS
+from research.fixtures.mock_outputs import get_mock_candidates
 from research.generation import GENERATOR_REGISTRY
 from research.generation.base import BaseGenerator
 from research.methods.loader import load_method_config
@@ -139,6 +139,7 @@ def _compute_and_store_group_metrics(
 
     sentences = (
         session.query(GeneratedSentence)
+        .options(joinedload(GeneratedSentence.evaluations))
         .filter_by(experiment_id=experiment.id)
         .all()
     )
@@ -182,6 +183,15 @@ def _compute_and_store_group_metrics(
     return inserted
 
 
+def _assert_live_allowed(benchmark: Benchmark, *, live: bool) -> None:
+    """Reject live generation on fixture benchmarks (mock_only in YAML)."""
+    if live and benchmark.mock_only:
+        raise ValueError(
+            f"Benchmark '{benchmark.name}' is mock_only and cannot be run with --live. "
+            "Use mock mode for evaluator fixtures, or remove mock_only from the YAML."
+        )
+
+
 def run_experiment(
     *,
     benchmark_name: str,
@@ -196,6 +206,7 @@ def run_experiment(
 
     try:
         benchmark = _resolve_benchmark(session, benchmark_name)
+        _assert_live_allowed(benchmark, live=live)
         method_config = _resolve_method_config(session, method_name)
         generator = _build_generator(method_config)
 
@@ -232,7 +243,9 @@ def run_experiment(
                         cefr_level=cs.cefr_level,
                     )
                 else:
-                    candidates = MOCK_OUTPUTS.get(cs.keyword, [])[:method_config.samples_per_case]
+                    candidates = get_mock_candidates(benchmark.name, cs.keyword)[
+                        : method_config.samples_per_case
+                    ]
 
                 if not candidates:
                     print(f"    No candidates generated for {cs.keyword}")
