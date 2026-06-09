@@ -13,6 +13,7 @@ import json
 import os
 from typing import Any
 
+from research.evaluation.length_bands import band_label
 from research.generation.base import BaseGenerator
 
 LANGUAGE_NAMES: dict[str, str] = {
@@ -30,6 +31,35 @@ def _lang_name(code: str) -> str:
     return LANGUAGE_NAMES.get(code, code)
 
 
+# Example subjects shown in the prompt for each person/number pair.
+_SUBJECT_EXAMPLES: dict[tuple[str, str], str] = {
+    ("1st", "singular"): '"yo"',
+    ("1st", "plural"): '"nosotros", "nosotras", or a group noun phrase',
+    ("2nd", "singular"): '"tú" or "usted"',
+    ("2nd", "plural"): '"vosotros", "ustedes", or a group noun phrase',
+    ("3rd", "singular"): '"él", "ella", or a named noun phrase',
+    ("3rd", "plural"): '"ellos", "ellas", or a named noun phrase',
+}
+
+
+def _explicit_subject_hint(
+    person: str,
+    number: str,
+    *,
+    explicit_subject_required: bool,
+) -> str:
+    """Extra instruction to anchor person/number with an overt subject."""
+    if not explicit_subject_required:
+        return ""
+    examples = _SUBJECT_EXAMPLES.get((person, number))
+    if not examples:
+        return ""
+    return (
+        f"Include an explicit subject matching person={person}, number={number} "
+        f"(e.g. {examples}) before the conjugated verb.\n"
+    )
+
+
 def build_prompt(
     keyword: str,
     translation: str,
@@ -40,6 +70,7 @@ def build_prompt(
     target_language: str = "es",
     sentence_length: str = "short",
     cefr_level: str | None = None,
+    explicit_subject_required: bool = False,
 ) -> str:
     """Build the prompt for unconstrained sentence generation.
 
@@ -48,16 +79,21 @@ def build_prompt(
     (e.g. "A2", "B1") asks the model to target that proficiency band.
     """
     lang = _lang_name(target_language)
+    length_desc = band_label(sentence_length)
     cefr_line = ""
     if cefr_level:
         cefr_line = f"Target CEFR level: {cefr_level}. Use vocabulary and grammar appropriate for this level.\n"
+    subject_line = _explicit_subject_hint(
+        person, number, explicit_subject_required=explicit_subject_required
+    )
     return (
         f"You generate {lang} example sentences for vocabulary practice.\n"
         f'Target word: "{keyword}" (English: "{translation}")\n'
         f"Constraints: tense={tense}, person={person}, "
-        f"number={number}, length={sentence_length}.\n"
+        f"number={number}, length={length_desc}.\n"
+        f"{subject_line}"
         f"{cefr_line}"
-        f"Produce {num_candidates} natural, {sentence_length}-length {lang} "
+        f"Produce {num_candidates} natural {lang} sentences within the length band "
         "sentences that contain the target word, each with its English "
         "translation.\n"
         "Reply ONLY as JSON in this exact shape:\n"
@@ -90,6 +126,8 @@ def generate(
     *,
     target_language: str = "es",
     cefr_level: str | None = None,
+    sentence_length: str = "short",
+    explicit_subject_required: bool = False,
     model: str = "gpt-5.4-nano",
     temperature: float = 0.7,
     api_key: str | None = None,
@@ -116,6 +154,8 @@ def generate(
         num_candidates=num_candidates,
         target_language=target_language,
         cefr_level=cefr_level,
+        sentence_length=sentence_length,
+        explicit_subject_required=explicit_subject_required,
     )
 
     completion = client.chat.completions.create(
@@ -159,6 +199,8 @@ class BaselineGPTGenerator(BaseGenerator):
         *,
         target_language: str = "es",
         cefr_level: str | None = None,
+        sentence_length: str = "short",
+        explicit_subject_required: bool = False,
     ) -> list[dict[str, str]]:
         return generate(
             keyword=keyword,
@@ -169,6 +211,8 @@ class BaselineGPTGenerator(BaseGenerator):
             num_candidates=num_candidates,
             target_language=target_language,
             cefr_level=cefr_level,
+            sentence_length=sentence_length,
+            explicit_subject_required=explicit_subject_required,
             model=self._model,
             temperature=self._temperature,
         )

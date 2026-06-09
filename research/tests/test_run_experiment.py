@@ -23,6 +23,7 @@ from research.pipeline import (
     _assert_live_allowed,
     _compute_and_store_group_metrics,
     _evaluate_sentences,
+    _experiment_name,
 )
 
 
@@ -141,6 +142,8 @@ def test_default_evaluators_registry():
         "expected_form_match",
         "verb_morphology",
         "grammar_languagetool",
+        "length_in_band",
+        "clause_count",
     }
 
 
@@ -162,6 +165,20 @@ def test_experiment_links_to_benchmark_and_method(session):
     assert row.benchmark.name == "test_spanish"
     assert row.method_config_id == method_config.id
     assert row.method_config.method == "baseline_gpt"
+
+
+def test_experiment_name_uses_method_preset_name(session):
+    benchmark, _ = _create_test_benchmark(session)
+    method_config = _create_test_method_config(session)
+    method_config.name = "baseline_long_explicit"
+    session.commit()
+
+    name = _experiment_name(
+        benchmark=benchmark,
+        method_config=method_config,
+        live=True,
+    )
+    assert name == "test_spanish__baseline_long_explicit__live"
 
 
 # ── Evaluation integration ──────────────────────────────────────────────────
@@ -368,9 +385,9 @@ def test_full_phase3_metrics_pipeline(session):
     assert session.query(SentenceEvaluation).count() == 15
 
     g = _compute_and_store_group_metrics(session, experiment, DEFAULT_GROUP_METRICS)
-    assert g == 36  # 6 metric types × (5 constraint_set + 1 experiment)
+    assert g == 54  # 9 metric types × (5 constraint_set + 1 experiment)
 
     r = aggregate_sentence_eval_rollups(session, experiment.id)
-    assert r == 24  # 4 rollup kinds × (5 constraint_set + 1 experiment)
+    assert r == 24  # 1 evaluator × 4 rollup kinds × (5 constraint_set + 1 experiment)
 
-    assert session.query(ExperimentMetric).count() == 60  # 36 group + 24 roll-up
+    assert session.query(ExperimentMetric).count() == 78  # 54 group + 24 roll-up

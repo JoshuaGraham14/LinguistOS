@@ -33,6 +33,8 @@ class IndividualGPTGenerator(BaseGenerator):
         *,
         target_language: str = "es",
         cefr_level: str | None = None,
+        sentence_length: str = "short",
+        explicit_subject_required: bool = False,
     ) -> list[dict[str, str]]:
         results: list[dict[str, str]] = []
         for _ in range(num_candidates):
@@ -45,6 +47,8 @@ class IndividualGPTGenerator(BaseGenerator):
                 num_candidates=1,
                 target_language=target_language,
                 cefr_level=cefr_level,
+                sentence_length=sentence_length,
+                explicit_subject_required=explicit_subject_required,
                 model=self._model,
                 temperature=self._temperature,
             )

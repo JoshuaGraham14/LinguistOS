@@ -11,7 +11,7 @@ Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/
 | `run_experiment.py` | CLI entry point |
 | `pipeline.py` | Orchestration: generate → evaluate → metrics |
 | `benchmarks/*.yaml` | Reusable constraint-set groups |
-| `methods/*.yaml` | Generation method configs |
+| `methods/` | Generation presets (`baseline/`, `individual/`); see [`methods/README.md`](methods/README.md) |
 | `fixtures/mock_outputs.py` | Canned sentences for mock runs |
 | `explore.ipynb` | Analysis over `research.db` |
 | `explore_live_spanish_basic.ipynb` | Live method comparison (`spanish_basic`) |
@@ -74,6 +74,20 @@ Headline experiment-wide diversity columns: `uniqueness_ratio_experiment`, `self
 `template_rate_experiment`, `distinct_1_experiment`, `distinct_2_experiment`. Baseline (batched GPT)
 should score higher on uniqueness/distinct-n and lower on self-BLEU/template-rate than individual.
 
+### Length grid (`spanish_basic`, Phase F)
+
+Presets under `methods/baseline/` and `methods/individual/`:
+`{short,medium,long,random,long_explicit}` plus `default`.
+Bands: short 2–5 tokens, medium 5–9, long 10–16; `random` draws per sample.
+
+```bash
+python -m research.run_experiment --benchmark spanish_basic --method baseline_short --live
+python -m research.run_experiment --benchmark spanish_basic --method individual_long --live
+```
+
+Length metrics: `pass_rate::length_in_band`, `mean_token_count_experiment`, `length_cv_experiment`,
+`mean_clauses_experiment`, `mean::clause_count`.
+
 ## Tests
 
 ```bash
@@ -86,7 +100,7 @@ python -m pytest tests/ -q
   Optional `mock_only: true` marks fixture benchmarks (evaluator regression tests);
   `run_experiment --live` rejects these. After schema changes, run `reset_db()` and reload.
   Benchmarks: `spanish_basic` (easy), `spanish_challenging` (live stress-test), `spanish_grammar_probe` (mock fixture).
-- **Method:** YAML under `methods/` (`baseline_gpt`, `individual_gpt`, etc.).
+- **Method:** Self-contained YAML preset under `methods/baseline/` or `methods/individual/`; CLI uses the preset `name` (e.g. `baseline_long`).
 - **Sentence evaluator:** class under `evaluation/sentence/`, register in `evaluation/sentence/__init__.py` (`DEFAULT_EVALUATORS`).
 - **Distribution metric:** class under `evaluation/distribution/`, register in `evaluation/distribution/__init__.py` (`DEFAULT_GROUP_METRICS`). Diversity metrics: `self_bleu`, `template_rate`, `distinct_1`, `distinct_2` (each with constraint_set + experiment scopes).
 - **Language morph config:** YAML under `evaluation/morph_configs/<lang>.yaml` (maps benchmark tense/person/number → UD features for `verb_morphology`). Adding a new language requires no code changes — drop a file and download the parser model.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,11 +28,11 @@ from research.evaluation.sentence.base import BaseEvaluator
 from research.fixtures.mock_outputs import get_mock_candidates
 from research.generation import GENERATOR_REGISTRY
 from research.generation.base import BaseGenerator
-from research.methods.loader import load_method_config
+from research.methods.loader import load_method_config_by_name
+from research.methods.run_config import MethodRunConfig
 
 _RESEARCH_DIR = Path(__file__).resolve().parent
 _BENCHMARKS_DIR = _RESEARCH_DIR / "benchmarks"
-_METHODS_DIR = _RESEARCH_DIR / "methods"
 
 
 def _resolve_benchmark(session, name: str) -> Benchmark:
@@ -43,14 +44,22 @@ def _resolve_benchmark(session, name: str) -> Benchmark:
 
 
 def _resolve_method_config(session, name: str) -> MethodConfig:
-    """Load a method config by name — reads from YAML on first use."""
-    yaml_path = _METHODS_DIR / f"{name}.yaml"
-    if not yaml_path.exists():
-        raise FileNotFoundError(f"No method YAML found at {yaml_path}")
-    return load_method_config(session, yaml_path)
+    """Load a method preset by ``name`` (searches methods/baseline/, individual/, etc.)."""
+    return load_method_config_by_name(session, name)
 
 
-def _build_generator(method_config: MethodConfig) -> BaseGenerator:
+def _experiment_name(
+    *,
+    benchmark: Benchmark,
+    method_config: MethodConfig,
+    live: bool,
+) -> str:
+    """Unique, human-readable experiment id stored on ``experiments.name``."""
+    mode = "live" if live else "mock"
+    return f"{benchmark.name}__{method_config.name}__{mode}"
+
+
+def _build_generator(run_config: MethodRunConfig, method_config: MethodConfig) -> BaseGenerator:
     """Instantiate a generator from a MethodConfig row."""
     cls = GENERATOR_REGISTRY.get(method_config.method)
     if cls is None:
@@ -58,10 +67,19 @@ def _build_generator(method_config: MethodConfig) -> BaseGenerator:
             f"Unknown generation method '{method_config.method}'. "
             f"Available: {', '.join(GENERATOR_REGISTRY)}"
         )
-    config = method_config.config or {}
     return cls(
-        model=config.get("model", "gpt-5.4-nano"),
-        temperature=config.get("temperature", 0.7),
+        model=run_config.model,
+        temperature=run_config.temperature,
+    )
+
+
+def _resolved_length_from_sentence(sent: GeneratedSentence) -> str:
+    """Band used for length evaluation (per-sentence when preset is random)."""
+    meta = sent.generation_meta or {}
+    return str(
+        meta.get("resolved_sentence_length")
+        or meta.get("sentence_length")
+        or "short"
     )
 
 
@@ -103,6 +121,7 @@ def _evaluate_sentences(
     total = 0
     for sent in sentences:
         constraints = sent.constraint_set.to_constraints_dict()
+        constraints["sentence_length"] = _resolved_length_from_sentence(sent)
         for evaluator in evaluators:
             result = evaluator.evaluate(
                 sentence=sent.sentence,
@@ -192,6 +211,50 @@ def _assert_live_allowed(benchmark: Benchmark, *, live: bool) -> None:
         )
 
 
+def _generate_live_candidates(
+    generator: BaseGenerator,
+    *,
+    cs: ConstraintSet,
+    run_config: MethodRunConfig,
+    samples_per_case: int,
+    rng: random.Random,
+) -> list[tuple[dict[str, str], str]]:
+    """Return (candidate, resolved_sentence_length) pairs for one constraint set."""
+    common = dict(
+        keyword=cs.keyword,
+        translation=cs.translation,
+        tense=cs.tense,
+        person=cs.person,
+        number=cs.number,
+        target_language=cs.target_language,
+        cefr_level=cs.cefr_level,
+        explicit_subject_required=run_config.explicit_subject_required,
+    )
+    out: list[tuple[dict[str, str], str]] = []
+
+    if run_config.is_random_length:
+        for _ in range(samples_per_case):
+            resolved = run_config.resolve_length(rng)
+            batch = generator.generate(
+                **common,
+                num_candidates=1,
+                sentence_length=resolved,
+            )
+            for cand in batch:
+                out.append((cand, resolved))
+    else:
+        resolved = run_config.sentence_length
+        batch = generator.generate(
+            **common,
+            num_candidates=samples_per_case,
+            sentence_length=resolved,
+        )
+        for cand in batch:
+            out.append((cand, resolved))
+
+    return out
+
+
 def run_experiment(
     *,
     benchmark_name: str,
@@ -208,7 +271,9 @@ def run_experiment(
         benchmark = _resolve_benchmark(session, benchmark_name)
         _assert_live_allowed(benchmark, live=live)
         method_config = _resolve_method_config(session, method_name)
-        generator = _build_generator(method_config)
+        run_config = MethodRunConfig.from_method_config(method_config)
+        generator = _build_generator(run_config, method_config)
+        rng = random.Random()
 
         constraint_sets = (
             session.query(ConstraintSet)
@@ -219,7 +284,11 @@ def run_experiment(
         experiment = Experiment(
             benchmark_id=benchmark.id,
             method_config_id=method_config.id,
-            name=f"{method_config.method}_{benchmark.name}_{'live' if live else 'mock'}",
+            name=_experiment_name(
+                benchmark=benchmark,
+                method_config=method_config,
+                live=live,
+            ),
             status="running",
         )
         session.add(experiment)
@@ -232,45 +301,58 @@ def run_experiment(
                 print(f"\n  Constraint set: {cs.keyword} + {cs.tense} + {cs.person} + {cs.number}")
 
                 if live:
-                    candidates = generator.generate(
-                        keyword=cs.keyword,
-                        translation=cs.translation,
-                        tense=cs.tense,
-                        person=cs.person,
-                        number=cs.number,
-                        num_candidates=method_config.samples_per_case,
-                        target_language=cs.target_language,
-                        cefr_level=cs.cefr_level,
+                    candidate_pairs = _generate_live_candidates(
+                        generator,
+                        cs=cs,
+                        run_config=run_config,
+                        samples_per_case=method_config.samples_per_case,
+                        rng=rng,
                     )
                 else:
-                    candidates = get_mock_candidates(benchmark.name, cs.keyword)[
+                    mock_batch = get_mock_candidates(benchmark.name, cs.keyword)[
                         : method_config.samples_per_case
                     ]
+                    candidate_pairs = []
+                    for cand in mock_batch:
+                        resolved = (
+                            run_config.resolve_length(rng)
+                            if run_config.is_random_length
+                            else run_config.sentence_length
+                        )
+                        candidate_pairs.append((cand, resolved))
 
-                if not candidates:
+                if not candidate_pairs:
                     print(f"    No candidates generated for {cs.keyword}")
                     continue
 
-                for i, cand in enumerate(candidates):
+                for i, (cand, resolved_length) in enumerate(candidate_pairs):
                     gen = GeneratedSentence(
                         experiment_id=experiment.id,
                         constraint_set_id=cs.id,
                         sentence=cand["sentence"],
                         translation=cand["translation"],
                         sample_index=i,
-                        generation_meta={"method": method_config.method, "live": live},
+                        generation_meta={
+                            "method": method_config.method,
+                            "live": live,
+                            "sentence_length": run_config.sentence_length,
+                            "resolved_sentence_length": resolved_length,
+                            "explicit_subject_required": run_config.explicit_subject_required,
+                        },
                     )
                     session.add(gen)
                     total_stored += 1
 
                 session.commit()
-                print(f"    Stored {len(candidates)} sentences")
+                print(f"    Stored {len(candidate_pairs)} sentences")
 
             total_evals = 0
             if evaluate:
                 print("\n  Running per-sentence evaluators...")
                 total_evals = _evaluate_sentences(
-                    session, experiment, DEFAULT_EVALUATORS
+                    session,
+                    experiment,
+                    DEFAULT_EVALUATORS,
                 )
                 print(f"  Stored {total_evals} sentence evaluations")
 

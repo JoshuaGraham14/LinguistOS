@@ -13,6 +13,7 @@ from research.generation.base import BaseGenerator
 from research.generation.baseline_gpt import BaselineGPTGenerator
 from research.generation.individual_gpt import IndividualGPTGenerator
 from research.generation import GENERATOR_REGISTRY
+from research.methods.run_config import MethodRunConfig
 from research.pipeline import _build_generator
 
 
@@ -31,7 +32,8 @@ def test_concrete_subclass_works():
             return "dummy"
 
         def generate(self, keyword, translation, tense, person, number,
-                     num_candidates, *, target_language="es", cefr_level=None):
+                     num_candidates, *, target_language="es", cefr_level=None,
+                     sentence_length="short"):
             return [{"sentence": "Hola.", "translation": "Hello."}]
 
     gen = Dummy()
@@ -83,7 +85,7 @@ def test_build_generator_from_method_config(session):
     session.add(mc)
     session.commit()
 
-    gen = _build_generator(mc)
+    gen = _build_generator(MethodRunConfig.from_method_config(mc), mc)
     assert isinstance(gen, BaselineGPTGenerator)
     assert gen._model == "gpt-4o-mini"
     assert gen._temperature == 0.5
@@ -97,7 +99,7 @@ def test_build_generator_unknown_method(session):
     session.commit()
 
     with pytest.raises(ValueError, match="Unknown generation method"):
-        _build_generator(mc)
+        _build_generator(MethodRunConfig.from_method_config(mc), mc)
 
 
 # ── Method config loader ───────────────────────────────────────────────────
@@ -148,16 +150,37 @@ def test_validate_bad_samples(tmp_path):
 
 
 def test_load_baseline_default_yaml(session):
-    """Smoke test: the real baseline_default.yaml loads without errors."""
-    yaml_path = Path(__file__).resolve().parent.parent / "methods" / "baseline_default.yaml"
+    """Smoke test: the real baseline_default preset loads without errors."""
+    yaml_path = Path(__file__).resolve().parent.parent / "methods" / "baseline" / "default.yaml"
     mc = load_method_config(session, yaml_path)
     assert mc.name == "baseline_default"
     assert mc.method == "baseline_gpt"
+    assert mc.config["sentence_length"] == "short"
 
 
 def test_load_individual_default_yaml(session):
-    """Smoke test: the real individual_default.yaml loads without errors."""
-    yaml_path = Path(__file__).resolve().parent.parent / "methods" / "individual_default.yaml"
+    """Smoke test: the real individual_default preset loads without errors."""
+    yaml_path = Path(__file__).resolve().parent.parent / "methods" / "individual" / "default.yaml"
     mc = load_method_config(session, yaml_path)
     assert mc.name == "individual_default"
     assert mc.method == "individual_gpt"
+
+
+def test_parse_method_yaml_loads_full_preset():
+    from research.methods.loader import parse_method_yaml
+
+    path = Path(__file__).resolve().parent.parent / "methods" / "baseline" / "long_explicit.yaml"
+    data = parse_method_yaml(path)
+    assert data["name"] == "baseline_long_explicit"
+    assert data["method"] == "baseline_gpt"
+    assert data["config"]["model"] == "gpt-5.4-nano"
+    assert data["config"]["sentence_length"] == "long"
+    assert data["config"]["explicit_subject_required"] is True
+
+
+def test_find_method_yaml_by_name():
+    from research.methods.loader import find_method_yaml
+
+    path = find_method_yaml("individual_random")
+    assert path is not None
+    assert path.name == "random.yaml"

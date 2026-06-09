@@ -4,7 +4,7 @@
 > spaCy morph tags against requested constraints; kept in the pipeline for tool-reliability
 > analysis until parser-based scoring is fully retired.
 >
-> **Headline metric:** `expected_form_match`. **Planned:** `llm_morph_match`.
+> **Headline metric:** `expected_form_match`.
 > See [`evaluation_metrics_implementation_plan.md`](evaluation_metrics_implementation_plan.md)
 > (Evaluator strategy note, June 2026).
 >

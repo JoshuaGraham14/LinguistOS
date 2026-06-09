@@ -4,3 +4,4 @@ samples_per_case: 3
 config:
   model: gpt-5.4-nano
   temperature: 0.7
+  sentence_length: short
