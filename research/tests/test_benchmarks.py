@@ -199,6 +199,31 @@ def test_validate_missing_constraint_field(tmp_path):
         _validate_raw(data, tmp_path / "x.yaml")
 
 
+def test_load_spanish_challenging_yaml(session):
+    yaml_path = (
+        Path(__file__).resolve().parent.parent / "benchmarks" / "spanish_challenging.yaml"
+    )
+    bm = load_benchmark(session, yaml_path)
+
+    assert bm.name == "spanish_challenging"
+    assert bm.mock_only is False
+    assert len(bm.constraint_sets) == 8
+
+    expected = {
+        ("pedir", "present", "1st", "singular"): "pido",
+        ("dormir", "present", "1st", "singular"): "duermo",
+        ("decir", "preterite", "1st", "singular"): "dije",
+        ("tener", "preterite", "3rd", "plural"): "tuvieron",
+        ("conducir", "preterite", "3rd", "plural"): "condujeron",
+        ("poner", "conditional", "1st", "singular"): "pondría",
+        ("venir", "conditional", "1st", "singular"): "vendría",
+        ("llegar", "preterite", "1st", "singular"): "llegué",
+    }
+    for cs in bm.constraint_sets:
+        key = (cs.keyword, cs.tense, cs.person, cs.number)
+        assert cs.expected_form == expected[key]
+
+
 def test_load_spanish_grammar_probe_yaml(session):
     yaml_path = (
         Path(__file__).resolve().parent.parent / "benchmarks" / "spanish_grammar_probe.yaml"

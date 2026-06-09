@@ -11,11 +11,7 @@ if TYPE_CHECKING:
 
 
 class UniquenessRatioMetric(BaseGroupMetric):
-    """Distinct sentences / batch size (case-folded, trimmed).
-
-    For self-BLEU, repetition rate, etc., add sibling modules implementing
-    ``BaseGroupMetric`` and register them in ``distribution/__init__.py``.
-    """
+    """Distinct sentences / batch size (case-folded, trimmed)."""
 
     def __init__(self, scope: Literal["constraint_set", "experiment"]) -> None:
         self._scope = scope

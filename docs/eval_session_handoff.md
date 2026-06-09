@@ -50,14 +50,30 @@
 | `verb_morphology` | **Diagnostic only** — spaCy morph check + `parser_disagreement` in `details` | `sentence/verb_morphology.py` |
 | `grammar_languagetool` | **Secondary grammar quality** — LanguageTool rule check (filtered categories) | `sentence/languagetool.py` |
 
-### Distribution metrics (LT-related)
+### Distribution metrics (Stage 2b)
 
-- `lt_error_breakdown` / `lt_error_breakdown_experiment` — category histogram from LT `details`
-- Roll-ups: `pass_rate::grammar_languagetool` (EFSR), `errors_per_100w::grammar_languagetool`
+| `name` | Role | File |
+| --- | --- | --- |
+| `uniqueness_ratio` | Exact-string duplicate rate (higher = more diverse) | `distribution/uniqueness.py` |
+| `self_bleu` | Mean sentence BLEU vs rest of batch (lower = more diverse) | `distribution/self_bleu.py` |
+| `template_rate` | Share with same first-k-token prefix (higher = mode collapse) | `distribution/template_rate.py` |
+| `distinct_1` / `distinct_2` | Unique unigrams / bigrams ÷ total (higher = more diverse) | `distribution/distinct_ngram.py` |
+| `lt_error_breakdown` | LT category histogram | `distribution/lt_error_breakdown.py` |
+
+Each diversity metric registers `constraint_set` and `_experiment` scopes (12 group-metric
+instances total across 6 metric types). Shared tokenization: `distribution/tokens.py`
+(strips `¿¡` and standard punctuation).
+
+**Self-BLEU:** sacrebleu with `tokenize='intl'`, `smooth_method='exp'`,
+`effective_order=True`; score stored on 0–1 scale. Batches with fewer than 2 sentences
+return `0.0` with `details.skipped=true`.
+
+**Template rate:** default `k=3`; sentences shorter than k use their full token list as prefix.
 
 ### Benchmarks
 
 - `spanish_basic` — evaluation benchmark (live + mock)
+- `spanish_challenging` — morphology live benchmark (stem-change, irregular preterite/conditional, orthographic)
 - `spanish_grammar_probe` — `mock_only: true` fixture for LT vs `expected_form_match` disagreement
 
 ### Morph configs
@@ -67,15 +83,21 @@
 
 ### Tests
 
-- `research/tests/test_evaluation.py` — expected_form + verb_morphology (incl. spaCy quirk docs)
-- `research/tests/test_morph_configs.py`
 - `research/tests/test_evaluation.py` — expected_form, verb_morphology, grammar_languagetool
-- **149+ tests** passing; run `python3 -m pytest research/tests/ -q`
+- `research/tests/test_group_metrics.py` — diversity metrics (repetitive / varied / near-duplicate batches)
+- `research/tests/test_morph_configs.py`
+- **165 tests** passing; run `python3 -m pytest research/tests/ -q`
 
 ### Mock data
 
-- `research/fixtures/mock_outputs.py` — 15 Spanish sentences (3 per verb × 5 verbs)
-- All 15 pass `expected_form_match`; ~10–11 pass `verb_morphology` depending on spaCy model
+- `research/fixtures/mock_outputs.py` — canned outputs for `spanish_basic`, `spanish_challenging`, `spanish_grammar_probe`
+- `spanish_basic`: 15 sentences; all pass `expected_form_match`; ~10–11 pass `verb_morphology` depending on spaCy model
+- Mock runs use identical canned data per benchmark regardless of method — diversity metrics only diverge on **live** output
+
+### Analysis notebooks
+
+- `research/explore_live_spanish_basic.ipynb` — method comparison pivot incl. diversity columns
+- `research/explore_live_spanish_challenging.ipynb` — same for morphology benchmark
 
 ---
 
@@ -93,10 +115,35 @@
    Not ground truth; catches agreement/concordance slips `expected_form_match` misses.
    Full pipeline mapping documented in plan (Stage 1 / 2a / 2b).
 
-4. **Rejected for now:** `llm_morph_match`, paradigm lookup, Stanza as primary, bigger spaCy models as fix,
+4. **Batch diversity = four complementary metrics.** Headline method-comparison columns are
+   experiment-wide: `uniqueness_ratio_experiment`, `self_bleu_experiment`,
+   `template_rate_experiment`, `distinct_1_experiment`, `distinct_2_experiment`. All should
+   point the same direction (baseline more diverse than individual). Skipped: `length_cv`,
+   parser batch diagnostics (`morph_failure_mode`, `parse_failure_rate`).
+
+5. **Rejected for now:** `llm_morph_match`, paradigm lookup, Stanza as primary, bigger spaCy models as fix,
    LLM-only primary metric without human validation, `constraint_bundle`, `translation_pair`,
    `fluency_heuristic` (LLM outputs are already fluent-looking; heuristics don't catch
    grammar slips or unnatural phrasing).
+
+---
+
+## Live diversity validation (`spanish_basic`, June 2026)
+
+Fresh live runs (experiments id=9 baseline, id=10 individual) — all five diversity metrics
+separate methods as expected:
+
+| Metric | `baseline_default` | `individual_default` |
+| --- | --- | --- |
+| `uniqueness_ratio_experiment` | 1.00 | 0.67 |
+| `self_bleu_experiment` | 0.26 | 0.77 |
+| `template_rate_experiment` | 0.00 | 0.80 |
+| `distinct_1_experiment` | 0.70 | 0.47 |
+| `distinct_2_experiment` | 0.91 | 0.51 |
+
+Individual shows exact duplicates (`"Yo corro todos los días."` ×2, `"Él vivirá en Madrid."` ×2)
+and shared openings (`template_rate` 0.67–1.0 per constraint set). Baseline keeps all strings
+unique with varied openings. Stored DB values match direct recomputation.
 
 ---
 
@@ -117,11 +164,11 @@ Install: `python3 -m spacy download es_core_news_sm` (see `research/README.md`).
 
 ## Next steps (recommended order)
 
-1. **Run mock + live experiment** on `spanish_basic`; notebook pivots
-   `pass_rate::expected_form_match` vs `pass_rate::verb_morphology`
+1. ~~**Phase A** — constraint core + live analysis notebooks~~ **Done**
 
-2. **Phase B** — distribution metrics (`self_bleu`, `distinct_n`, …) for batched vs
-   individual comparison
+2. ~~**Phase B** — diversity metrics (`self_bleu`, `template_rate`, `distinct_1/2`)~~ **Done**
+   — validated on live `spanish_basic` (id=9/10). Re-run `spanish_challenging` live to
+   populate diversity columns there.
 
 3. **Phase D** — human ratings for naturalness / acceptability (the only reliable check
    for "slightly off" or unnatural phrasing)
@@ -137,6 +184,10 @@ python3 -m pytest research/tests/ -q
 # Mock experiment (from repo root)
 python3 -m research.run_experiment --benchmark spanish_basic --method baseline_default
 
+# Live method comparison (populates diversity metrics)
+python3 -m research.run_experiment --benchmark spanish_basic --method baseline_default --live
+python3 -m research.run_experiment --benchmark spanish_basic --method individual_default --live
+
 # Reset research DB after benchmark schema changes
 python3 -c "from research.db.database import reset_db; reset_db()"
 ```
@@ -147,6 +198,8 @@ python3 -c "from research.db.database import reset_db; reset_db()"
 
 - `research/evaluation/sentence/expected_form.py`
 - `research/evaluation/sentence/verb_morphology.py`
-- `research/evaluation/sentence/__init__.py` (registry)
+- `research/evaluation/distribution/__init__.py` (group metric registry)
+- `research/evaluation/distribution/self_bleu.py`, `template_rate.py`, `distinct_ngram.py`
 - `research/benchmarks/spanish_basic.yaml`
+- `research/explore_live_spanish_basic.ipynb`
 - `docs/evaluation_metrics_implementation_plan.md`

@@ -14,6 +14,7 @@ ipykernel>=6.0
 # analysis / notebooks
 pandas>=2.2
 matplotlib>=3.8
+sacrebleu>=2.4  # self_bleu distribution metric
 
 # future phases
 streamlit>=1.38

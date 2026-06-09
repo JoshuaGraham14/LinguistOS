@@ -368,9 +368,9 @@ def test_full_phase3_metrics_pipeline(session):
     assert session.query(SentenceEvaluation).count() == 15
 
     g = _compute_and_store_group_metrics(session, experiment, DEFAULT_GROUP_METRICS)
-    assert g == 12  # uniqueness + lt_error_breakdown (×2 scopes × 6 groups)
+    assert g == 36  # 6 metric types × (5 constraint_set + 1 experiment)
 
     r = aggregate_sentence_eval_rollups(session, experiment.id)
     assert r == 24  # 4 rollup kinds × (5 constraint_set + 1 experiment)
 
-    assert session.query(ExperimentMetric).count() == 36  # 12 group + 24 roll-up
+    assert session.query(ExperimentMetric).count() == 60  # 36 group + 24 roll-up
