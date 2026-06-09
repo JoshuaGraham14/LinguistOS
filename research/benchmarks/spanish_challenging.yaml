@@ -1,0 +1,79 @@
+name: spanish_challenging
+language: es
+description: >
+  Morphology-focused live benchmark organised by phenomenon: stem-changing
+  present (e→i, o→ue), irregular preterite stems, irregular conditional stems,
+  and orthographic preterite changes. Intended for live GPT evaluation.
+
+constraint_sets:
+  # Stem-changing present (e→i)
+  - keyword: pedir
+    expected_form: pido
+    translation: to ask for
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: B1
+
+  # Stem-changing present (o→ue)
+  - keyword: dormir
+    expected_form: duermo
+    translation: to sleep
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: B1
+
+  # Irregular preterite stem
+  - keyword: decir
+    expected_form: dije
+    translation: to say
+    tense: preterite
+    person: 1st
+    number: singular
+    cefr_level: B1
+
+  # Irregular preterite stem
+  - keyword: tener
+    expected_form: tuvieron
+    translation: to have
+    tense: preterite
+    person: 3rd
+    number: plural
+    cefr_level: B1
+
+  # Irregular preterite stem (-j-)
+  - keyword: conducir
+    expected_form: condujeron
+    translation: to drive
+    tense: preterite
+    person: 3rd
+    number: plural
+    cefr_level: B2
+
+  # Irregular conditional stem
+  - keyword: poner
+    expected_form: pondría
+    translation: to put
+    tense: conditional
+    person: 1st
+    number: singular
+    cefr_level: B2
+
+  # Irregular conditional stem
+  - keyword: venir
+    expected_form: vendría
+    translation: to come
+    tense: conditional
+    person: 1st
+    number: singular
+    cefr_level: B2
+
+  # Orthographic preterite change (g→gu before e)
+  - keyword: llegar
+    expected_form: llegué
+    translation: to arrive
+    tense: preterite
+    person: 1st
+    number: singular
+    cefr_level: B1

@@ -68,6 +68,7 @@ python -m pytest tests/ -q
 - **Benchmark:** YAML under `benchmarks/`, loaded on first use.
   Optional `mock_only: true` marks fixture benchmarks (evaluator regression tests);
   `run_experiment --live` rejects these. After schema changes, run `reset_db()` and reload.
+  Benchmarks: `spanish_basic` (easy), `spanish_challenging` (live stress-test), `spanish_grammar_probe` (mock fixture).
 - **Method:** YAML under `methods/` (`baseline_gpt`, `individual_gpt`, etc.).
 - **Sentence evaluator:** class under `evaluation/sentence/`, register in `evaluation/sentence/__init__.py` (`DEFAULT_EVALUATORS`).
 - **Distribution metric:** class under `evaluation/distribution/`, register in `evaluation/distribution/__init__.py` (`DEFAULT_GROUP_METRICS`).

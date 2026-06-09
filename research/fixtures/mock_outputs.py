@@ -34,6 +34,48 @@ MOCK_OUTPUTS_BY_BENCHMARK: dict[str, dict[str, list[dict[str, str]]]] = {
             {"sentence": "Yo corro con mi perro.", "translation": "I run with my dog."},
         ],
     },
+    "spanish_challenging": {
+        "pedir": [
+            {"sentence": "Yo pido ayuda cuando la necesito.", "translation": "I ask for help when I need it."},
+            {"sentence": "A veces pido demasiado.", "translation": "Sometimes I ask for too much."},
+            {"sentence": "Yo pido la cuenta al camarero.", "translation": "I ask the waiter for the bill."},
+        ],
+        "dormir": [
+            {"sentence": "Yo duermo ocho horas cada noche.", "translation": "I sleep eight hours every night."},
+            {"sentence": "Duermo mejor en invierno.", "translation": "I sleep better in winter."},
+            {"sentence": "Yo duermo en el sofá.", "translation": "I sleep on the sofa."},
+        ],
+        "decir": [
+            {"sentence": "Ayer dije la verdad.", "translation": "Yesterday I told the truth."},
+            {"sentence": "Dije que vendría.", "translation": "I said that he would come."},
+            {"sentence": "Yo dije eso en clase.", "translation": "I said that in class."},
+        ],
+        "tener": [
+            {"sentence": "Ellos tuvieron suerte.", "translation": "They were lucky."},
+            {"sentence": "Los niños tuvieron miedo.", "translation": "The children were afraid."},
+            {"sentence": "Mis padres tuvieron una idea.", "translation": "My parents had an idea."},
+        ],
+        "conducir": [
+            {"sentence": "Ellos condujeron hasta Sevilla.", "translation": "They drove to Seville."},
+            {"sentence": "Los turistas condujeron con cuidado.", "translation": "The tourists drove carefully."},
+            {"sentence": "Mis amigos condujeron toda la noche.", "translation": "My friends drove all night."},
+        ],
+        "poner": [
+            {"sentence": "Yo pondría la mesa aquí.", "translation": "I would put the table here."},
+            {"sentence": "Pondría más sal.", "translation": "I would add more salt."},
+            {"sentence": "Yo pondría eso en la nevera.", "translation": "I would put that in the fridge."},
+        ],
+        "venir": [
+            {"sentence": "Yo vendría mañana si pudiera.", "translation": "I would come tomorrow if I could."},
+            {"sentence": "Vendría contigo.", "translation": "I would come with you."},
+            {"sentence": "Yo vendría más temprano.", "translation": "I would come earlier."},
+        ],
+        "llegar": [
+            {"sentence": "Ayer llegué tarde a casa.", "translation": "Yesterday I arrived home late."},
+            {"sentence": "Llegué antes que tú.", "translation": "I arrived before you."},
+            {"sentence": "Yo llegué a las ocho.", "translation": "I arrived at eight."},
+        ],
+    },
     "spanish_grammar_probe": {
         "probe_subj_verb": [
             {"sentence": "Yo comimos pizza ayer.", "translation": "We ate pizza yesterday."},

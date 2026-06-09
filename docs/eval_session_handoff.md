@@ -58,6 +58,7 @@
 ### Benchmarks
 
 - `spanish_basic` — evaluation benchmark (live + mock)
+- `spanish_challenging` — morphology live benchmark (stem-change, irregular preterite/conditional, orthographic)
 - `spanish_grammar_probe` — `mock_only: true` fixture for LT vs `expected_form_match` disagreement
 
 ### Morph configs
