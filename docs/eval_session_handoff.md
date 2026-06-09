@@ -201,6 +201,37 @@ python3 -c "from research.db.database import reset_db; reset_db()"
 
 ---
 
+## Deferred refactors (post-merge backlog)
+
+### Shared live-analysis module (planned)
+
+Extract duplicated notebook logic into `research/analysis/live_experiments.py`:
+
+- `load_live_experiments(session, benchmark, method_names=None)`
+- `metric_pivot(experiments, metrics)`
+- `constraint_pass_table(experiment_id)`
+- `disagreement_rows(experiment_id)`
+- `length_grid_summary(benchmark)`
+
+Then thin `explore_live_spanish_basic.ipynb` and `explore_live_spanish_challenging.ipynb`
+to parameterised shells. **Status:** not started; challenging notebook still missing
+experiments 22–24.
+
+### Method loader YAML sync (deferred — not merge-blocking)
+
+`load_method_config` is **insert-only**: after the first load, edits to a preset YAML
+are ignored until `reset_db()`. This is a **footgun**, not a correctness bug — existing
+experiments keep their stored `generation_meta`; only *new* runs are affected.
+
+**When it bites:** you change `temperature` or `explicit_subject_required` in
+`methods/baseline/long.yaml` and re-run `--method baseline_long` without resetting the DB.
+
+**Workaround today:** `reset_db()` then re-run, or use a new preset `name`.
+
+**Proper fix (later):** upsert `MethodConfig.config` when YAML content changes.
+
+---
+
 ## Files to read first in a new chat
 
 - `research/evaluation/sentence/expected_form.py`
@@ -211,3 +242,5 @@ python3 -c "from research.db.database import reset_db; reset_db()"
 - `research/explore_live_spanish_basic.ipynb`
 - `docs/evaluation_metrics_implementation_plan.md`
 - `docs/eval_sentence_length_plan.md`
+- `research/methods/README.md` (preset layout, `extends`, `random` length)
+- `research/methods/run_config.py` (`MethodRunConfig`)

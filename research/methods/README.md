@@ -1,0 +1,51 @@
+# Method presets
+
+Named generation settings for `run_experiment --method <name>`. Lookup uses the
+YAML **`name`** field, not the file path.
+
+## Layout
+
+```
+methods/
+  _base/                  # Shared templates (not loadable directly)
+    baseline_gpt.yaml
+    individual_gpt.yaml
+  baseline/               # Batched GPT presets
+    default.yaml          # name: baseline_default
+    short.yaml
+    medium.yaml
+    long.yaml
+    long_explicit.yaml
+    random.yaml
+  individual/             # One-call-per-sample GPT presets
+    default.yaml
+    ...
+```
+
+## extends
+
+Presets inherit shared fields from `_base/`:
+
+```yaml
+extends: ../_base/baseline_gpt.yaml
+name: baseline_long
+config:
+  sentence_length: long
+  explicit_subject_required: true
+```
+
+Child `config` keys override the base (shallow merge).
+
+## sentence_length
+
+Every preset must set `sentence_length` in `config` (via base or override):
+
+| Value | Meaning |
+| --- | --- |
+| `short` | 2–5 tokens |
+| `medium` | 5–9 tokens |
+| `long` | 10–16 tokens |
+| `random` | Draw short/medium/long per sample at run time |
+
+For `random`, each sentence stores `resolved_sentence_length` in `generation_meta`;
+`length_in_band` is evaluated against that draw.

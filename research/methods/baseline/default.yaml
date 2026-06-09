@@ -1,0 +1,2 @@
+extends: ../_base/baseline_gpt.yaml
+name: baseline_default

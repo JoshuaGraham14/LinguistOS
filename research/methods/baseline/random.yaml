@@ -1,0 +1,4 @@
+extends: ../_base/baseline_gpt.yaml
+name: baseline_random
+config:
+  sentence_length: random

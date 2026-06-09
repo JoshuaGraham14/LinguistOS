@@ -1,0 +1,4 @@
+extends: ../_base/individual_gpt.yaml
+name: individual_medium
+config:
+  sentence_length: medium

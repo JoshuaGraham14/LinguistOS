@@ -1,0 +1,4 @@
+extends: ../_base/baseline_gpt.yaml
+name: baseline_long
+config:
+  sentence_length: long

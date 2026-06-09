@@ -23,6 +23,7 @@ from research.pipeline import (
     _assert_live_allowed,
     _compute_and_store_group_metrics,
     _evaluate_sentences,
+    _experiment_name,
 )
 
 
@@ -164,6 +165,20 @@ def test_experiment_links_to_benchmark_and_method(session):
     assert row.benchmark.name == "test_spanish"
     assert row.method_config_id == method_config.id
     assert row.method_config.method == "baseline_gpt"
+
+
+def test_experiment_name_uses_method_preset_name(session):
+    benchmark, _ = _create_test_benchmark(session)
+    method_config = _create_test_method_config(session)
+    method_config.name = "baseline_long_explicit"
+    session.commit()
+
+    name = _experiment_name(
+        benchmark=benchmark,
+        method_config=method_config,
+        live=True,
+    )
+    assert name == "test_spanish__baseline_long_explicit__live"
 
 
 # ── Evaluation integration ──────────────────────────────────────────────────
