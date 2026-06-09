@@ -31,7 +31,8 @@ def test_concrete_subclass_works():
             return "dummy"
 
         def generate(self, keyword, translation, tense, person, number,
-                     num_candidates, *, target_language="es", cefr_level=None):
+                     num_candidates, *, target_language="es", cefr_level=None,
+                     sentence_length="short"):
             return [{"sentence": "Hola.", "translation": "Hello."}]
 
     gen = Dummy()

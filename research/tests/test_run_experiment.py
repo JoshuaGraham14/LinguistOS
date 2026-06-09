@@ -141,6 +141,8 @@ def test_default_evaluators_registry():
         "expected_form_match",
         "verb_morphology",
         "grammar_languagetool",
+        "length_in_band",
+        "clause_count",
     }
 
 
@@ -368,9 +370,9 @@ def test_full_phase3_metrics_pipeline(session):
     assert session.query(SentenceEvaluation).count() == 15
 
     g = _compute_and_store_group_metrics(session, experiment, DEFAULT_GROUP_METRICS)
-    assert g == 36  # 6 metric types × (5 constraint_set + 1 experiment)
+    assert g == 54  # 9 metric types × (5 constraint_set + 1 experiment)
 
     r = aggregate_sentence_eval_rollups(session, experiment.id)
-    assert r == 24  # 4 rollup kinds × (5 constraint_set + 1 experiment)
+    assert r == 24  # 1 evaluator × 4 rollup kinds × (5 constraint_set + 1 experiment)
 
-    assert session.query(ExperimentMetric).count() == 60  # 36 group + 24 roll-up
+    assert session.query(ExperimentMetric).count() == 78  # 54 group + 24 roll-up

@@ -121,10 +121,13 @@ return `0.0` with `details.skipped=true`.
    point the same direction (baseline more diverse than individual). Skipped: `length_cv`,
    parser batch diagnostics (`morph_failure_mode`, `parse_failure_rate`).
 
-5. **Rejected for now:** `llm_morph_match`, paradigm lookup, Stanza as primary, bigger spaCy models as fix,
-   LLM-only primary metric without human validation, `constraint_bundle`, `translation_pair`,
-   `fluency_heuristic` (LLM outputs are already fluent-looking; heuristics don't catch
-   grammar slips or unnatural phrasing).
+5. **Removed from scope:** `llm_morph_match`, `keyword_presence`, `alignment`, `fluency_heuristic`.
+   Also deferred: parser batch diagnostics, Stanza-as-primary, bigger spaCy models as fix.
+
+6. **Sentence length (Phase F):** bands are short 2–5, medium 5–9, long 10–16 tokens.
+   New evaluators: `length_in_band`, `clause_count`. Grid: 6 live runs on `spanish_basic`
+   (`baseline_{short,medium,long}` × `individual_{short,medium,long}`).
+   Plan: [`eval_sentence_length_plan.md`](eval_sentence_length_plan.md).
 
 ---
 
@@ -167,11 +170,11 @@ Install: `python3 -m spacy download es_core_news_sm` (see `research/README.md`).
 1. ~~**Phase A** — constraint core + live analysis notebooks~~ **Done**
 
 2. ~~**Phase B** — diversity metrics (`self_bleu`, `template_rate`, `distinct_1/2`)~~ **Done**
-   — validated on live `spanish_basic` (id=9/10). Re-run `spanish_challenging` live to
-   populate diversity columns there.
 
-3. **Phase D** — human ratings for naturalness / acceptability (the only reliable check
-   for "slightly off" or unnatural phrasing)
+3. ~~**Phase F** — sentence length wiring + evaluators~~ **Done** (code + six method YAMLs).
+   Run live 6-grid on `spanish_basic` to populate DB. Plan: [`eval_sentence_length_plan.md`](eval_sentence_length_plan.md).
+
+4. **Phase D** — human ratings (acceptability, naturalness, pedagogical fit by length band)
 
 ---
 
@@ -188,6 +191,10 @@ python3 -m research.run_experiment --benchmark spanish_basic --method baseline_d
 python3 -m research.run_experiment --benchmark spanish_basic --method baseline_default --live
 python3 -m research.run_experiment --benchmark spanish_basic --method individual_default --live
 
+# Length grid (Phase F — after method configs exist)
+python3 -m research.run_experiment --benchmark spanish_basic --method baseline_short --live
+python3 -m research.run_experiment --benchmark spanish_basic --method individual_long --live
+
 # Reset research DB after benchmark schema changes
 python3 -c "from research.db.database import reset_db; reset_db()"
 ```
@@ -203,3 +210,4 @@ python3 -c "from research.db.database import reset_db; reset_db()"
 - `research/benchmarks/spanish_basic.yaml`
 - `research/explore_live_spanish_basic.ipynb`
 - `docs/evaluation_metrics_implementation_plan.md`
+- `docs/eval_sentence_length_plan.md`

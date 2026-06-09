@@ -50,6 +50,18 @@ def _resolve_method_config(session, name: str) -> MethodConfig:
     return load_method_config(session, yaml_path)
 
 
+def _method_sentence_length(method_config: MethodConfig) -> str:
+    """Read sentence_length from method YAML config (default short)."""
+    config = method_config.config or {}
+    return str(config.get("sentence_length", "short"))
+
+
+def _method_explicit_subject_required(method_config: MethodConfig) -> bool:
+    """Read explicit_subject_required from method YAML config."""
+    config = method_config.config or {}
+    return bool(config.get("explicit_subject_required", False))
+
+
 def _build_generator(method_config: MethodConfig) -> BaseGenerator:
     """Instantiate a generator from a MethodConfig row."""
     cls = GENERATOR_REGISTRY.get(method_config.method)
@@ -84,6 +96,8 @@ def _evaluate_sentences(
     session,
     experiment: Experiment,
     evaluators: list[BaseEvaluator],
+    *,
+    sentence_length: str = "short",
 ) -> int:
     """Run all evaluators against every sentence in the experiment.
 
@@ -103,6 +117,7 @@ def _evaluate_sentences(
     total = 0
     for sent in sentences:
         constraints = sent.constraint_set.to_constraints_dict()
+        constraints["sentence_length"] = sentence_length
         for evaluator in evaluators:
             result = evaluator.evaluate(
                 sentence=sent.sentence,
@@ -209,6 +224,8 @@ def run_experiment(
         _assert_live_allowed(benchmark, live=live)
         method_config = _resolve_method_config(session, method_name)
         generator = _build_generator(method_config)
+        sentence_length = _method_sentence_length(method_config)
+        explicit_subject_required = _method_explicit_subject_required(method_config)
 
         constraint_sets = (
             session.query(ConstraintSet)
@@ -219,7 +236,10 @@ def run_experiment(
         experiment = Experiment(
             benchmark_id=benchmark.id,
             method_config_id=method_config.id,
-            name=f"{method_config.method}_{benchmark.name}_{'live' if live else 'mock'}",
+            name=(
+                f"{method_config.method}_{benchmark.name}_"
+                f"{'live' if live else 'mock'}_{sentence_length}"
+            ),
             status="running",
         )
         session.add(experiment)
@@ -241,6 +261,8 @@ def run_experiment(
                         num_candidates=method_config.samples_per_case,
                         target_language=cs.target_language,
                         cefr_level=cs.cefr_level,
+                        sentence_length=sentence_length,
+                        explicit_subject_required=explicit_subject_required,
                     )
                 else:
                     candidates = get_mock_candidates(benchmark.name, cs.keyword)[
@@ -258,7 +280,12 @@ def run_experiment(
                         sentence=cand["sentence"],
                         translation=cand["translation"],
                         sample_index=i,
-                        generation_meta={"method": method_config.method, "live": live},
+                        generation_meta={
+                            "method": method_config.method,
+                            "live": live,
+                            "sentence_length": sentence_length,
+                            "explicit_subject_required": explicit_subject_required,
+                        },
                     )
                     session.add(gen)
                     total_stored += 1
@@ -270,7 +297,10 @@ def run_experiment(
             if evaluate:
                 print("\n  Running per-sentence evaluators...")
                 total_evals = _evaluate_sentences(
-                    session, experiment, DEFAULT_EVALUATORS
+                    session,
+                    experiment,
+                    DEFAULT_EVALUATORS,
+                    sentence_length=sentence_length,
                 )
                 print(f"  Stored {total_evals} sentence evaluations")
 

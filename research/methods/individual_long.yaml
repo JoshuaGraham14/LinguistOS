@@ -1,7 +1,7 @@
-name: individual_default
+name: individual_long
 method: individual_gpt
 samples_per_case: 3
 config:
   model: gpt-5.4-nano
   temperature: 0.5
-  sentence_length: short
+  sentence_length: long

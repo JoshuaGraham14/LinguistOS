@@ -9,7 +9,11 @@ from research.evaluation.distribution.lt_error_breakdown import LtErrorBreakdown
 from research.evaluation.distribution.self_bleu import SelfBleuMetric
 from research.evaluation.distribution.template_rate import TemplateRateMetric
 from research.evaluation.distribution.tokens import tokenize
+from research.evaluation.distribution.length_cv import LengthCvMetric
+from research.evaluation.distribution.mean_clauses import MeanClausesMetric
+from research.evaluation.distribution.mean_token_count import MeanTokenCountMetric
 from research.evaluation.distribution.uniqueness import UniquenessRatioMetric
+from research.evaluation.sentence.clause_count import EVALUATOR_NAME
 from research.pipeline import _compute_and_store_group_metrics
 
 
@@ -159,7 +163,7 @@ def test_compute_and_store_group_metrics_no_sentence_evaluations(
     n = _compute_and_store_group_metrics(
         session, sample_experiment, DEFAULT_GROUP_METRICS
     )
-    assert n == 12  # 6 metric types × (1 constraint_set + 1 experiment)
+    assert n == 18  # 9 metric types × (1 constraint_set + 1 experiment)
     assert session.query(SentenceEvaluation).count() == 0
 
 
@@ -205,6 +209,63 @@ def test_lt_error_breakdown_aggregates_categories():
     r = m.compute([s1, s2])
     assert r.value == 3.0
     assert r.details == {"AGREEMENT_VERBS": 2, "AGREEMENT_NOUNS": 1}
+
+
+def test_mean_token_count_averages_lengths():
+    m = MeanTokenCountMetric("constraint_set")
+    r = m.compute(_sentences(["Yo corro.", "Corro rápido en el parque."]))
+    assert r.value == 3.5
+    assert r.details["counts"] == [2, 5]
+
+
+def test_length_cv_zero_for_identical_lengths():
+    m = LengthCvMetric("constraint_set")
+    r = m.compute(_sentences(["Yo corro.", "Tú hablas.", "Él come."]))
+    assert r.value == 0.0
+
+
+def test_length_cv_positive_for_mixed_lengths():
+    m = LengthCvMetric("constraint_set")
+    short = m.compute(_sentences(["Yo corro.", "Tú hablas."])).value
+    mixed = m.compute(_sentences(["Yo corro.", "Corro rápido en el parque todos los días."])).value
+    assert mixed > short
+
+
+def test_mean_clauses_reads_clause_count_evaluations():
+    m = MeanClausesMetric("constraint_set")
+    s1 = GeneratedSentence(
+        experiment_id=1,
+        constraint_set_id=1,
+        sentence="Yo corro.",
+        translation="I run.",
+        sample_index=0,
+    )
+    s2 = GeneratedSentence(
+        experiment_id=1,
+        constraint_set_id=1,
+        sentence="Creo que viene.",
+        translation="I think he is coming.",
+        sample_index=1,
+    )
+    s1.evaluations = [
+        SentenceEvaluation(
+            sentence_id=1,
+            evaluator_name=EVALUATOR_NAME,
+            score=0.25,
+            details={"clause_count": 1},
+        )
+    ]
+    s2.evaluations = [
+        SentenceEvaluation(
+            sentence_id=2,
+            evaluator_name=EVALUATOR_NAME,
+            score=0.5,
+            details={"clause_count": 2},
+        )
+    ]
+    r = m.compute([s1, s2])
+    assert r.value == 1.5
+    assert r.details["counts"] == [1, 2]
 
 
 def test_lt_error_breakdown_empty_without_evaluations():

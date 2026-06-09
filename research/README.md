@@ -74,6 +74,19 @@ Headline experiment-wide diversity columns: `uniqueness_ratio_experiment`, `self
 `template_rate_experiment`, `distinct_1_experiment`, `distinct_2_experiment`. Baseline (batched GPT)
 should score higher on uniqueness/distinct-n and lower on self-BLEU/template-rate than individual.
 
+### Length grid (`spanish_basic`, Phase F)
+
+Six method configs: `baseline_{short,medium,long}`, `individual_{short,medium,long}`.
+Bands: short 2–5 tokens, medium 5–9, long 10–16.
+
+```bash
+python -m research.run_experiment --benchmark spanish_basic --method baseline_short --live
+python -m research.run_experiment --benchmark spanish_basic --method individual_long --live
+```
+
+Length metrics: `pass_rate::length_in_band`, `mean_token_count_experiment`, `length_cv_experiment`,
+`mean_clauses_experiment`, `mean::clause_count`.
+
 ## Tests
 
 ```bash

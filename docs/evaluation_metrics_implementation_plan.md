@@ -15,7 +15,9 @@ The thesis evaluates controlled sentence generation along four axes:
 
 | Axis | Question | Primary metric layer |
 | --- | --- | --- |
-| **Constraint satisfaction** | Does the output use the target word in the requested tense, person, and number? | `expected_form_match` (+ `llm_morph_match` when added) |
+| **Constraint satisfaction** | Does the output use the target word in the requested tense, person, and number? | `expected_form_match` |
+| **Length compliance** | Does the output match the requested sentence length band? | `length_in_band` (+ `mean_token_count`) |
+| **Syntactic complexity** | Does longer generation produce more clausal structure? | `clause_count`, `mean_clauses` |
 | **Tool reliability** | How often do parsers / LLM judges agree with gold surface forms? | `verb_morphology` `details`, LLM disagreement, distribution diagnostics |
 | **Output quality** | Are sentences grammatically coherent and pedagogically suitable? | `grammar_languagetool` (+ human ratings) |
 | **Batch usefulness** | Does a run produce varied, non-repetitive practice material? | Distribution metrics |
@@ -54,9 +56,6 @@ Where possible, combine **automatic evaluation** (this pipeline) with **human ju
 requested surface form? This directly matches the generation goal (use the target verb in
 *this* form). Deterministic, reproducible, and passes all mock gold outputs.
 
-**Planned:** `llm_morph_match` — structured LLM judge (separate model from generator) as a
-flexible secondary signal; compare agreement with `expected_form_match` in the notebook.
-
 **spaCy (`verb_morphology`) — keep registered, not headline:** Empirical probing on
 `spanish_basic` mock outputs (`es_core_news_sm` / `md` / `lg`) shows ~67–73% pass on
 sentences that `expected_form_match` scores 100% on. spaCy cannot accept morph hints;
@@ -65,16 +64,21 @@ failures are parser mis-tags and homographs, not generation errors. Keep
 stores `details` (including `parser_disagreement`), and rolls up as
 `pass_rate::verb_morphology` — useful for tool-reliability analysis until we fully drop
 parser-based constraint scoring. It does **not** gate generation or other evaluators; report
-`pass_rate::expected_form_match` (and later `llm_morph_match`) as the headline columns.
+`pass_rate::expected_form_match` as the headline constraint column.
 
 ### Not yet implemented
 
-- `llm_morph_match` evaluator (optional — skipped for now)
 - Human rating import (Phase D)
+- Sentence length parameter + evaluators (Phase F) — see [`eval_sentence_length_plan.md`](eval_sentence_length_plan.md)
 - Hebrew benchmark + evaluators (Phase E)
-- Gold reference sentences for alignment metrics
-- `length_cv` distribution metric (skipped — weak signal on short practice sentences)
 - Parser batch diagnostics (`morph_failure_mode`, `parse_failure_rate`) — explicitly deferred
+
+### Removed from scope (do not implement)
+
+- `llm_morph_match` — LLM morph judge
+- `keyword_presence` — redundant with `expected_form_match` for verb constraints
+- `alignment` — translation/reference alignment (COMET, BLEU vs gold)
+- `fluency_heuristic` — token-count / TTR heuristics
 
 ---
 
@@ -142,8 +146,9 @@ These directly address morpho-syntactic control.
 | Evaluator | Module (proposed) | `name` | What it checks | Implementation |
 | --- | --- | --- | --- | --- |
 | Expected form match | `sentence/expected_form.py` | `expected_form_match` | Gold surface form present as whole token | **Done** — primary constraint metric |
-| Keyword presence | `sentence/keyword.py` | `keyword_presence` | Target lemma appears in sentence | spaCy/Stanza lemma match on a token; fallback to normalized string only if parse fails |
 | Verb morphology | `sentence/verb_morphology.py` | `verb_morphology` | Tense, person, number on constrained verb | **Done** — diagnostic only; parse sentence, compare `Morph` features to mapped expected set |
+| Length in band | `sentence/length_in_band.py` | `length_in_band` | Token count within target band | **Phase F** — see [`eval_sentence_length_plan.md`](eval_sentence_length_plan.md) |
+| Clause count | `sentence/clause_count.py` | `clause_count` | Clausal predicates via spaCy deps | **Phase F** |
 
 **Retired `grammar_stub`:** Removed from `DEFAULT_EVALUATORS`; superseded by
 `expected_form_match` and `grammar_languagetool`.
@@ -158,8 +163,9 @@ and document download step in `research/README.md`.
 | Evaluator | Module (proposed) | `name` | What it checks | Implementation |
 | --- | --- | --- | --- | --- |
 | LanguageTool grammar | `sentence/languagetool.py` | `grammar_languagetool` | Surface grammaticality | LanguageTool on target sentence; binary score; rich `details` for roll-ups and breakdown (see **Phase C — LanguageTool**) |
-| CEFR lexical | `sentence/cefr_lexical.py` | `cefr_lexical` | Vocabulary band | Only when `cefr_level` set; compare token frequencies against CEFR word list |
-| Alignment | `sentence/alignment.py` | `alignment` | Translation quality | Phase 1: lexical overlap; Phase 2: COMET or BLEU vs gold reference if benchmark provides one |
+| CEFR lexical | `sentence/cefr_lexical.py` | `cefr_lexical` | Vocabulary band | Optional — only when `cefr_level` set; compare token frequencies against CEFR word list |
+
+**Removed — `alignment`, `keyword_presence`, `llm_morph_match`:** Not needed for thesis evaluation.
 
 **Rejected — `fluency_heuristic`:** Token-count / TTR / trigram checks target degenerate
 NLG collapse. GPT-class generators already produce fluent-looking sentences; the real quality
@@ -200,7 +206,9 @@ Each metric is one module under `research/evaluation/distribution/`, registered 
 | Self-BLEU | `self_bleu.py` | `self_bleu` / `self_bleu_experiment` | Mean BLEU of each sentence vs rest of batch | **Done** — sacrebleu `intl` tokenizer, smoothed; lower = more diverse |
 | Distinct-n | `distinct_ngram.py` | `distinct_1` / `distinct_1_experiment`, `distinct_2` / `distinct_2_experiment` | Unique n-grams / total n-grams (tokenized) | **Done** — one `DistinctNgramMetric` class, `n=1` and `n=2` |
 | Template rate | `template_rate.py` | `template_rate` / `template_rate_experiment` | Share sharing same first-k tokens (default k=3) | **Done** — detects mode collapse ("Yo corro…" × N) |
-| Length CV | `length_cv.py` | `length_cv` / `length_cv_experiment` | Coefficient of variation of token counts | **Skipped** — weak signal on short practice sentences |
+| Mean token count | `mean_token_count.py` | `mean_token_count` / `_experiment` | Average tokens per sentence | **Phase F** — length compliance analysis |
+| Length CV | `length_cv.py` | `length_cv` / `length_cv_experiment` | Coefficient of variation of token counts | **Phase F** — enabled for length grid (not method comparison) |
+| Mean clauses | `mean_clauses.py` | `mean_clauses` / `_experiment` | Mean clausal count from `clause_count` eval | **Phase F** |
 
 ---
 
@@ -258,7 +266,6 @@ in `research/explore_live_spanish_basic.ipynb` (or `explore.ipynb`).
 1. ~~`expected_form` on constraint sets + `expected_form_match`~~ **Done**
 2. ~~`verb_morphology` + morph configs (spaCy diagnostic)~~ **Done** — keep in registry, not headline
 3. ~~Run mock + live experiments; notebook compares `expected_form_match` vs `verb_morphology`~~ **Done**
-4. `llm_morph_match` (structured judge, mockable for tests) — optional, skipped
 
 **Done when:** ~~`pass_rate::expected_form_match` meaningful on live GPT output~~ ✓ (100% on `spanish_basic` / `spanish_challenging` live runs).
 
@@ -451,6 +458,45 @@ notebook disagreement table is populated.
 
 ---
 
+### Phase F — Sentence length parameter and evaluation *(code done; grid pending)*
+
+**Goal:** Wire `sentence_length` as a generation parameter and measure compliance, clausal
+complexity, and trade-offs on constraint / grammar / diversity metrics.
+
+**Detailed plan:** [`eval_sentence_length_plan.md`](eval_sentence_length_plan.md)
+
+**Implemented:** `length_bands.py`, `length_in_band`, `clause_count`, `mean_token_count`,
+`length_cv`, `mean_clauses`; six method YAMLs; pipeline wiring; 183 tests passing.
+
+**Length bands (tokens):**
+
+| Label | Min | Max |
+| --- | --- | --- |
+| `short` | 2 | 5 |
+| `medium` | 5 | 9 |
+| `long` | 10 | 16 |
+
+**Experiment grid (`spanish_basic`):** 2 methods × 3 lengths = 6 runs:
+
+`baseline_{short,medium,long}`, `individual_{short,medium,long}`
+
+**New evaluators:** `length_in_band`, `clause_count` (spaCy clausal deps)
+
+**New distribution metrics:** `mean_token_count`, `length_cv`, `mean_clauses`
+
+**Implementation order:**
+
+1. `length_bands.py` + wire `sentence_length` through methods YAML → pipeline → generators
+2. Six method configs + experiment naming suffix (`_short`, `_medium`, `_long`)
+3. `length_in_band` and `clause_count` sentence evaluators
+4. Length distribution metrics + tests
+5. Live 6-run grid; notebook pivot (method × length × metrics)
+
+**Done when:** Grid complete; `pass_rate::length_in_band` and `mean_clauses_experiment` show
+expected patterns; notebook documents constraint/grammar/diversity trade-offs by length.
+
+---
+
 ### Phase E — Multilingual (Hebrew)
 
 **Goal:** Cross-language generalisability.
@@ -471,6 +517,7 @@ notebook disagreement table is populated.
 | We can enforce morpho-syntax | `expected_form_match`, `verb_morphology` | `morph_failure_mode` | Spot-check sample |
 | Automatic tools are imperfect but usable | `grammar_languagetool` vs `expected_form_match` vs `verb_morphology` | `lt_error_breakdown`, `parse_failure_rate` | Required subset |
 | Batched vs individual generation differs | Roll-up `pass_rate::expected_form_match` | `self_bleu`, `uniqueness_ratio`, `template_rate`, `distinct_1`, `distinct_2` | Optional |
+| Length parameter works | `pass_rate::length_in_band`, `mean_token_count` | `length_cv`, `mean_clauses` | Pedagogical fit by band |
 | Spanish vs Hebrew | Same evaluators, different parser | Same metrics, per-language runs | Yes for Hebrew |
 
 ---
@@ -480,10 +527,10 @@ notebook disagreement table is populated.
 | Decision | Options | Recommendation |
 | --- | --- | --- |
 | **Partial vs binary scoring** | Partial credit per morph feature vs strict all-or-nothing | Partial credit for analysis; report `pass_rate::` with threshold 1.0 as strict column in notebook |
-| **Keyword matching** | Inflected form only vs any lemma inflection | Require **correct inflection** matching tense/person/number (matches constraint semantics) |
 | **Human scale** | Binary vs Likert 1–5 | Likert for nuance; binary for inter-rater agreement (Cohen's κ) |
-| **Gold references** | Hand-written per constraint set vs reference-free | Start reference-free; add optional `reference_sentence` field to benchmark YAML later for `alignment` |
-| **Parser on failure** | Score 0 vs skip sentence | Score 0 with `parse_ok: false` in `details` (supports `parse_failure_rate`) |
+| **Length band at 5 tokens** | Shared boundary vs exclusive | Inclusive bands per label; each experiment has one target (see Phase F plan) |
+| **Clause counting** | spaCy dep heuristics vs manual | spaCy `{ccomp, xcomp, advcl, relcl, conj}` on `VERB`/`AUX`; document limitations in appendix |
+| **Parser on failure** | Score 0 vs skip sentence | Score 0 with `parse_ok: false` in `details` |
 
 ---
 

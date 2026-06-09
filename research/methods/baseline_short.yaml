@@ -1,4 +1,4 @@
-name: baseline_default
+name: baseline_short
 method: baseline_gpt
 samples_per_case: 3
 config:

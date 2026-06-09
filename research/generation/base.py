@@ -25,5 +25,7 @@ class BaseGenerator(ABC):
         *,
         target_language: str = "es",
         cefr_level: str | None = None,
+        sentence_length: str = "short",
+        explicit_subject_required: bool = False,
     ) -> list[dict[str, str]]:
         """Return up to *num_candidates* ``{sentence, translation}`` dicts."""

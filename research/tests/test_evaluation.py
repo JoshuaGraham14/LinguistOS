@@ -5,11 +5,17 @@ from __future__ import annotations
 import pytest
 
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
+from research.evaluation.sentence.clause_count import (
+    ClauseCountEvaluator,
+    count_clauses,
+    normalised_clause_score,
+)
 from research.evaluation.sentence.expected_form import (
     ExpectedFormMatchEvaluator,
     normalize_token,
     tokenize,
 )
+from research.evaluation.sentence.length_in_band import LengthInBandEvaluator
 from research.evaluation.sentence.grammar import GrammarEvaluator
 from research.evaluation.sentence.languagetool import (
     GRAMMAR_CATEGORIES,
@@ -677,3 +683,82 @@ def test_grammar_categories_cover_expected_groups():
     assert "AGREEMENT_VERBS" in GRAMMAR_CATEGORIES
     assert "AGREEMENT_NOUNS" in GRAMMAR_CATEGORIES
     assert "TYPOS" not in GRAMMAR_CATEGORIES
+
+
+# ── length_in_band ───────────────────────────────────────────────────────────
+
+
+def test_length_in_band_evaluator_name():
+    assert LengthInBandEvaluator().name == "length_in_band"
+
+
+def test_length_in_band_passes_short_sentence():
+    ev = LengthInBandEvaluator()
+    result = ev.evaluate(
+        "Yo corro.",
+        "I run.",
+        {"sentence_length": "short", "target_language": "es"},
+    )
+    assert result.score == 1.0
+    assert result.details["in_band"] is True
+    assert result.details["token_count"] == 2
+
+
+def test_length_in_band_fails_when_too_long_for_short():
+    ev = LengthInBandEvaluator()
+    result = ev.evaluate(
+        "Yo corro rápido en el parque todos los días.",
+        "I run fast in the park every day.",
+        {"sentence_length": "short", "target_language": "es"},
+    )
+    assert result.score == 0.0
+    assert result.details["in_band"] is False
+
+
+def test_length_in_band_medium_accepts_five_tokens():
+    ev = LengthInBandEvaluator()
+    result = ev.evaluate(
+        "Yo como pan muy bien.",
+        "I eat bread very well.",
+        {"sentence_length": "medium", "target_language": "es"},
+    )
+    assert result.score == 1.0
+    assert result.details["token_count"] == 5
+
+
+# ── clause_count ─────────────────────────────────────────────────────────────
+
+
+def test_normalised_clause_score_caps_at_one():
+    assert normalised_clause_score(1) == 0.25
+    assert normalised_clause_score(4) == 1.0
+    assert normalised_clause_score(8) == 1.0
+
+
+def test_count_clauses_simple_sentence():
+    spacy = pytest.importorskip("spacy")
+    try:
+        nlp = spacy.load("es_core_news_sm")
+    except OSError:
+        pytest.skip("es_core_news_sm not installed")
+
+    assert count_clauses(nlp("Yo corro.")) >= 1
+
+
+def test_clause_count_evaluator_returns_details():
+    spacy = pytest.importorskip("spacy")
+    try:
+        spacy.load("es_core_news_sm")
+    except OSError:
+        pytest.skip("es_core_news_sm not installed")
+
+    ev = ClauseCountEvaluator()
+    result = ev.evaluate(
+        "Yo corro en el parque.",
+        "I run in the park.",
+        {"target_language": "es"},
+    )
+    assert result.details["parse_ok"] is True
+    assert isinstance(result.details["clause_count"], int)
+    assert result.details["clause_count"] >= 1
+    assert 0.0 < result.score <= 1.0
