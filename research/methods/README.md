@@ -7,9 +7,6 @@ YAML **`name`** field, not the file path.
 
 ```
 methods/
-  _base/                  # Shared templates (not loadable directly)
-    baseline_gpt.yaml
-    individual_gpt.yaml
   baseline/               # Batched GPT presets
     default.yaml          # name: baseline_default
     short.yaml
@@ -22,23 +19,11 @@ methods/
     ...
 ```
 
-## extends
-
-Presets inherit shared fields from `_base/`:
-
-```yaml
-extends: ../_base/baseline_gpt.yaml
-name: baseline_long
-config:
-  sentence_length: long
-  explicit_subject_required: true
-```
-
-Child `config` keys override the base (shallow merge).
+Each file is self-contained (no inheritance). Open any preset to see the full config.
 
 ## sentence_length
 
-Every preset must set `sentence_length` in `config` (via base or override):
+Every preset sets `sentence_length` in `config`:
 
 | Value | Meaning |
 | --- | --- |

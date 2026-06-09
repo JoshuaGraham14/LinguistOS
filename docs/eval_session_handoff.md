@@ -242,5 +242,5 @@ experiments keep their stored `generation_meta`; only *new* runs are affected.
 - `research/explore_live_spanish_basic.ipynb`
 - `docs/evaluation_metrics_implementation_plan.md`
 - `docs/eval_sentence_length_plan.md`
-- `research/methods/README.md` (preset layout, `extends`, `random` length)
+- `research/methods/README.md` (preset layout, `random` length)
 - `research/methods/run_config.py` (`MethodRunConfig`)

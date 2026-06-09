@@ -1,8 +1,7 @@
 """Load a method config from a YAML file into the database.
 
-Supports ``extends`` for shared base templates under ``methods/_base/``.
-Preset files live under ``methods/baseline/`` and ``methods/individual/``;
-lookup is by the YAML ``name`` field (CLI ``--method`` value), not file path.
+Preset files live under ``methods/baseline/`` and ``methods/individual/``.
+Lookup is by the YAML ``name`` field (CLI ``--method`` value), not file path.
 
 Idempotent: if a config with the same name already exists, the existing
 record is returned and no rows are inserted.
@@ -22,48 +21,11 @@ _METHODS_ROOT = Path(__file__).resolve().parent
 _REQUIRED_FIELDS = ("name", "method", "samples_per_case")
 
 
-def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
-    """Merge override into base; nested ``config`` dicts are merged shallowly."""
-    merged = dict(base)
-    for key, value in override.items():
-        if key == "config" and isinstance(value, dict):
-            parent_config = merged.get("config")
-            if isinstance(parent_config, dict):
-                merged["config"] = {**parent_config, **value}
-            else:
-                merged["config"] = dict(value)
-        else:
-            merged[key] = value
-    return merged
-
-
-def _resolve_extends_path(child_path: Path, extends: str) -> Path:
-    """Resolve an ``extends`` reference relative to the child YAML file."""
-    candidate = (child_path.parent / extends).resolve()
-    if not str(candidate).startswith(str(_METHODS_ROOT)):
-        raise ValueError(
-            f"Method YAML {child_path}: extends path {extends!r} escapes methods/"
-        )
-    if not candidate.exists():
-        raise FileNotFoundError(
-            f"Method YAML {child_path}: extends file not found: {candidate}"
-        )
-    return candidate
-
-
 def parse_method_yaml(path: str | Path) -> dict[str, Any]:
-    """Load and merge a method YAML (following ``extends`` chain)."""
+    """Load a method preset YAML."""
     path = Path(path)
     with open(path) as f:
-        data: dict[str, Any] = yaml.safe_load(f) or {}
-
-    extends = data.pop("extends", None)
-    if extends:
-        base_path = _resolve_extends_path(path, str(extends))
-        base_data = parse_method_yaml(base_path)
-        data = _deep_merge(base_data, data)
-
-    return data
+        return yaml.safe_load(f) or {}
 
 
 def _validate_raw(data: dict[str, Any], path: Path) -> None:
@@ -77,13 +39,13 @@ def _validate_raw(data: dict[str, Any], path: Path) -> None:
 
 
 def _iter_preset_yaml_paths(methods_dir: Path | None = None) -> list[Path]:
-    """All loadable preset YAML files (excludes ``_base/`` templates)."""
+    """All preset YAML files under ``methods/baseline/`` and ``methods/individual/``."""
     root = methods_dir or _METHODS_ROOT
     paths: list[Path] = []
-    for path in sorted(root.rglob("*.yaml")):
-        if "_base" in path.parts:
-            continue
-        paths.append(path)
+    for subdir in ("baseline", "individual"):
+        folder = root / subdir
+        if folder.is_dir():
+            paths.extend(sorted(folder.glob("*.yaml")))
     return paths
 
 
@@ -126,6 +88,7 @@ def load_method_config_by_name(session: Session, name: str) -> MethodConfig:
     if path is None:
         raise FileNotFoundError(
             f"No method preset named {name!r}. "
-            f"Expected a YAML under methods/ with name: {name}"
+            f"Expected a YAML under methods/baseline/ or methods/individual/ "
+            f"with name: {name}"
         )
     return load_method_config(session, path)

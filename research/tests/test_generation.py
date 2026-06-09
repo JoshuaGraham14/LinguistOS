@@ -166,7 +166,7 @@ def test_load_individual_default_yaml(session):
     assert mc.method == "individual_gpt"
 
 
-def test_parse_method_yaml_extends_merges_config():
+def test_parse_method_yaml_loads_full_preset():
     from research.methods.loader import parse_method_yaml
 
     path = Path(__file__).resolve().parent.parent / "methods" / "baseline" / "long_explicit.yaml"

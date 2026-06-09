@@ -1,5 +1,8 @@
-extends: ../_base/individual_gpt.yaml
 name: individual_long_explicit
+method: individual_gpt
+samples_per_case: 3
 config:
+  model: gpt-5.4-nano
+  temperature: 0.7
   sentence_length: long
   explicit_subject_required: true

@@ -11,7 +11,7 @@ Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/
 | `run_experiment.py` | CLI entry point |
 | `pipeline.py` | Orchestration: generate → evaluate → metrics |
 | `benchmarks/*.yaml` | Reusable constraint-set groups |
-| `methods/` | Generation presets (`baseline/`, `individual/`, `_base/`); see [`methods/README.md`](methods/README.md) |
+| `methods/` | Generation presets (`baseline/`, `individual/`); see [`methods/README.md`](methods/README.md) |
 | `fixtures/mock_outputs.py` | Canned sentences for mock runs |
 | `explore.ipynb` | Analysis over `research.db` |
 | `explore_live_spanish_basic.ipynb` | Live method comparison (`spanish_basic`) |
@@ -100,7 +100,7 @@ python -m pytest tests/ -q
   Optional `mock_only: true` marks fixture benchmarks (evaluator regression tests);
   `run_experiment --live` rejects these. After schema changes, run `reset_db()` and reload.
   Benchmarks: `spanish_basic` (easy), `spanish_challenging` (live stress-test), `spanish_grammar_probe` (mock fixture).
-- **Method:** YAML preset under `methods/baseline/` or `methods/individual/`; CLI uses the preset `name` (e.g. `baseline_long`). Shared defaults live in `methods/_base/` via `extends`.
+- **Method:** Self-contained YAML preset under `methods/baseline/` or `methods/individual/`; CLI uses the preset `name` (e.g. `baseline_long`).
 - **Sentence evaluator:** class under `evaluation/sentence/`, register in `evaluation/sentence/__init__.py` (`DEFAULT_EVALUATORS`).
 - **Distribution metric:** class under `evaluation/distribution/`, register in `evaluation/distribution/__init__.py` (`DEFAULT_GROUP_METRICS`). Diversity metrics: `self_bleu`, `template_rate`, `distinct_1`, `distinct_2` (each with constraint_set + experiment scopes).
 - **Language morph config:** YAML under `evaluation/morph_configs/<lang>.yaml` (maps benchmark tense/person/number → UD features for `verb_morphology`). Adding a new language requires no code changes — drop a file and download the parser model.

@@ -1,7 +1,0 @@
-# Shared defaults for individual (one-call-per-sample) GPT presets. Not loadable directly.
-method: individual_gpt
-samples_per_case: 3
-config:
-  model: gpt-5.4-nano
-  temperature: 0.7
-  sentence_length: short
