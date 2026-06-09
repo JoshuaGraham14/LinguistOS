@@ -40,7 +40,7 @@ Structural improvements; behaviour for a normal CLI run is unchanged.
 | Kind                                | What it measures                                                          | Code hook                                  | Storage                                                                    | Example metric names                                                 |
 | ----------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | **Per-sentence (Level 1)**          | One generated sentence at a time                                          | `BaseEvaluator.evaluate(...)` + `ConstraintSet.to_constraints_dict()` | `**sentence_evaluations`** — one row per `(sentence_id, evaluator_name)` per eval pass; re-run replaces rows for that experiment | `grammar_stub`                                                       |
-| **Distribution / joint (Level 2b)** | All samples in a batch together (per constraint set, or whole experiment) | `BaseGroupMetric.compute(list[sentences])` | `**experiment_metrics`** only (`scope` = `constraint_set` or `experiment`) | `uniqueness_ratio`, `uniqueness_ratio_experiment`; future: self-BLEU |
+| **Distribution / joint (Level 2b)** | All samples in a batch together (per constraint set, or whole experiment) | `BaseGroupMetric.compute(list[sentences])` | `**experiment_metrics`** only (`scope` = `constraint_set` or `experiment`) | `uniqueness_ratio`, `self_bleu`, `template_rate`, `distinct_1`, `distinct_2`, `lt_error_breakdown` (+ `_experiment` scopes) |
 | **Roll-up / aggregate (Level 2a)**  | Summary statistics **computed from** per-sentence rows                    | `aggregate_sentence_eval_rollups()`        | `**experiment_metrics`** (`metric_name` prefix `mean::`)                   | `mean::grammar_stub`                                                 |
 
 
@@ -261,7 +261,7 @@ Extend what gets stored automatically after each run. **Comparison and explorati
   - Same `scope` / `metric_name` pattern as `mean::`; idempotent delete of all rollup prefixes before insert
 - `run_experiment.py` unchanged hook (still calls `aggregate_sentence_eval_rollups` after sentence eval)
 - Tests: extended `test_analysis.py` (+2 tests); integration test counts updated
-- `explore.ipynb` — experiments table uses `MethodConfig` / `Benchmark`; new **Compare experiments** section (pivot of experiment-wide metrics including roll-ups and `uniqueness_ratio_experiment`)
+- `explore.ipynb` / `explore_live_spanish_*.ipynb` — experiments table uses `MethodConfig` / `Benchmark`; **Compare experiments** pivot of experiment-wide metrics including roll-ups and diversity columns (`uniqueness_ratio_experiment`, `self_bleu_experiment`, `template_rate_experiment`, `distinct_1_experiment`, `distinct_2_experiment`)
 
 **Deliberately not built:** `analysis.py`, `--compare` CLI, median/percentiles (can add later if needed for dissertation tables).
 

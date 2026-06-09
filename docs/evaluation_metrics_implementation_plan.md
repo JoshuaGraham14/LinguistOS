@@ -39,8 +39,12 @@ Where possible, combine **automatic evaluation** (this pipeline) with **human ju
 | `grammar_stub` | `research/evaluation/sentence/grammar.py` | Retired from registry (module kept for reference) |
 | Morph configs | `research/evaluation/morph_configs/` | Done (Spanish) |
 | Distribution metric interface | `research/evaluation/distribution/base.py` | Done |
-| `UniquenessRatioMetric` | `research/evaluation/distribution/uniqueness.py` | Done (constraint-set + experiment scopes) |
-| Roll-ups | `research/evaluation/rollups.py` | Done (`mean::`, `min::`, `std::`, `pass_rate::`) |
+| `UniquenessRatioMetric` | `research/evaluation/distribution/uniqueness.py` | Done |
+| `SelfBleuMetric` | `research/evaluation/distribution/self_bleu.py` | Done |
+| `TemplateRateMetric` | `research/evaluation/distribution/template_rate.py` | Done |
+| `DistinctNgramMetric` | `research/evaluation/distribution/distinct_ngram.py` | Done (distinct_1 + distinct_2) |
+| Shared tokenization | `research/evaluation/distribution/tokens.py` | Done (strips `¿¡` + punctuation) |
+| Roll-ups | `research/evaluation/rollups.py` | Done (`mean::`, `min::`, `std::`, `pass_rate::`, `errors_per_100w::`) |
 | Registries | `sentence/__init__.py`, `distribution/__init__.py` | Done |
 | Pipeline hooks | `research/pipeline.py` | Stage 1 → 2b → 2a |
 
@@ -66,10 +70,11 @@ parser-based constraint scoring. It does **not** gate generation or other evalua
 ### Not yet implemented
 
 - `llm_morph_match` evaluator (optional — skipped for now)
-- Self-BLEU, distinct-n, template detection
-- Human rating import
-- Hebrew benchmark + evaluators
+- Human rating import (Phase D)
+- Hebrew benchmark + evaluators (Phase E)
 - Gold reference sentences for alignment metrics
+- `length_cv` distribution metric (skipped — weak signal on short practice sentences)
+- Parser batch diagnostics (`morph_failure_mode`, `parse_failure_rate`) — explicitly deferred
 
 ---
 
@@ -192,10 +197,10 @@ Each metric is one module under `research/evaluation/distribution/`, registered 
 | Metric | Module (proposed) | `name` (constraint_set / experiment) | What it measures | Notes |
 | --- | --- | --- | --- | --- |
 | Uniqueness ratio | `uniqueness.py` | `uniqueness_ratio` / `uniqueness_ratio_experiment` | Distinct strings / N | **Done** |
-| Self-BLEU | `self_bleu.py` | `self_bleu` / `self_bleu_experiment` | Mean BLEU of each sentence vs rest of batch | Lower = more diverse; key for batched vs individual GPT comparison |
-| Distinct-n | `distinct_n.py` | `distinct_1` / `distinct_1_experiment` | Unique unigrams / total unigrams (tokenized) | Standard NLG diversity metric |
-| Length CV | `length_cv.py` | `length_cv` / `length_cv_experiment` | Coefficient of variation of token counts | Flags uniform-length batches |
-| Template rate | `template_rate.py` | `template_rate` / `template_rate_experiment` | Share sharing same first-k tokens | Detects mode collapse ("Yo como…" × N) |
+| Self-BLEU | `self_bleu.py` | `self_bleu` / `self_bleu_experiment` | Mean BLEU of each sentence vs rest of batch | **Done** — sacrebleu `intl` tokenizer, smoothed; lower = more diverse |
+| Distinct-n | `distinct_ngram.py` | `distinct_1` / `distinct_1_experiment`, `distinct_2` / `distinct_2_experiment` | Unique n-grams / total n-grams (tokenized) | **Done** — one `DistinctNgramMetric` class, `n=1` and `n=2` |
+| Template rate | `template_rate.py` | `template_rate` / `template_rate_experiment` | Share sharing same first-k tokens (default k=3) | **Done** — detects mode collapse ("Yo corro…" × N) |
+| Length CV | `length_cv.py` | `length_cv` / `length_cv_experiment` | Coefficient of variation of token counts | **Skipped** — weak signal on short practice sentences |
 
 ---
 
@@ -236,7 +241,9 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 `pass_rate::grammar_languagetool` (grammar headline / EFSR),
 `errors_per_100w::grammar_languagetool` (length-normalised severity),
 `pass_rate::verb_morphology` (parser diagnostic), and distribution metrics
-(`lt_error_breakdown_experiment`, `self_bleu_experiment`, etc.) in `research/explore.ipynb`.
+(`uniqueness_ratio_experiment`, `self_bleu_experiment`, `template_rate_experiment`,
+`distinct_1_experiment`, `distinct_2_experiment`, `lt_error_breakdown_experiment`)
+in `research/explore_live_spanish_basic.ipynb` (or `explore.ipynb`).
 
 **Future roll-ups (optional):** median, p25/p75 — add to `rollups.py` only if needed for tables.
 
@@ -244,33 +251,47 @@ Scopes: per `constraint_set` and pooled `experiment`-wide (weighted by sentence 
 
 ## Implementation phases
 
-### Phase A — Constraint satisfaction core *(in progress)*
+### Phase A — Constraint satisfaction core *(done)*
 
 **Goal:** Reliable constraint checking without depending on parser morph tags.
 
 1. ~~`expected_form` on constraint sets + `expected_form_match`~~ **Done**
 2. ~~`verb_morphology` + morph configs (spaCy diagnostic)~~ **Done** — keep in registry, not headline
-3. Implement `llm_morph_match` (structured judge, mockable for tests) — optional
-4. Run mock + live experiments; notebook compares `expected_form_match` vs `verb_morphology`
+3. ~~Run mock + live experiments; notebook compares `expected_form_match` vs `verb_morphology`~~ **Done**
+4. `llm_morph_match` (structured judge, mockable for tests) — optional, skipped
 
-**Done when:** `pass_rate::expected_form_match` and LLM agreement rates are meaningful on live GPT output.
+**Done when:** ~~`pass_rate::expected_form_match` meaningful on live GPT output~~ ✓ (100% on `spanish_basic` / `spanish_challenging` live runs).
 
 ---
 
-### Phase B — Distribution metrics for generation comparison
+### Phase B — Distribution metrics for generation comparison *(done)*
 
 **Goal:** Quantify diversity differences between methods.
 
-1. Implement `self_bleu` (constraint_set + experiment)
-2. Implement `distinct_n` or `template_rate` (pick at least one beyond uniqueness)
-3. Tests with known repetitive vs diverse fixture batches
-4. Compare `baseline_default` vs `individual_default` in notebook
+1. ~~Implement `self_bleu` (constraint_set + experiment)~~ **Done** — `sacrebleu>=2.4`, `tokenize='intl'`
+2. ~~Implement `template_rate` (k=3) and `distinct_1` / `distinct_2`~~ **Done**
+3. ~~Tests with repetitive / varied / near-duplicate fixture batches~~ **Done** (`test_group_metrics.py`)
+4. ~~Compare `baseline_default` vs `individual_default` on live `spanish_basic`~~ **Done**
 
-**Done when:** Experiment pivot shows distinct diversity signatures per method.
+**Live validation (June 2026, `spanish_basic`):**
+
+| Metric | baseline | individual |
+| --- | --- | --- |
+| `uniqueness_ratio_experiment` | 1.00 | 0.67 |
+| `self_bleu_experiment` | 0.26 | 0.77 |
+| `template_rate_experiment` | 0.00 | 0.80 |
+| `distinct_1_experiment` | 0.70 | 0.47 |
+| `distinct_2_experiment` | 0.91 | 0.51 |
+
+All five point the same direction. Notebooks updated (`explore_live_spanish_basic.ipynb`,
+`explore_live_spanish_challenging.ipynb`). Mock runs use identical canned data per benchmark
+so diversity metrics only diverge on live output.
+
+**Done when:** ~~Experiment pivot shows distinct diversity signatures per method~~ ✓
 
 ---
 
-### Phase C — LanguageTool grammar quality layer
+### Phase C — LanguageTool grammar quality layer *(done)*
 
 **Goal:** Add a grammar-quality signal **independent of spaCy and gold labels**, with honest
 scoping. LanguageTool is a **secondary** metric — not ground truth, not a constraint checker.
@@ -410,9 +431,9 @@ Appendix: sample of flagged `details.matches` (rule, message, sentence) for qual
 **Done when:** Live `spanish_basic` run produces EFSR, errors/100w, and category breakdown;
 notebook disagreement table is populated.
 
-#### Also in Phase C (parser diagnostics)
+#### Deferred from Phase C
 
-- Distribution `parse_failure_rate` and `morph_failure_mode` (spaCy tool-reliability)
+- Distribution `parse_failure_rate` and `morph_failure_mode` (spaCy tool-reliability) — not needed
 - Optional: `cefr_lexical` when benchmarks include `cefr_level`
 
 ---
@@ -449,7 +470,7 @@ notebook disagreement table is populated.
 | --- | --- | --- | --- |
 | We can enforce morpho-syntax | `expected_form_match`, `verb_morphology` | `morph_failure_mode` | Spot-check sample |
 | Automatic tools are imperfect but usable | `grammar_languagetool` vs `expected_form_match` vs `verb_morphology` | `lt_error_breakdown`, `parse_failure_rate` | Required subset |
-| Batched vs individual generation differs | Roll-up `pass_rate::expected_form_match` | `self_bleu`, `uniqueness_ratio`, `template_rate` | Optional |
+| Batched vs individual generation differs | Roll-up `pass_rate::expected_form_match` | `self_bleu`, `uniqueness_ratio`, `template_rate`, `distinct_1`, `distinct_2` | Optional |
 | Spanish vs Hebrew | Same evaluators, different parser | Same metrics, per-language runs | Yes for Hebrew |
 
 ---
@@ -494,7 +515,7 @@ notebook disagreement table is populated.
 | `spacy` + `es_core_news_sm` | Tier 1 Spanish evaluators | Pin version; document `python -m spacy download` |
 | `stanza` | Hebrew (Phase E) | Separate model download |
 | `language-tool-python` | `grammar_languagetool` | Local server (Java, ~259MB first download); mock in CI |
-| `sacrebleu` or `nltk` | `self_bleu` | Prefer sacrebleu for consistency |
+| `sacrebleu>=2.4` | `self_bleu` | Installed; `tokenize='intl'`, `smooth_method='exp'` |
 | `pandas` | Human rating import | Already used in notebook |
 
 Add to `research/requirements.txt` incrementally per phase — avoid pulling all NLP deps for mock-only runs if optional imports are preferred.
@@ -535,8 +556,8 @@ Analysis and dissertation figures: **`research/explore.ipynb`** (no separate `an
 
 The evaluation layer is **dissertation-ready** when:
 
-1. **`expected_form_match`** produces interpretable pass rates on live GPT runs across `spanish_basic`
-2. **`details`** support error analysis (which constraint dimension fails most often)
-3. **At least two distribution metrics** distinguish batched vs individual generation
-4. **Human ratings** on a sample validate automatic constraint scores
-5. **Notebook** can pivot experiment-wide metrics for method and language comparison
+1. ~~**`expected_form_match`** produces interpretable pass rates on live GPT runs across `spanish_basic`~~ ✓
+2. ~~**`details`** support error analysis (which constraint dimension fails most often)~~ ✓
+3. ~~**At least two distribution metrics** distinguish batched vs individual generation~~ ✓ (five metrics validated live)
+4. **Human ratings** on a sample validate automatic constraint scores — **remaining**
+5. ~~**Notebook** can pivot experiment-wide metrics for method and language comparison~~ ✓
