@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import (
+    enrichment,
     generate,
     mastery,
     practice,
@@ -12,6 +13,7 @@ from app.api import (
     voice,
     workspaces,
 )
+from app.services.enrichment_worker import run_startup_enrichment, start_enrichment_scheduler
 from app.config import settings
 from app.db.database import Base, engine
 from app.db import models  # noqa: F401
@@ -40,6 +42,7 @@ app.add_middleware(
 app.include_router(generate.router, prefix="/api", tags=["generate"])
 app.include_router(practice.router, prefix="/api", tags=["practice"])
 app.include_router(vocab.router, prefix="/api", tags=["vocab"])
+app.include_router(enrichment.router, prefix="/api", tags=["enrichment"])
 app.include_router(vocab_suggest.router, prefix="/api", tags=["vocab-suggest"])
 app.include_router(workspaces.router, prefix="/api", tags=["workspaces"])
 app.include_router(mastery.router, prefix="/api", tags=["mastery"])
@@ -60,6 +63,8 @@ def _init_db() -> None:
     backfill_canonical_word_fields()
     backfill_lexemes()
     drop_deprecated_vocab_columns(engine)
+    run_startup_enrichment()
+    start_enrichment_scheduler()
 
 
 @app.get("/health")

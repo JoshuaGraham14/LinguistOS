@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -6,6 +6,7 @@ from app.api._auth import ensure_workspace_owner
 from app.db.database import get_db
 from app.db.models import Vocab, Workspace
 from app.db.schemas import VocabCreate, VocabListResponse, VocabOut, VocabUpdate
+from app.services.enrichment_worker import maybe_enqueue_enrichment, process_enrichment_job
 from app.services.lexeme_resolver import find_vocab_link, resolve_lexeme
 from app.services.vocab_mapper import sync_legacy_mirrors, vocab_out
 
@@ -113,8 +114,25 @@ def get_vocab(vocab_id: int, db: Session = Depends(get_db)) -> VocabOut:
     return vocab_out(item)
 
 
+def _schedule_enrichment(background_tasks: BackgroundTasks | None, job_id: int | None) -> None:
+    if background_tasks is not None and job_id is not None:
+        background_tasks.add_task(_run_enrichment_job, job_id)
+
+
+def _run_enrichment_job(job_id: int) -> None:
+    from app.db.database import SessionLocal
+
+    with SessionLocal() as db:
+        process_enrichment_job(db, job_id)
+        db.commit()
+
+
 @router.post("/vocab", response_model=VocabOut)
-def add_vocab(payload: VocabCreate, db: Session = Depends(get_db)) -> VocabOut:
+def add_vocab(
+    payload: VocabCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+) -> VocabOut:
     ensure_workspace_owner(db, payload.workspace_id)
     capture = _ResolvedCapture(payload)
     language = _workspace_language(db, payload.workspace_id)
@@ -154,8 +172,10 @@ def add_vocab(payload: VocabCreate, db: Session = Depends(get_db)) -> VocabOut:
     )
     sync_legacy_mirrors(item, lexeme)
     db.add(item)
+    db.flush()
+    job = maybe_enqueue_enrichment(db, lexeme_id=lexeme.id, vocab_id=item.id)
     db.commit()
-    db.refresh(item)
+    _schedule_enrichment(background_tasks, job.id if job else None)
     item = _load_vocab_with_mastery(db, item.id)
     assert item is not None
     return vocab_out(item)

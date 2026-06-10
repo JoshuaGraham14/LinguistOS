@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -19,10 +19,19 @@ from app.db.schemas import (
     TokenResolveResponse,
     TokenSpanOut,
 )
+from app.services.enrichment_worker import maybe_enqueue_enrichment, process_enrichment_job
 from app.services.lexeme_resolver import lexeme_lemma, resolve_lexeme
 from app.services.vocab_mapper import sync_legacy_mirrors, vocab_out
 
 router = APIRouter()
+
+
+def _run_token_enrichment(job_id: int) -> None:
+    from app.db.database import SessionLocal
+
+    with SessionLocal() as db:
+        process_enrichment_job(db, job_id)
+        db.commit()
 
 _TOKEN_RE = re.compile(r"[\w\u00C0-\u017F']+")
 
@@ -99,6 +108,7 @@ def resolve_tokens(
 @router.post("/tokens/action", response_model=TokenActionResponse)
 def token_action(
     payload: TokenActionRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> TokenActionResponse:
     ensure_workspace_owner(db, payload.workspace_id)
@@ -149,7 +159,12 @@ def token_action(
             sync_legacy_mirrors(existing, lexeme)
             db.add(existing)
             db.flush()
+            job = maybe_enqueue_enrichment(
+                db, lexeme_id=lexeme.id, vocab_id=existing.id
+            )
             db.commit()
+            if job is not None:
+                background_tasks.add_task(_run_token_enrichment, job.id)
             existing = db.scalar(
                 select(Vocab)
                 .options(selectinload(Vocab.lexeme), selectinload(Vocab.mastery))
