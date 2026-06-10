@@ -26,6 +26,7 @@ from app.services.enrichment import (
 logger = logging.getLogger(__name__)
 
 _sweeper_thread: threading.Thread | None = None
+_startup_thread: threading.Thread | None = None
 
 
 def maybe_enqueue_enrichment(
@@ -184,5 +185,21 @@ def start_enrichment_scheduler() -> None:
 
 
 def run_startup_enrichment() -> None:
-    sweep_incomplete_lexemes()
-    process_pending_jobs()
+    """Enqueue and process enrichment work without blocking API startup."""
+    global _startup_thread
+    if _startup_thread is not None and _startup_thread.is_alive():
+        return
+
+    def _run() -> None:
+        try:
+            sweep_incomplete_lexemes()
+            process_pending_jobs()
+        except Exception:
+            logger.exception("Startup enrichment failed")
+
+    _startup_thread = threading.Thread(
+        target=_run,
+        name="lexeme-startup-enrichment",
+        daemon=True,
+    )
+    _startup_thread.start()
