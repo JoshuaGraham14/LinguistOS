@@ -6,11 +6,11 @@ import re
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.api._auth import ensure_workspace_owner
 from app.db.database import get_db
-from app.db.models import Vocab, WordOccurrence
+from app.db.models import Vocab, WordOccurrence, Workspace
 from app.db.schemas import (
     TokenActionRequest,
     TokenActionResponse,
@@ -18,8 +18,9 @@ from app.db.schemas import (
     TokenResolveRequest,
     TokenResolveResponse,
     TokenSpanOut,
-    VocabOut,
 )
+from app.services.lexeme_resolver import lexeme_lemma, resolve_lexeme
+from app.services.vocab_mapper import sync_legacy_mirrors, vocab_out
 
 router = APIRouter()
 
@@ -38,8 +39,20 @@ def _tokenize_with_spans(text: str) -> list[tuple[str, int, int]]:
 
 
 def _matches_vocab(vocab: Vocab, normalized: str) -> bool:
-    forms = [vocab.word, vocab.lemma or "", vocab.surface_form or "", *(vocab.surface_forms or [])]
+    forms = [vocab.word, vocab.surface_form or "", *(vocab.surface_forms or [])]
+    if vocab.lexeme:
+        forms.append(vocab.lexeme.lemma)
     return any(_normalize(form) == normalized for form in forms if form)
+
+
+def _load_vocab_rows(db: Session, workspace_id: int) -> list[Vocab]:
+    return list(
+        db.scalars(
+            select(Vocab)
+            .options(selectinload(Vocab.lexeme))
+            .where(Vocab.workspace_id == workspace_id)
+        ).all()
+    )
 
 
 @router.post("/tokens/resolve", response_model=TokenResolveResponse)
@@ -48,7 +61,7 @@ def resolve_tokens(
     db: Session = Depends(get_db),
 ) -> TokenResolveResponse:
     ensure_workspace_owner(db, payload.workspace_id)
-    rows = db.scalars(select(Vocab).where(Vocab.workspace_id == payload.workspace_id)).all()
+    rows = _load_vocab_rows(db, payload.workspace_id)
 
     spans: list[TokenSpanOut] = []
     for token, start, end in _tokenize_with_spans(payload.text):
@@ -60,7 +73,7 @@ def resolve_tokens(
             TokenCandidate(
                 vocab_id=c.id,
                 word=c.word,
-                lemma=c.lemma,
+                lemma=lexeme_lemma(c) if c.lexeme else c.surface_form,
                 surface_form=c.surface_form,
                 translation=c.translation,
             )
@@ -97,39 +110,60 @@ def token_action(
     if payload.action == "open_word":
         if payload.vocab_id is None:
             raise HTTPException(status_code=422, detail="vocab_id is required for open_word")
-        row = db.get(Vocab, payload.vocab_id)
-        if not row or row.workspace_id != payload.workspace_id:
+        row = db.scalar(
+            select(Vocab)
+            .options(selectinload(Vocab.lexeme), selectinload(Vocab.mastery))
+            .where(Vocab.id == payload.vocab_id)
+        )
+        if not row or row.workspace_id != payload.workspace_id or row.lexeme is None:
             raise HTTPException(status_code=404, detail="Word not found")
-        return TokenActionResponse(ok=True, destination=f"/words/{row.id}", vocab=VocabOut.model_validate(row))
+        return TokenActionResponse(
+            ok=True,
+            destination=f"/words/{row.id}",
+            vocab=vocab_out(row),
+        )
 
     if payload.action == "add_to_vocab":
+        rows = _load_vocab_rows(db, payload.workspace_id)
         normalized = _normalize(token)
-        rows = db.scalars(select(Vocab).where(Vocab.workspace_id == payload.workspace_id)).all()
         existing = next((r for r in rows if _matches_vocab(r, normalized)), None)
         if existing is None:
             gloss = (payload.gloss or "").strip()
+            workspace = db.get(Workspace, payload.workspace_id)
+            language = workspace.language if workspace else payload.language
+            lexeme = resolve_lexeme(
+                db,
+                language,
+                surface_form=token,
+                gloss_primary=gloss,
+            )
             existing = Vocab(
                 workspace_id=payload.workspace_id,
+                lexeme_id=lexeme.id,
                 word=token,
-                translation=gloss,
-                tags=[],
-                lemma=token,
+                translation=gloss or lexeme.gloss_primary,
                 surface_form=token,
                 surface_forms=[token],
-                gloss_primary=gloss or None,
-                glosses=[gloss] if gloss else [],
+                gloss_override=gloss or None,
             )
+            sync_legacy_mirrors(existing, lexeme)
             db.add(existing)
             db.flush()
             db.commit()
-            db.refresh(existing)
-        return TokenActionResponse(ok=True, vocab=VocabOut.model_validate(existing))
+            existing = db.scalar(
+                select(Vocab)
+                .options(selectinload(Vocab.lexeme), selectinload(Vocab.mastery))
+                .where(Vocab.id == existing.id)
+            )
+        if existing is None or existing.lexeme is None:
+            raise HTTPException(status_code=500, detail="Failed to create vocab link")
+        return TokenActionResponse(ok=True, vocab=vocab_out(existing))
 
     # record_occurrence
     vocab_id = payload.vocab_id
     if vocab_id is None:
         normalized = _normalize(token)
-        rows = db.scalars(select(Vocab).where(Vocab.workspace_id == payload.workspace_id)).all()
+        rows = _load_vocab_rows(db, payload.workspace_id)
         matched = next((r for r in rows if _matches_vocab(r, normalized)), None)
         if matched is None:
             raise HTTPException(status_code=422, detail="vocab_id required when token is unknown")
