@@ -48,13 +48,10 @@ class ConstraintSet(Base):
     )
     keyword: Mapped[str] = mapped_column(String(255), nullable=False)
     expected_form: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    tense: Mapped[str] = mapped_column(String(64), nullable=False)
-    person: Mapped[str] = mapped_column(String(16), nullable=False)
-    number: Mapped[str] = mapped_column(String(16), nullable=False)
+    constraints: Mapped[dict] = mapped_column(JSON, nullable=False)
     target_language: Mapped[str] = mapped_column(String(16), nullable=False, default="es")
     translation: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     cefr_level: Mapped[str | None] = mapped_column(String(8), nullable=True)
-    extra_constraints: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, nullable=False
     )
@@ -64,6 +61,18 @@ class ConstraintSet(Base):
         back_populates="constraint_set", cascade="all, delete-orphan"
     )
 
+    @property
+    def tense(self) -> str:
+        return str(self.constraints.get("tense", ""))
+
+    @property
+    def person(self) -> str:
+        return str(self.constraints.get("person", ""))
+
+    @property
+    def number(self) -> str:
+        return str(self.constraints.get("number", ""))
+
     @classmethod
     def from_yaml_dict(
         cls,
@@ -71,6 +80,7 @@ class ConstraintSet(Base):
         benchmark_id: int,
         cs_data: dict[str, Any],
         default_language: str,
+        constraints: dict[str, Any],
     ) -> ConstraintSet:
         """Build a row from one benchmark YAML constraint-set entry."""
         return cls(
@@ -78,12 +88,9 @@ class ConstraintSet(Base):
             keyword=cs_data["keyword"],
             expected_form=cs_data.get("expected_form"),
             translation=cs_data["translation"],
-            tense=cs_data["tense"],
-            person=cs_data["person"],
-            number=cs_data["number"],
+            constraints=constraints,
             target_language=cs_data.get("target_language", default_language),
             cefr_level=cs_data.get("cefr_level"),
-            extra_constraints=cs_data.get("extra_constraints"),
         )
 
     def to_constraints_dict(self) -> dict[str, Any]:
@@ -91,16 +98,12 @@ class ConstraintSet(Base):
         out: dict[str, Any] = {
             "keyword": self.keyword,
             "translation": self.translation,
-            "tense": self.tense,
-            "person": self.person,
-            "number": self.number,
             "target_language": self.target_language,
             "cefr_level": self.cefr_level,
+            **self.constraints,
         }
         if self.expected_form is not None:
             out["expected_form"] = self.expected_form
-        if self.extra_constraints is not None:
-            out["extra_constraints"] = self.extra_constraints
         return out
 
 
@@ -183,7 +186,7 @@ class GeneratedSentence(Base):
 
     experiment: Mapped[Experiment] = relationship(back_populates="sentences")
     constraint_set: Mapped[ConstraintSet] = relationship(back_populates="sentences")
-    evaluations: Mapped[list[SentenceEvaluation]] = relationship(
+    evaluations: Mapped[list["SentenceEvaluation"]] = relationship(
         back_populates="sentence", cascade="all, delete-orphan"
     )
 

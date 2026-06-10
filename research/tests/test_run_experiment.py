@@ -19,6 +19,7 @@ from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence import DEFAULT_EVALUATORS
 from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
 from research.fixtures.mock_outputs import MOCK_OUTPUTS, get_mock_candidates
+from research.generation.languages import extract_constraints
 from research.pipeline import (
     _assert_live_allowed,
     _compute_and_store_group_metrics,
@@ -48,6 +49,7 @@ def _create_test_benchmark(session) -> tuple[Benchmark, list[ConstraintSet]]:
             benchmark_id=bm.id,
             cs_data=cs_data,
             default_language="es",
+            constraints=extract_constraints(cs_data),
         )
         session.add(cs)
         sets.append(cs)

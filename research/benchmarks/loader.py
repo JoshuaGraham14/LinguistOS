@@ -16,13 +16,24 @@ import yaml
 from sqlalchemy.orm import Session
 
 from research.db.models import Benchmark, ConstraintSet
+from research.generation.languages import extract_constraints, load_language_profile
 
 
-_REQUIRED_CS_FIELDS = ("keyword", "translation", "tense", "person", "number")
+_REQUIRED_CS_FIELDS = ("keyword", "translation")
 
 
 def _constraint_set_key(cs: dict[str, Any]) -> tuple[str, str, str, str]:
-    return (cs["keyword"], cs["tense"], cs["person"], cs["number"])
+    return (
+        cs["keyword"],
+        cs.get("tense", ""),
+        cs.get("person", ""),
+        cs.get("number", ""),
+    )
+
+
+def _constraint_set_row_key(cs: ConstraintSet) -> tuple[str, str, str, str]:
+    c = cs.constraints
+    return (cs.keyword, c.get("tense", ""), c.get("person", ""), c.get("number", ""))
 
 
 def _mock_only_from_yaml(data: dict[str, Any]) -> bool:
@@ -47,10 +58,7 @@ def _sync_expected_forms(
     cs_list: list[dict[str, Any]],
 ) -> None:
     """Update expected_form on existing rows when YAML provides gold labels."""
-    by_key = {
-        (cs.keyword, cs.tense, cs.person, cs.number): cs
-        for cs in benchmark.constraint_sets
-    }
+    by_key = {_constraint_set_row_key(cs): cs for cs in benchmark.constraint_sets}
     changed = False
     for cs_data in cs_list:
         expected = cs_data.get("expected_form")
@@ -64,11 +72,28 @@ def _sync_expected_forms(
         session.commit()
 
 
+def _build_and_validate_constraints(
+    cs_data: dict[str, Any],
+    *,
+    language: str,
+    path: Path,
+    index: int,
+) -> dict[str, Any]:
+    constraints = extract_constraints(cs_data)
+    profile = load_language_profile(language)
+    hint = f"Benchmark {path.name} constraint_sets[{index}]"
+    profile.validate(constraints, path_hint=hint)
+    return constraints
+
+
 def _validate_raw(data: dict[str, Any], path: Path) -> None:
     """Raise on missing or invalid top-level fields."""
     for field in ("name", "language", "constraint_sets"):
         if field not in data:
             raise ValueError(f"Benchmark YAML {path} missing required field: {field}")
+
+    language = data["language"]
+    load_language_profile(language)
 
     cs_list = data["constraint_sets"]
     if not isinstance(cs_list, list) or len(cs_list) == 0:
@@ -80,6 +105,7 @@ def _validate_raw(data: dict[str, Any], path: Path) -> None:
                 raise ValueError(
                     f"Benchmark YAML {path}: constraint_sets[{i}] missing required field: {req}"
                 )
+        _build_and_validate_constraints(cs, language=language, path=path, index=i)
 
 
 def load_benchmark(session: Session, path: str | Path) -> Benchmark:
@@ -110,11 +136,15 @@ def load_benchmark(session: Session, path: str | Path) -> Benchmark:
     session.add(benchmark)
     session.flush()
 
-    for cs_data in data["constraint_sets"]:
+    for i, cs_data in enumerate(data["constraint_sets"]):
+        constraints = _build_and_validate_constraints(
+            cs_data, language=language, path=path, index=i
+        )
         session.add(ConstraintSet.from_yaml_dict(
             benchmark_id=benchmark.id,
             cs_data=cs_data,
             default_language=language,
+            constraints=constraints,
         ))
 
     session.commit()
