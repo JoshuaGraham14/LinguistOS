@@ -19,6 +19,10 @@ const PROFILE_KEY = "linguistos.profile.v1";
 const ACTIVE_WORKSPACE_KEY = "linguistos.workspace.active.v1";
 const WORKSPACE_CHANGE_EVENT = "linguistos:workspace-change";
 const WORKSPACES_LIST_SYNC_EVENT = "linguistos:workspaces-list-sync";
+const VOCAB_ADD_EVENT = "linguistos:vocab-add";
+const VOCAB_UPDATE_EVENT = "linguistos:vocab-update";
+const VOCAB_REMOVE_EVENT = "linguistos:vocab-remove";
+const VOCAB_CLEAR_EVENT = "linguistos:vocab-clear";
 
 export type SidebarState = { width: number; collapsed: boolean };
 
@@ -84,6 +88,22 @@ function broadcastWorkspaceList(list: Workspace[]) {
   window.dispatchEvent(
     new CustomEvent(WORKSPACES_LIST_SYNC_EVENT, { detail: list }),
   );
+}
+
+function broadcastVocabAdd(item: VocabItem) {
+  window.dispatchEvent(new CustomEvent(VOCAB_ADD_EVENT, { detail: item }));
+}
+
+function broadcastVocabUpdate(item: VocabItem) {
+  window.dispatchEvent(new CustomEvent(VOCAB_UPDATE_EVENT, { detail: item }));
+}
+
+function broadcastVocabRemove(id: number) {
+  window.dispatchEvent(new CustomEvent(VOCAB_REMOVE_EVENT, { detail: id }));
+}
+
+function broadcastVocabClear() {
+  window.dispatchEvent(new CustomEvent(VOCAB_CLEAR_EVENT));
 }
 
 export function useProfile() {
@@ -317,16 +337,35 @@ export function useVocab() {
   } = useWorkspaces();
   const [vocab, setVocab] = useState<VocabItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const pollEnrichingItems = useCallback(
+    (items: VocabItem[]) => {
+      if (!activeWorkspace) return;
+      for (const item of items) {
+        if (!item.enriching) continue;
+        void api
+          .pollVocabUntilEnriched(item.id, activeWorkspace.language)
+          .then((enriched) => {
+            setVocab((prev) =>
+              prev.map((v) => (v.id === enriched.id ? enriched : v)),
+            );
+            broadcastVocabUpdate(enriched);
+          })
+          .catch(() => undefined);
+      }
+    },
+    [activeWorkspace],
+  );
 
   const refresh = useCallback(async () => {
     if (!activeWorkspaceId || !activeWorkspace) return;
     try {
       const items = await api.listVocab(activeWorkspaceId, activeWorkspace.language);
       setVocab(items);
+      pollEnrichingItems(items);
     } catch {
       setVocab([]);
     }
-  }, [activeWorkspaceId, activeWorkspace]);
+  }, [activeWorkspaceId, activeWorkspace, pollEnrichingItems]);
 
   useEffect(() => {
     if (!workspacesHydrated || !activeWorkspaceId) return;
@@ -343,6 +382,40 @@ export function useVocab() {
       mounted = false;
     };
   }, [refresh, workspacesHydrated, activeWorkspaceId]);
+
+  useEffect(() => {
+    function handleVocabAdd(event: Event) {
+      const item = (event as CustomEvent<VocabItem>).detail;
+      if (!item || item.workspaceId !== activeWorkspaceId) return;
+      setVocab((prev) => {
+        if (prev.some((v) => v.id === item.id)) return prev;
+        return [item, ...prev];
+      });
+    }
+    function handleVocabUpdate(event: Event) {
+      const item = (event as CustomEvent<VocabItem>).detail;
+      if (!item || item.workspaceId !== activeWorkspaceId) return;
+      setVocab((prev) => prev.map((v) => (v.id === item.id ? item : v)));
+    }
+    function handleVocabRemove(event: Event) {
+      const id = (event as CustomEvent<number>).detail;
+      if (typeof id !== "number") return;
+      setVocab((prev) => prev.filter((v) => v.id !== id));
+    }
+    function handleVocabClear() {
+      setVocab([]);
+    }
+    window.addEventListener(VOCAB_ADD_EVENT, handleVocabAdd);
+    window.addEventListener(VOCAB_UPDATE_EVENT, handleVocabUpdate);
+    window.addEventListener(VOCAB_REMOVE_EVENT, handleVocabRemove);
+    window.addEventListener(VOCAB_CLEAR_EVENT, handleVocabClear);
+    return () => {
+      window.removeEventListener(VOCAB_ADD_EVENT, handleVocabAdd);
+      window.removeEventListener(VOCAB_UPDATE_EVENT, handleVocabUpdate);
+      window.removeEventListener(VOCAB_REMOVE_EVENT, handleVocabRemove);
+      window.removeEventListener(VOCAB_CLEAR_EVENT, handleVocabClear);
+    };
+  }, [activeWorkspaceId]);
 
   const addVocab = useCallback(
     async (input: {
@@ -383,6 +456,7 @@ export function useVocab() {
         translation: input.translation,
       });
       setVocab((prev) => [item, ...prev]);
+      broadcastVocabAdd(item);
       if (item.enriching) {
         void api
           .pollVocabUntilEnriched(item.id, activeWorkspace.language)
@@ -390,6 +464,7 @@ export function useVocab() {
             setVocab((prev) =>
               prev.map((v) => (v.id === enriched.id ? enriched : v)),
             );
+            broadcastVocabUpdate(enriched);
           })
           .catch(() => undefined);
       }
@@ -401,6 +476,7 @@ export function useVocab() {
   const removeVocab = useCallback(async (id: number) => {
     await api.removeVocab(id);
     setVocab((prev) => prev.filter((v) => v.id !== id));
+    broadcastVocabRemove(id);
   }, []);
 
   const updateVocab = useCallback(
@@ -408,6 +484,7 @@ export function useVocab() {
       if (!activeWorkspace) throw new Error("No active workspace");
       const updated = await api.updateVocab(id, patch, activeWorkspace.language);
       setVocab((prev) => prev.map((v) => (v.id === id ? updated : v)));
+      broadcastVocabUpdate(updated);
       return updated;
     },
     [activeWorkspace],
@@ -426,6 +503,7 @@ export function useVocab() {
     if (!activeWorkspaceId) return;
     await api.clearVocab(activeWorkspaceId);
     setVocab([]);
+    broadcastVocabClear();
   }, [activeWorkspaceId]);
 
   /**

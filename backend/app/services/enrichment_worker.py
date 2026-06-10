@@ -12,13 +12,15 @@ from sqlalchemy.orm import Session
 
 from app.db.database import SessionLocal
 from app.db.models import EnrichmentJob, Lexeme, Vocab
+from sqlalchemy import and_, or_
+
 from app.services.enrichment import (
     apply_enrichment_to_lexeme,
     copy_lexeme_fields,
     enrich_lexeme_llm,
     find_complete_lexeme_match,
-    is_lexeme_complete,
     missing_lexeme_fields,
+    needs_enrichment,
 )
 
 logger = logging.getLogger(__name__)
@@ -33,7 +35,7 @@ def maybe_enqueue_enrichment(
     vocab_id: int | None = None,
 ) -> EnrichmentJob | None:
     lexeme = db.get(Lexeme, lexeme_id)
-    if lexeme is None or is_lexeme_complete(lexeme):
+    if lexeme is None or not needs_enrichment(lexeme):
         return None
 
     pending = db.scalar(
@@ -45,11 +47,14 @@ def maybe_enqueue_enrichment(
     if pending is not None:
         return pending
 
+    missing = missing_lexeme_fields(lexeme)
+    if not missing and lexeme.enrichment_status == "complete":
+        missing = ["cefr", "gender", "ipa", "dictionary_notes"]
     job = EnrichmentJob(
         lexeme_id=lexeme_id,
         vocab_id=vocab_id,
         status="pending",
-        requested_fields=missing_lexeme_fields(lexeme),
+        requested_fields=missing,
     )
     db.add(job)
     db.flush()
@@ -68,7 +73,7 @@ def process_enrichment_job(db: Session, job_id: int) -> None:
         db.add(job)
         return
 
-    if is_lexeme_complete(lexeme):
+    if not needs_enrichment(lexeme):
         job.status = "done"
         job.completed_at = datetime.utcnow()
         db.add(job)
@@ -135,7 +140,21 @@ def sweep_incomplete_lexemes(limit: int = 50) -> int:
     with SessionLocal() as db:
         lexemes = db.scalars(
             select(Lexeme)
-            .where(Lexeme.enrichment_status != "complete")
+            .where(
+                or_(
+                    Lexeme.enrichment_status != "complete",
+                    and_(
+                        Lexeme.enrichment_status == "complete",
+                        Lexeme.dictionary_notes.is_(None),
+                        Lexeme.cefr.is_(None),
+                        Lexeme.ipa.is_(None),
+                        Lexeme.gender.is_(None),
+                        # Legacy thin rows auto-marked complete; skip seeded lexemes
+                        # that already have real POS tags.
+                        Lexeme.pos.in_(["", "other"]),
+                    ),
+                )
+            )
             .limit(limit)
         ).all()
         for lexeme in lexemes:

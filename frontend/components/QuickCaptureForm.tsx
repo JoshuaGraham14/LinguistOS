@@ -288,7 +288,7 @@ export function QuickCaptureForm({
           )}
         </div>
         {suggestions.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-col gap-2">
             {suggestions.map((candidate) => (
               <button
                 type="button"
@@ -296,12 +296,17 @@ export function QuickCaptureForm({
                 onClick={() => {
                   void chooseSuggestion(candidate);
                 }}
-                className="rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs text-brand-700 hover:bg-brand-100 transition"
+                className="rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-left text-xs text-brand-700 hover:bg-brand-100 transition"
               >
                 <span className="font-semibold">{candidate.text}</span>
                 <span className="ml-1 uppercase tracking-wide text-brand-500">
                   {candidate.pos}
                 </span>
+                {candidate.context ? (
+                  <span className="mt-0.5 block text-[11px] font-normal text-slate-500">
+                    {candidate.context}
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>

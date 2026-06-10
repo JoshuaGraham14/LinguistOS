@@ -41,6 +41,23 @@ def has_minimum_lexeme_fields(lexeme: Lexeme) -> bool:
     )
 
 
+def has_rich_metadata(lexeme: Lexeme) -> bool:
+    """True when LLM-style enrichment has run (not just sparse create defaults)."""
+    return bool(
+        lexeme.dictionary_notes
+        or lexeme.cefr
+        or lexeme.ipa
+        or lexeme.gender
+        or lexeme.morph_features
+    )
+
+
+def needs_enrichment(lexeme: Lexeme) -> bool:
+    if lexeme.enrichment_status != "complete":
+        return True
+    return not has_rich_metadata(lexeme)
+
+
 def missing_lexeme_fields(lexeme: Lexeme) -> list[str]:
     missing: list[str] = []
     if not lexeme.lemma:
@@ -282,7 +299,7 @@ def apply_enrichment_to_lexeme(lexeme: Lexeme, result: dict[str, Any]) -> None:
     if result.get("glosses"):
         lexeme.glosses = list(result["glosses"])
     for field in ("cefr", "gender", "conjugation_class", "ipa"):
-        if result.get(field):
+        if result.get(field) is not None:
             setattr(lexeme, field, result[field])
     if result.get("frequency_rank") is not None:
         lexeme.frequency_rank = result["frequency_rank"]

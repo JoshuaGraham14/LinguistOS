@@ -837,7 +837,7 @@ function WordFormModal({
             </div>
 
             {suggestions.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-col gap-2">
                 {suggestions.map((candidate) => (
                   <button
                     type="button"
@@ -845,12 +845,17 @@ function WordFormModal({
                     onClick={() => {
                       void chooseSuggestion(candidate);
                     }}
-                    className="rounded-full border border-brand-200 bg-brand-50 px-3 py-1.5 text-sm text-brand-700 hover:bg-brand-100 transition"
+                    className="rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-left text-sm text-brand-700 hover:bg-brand-100 transition"
                   >
                     <span className="font-semibold">{candidate.text}</span>
                     <span className="ml-1.5 text-xs uppercase tracking-wide text-brand-500">
                       {candidate.pos}
                     </span>
+                    {candidate.context ? (
+                      <span className="mt-0.5 block text-xs font-normal text-slate-500">
+                        {candidate.context}
+                      </span>
+                    ) : null}
                   </button>
                 ))}
               </div>

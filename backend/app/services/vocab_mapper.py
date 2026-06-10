@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.db.backfill_lexemes import is_lexeme_complete
 from app.db.models import Lexeme, Vocab
 from app.db.schemas import MasteryOut, VocabOut, VocabTag
+from app.services.enrichment import needs_enrichment
 
 
 def _coerce_json_dict(value: Any) -> dict[str, Any] | None:
@@ -45,7 +45,7 @@ def vocab_out(vocab: Vocab, lexeme: Lexeme | None = None) -> VocabOut:
     if vocab.mastery is not None:
         mastery = MasteryOut.model_validate(vocab.mastery)
 
-    enriching = not is_lexeme_complete(lx)
+    enriching = needs_enrichment(lx)
 
     return VocabOut(
         id=vocab.id,
