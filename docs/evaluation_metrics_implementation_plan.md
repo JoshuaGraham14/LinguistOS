@@ -501,12 +501,18 @@ expected patterns; notebook documents constraint/grammar/diversity trade-offs by
 
 **Goal:** Cross-language generalisability.
 
-1. Hebrew benchmark YAML (morphologically rich constraint sets)
-2. Stanza `he` pipeline for `verb_morphology` (spaCy Hebrew support may differ)
-3. Re-run Phases A–C on Hebrew subset
-4. Compare tool reliability Spanish vs Hebrew in notebook
+> Detailed plan: [`eval_hebrew_plan.md`](eval_hebrew_plan.md) (phases E0–E5, scope tiers, mitigations).
 
-**Done when:** Same evaluator interfaces, language-specific parser config, comparable metric columns.
+1. **E0** — manual GPT spike; clitic rate; length-band calibration
+2. **E1** — `hebrew_basic` + `hebrew_morph_probe` benchmarks; clitic-aware `expected_form_match`; `gender` in constraints
+3. **E2** — Stanza `he` pipeline for `verb_morphology` (diagnostic only; spaCy Hebrew unsupported)
+4. **E5** — gender-aware explicit-subject prompts; live default + long_explicit runs
+5. **E3–E4** *(Tier 2)* — grammar layer decision (LT skip or LLM judge); Hebrew length grid + diversity caveats
+6. Compare tool reliability Spanish vs Hebrew in notebook
+
+**Done when (Tier 1 MVP):** Same evaluator interfaces, language-specific parser config, comparable
+roll-up columns; `explore_live_hebrew_basic.ipynb` documents EF (strict vs clitic-aware) and VM
+diagnostics; Hebrew claim(s) added to [`eval_thesis_claims.md`](eval_thesis_claims.md).
 
 ---
 

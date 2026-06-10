@@ -23,6 +23,48 @@ def test_prompt_contains_target_language_hebrew():
     assert "Spanish" not in prompt
 
 
+def test_hebrew_prompt_explains_three_tenses():
+    prompt = build_prompt(
+        "לשאול", "to ask", "qatal", "1st", "singular", 3, target_language="he"
+    )
+    assert "three morphological tenses" in prompt
+    assert "עבר (avar)" in prompt
+    assert "הווה (hoveh)" in prompt
+    assert "עתיד (atid)" in prompt
+    assert "Required tense for this item: Past" in prompt
+
+
+def test_hebrew_prompt_maps_yiqtol_to_future():
+    prompt = build_prompt(
+        "לכתוב", "to write", "yiqtol", "1st", "plural", 3, target_language="he"
+    )
+    assert "Required tense for this item: Future" in prompt
+    assert "עתיד (atid)" in prompt
+
+
+def test_hebrew_prompt_includes_gender():
+    prompt = build_prompt(
+        "לדבר",
+        "to speak",
+        "present_participle",
+        "1st",
+        "singular",
+        3,
+        target_language="he",
+        gender="feminine",
+    )
+    assert "Required gender: feminine" in prompt
+    assert "מדברת" in prompt
+
+
+def test_hebrew_prompt_anchors_2nd_person_subject():
+    prompt = build_prompt(
+        "לשאול", "to ask", "qatal", "2nd", "singular", 3, target_language="he", gender="masculine"
+    )
+    assert "explicit subject" in prompt
+    assert "אתה" in prompt
+
+
 def test_prompt_contains_constraints():
     prompt = build_prompt("vivir", "to live", "future", "3rd", "singular", 5)
     assert "tense=future" in prompt

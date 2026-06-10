@@ -151,8 +151,9 @@ Optional `explicit_subject_required: true` adds a person/number-specific subject
 ## Next steps
 
 1. **Dissertation write-up** — use [`eval_thesis_claims.md`](eval_thesis_claims.md)
-2. **Phase D** — human ratings (deferred)
-3. **Shared analysis module** — extract notebook helpers (deferred; see below)
+2. **Phase E — Hebrew** — see [`eval_hebrew_plan.md`](eval_hebrew_plan.md) (E0 spike → E1 benchmark + clitic matcher → E2 Stanza → E5 gendered prompts)
+3. **Phase D** — human ratings (deferred)
+4. **Shared analysis module** — extract notebook helpers (deferred; Hebrew plan folds this into E1/E5 via `research/analysis/live_experiments.py`)
 
 ---
 
@@ -195,6 +196,7 @@ Extract duplicated notebook logic into `research/analysis/live_experiments.py`.
 ## Files to read first in a new chat
 
 - [`eval_thesis_claims.md`](eval_thesis_claims.md) — headline claims + evidence
+- [`eval_hebrew_plan.md`](eval_hebrew_plan.md) — Phase E Hebrew implementation (if starting multilingual work)
 - `research/evaluation/sentence/expected_form.py`
 - `research/evaluation/distribution/__init__.py`
 - `research/explore_live_spanish_basic.ipynb`

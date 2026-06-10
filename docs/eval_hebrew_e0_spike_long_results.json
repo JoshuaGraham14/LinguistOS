@@ -1,0 +1,695 @@
+{
+  "data": {
+    "cases": [
+      {
+        "case": {
+          "id": "01_infinitive_trap",
+          "keyword": "לשאול",
+          "expected_form": "שאלתי",
+          "translation": "to ask",
+          "tense": "qatal",
+          "person": "1st",
+          "number": "singular",
+          "gender": null,
+          "difficulty": "Infinitive keyword — GPT may leave ל+stem instead of conjugating (Spanish dormir pattern)."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לשאול\" (English: \"to ask\")\nConstraints: tense=qatal, person=1st, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Past — עבר (avar) (benchmark label: qatal).\nUse a past-tense (perfective) finite verb — NOT present (הווה), future (עתיד), or imperative.\nRequired agreement: person=1st, number=singular.\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתמול שאלתי את המורה שאלה על שיעורי הבית כדי להבין טוב יותר.",
+            "translation": "Yesterday I asked the teacher a question about the homework in order to understand better.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלתי",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          },
+          {
+            "idx": 2,
+            "sentence": "בלילה שעבר שאלתי את אמא אם היא יכולה לעזור לי לסיים את הפרויקט בזמן.",
+            "translation": "Last night I asked my mom if she could help me finish the project on time.",
+            "token_count": 14,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלתי",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          },
+          {
+            "idx": 3,
+            "sentence": "בפגישה האחרונה שאלתי את הבוס לגבי לוח הזמנים של השבוע הקרוב בצורה ברורה.",
+            "translation": "At the last meeting I asked the boss about the schedule for the coming week in a clear way.",
+            "token_count": 13,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלתי",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "של"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "02_present_3sg_fem",
+          "keyword": "לכתוב",
+          "expected_form": "כותבת",
+          "translation": "to write",
+          "tense": "present_participle",
+          "person": "3rd",
+          "number": "singular",
+          "gender": "feminine",
+          "difficulty": "Present (Benoni) marks gender on verb; pro-drop common — no overt subject."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לכתוב\" (English: \"to write\")\nConstraints: tense=present_participle, person=3rd, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Present — הווה (hoveh) (benchmark label: present_participle).\nUse a present-tense (Benoni/participle) finite verb — NOT past (עבר) or future (עתיד).\nRequired agreement: person=3rd, number=singular.\nRequired gender: feminine — the verb must use the feminine form (e.g. feminine כותבת / מדברת, masculine כותב / מדבר).\nInclude an explicit subject matching person=3rd, number=singular, gender=feminine before the conjugated verb (e.g. \"היא\" or a feminine noun phrase).\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "היא כותבת עכשיו בעיפרון במחברת, כדי לא לשכוח את הפרטים.",
+            "translation": "She is writing now in a pencil in her notebook, so as not to forget the details.",
+            "token_count": 10,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "כותבת",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          },
+          {
+            "idx": 2,
+            "sentence": "היא כותבת בכל יום פתק קטן לעצמה, ומסדרת את המחשבות לפני השינה.",
+            "translation": "She is writing every day a small note to herself, and arranging her thoughts before sleep.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "כותבת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "בכל"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "היא כותבת מאמר חדש בימים אלה, ולכן כל הערה חשובה לה מאוד.",
+            "translation": "She is writing a new article these days, so every note is very important to her.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "כותבת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "כל",
+              "לה"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "03_past_2sg_masc",
+          "keyword": "לשאול",
+          "expected_form": "שאלת",
+          "translation": "to ask",
+          "tense": "qatal",
+          "person": "2nd",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "2sg past — easy to produce 3sg or 1sg form without anchored subject."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לשאול\" (English: \"to ask\")\nConstraints: tense=qatal, person=2nd, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Past — עבר (avar) (benchmark label: qatal).\nUse a past-tense (perfective) finite verb — NOT present (הווה), future (עתיד), or imperative.\nRequired agreement: person=2nd, number=singular.\nRequired gender: masculine — the verb must use the masculine form (e.g. feminine כותבת / מדברת, masculine כותב / מדבר).\nInclude an explicit subject matching person=2nd, number=singular, gender=masculine before the conjugated verb (e.g. \"אתה\").\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתה שאלת את המורה שאלה קשה על ההיסטוריה של העיר.",
+            "translation": "You asked the teacher a difficult question about the history of the city.",
+            "token_count": 10,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "של"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "אתה שאלת אותי למה התוכנה לא עבדה אתמול במחשב.",
+            "translation": "You asked me why the software didn’t work yesterday on the computer.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "למה",
+              "לא"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "אתה שאלת את השכן אם הוא יוכל לעזור לך עם ההובלה.",
+            "translation": "You asked the neighbor if he could help you with the move.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הוא",
+              "ההובלה"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "04_past_2sg_fem_ambiguous",
+          "keyword": "ללכת",
+          "expected_form": "הלכת",
+          "translation": "to go",
+          "tense": "qatal",
+          "person": "2nd",
+          "number": "singular",
+          "gender": "feminine",
+          "difficulty": "הלכת is orthographically identical to 1sg past — person disambiguation needs context."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"ללכת\" (English: \"to go\")\nConstraints: tense=qatal, person=2nd, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Past — עבר (avar) (benchmark label: qatal).\nUse a past-tense (perfective) finite verb — NOT present (הווה), future (עתיד), or imperative.\nRequired agreement: person=2nd, number=singular.\nRequired gender: feminine — the verb must use the feminine form (e.g. feminine כותבת / מדברת, masculine כותב / מדבר).\nInclude an explicit subject matching person=2nd, number=singular, gender=feminine before the conjugated verb (e.g. \"את\").\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "את הלכת אתמול לספרייה ושאלת אותי על הספר החדש.",
+            "translation": "You (feminine) went yesterday to the library and asked me about the new book.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלכת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הלכת"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "את הלכת הביתה מוקדם, לפני שהתחיל הגשם בחוץ.",
+            "translation": "You (feminine) went home early, before the rain started outside.",
+            "token_count": 8,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלכת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הלכת"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "את הלכת אתמול בערב לקולנוע עם חברה טובה שלך.",
+            "translation": "You (feminine) went yesterday evening to the cinema with your good friend.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלכת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הלכת"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "05_future_1pl",
+          "keyword": "לכתוב",
+          "expected_form": "נכתוב",
+          "translation": "to write",
+          "tense": "yiqtol",
+          "person": "1st",
+          "number": "plural",
+          "gender": null,
+          "difficulty": "Future 1pl requires נ- prefix; GPT may use present or wrong person."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לכתוב\" (English: \"to write\")\nConstraints: tense=yiqtol, person=1st, number=plural, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Future — עתיד (atid) (benchmark label: yiqtol).\nUse a future-tense finite verb — NOT present (הווה) or past (עבר).\nRequired agreement: person=1st, number=plural.\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "מחר בערב אנחנו נכתוב את הדוח המפורט למנהל ונשלח אותו מיד.",
+            "translation": "Tomorrow evening we will write the detailed report to the manager and send it right away.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נכתוב",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נכתוב"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "בשבוע הבא אנחנו נכתוב יחד את המכתב הרשמי ונגיש אותו לפני הפגישה.",
+            "translation": "Next week we will write the official letter together and submit it before the meeting.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נכתוב",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נכתוב"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "במהלך הקורס אנחנו נכתוב מספר רב של תרגילים ונעבור עליהם בקפידה.",
+            "translation": "During the course we will write many exercises and go over them carefully.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נכתוב",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נכתוב",
+              "של"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "06_past_1pl",
+          "keyword": "לאכול",
+          "expected_form": "אכלנו",
+          "translation": "to eat",
+          "tense": "qatal",
+          "person": "1st",
+          "number": "plural",
+          "gender": null,
+          "difficulty": "Past 1pl suffix -נו; tests plural morphology."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לאכול\" (English: \"to eat\")\nConstraints: tense=qatal, person=1st, number=plural, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Past — עבר (avar) (benchmark label: qatal).\nUse a past-tense (perfective) finite verb — NOT present (הווה), future (עתיד), or imperative.\nRequired agreement: person=1st, number=plural.\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אנחנו אכלנו ארוחת ערב מוקדם כי היינו רעבים מאוד אחרי העבודה.",
+            "translation": "We ate dinner early because we were very hungry after work.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "אכלנו",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          },
+          {
+            "idx": 2,
+            "sentence": "הערב הם אכלו יחד במסעדה חדשה, ואני שמחתי לראות כמה נהנינו.",
+            "translation": "Tonight they ate together at a new restaurant, and I was happy to see how much we enjoyed it.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": false,
+            "clitic_aware": false,
+            "matched_token": null,
+            "match_strategy": null,
+            "verb_like_tokens": [
+              "כמה"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "בבוקר של שבת אכלנו לחם טרי עם גבינה, והילדים ביקשו עוד לפני שיצאנו החוצה.",
+            "translation": "On Saturday morning we ate fresh bread with cheese, and the children asked for more before we went outside.",
+            "token_count": 14,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "אכלנו",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "של"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "07_present_1sg_masc",
+          "keyword": "לדבר",
+          "expected_form": "מדבר",
+          "translation": "to speak",
+          "tense": "present_participle",
+          "person": "1st",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "1sg present is gender-marked despite gender-neutral pronoun אני."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לדבר\" (English: \"to speak\")\nConstraints: tense=present_participle, person=1st, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Present — הווה (hoveh) (benchmark label: present_participle).\nUse a present-tense (Benoni/participle) finite verb — NOT past (עבר) or future (עתיד).\nRequired agreement: person=1st, number=singular.\nRequired gender: masculine — the verb must use the masculine form (e.g. feminine כותבת / מדברת, masculine כותב / מדבר).\nInclude an explicit subject matching person=1st, number=singular, gender=masculine before the conjugated verb (e.g. \"אני\" with a masculine verb (e.g. אני מדבר)).\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אני מדבר עכשיו עם המורה על שיעורי הבית שלי.",
+            "translation": "I am speaking now with the teacher about my homework.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדבר",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדבר"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "אני מדבר בשקט כדי לא להפריע לאמא בבית.",
+            "translation": "I am speaking quietly so as not to disturb my mother at home.",
+            "token_count": 8,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדבר",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדבר"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "אני מדבר בקול ברור כדי שהקהל יבין את הרעיון.",
+            "translation": "I am speaking in a clear voice so that the audience understands the idea.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדבר",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדבר"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "08_present_1sg_fem",
+          "keyword": "לדבר",
+          "expected_form": "מדברת",
+          "translation": "to speak",
+          "tense": "present_participle",
+          "person": "1st",
+          "number": "singular",
+          "gender": "feminine",
+          "difficulty": "Feminine present 1sg — common GPT slip to masculine מדבר."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לדבר\" (English: \"to speak\")\nConstraints: tense=present_participle, person=1st, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Present — הווה (hoveh) (benchmark label: present_participle).\nUse a present-tense (Benoni/participle) finite verb — NOT past (עבר) or future (עתיד).\nRequired agreement: person=1st, number=singular.\nRequired gender: feminine — the verb must use the feminine form (e.g. feminine כותבת / מדברת, masculine כותב / מדבר).\nInclude an explicit subject matching person=1st, number=singular, gender=feminine before the conjugated verb (e.g. \"אני\" with a feminine verb (e.g. אני מדברת)).\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אני מדברת איתך עכשיו על התוכניות שלנו לעבודה.",
+            "translation": "I am speaking with you now about our plans for work.",
+            "token_count": 8,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדברת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדברת"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "אני מדברת בקול שקט כדי שלא נפריע לאחרים בחדר.",
+            "translation": "I am speaking in a quiet voice so we won’t disturb others in the room.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדברת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדברת"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "אני מדברת עם המורה היום ומבקשת הסבר נוסף לשיעור.",
+            "translation": "I am speaking with the teacher today and asking for an additional explanation for the lesson.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדברת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדברת"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "09_irregular_past_3sg_masc",
+          "keyword": "ללכת",
+          "expected_form": "הלך",
+          "translation": "to go",
+          "tense": "qatal",
+          "person": "3rd",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "Irregular suppletive past (go → went); high error rate expected."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"ללכת\" (English: \"to go\")\nConstraints: tense=qatal, person=3rd, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Past — עבר (avar) (benchmark label: qatal).\nUse a past-tense (perfective) finite verb — NOT present (הווה), future (עתיד), or imperative.\nRequired agreement: person=3rd, number=singular.\nRequired gender: masculine — the verb must use the masculine form (e.g. feminine כותבת / מדברת, masculine כותב / מדבר).\nInclude an explicit subject matching person=3rd, number=singular, gender=masculine before the conjugated verb (e.g. \"הוא\" or a masculine noun phrase).\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "הוא הלך אתמול בבוקר לבית הספר כדי לפגוש את המורה שלו.",
+            "translation": "He went yesterday morning to the school to meet his teacher.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלך",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "שלו"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "הוא הלך לאחר העבודה לחנות הקרובה וקנה מצרכים למשפחה שלו.",
+            "translation": "He went after work to the nearest store and bought groceries for his family.",
+            "token_count": 10,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלך",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "שלו"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "הוא הלך בסוף השבוע לטייל ביער הרחוק עם חבר ותיק שלו.",
+            "translation": "He went at the weekend to hike in the far forest with an old friend.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלך",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "שלו"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "10_clitic_prone_past_2sg",
+          "keyword": "לתת",
+          "expected_form": "נתת",
+          "translation": "to give",
+          "tense": "qatal",
+          "person": "2nd",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "Narrative contexts attach ו- (and); tests clitic fusion on target verb."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לתת\" (English: \"to give\")\nConstraints: tense=qatal, person=2nd, number=singular, length=long (10–16 tokens).\nModern Hebrew uses exactly three morphological tenses:\n  • Past — עבר (avar)\n  • Present — הווה (hoveh)\n  • Future — עתיד (atid)\nRequired tense for this item: Past — עבר (avar) (benchmark label: qatal).\nUse a past-tense (perfective) finite verb — NOT present (הווה), future (עתיד), or imperative.\nRequired agreement: person=2nd, number=singular.\nRequired gender: masculine — the verb must use the masculine form (e.g. feminine כותבת / מדברת, masculine כותב / מדבר).\nInclude an explicit subject matching person=2nd, number=singular, gender=masculine before the conjugated verb (e.g. \"אתה\").\nConjugate the verb from the target root in the required tense and agreement. Use a finite conjugated verb form — not the bare infinitive alone, not an imperative unless imperative is explicitly requested, and not a different tense.\nProduce 3 natural Hebrew sentences within the length band sentences that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתה נתת לי את המפתח אתמול בבוקר למרות הלחץ.",
+            "translation": "You gave me the key yesterday morning despite the pressure.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נתת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נתת"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "אתה נתת לאחיך עזרה מלאה כשהוא ביקש ממך בשקט.",
+            "translation": "You gave your brother full help when he asked you quietly.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נתת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נתת"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "אתה נתת לי הבטחה חשובה לפני הפגישה וסמכת עליי.",
+            "translation": "You gave me an important promise before the meeting and trusted me.",
+            "token_count": 9,
+            "in_length_band": false,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נתת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נתת"
+            ]
+          }
+        ],
+        "n_returned": 3
+      }
+    ],
+    "samples_per_case": 3,
+    "sentence_length": "long"
+  },
+  "summary": {
+    "sentence_length": "long",
+    "total_candidates": 30,
+    "strict_pass_rate": 0.9666666666666667,
+    "clitic_aware_pass_rate": 0.9666666666666667,
+    "length_in_band_rate": 0.5666666666666667,
+    "mean_token_count": 10.333333333333334,
+    "clitic_attachment_fixes": 0,
+    "per_case": [
+      {
+        "id": "01_infinitive_trap",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 13.0,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "02_present_3sg_fem",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 11.333333333333334,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "03_past_2sg_masc",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 0.6666666666666666,
+        "mean_tokens": 10.0,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "04_past_2sg_fem_ambiguous",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 0.0,
+        "mean_tokens": 8.666666666666666,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "05_future_1pl",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 11.333333333333334,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "06_past_1pl",
+        "strict_rate": 0.6666666666666666,
+        "clitic_aware_rate": 0.6666666666666666,
+        "length_rate": 1.0,
+        "mean_tokens": 12.0,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "07_present_1sg_masc",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 0.0,
+        "mean_tokens": 8.666666666666666,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "08_present_1sg_fem",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 0.0,
+        "mean_tokens": 8.666666666666666,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "09_irregular_past_3sg_masc",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 10.666666666666666,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "10_clitic_prone_past_2sg",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 0.0,
+        "mean_tokens": 9.0,
+        "clitic_only_fixes": 0,
+        "n": 3
+      }
+    ]
+  }
+}

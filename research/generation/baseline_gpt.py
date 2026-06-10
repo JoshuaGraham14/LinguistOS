@@ -41,14 +41,171 @@ _SUBJECT_EXAMPLES: dict[tuple[str, str], str] = {
     ("3rd", "plural"): '"ellos", "ellas", or a named noun phrase',
 }
 
+# Modern Hebrew has three morphological tenses (not biblical qatal/yiqtol labels).
+_HEBREW_TENSE_ALIASES: dict[str, str] = {
+    "qatal": "past",
+    "past": "past",
+    "preterite": "past",
+    "present_participle": "present",
+    "present": "present",
+    "yiqtol": "future",
+    "future": "future",
+}
+
+# canonical tense -> (English name, Hebrew name, form instruction)
+_HEBREW_TENSE_INFO: dict[str, tuple[str, str, str]] = {
+    "past": (
+        "Past",
+        "עבר (avar)",
+        "Use a past-tense (perfective) finite verb — NOT present (הווה), future (עתיד), or imperative.",
+    ),
+    "present": (
+        "Present",
+        "הווה (hoveh)",
+        "Use a present-tense (Benoni/participle) finite verb — NOT past (עבר) or future (עתיד).",
+    ),
+    "future": (
+        "Future",
+        "עתיד (atid)",
+        "Use a future-tense finite verb — NOT present (הווה) or past (עבר).",
+    ),
+}
+
+_HEBREW_SUBJECT_EXAMPLES: dict[tuple[str, str, str | None], str] = {
+    ("1st", "singular", None): '"אני"',
+    ("1st", "singular", "masculine"): '"אני" with a masculine verb (e.g. אני מדבר)',
+    ("1st", "singular", "feminine"): '"אני" with a feminine verb (e.g. אני מדברת)',
+    ("1st", "plural", None): '"אנחנו"',
+    ("2nd", "singular", "masculine"): '"אתה"',
+    ("2nd", "singular", "feminine"): '"את"',
+    ("2nd", "plural", "masculine"): '"אתם"',
+    ("2nd", "plural", "feminine"): '"אתן"',
+    ("3rd", "singular", "masculine"): '"הוא" or a masculine noun phrase',
+    ("3rd", "singular", "feminine"): '"היא" or a feminine noun phrase',
+    ("3rd", "plural", "masculine"): '"הם" or a masculine group noun phrase',
+    ("3rd", "plural", "feminine"): '"הן" or a feminine group noun phrase',
+}
+
+
+def resolve_hebrew_tense(tense: str) -> str | None:
+    """Map benchmark tense label to canonical past/present/future."""
+    return _HEBREW_TENSE_ALIASES.get(tense.strip().lower())
+
+
+def _hebrew_tense_block(tense: str) -> str:
+    """Explain Modern Hebrew's three tenses and the required tense for this item."""
+    canonical = resolve_hebrew_tense(tense)
+    if canonical is None:
+        return (
+            f"Required tense label: {tense}.\n"
+            "Modern Hebrew uses three morphological tenses: Past (עבר / avar), "
+            "Present (הווה / hoveh), and Future (עתיד / atid).\n"
+        )
+
+    past_en, past_he, past_inst = _HEBREW_TENSE_INFO["past"]
+    pres_en, pres_he, pres_inst = _HEBREW_TENSE_INFO["present"]
+    fut_en, fut_he, fut_inst = _HEBREW_TENSE_INFO["future"]
+    req_en, req_he, req_inst = _HEBREW_TENSE_INFO[canonical]
+
+    return (
+        "Modern Hebrew uses exactly three morphological tenses:\n"
+        f"  • {past_en} — {past_he}\n"
+        f"  • {pres_en} — {pres_he}\n"
+        f"  • {fut_en} — {fut_he}\n"
+        f"Required tense for this item: {req_en} — {req_he} "
+        f"(benchmark label: {tense}).\n"
+        f"{req_inst}\n"
+    )
+
+
+def _hebrew_agreement_block(person: str, number: str, gender: str | None) -> str:
+    """Person, number, and gender agreement instructions for Hebrew."""
+    lines = [
+        f"Required agreement: person={person}, number={number}.",
+    ]
+    if gender:
+        lines.append(
+            f"Required gender: {gender} — the verb must use the {gender} form "
+            f"(e.g. feminine כותבת / מדברת, masculine כותב / מדבר)."
+        )
+    elif person in ("2nd", "3rd") and number == "singular":
+        lines.append(
+            "The verb must agree in gender with its subject; choose a subject and "
+            "matching verb form consistently."
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _hebrew_subject_hint(
+    person: str,
+    number: str,
+    gender: str | None,
+    *,
+    explicit_subject_required: bool,
+) -> str:
+    """Anchor person/number (and gender when known) with an overt Hebrew subject."""
+    needs_subject = (
+        explicit_subject_required
+        or person in ("2nd", "3rd")
+        or (person == "1st" and number == "singular" and gender)
+    )
+    if not needs_subject:
+        return ""
+
+    gender_key = gender.lower() if gender else None
+    examples = _HEBREW_SUBJECT_EXAMPLES.get((person, number, gender_key))
+    if examples is None and gender_key is not None:
+        examples = _HEBREW_SUBJECT_EXAMPLES.get((person, number, None))
+    if examples is None:
+        examples = _HEBREW_SUBJECT_EXAMPLES.get((person, number, None), '"אני"')
+    return (
+        f"Include an explicit subject matching person={person}, number={number}"
+        + (f", gender={gender}" if gender else "")
+        + f" before the conjugated verb (e.g. {examples}).\n"
+    )
+
+
+def _hebrew_form_block() -> str:
+    """Finite-verb requirement shared across Hebrew items."""
+    return (
+        "Conjugate the verb from the target root in the required tense and agreement. "
+        "Use a finite conjugated verb form — not the bare infinitive alone, not an "
+        "imperative unless imperative is explicitly requested, and not a different tense.\n"
+    )
+
+
+def _hebrew_prompt_block(
+    tense: str,
+    person: str,
+    number: str,
+    gender: str | None,
+    *,
+    explicit_subject_required: bool,
+) -> str:
+    """Hebrew-specific tense and agreement context (Past / Present / Future)."""
+    return (
+        _hebrew_tense_block(tense)
+        + _hebrew_agreement_block(person, number, gender)
+        + _hebrew_subject_hint(
+            person, number, gender, explicit_subject_required=explicit_subject_required
+        )
+        + _hebrew_form_block()
+    )
+
 
 def _explicit_subject_hint(
     person: str,
     number: str,
     *,
+    target_language: str,
+    gender: str | None,
     explicit_subject_required: bool,
 ) -> str:
     """Extra instruction to anchor person/number with an overt subject."""
+    if target_language == "he":
+        return _hebrew_subject_hint(
+            person, number, gender, explicit_subject_required=explicit_subject_required
+        )
     if not explicit_subject_required:
         return ""
     examples = _SUBJECT_EXAMPLES.get((person, number))
@@ -71,6 +228,7 @@ def build_prompt(
     sentence_length: str = "short",
     cefr_level: str | None = None,
     explicit_subject_required: bool = False,
+    gender: str | None = None,
 ) -> str:
     """Build the prompt for unconstrained sentence generation.
 
@@ -83,14 +241,36 @@ def build_prompt(
     cefr_line = ""
     if cefr_level:
         cefr_line = f"Target CEFR level: {cefr_level}. Use vocabulary and grammar appropriate for this level.\n"
+    gender_norm = gender.strip().lower() if gender else None
+    hebrew_block = ""
+    if target_language == "he":
+        hebrew_block = _hebrew_prompt_block(
+            tense,
+            person,
+            number,
+            gender_norm,
+            explicit_subject_required=explicit_subject_required,
+        )
     subject_line = _explicit_subject_hint(
-        person, number, explicit_subject_required=explicit_subject_required
+        person,
+        number,
+        target_language=target_language,
+        gender=gender_norm,
+        explicit_subject_required=explicit_subject_required,
     )
+    if target_language == "he":
+        # Subject + tense/agreement already covered in hebrew_block for 2nd/3rd.
+        subject_line = "" if hebrew_block else subject_line
+    gender_line = ""
+    if gender_norm and target_language != "he":
+        gender_line = f"Required gender: {gender_norm}.\n"
     return (
         f"You generate {lang} example sentences for vocabulary practice.\n"
         f'Target word: "{keyword}" (English: "{translation}")\n'
         f"Constraints: tense={tense}, person={person}, "
         f"number={number}, length={length_desc}.\n"
+        f"{gender_line}"
+        f"{hebrew_block}"
         f"{subject_line}"
         f"{cefr_line}"
         f"Produce {num_candidates} natural {lang} sentences within the length band "
@@ -128,6 +308,7 @@ def generate(
     cefr_level: str | None = None,
     sentence_length: str = "short",
     explicit_subject_required: bool = False,
+    gender: str | None = None,
     model: str = "gpt-5.4-nano",
     temperature: float = 0.7,
     api_key: str | None = None,
@@ -156,6 +337,7 @@ def generate(
         cefr_level=cefr_level,
         sentence_length=sentence_length,
         explicit_subject_required=explicit_subject_required,
+        gender=gender,
     )
 
     completion = client.chat.completions.create(
@@ -201,6 +383,7 @@ class BaselineGPTGenerator(BaseGenerator):
         cefr_level: str | None = None,
         sentence_length: str = "short",
         explicit_subject_required: bool = False,
+        gender: str | None = None,
     ) -> list[dict[str, str]]:
         return generate(
             keyword=keyword,
@@ -213,6 +396,7 @@ class BaselineGPTGenerator(BaseGenerator):
             cefr_level=cefr_level,
             sentence_length=sentence_length,
             explicit_subject_required=explicit_subject_required,
+            gender=gender,
             model=self._model,
             temperature=self._temperature,
         )
