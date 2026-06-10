@@ -24,10 +24,21 @@ VALID_TAGS: set[str] = {"noun", "verb", "adjective", "adverb", "preposition", "o
 
 REQUIRED_FIELDS = ("lemma", "pos", "tags", "gloss_primary")
 
+_MORPH_FEATURE_KEYS = ("number", "gender", "person", "tense", "mood", "case", "definite")
+
 
 def _coerce_tag(value: str | None) -> VocabTag:
     normalized = (value or "other").casefold().strip()
     return normalized if normalized in VALID_TAGS else "other"  # type: ignore[return-value]
+
+
+def has_minimum_lexeme_fields(lexeme: Lexeme) -> bool:
+    return bool(
+        lexeme.lemma
+        and lexeme.pos
+        and lexeme.gloss_primary
+        and lexeme.tags
+    )
 
 
 def missing_lexeme_fields(lexeme: Lexeme) -> list[str]:
@@ -43,7 +54,34 @@ def missing_lexeme_fields(lexeme: Lexeme) -> list[str]:
     return missing
 
 
-def _enrichment_schema() -> dict[str, Any]:
+def _morph_features_schema() -> dict[str, Any]:
+    properties = {key: {"type": ["string", "null"]} for key in _MORPH_FEATURE_KEYS}
+    return {
+        "anyOf": [
+            {"type": "null"},
+            {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": properties,
+                "required": list(_MORPH_FEATURE_KEYS),
+            },
+        ],
+    }
+
+
+def _coerce_morph_features(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    cleaned = {
+        str(key): str(item)
+        for key, item in value.items()
+        if item is not None and str(item).strip()
+    }
+    return cleaned or None
+
+
+def enrichment_json_schema() -> dict[str, Any]:
+    """Strict JSON schema for OpenAI structured enrichment responses."""
     return {
         "type": "object",
         "additionalProperties": False,
@@ -67,7 +105,7 @@ def _enrichment_schema() -> dict[str, Any]:
             "frequency_rank": {"type": ["integer", "null"]},
             "gender": {"type": ["string", "null"]},
             "conjugation_class": {"type": ["string", "null"]},
-            "morph_features": {"type": ["object", "null"], "additionalProperties": True},
+            "morph_features": _morph_features_schema(),
             "ipa": {"type": ["string", "null"]},
             "notes": {"type": ["string", "null"]},
         },
@@ -179,19 +217,16 @@ def enrich_lexeme_llm(
             pos=pos,
         ),
         "vocab_enrichment",
-        _enrichment_schema(),
+        enrichment_json_schema(),
     )
     if data is None:
-        return (
-            _fallback_enrichment(
-                target_word=target_word,
-                english_gloss=english_gloss,
-                pos=pos,
-                language=language,
-            ),
-            0.5,
-            True,
+        fallback = _fallback_enrichment(
+            target_word=target_word,
+            english_gloss=english_gloss,
+            pos=pos,
+            language=language,
         )
+        return _normalize_enrichment_result(fallback), 0.5, True
     pos_val = _coerce_tag(str(data.get("pos", pos)))
     tags = [_coerce_tag(str(tag)) for tag in data.get("tags", []) if isinstance(tag, str)]
     if not tags:
@@ -210,11 +245,29 @@ def enrich_lexeme_llm(
         "frequency_rank": data.get("frequency_rank"),
         "gender": data.get("gender"),
         "conjugation_class": data.get("conjugation_class"),
-        "morph_features": data.get("morph_features"),
+        "morph_features": _coerce_morph_features(data.get("morph_features")),
         "ipa": data.get("ipa"),
         "dictionary_notes": data.get("notes"),
     }
     return result, 0.9, False
+
+
+def _normalize_enrichment_result(raw: dict[str, Any]) -> dict[str, Any]:
+    notes = raw.get("dictionary_notes") or raw.get("notes")
+    return {
+        "lemma": raw.get("lemma"),
+        "gloss_primary": raw.get("gloss_primary"),
+        "glosses": raw.get("glosses"),
+        "pos": raw.get("pos"),
+        "tags": raw.get("tags"),
+        "cefr": raw.get("cefr"),
+        "frequency_rank": raw.get("frequency_rank"),
+        "gender": raw.get("gender"),
+        "conjugation_class": raw.get("conjugation_class"),
+        "morph_features": _coerce_morph_features(raw.get("morph_features")),
+        "ipa": raw.get("ipa"),
+        "dictionary_notes": notes,
+    }
 
 
 def apply_enrichment_to_lexeme(lexeme: Lexeme, result: dict[str, Any]) -> None:
@@ -235,9 +288,10 @@ def apply_enrichment_to_lexeme(lexeme: Lexeme, result: dict[str, Any]) -> None:
         lexeme.frequency_rank = result["frequency_rank"]
     if result.get("morph_features"):
         lexeme.morph_features = result["morph_features"]
-    if result.get("dictionary_notes"):
-        lexeme.dictionary_notes = str(result["dictionary_notes"])
-    if is_lexeme_complete(lexeme):
+    notes = result.get("dictionary_notes") or result.get("notes")
+    if notes:
+        lexeme.dictionary_notes = str(notes)
+    if has_minimum_lexeme_fields(lexeme):
         lexeme.enrichment_status = "complete"
         lexeme.enriched_at = datetime.utcnow()
     else:

@@ -73,7 +73,7 @@ class VocabCreate(BaseModel):
     pos: str | None = Field(default=None, max_length=32)
     cefr: str | None = Field(default=None, max_length=8)
     frequency_rank: int | None = None
-    gender: str | None = Field(default=None, max_length=8)
+    gender: str | None = Field(default=None, max_length=16)
     conjugation_class: str | None = Field(default=None, max_length=32)
     morph_features: dict[str, Any] | None = None
     ipa: str | None = Field(default=None, max_length=128)
@@ -95,7 +95,7 @@ class VocabUpdate(BaseModel):
     pos: str | None = Field(default=None, max_length=32)
     cefr: str | None = Field(default=None, max_length=8)
     frequency_rank: int | None = None
-    gender: str | None = Field(default=None, max_length=8)
+    gender: str | None = Field(default=None, max_length=16)
     conjugation_class: str | None = Field(default=None, max_length=32)
     morph_features: dict[str, Any] | None = None
     ipa: str | None = Field(default=None, max_length=128)

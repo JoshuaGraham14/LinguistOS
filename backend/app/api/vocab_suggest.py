@@ -19,6 +19,7 @@ from app.config import settings
 from app.db.database import get_db
 from app.db.models import Workspace
 from app.db.schemas import LanguageCode, VocabTag
+from app.services.enrichment import _coerce_morph_features, enrichment_json_schema
 
 router = APIRouter()
 
@@ -170,52 +171,6 @@ def _suggestion_schema() -> dict[str, Any]:
             }
         },
         "required": ["candidates"],
-    }
-
-
-def _enrichment_schema() -> dict[str, Any]:
-    return {
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "surface_form": {"type": "string"},
-            "lemma": {"type": "string"},
-            "gloss_primary": {"type": "string"},
-            "glosses": {"type": "array", "items": {"type": "string"}},
-            "pos": {
-                "type": "string",
-                "enum": ["noun", "verb", "adjective", "adverb", "preposition", "other"],
-            },
-            "tags": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "enum": ["noun", "verb", "adjective", "adverb", "preposition", "other"],
-                },
-            },
-            "cefr": {"type": ["string", "null"]},
-            "frequency_rank": {"type": ["integer", "null"]},
-            "gender": {"type": ["string", "null"]},
-            "conjugation_class": {"type": ["string", "null"]},
-            "morph_features": {"type": ["object", "null"], "additionalProperties": True},
-            "ipa": {"type": ["string", "null"]},
-            "notes": {"type": ["string", "null"]},
-        },
-        "required": [
-            "surface_form",
-            "lemma",
-            "gloss_primary",
-            "glosses",
-            "pos",
-            "tags",
-            "cefr",
-            "frequency_rank",
-            "gender",
-            "conjugation_class",
-            "morph_features",
-            "ipa",
-            "notes",
-        ],
     }
 
 
@@ -408,7 +363,7 @@ def enrich_vocab_suggestion(
     data = _call_openai_json(
         _enrichment_prompt(payload, language),
         "vocab_enrichment",
-        _enrichment_schema(),
+        enrichment_json_schema(),
     )
     if data is None:
         return _fallback_enrichment(payload, language)
@@ -432,7 +387,7 @@ def enrich_vocab_suggestion(
         frequency_rank=data.get("frequency_rank"),
         gender=data.get("gender"),
         conjugation_class=data.get("conjugation_class"),
-        morph_features=data.get("morph_features"),
+        morph_features=_coerce_morph_features(data.get("morph_features")),
         ipa=data.get("ipa"),
         notes=data.get("notes"),
     )
