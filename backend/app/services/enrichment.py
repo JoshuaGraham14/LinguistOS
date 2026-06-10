@@ -41,21 +41,20 @@ def has_minimum_lexeme_fields(lexeme: Lexeme) -> bool:
     )
 
 
-def has_rich_metadata(lexeme: Lexeme) -> bool:
-    """True when LLM-style enrichment has run (not just sparse create defaults)."""
-    return bool(
-        lexeme.dictionary_notes
-        or lexeme.cefr
-        or lexeme.ipa
-        or lexeme.gender
-        or lexeme.morph_features
-    )
+def _dedupe_tags(tags: list[str] | None) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for tag in tags or []:
+        normalized = str(tag).strip().casefold()
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            out.append(normalized)
+    return out
 
 
 def needs_enrichment(lexeme: Lexeme) -> bool:
-    if lexeme.enrichment_status != "complete":
-        return True
-    return not has_rich_metadata(lexeme)
+    """True while minimum fields or LLM enrichment are still outstanding."""
+    return lexeme.enrichment_status in ("pending", "complete")
 
 
 def missing_lexeme_fields(lexeme: Lexeme) -> list[str]:
@@ -245,7 +244,9 @@ def enrich_lexeme_llm(
         )
         return _normalize_enrichment_result(fallback), 0.5, True
     pos_val = _coerce_tag(str(data.get("pos", pos)))
-    tags = [_coerce_tag(str(tag)) for tag in data.get("tags", []) if isinstance(tag, str)]
+    tags = _dedupe_tags(
+        [_coerce_tag(str(tag)) for tag in data.get("tags", []) if isinstance(tag, str)]
+    )
     if not tags:
         tags = [pos_val]
     gloss_primary = str(data.get("gloss_primary") or "").strip() or english_gloss
@@ -293,7 +294,7 @@ def apply_enrichment_to_lexeme(lexeme: Lexeme, result: dict[str, Any]) -> None:
     if result.get("pos"):
         lexeme.pos = str(result["pos"])
     if result.get("tags"):
-        lexeme.tags = list(result["tags"])
+        lexeme.tags = _dedupe_tags(list(result["tags"]))
     if result.get("gloss_primary"):
         lexeme.gloss_primary = normalize_key_part(str(result["gloss_primary"]))
     if result.get("glosses"):
@@ -324,7 +325,7 @@ def find_complete_lexeme_match(db: Session, lexeme: Lexeme) -> Lexeme | None:
             Lexeme.lemma == lexeme.lemma,
             Lexeme.pos == lexeme.pos,
             Lexeme.gloss_primary == lexeme.gloss_primary,
-            Lexeme.enrichment_status == "complete",
+            Lexeme.enrichment_status == "enriched",
             Lexeme.id != lexeme.id,
         )
     )
@@ -345,5 +346,11 @@ def copy_lexeme_fields(target: Lexeme, source: Lexeme) -> None:
     target.audio_url = source.audio_url
     target.image_url = source.image_url
     target.dictionary_notes = source.dictionary_notes
-    target.enrichment_status = "complete"
+    target.enrichment_status = "enriched"
     target.enriched_at = source.enriched_at or datetime.utcnow()
+
+
+def mark_lexeme_enriched(lexeme: Lexeme) -> None:
+    """Mark LLM enrichment as finished so sweepers and UI stop re-checking."""
+    lexeme.enrichment_status = "enriched"
+    lexeme.enriched_at = lexeme.enriched_at or datetime.utcnow()

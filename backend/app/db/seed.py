@@ -179,7 +179,7 @@ def ensure_default_workspace_and_vocab() -> None:
                 tags=tags,
                 glosses=[translation],
             )
-            lexeme.enrichment_status = "complete"
+            lexeme.enrichment_status = "enriched"
             lexeme.enriched_at = lexeme.enriched_at or datetime.utcnow()
             surface = _capitalize_first(word)
             gloss = translation

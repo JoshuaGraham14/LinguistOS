@@ -37,9 +37,13 @@ def vocab_out(vocab: Vocab, lexeme: Lexeme | None = None) -> VocabOut:
         raise ValueError(f"Vocab {vocab.id} has no linked lexeme")
 
     gloss = _display_gloss(vocab, lx)
-    tags: list[VocabTag] = [t for t in lx.tags if t in {
-        "noun", "verb", "adjective", "adverb", "preposition", "other"
-    }]  # type: ignore[misc]
+    valid = {"noun", "verb", "adjective", "adverb", "preposition", "other"}
+    seen: set[str] = set()
+    tags: list[VocabTag] = []
+    for t in lx.tags:
+        if t in valid and t not in seen:
+            seen.add(t)
+            tags.append(t)  # type: ignore[arg-type]
 
     mastery = None
     if vocab.mastery is not None:

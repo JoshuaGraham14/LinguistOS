@@ -184,6 +184,32 @@ def migrate_enrichment_jobs_for_lexeme(engine: Engine) -> bool:
     return True
 
 
+def migrate_complete_to_enriched(engine: Engine) -> int:
+    """Promote legacy complete lexemes that should skip future LLM sweeps."""
+    inspector = inspect(engine)
+    if "lexemes" not in inspector.get_table_names():
+        return 0
+    with engine.begin() as conn:
+        result = conn.execute(
+            text(
+                """
+                UPDATE lexemes
+                SET enrichment_status = 'enriched'
+                WHERE enrichment_status = 'complete'
+                  AND (
+                    dictionary_notes IS NOT NULL
+                    OR cefr IS NOT NULL
+                    OR ipa IS NOT NULL
+                    OR gender IS NOT NULL
+                    OR morph_features IS NOT NULL
+                    OR pos NOT IN ('', 'other')
+                  )
+                """
+            )
+        )
+        return result.rowcount or 0
+
+
 def drop_deprecated_vocab_columns(engine: Engine) -> list[str]:
     """Drop linguistic columns migrated to Lexeme (SQLite 3.35+)."""
     inspector = inspect(engine)

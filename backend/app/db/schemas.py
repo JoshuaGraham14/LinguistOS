@@ -11,7 +11,7 @@ LanguageCode = Literal["es", "he", "fr"]
 VocabTag = Literal["noun", "verb", "adjective", "adverb", "preposition", "other"]
 MasteryOutcome = Literal["correct", "incorrect", "skipped", "hinted"]
 EnrichmentStatus = Literal["pending", "done", "failed"]
-LexemeEnrichmentStatus = Literal["pending", "complete", "failed"]
+LexemeEnrichmentStatus = Literal["pending", "complete", "enriched", "failed"]
 
 
 class WorkspaceCreate(BaseModel):

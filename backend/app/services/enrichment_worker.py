@@ -12,13 +12,12 @@ from sqlalchemy.orm import Session
 
 from app.db.database import SessionLocal
 from app.db.models import EnrichmentJob, Lexeme, Vocab
-from sqlalchemy import and_, or_
-
 from app.services.enrichment import (
     apply_enrichment_to_lexeme,
     copy_lexeme_fields,
     enrich_lexeme_llm,
     find_complete_lexeme_match,
+    mark_lexeme_enriched,
     missing_lexeme_fields,
     needs_enrichment,
 )
@@ -49,8 +48,6 @@ def maybe_enqueue_enrichment(
         return pending
 
     missing = missing_lexeme_fields(lexeme)
-    if not missing and lexeme.enrichment_status == "complete":
-        missing = ["cefr", "gender", "ipa", "dictionary_notes"]
     job = EnrichmentJob(
         lexeme_id=lexeme_id,
         vocab_id=vocab_id,
@@ -105,13 +102,9 @@ def process_enrichment_job(db: Session, job_id: int) -> None:
         pos=lexeme.pos,
     )
 
-    if confidence >= 0.85:
-        apply_enrichment_to_lexeme(lexeme, result)
-        job.status = "done"
-    else:
-        job.status = "done"
-        apply_enrichment_to_lexeme(lexeme, result)
-
+    apply_enrichment_to_lexeme(lexeme, result)
+    mark_lexeme_enriched(lexeme)
+    job.status = "done"
     job.result = result
     job.confidence = confidence
     job.completed_at = datetime.utcnow()
@@ -141,21 +134,7 @@ def sweep_incomplete_lexemes(limit: int = 50) -> int:
     with SessionLocal() as db:
         lexemes = db.scalars(
             select(Lexeme)
-            .where(
-                or_(
-                    Lexeme.enrichment_status != "complete",
-                    and_(
-                        Lexeme.enrichment_status == "complete",
-                        Lexeme.dictionary_notes.is_(None),
-                        Lexeme.cefr.is_(None),
-                        Lexeme.ipa.is_(None),
-                        Lexeme.gender.is_(None),
-                        # Legacy thin rows auto-marked complete; skip seeded lexemes
-                        # that already have real POS tags.
-                        Lexeme.pos.in_(["", "other"]),
-                    ),
-                )
-            )
+            .where(Lexeme.enrichment_status.in_(("pending", "complete")))
             .limit(limit)
         ).all()
         for lexeme in lexemes:

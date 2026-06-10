@@ -334,9 +334,9 @@ function LexiconRow({
           {item.tags.length === 0 ? (
             <span className="text-xs text-slate-400">—</span>
           ) : (
-            item.tags.map((t) => (
+            item.tags.map((t, i) => (
               <span
-                key={t}
+                key={`${item.id}-${t}-${i}`}
                 className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 capitalize"
               >
                 {t}

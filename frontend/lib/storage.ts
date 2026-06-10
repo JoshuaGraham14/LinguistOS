@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as api from "./api";
+import { pollVocabEnrichedOnce } from "./vocabPoll";
 import type {
   LanguageCode,
   MasteryOutcome,
@@ -342,8 +343,7 @@ export function useVocab() {
       if (!activeWorkspace) return;
       for (const item of items) {
         if (!item.enriching) continue;
-        void api
-          .pollVocabUntilEnriched(item.id, activeWorkspace.language)
+        void pollVocabEnrichedOnce(item.id, activeWorkspace.language)
           .then((enriched) => {
             setVocab((prev) =>
               prev.map((v) => (v.id === enriched.id ? enriched : v)),
@@ -458,8 +458,7 @@ export function useVocab() {
       setVocab((prev) => [item, ...prev]);
       broadcastVocabAdd(item);
       if (item.enriching) {
-        void api
-          .pollVocabUntilEnriched(item.id, activeWorkspace.language)
+        void pollVocabEnrichedOnce(item.id, activeWorkspace.language)
           .then((enriched) => {
             setVocab((prev) =>
               prev.map((v) => (v.id === enriched.id ? enriched : v)),
