@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from app.db.backfill_lexemes import is_lexeme_complete
 from app.db.models import Lexeme, Vocab
 from app.db.schemas import MasteryOut, VocabOut, VocabTag
+
+
+def _coerce_json_dict(value: Any) -> dict[str, Any] | None:
+    if value is None or value == "null":
+        return None
+    return value if isinstance(value, dict) else None
 
 
 def _capitalize_first(value: str) -> str:
@@ -57,7 +65,7 @@ def vocab_out(vocab: Vocab, lexeme: Lexeme | None = None) -> VocabOut:
         frequency_rank=lx.frequency_rank,
         gender=lx.gender,
         conjugation_class=lx.conjugation_class,
-        morph_features=lx.morph_features,
+        morph_features=_coerce_json_dict(lx.morph_features),
         ipa=lx.ipa,
         audio_url=lx.audio_url,
         image_url=lx.image_url,
