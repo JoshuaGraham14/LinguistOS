@@ -1,10 +1,33 @@
 # E0 Hebrew spike — findings (June 2026)
 
-> Live GPT run via `research/generation/baseline_gpt.py` — **same prompt template as Spanish**
-> (`gpt-5.4-nano`, temperature 0.7, `sentence_length=short`, 3 candidates per case).
+> Live GPT run via `research/generation/baseline_gpt.py` + `prompt_builder.py`
+> (`gpt-5.4-nano`, temperature 0.7, 3 candidates per case).
 >
 > Script: `research/scripts/e0_hebrew_spike.py`
-> Raw JSON: [`eval_hebrew_e0_spike_results.json`](eval_hebrew_e0_spike_results.json)
+> Raw JSON (Round 3): [`eval_hebrew_e0_spike_short_results.json`](eval_hebrew_e0_spike_short_results.json),
+> [`eval_hebrew_e0_spike_long_results.json`](eval_hebrew_e0_spike_long_results.json)
+> Round 1 archive: [`eval_hebrew_e0_spike_results.json`](eval_hebrew_e0_spike_results.json)
+
+---
+
+## Round 3 (language-profile refactor) — headline results (n=30 each)
+
+Prompt driven by `research/languages/he.yaml` — **no Hebrew-specific Python in `baseline_gpt.py`**.
+Benchmark labels use Modern Hebrew tense names (`past`, `present`, `future`) plus flat `gender`.
+
+| Metric | Round 2 (Hebrew patch) | **Round 3 (language profile)** |
+| --- | --- | --- |
+| EF strict (short) | 100% (30/30) | **100% (30/30)** |
+| EF clitic-aware (short) | 100% | **100%** |
+| Length in band (short) | 100% | **100%** |
+| EF strict (long) | 97% (29/30) | **100% (30/30)** |
+| EF clitic-aware (long) | 97% | **100%** |
+| Length in band (long) | 57% (17/30) | **100% (30/30)** |
+
+**Refactor gate:** ≥95% EF short, ≥90% EF long without Hebrew patch → **PASS**.
+
+Tense glosses (`Past (עבר)`, etc.) come from `he.yaml` `glosses:` — same effective prompt content
+as Round 2, but language knowledge lives in data, not code.
 
 ---
 
@@ -12,15 +35,15 @@
 
 Modern Hebrew has **exactly three morphological tenses** (not Spanish-style preterite/imperfect/subjunctive):
 
-| Canonical | Hebrew name | English | Benchmark YAML labels |
+| Canonical | Hebrew name | English | Benchmark YAML label |
 | --- | --- | --- | --- |
-| **Past** | עבר (avar) | completed / perfective | `qatal`, `past`, `preterite` |
-| **Present** | הווה (hoveh) | ongoing / Benoni participle | `present_participle`, `present` |
-| **Future** | עתיד (atid) | not yet done | `yiqtol`, `future` |
+| **Past** | עבר (avar) | completed / perfective | `past` |
+| **Present** | הווה (hoveh) | ongoing / Benoni participle | `present` |
+| **Future** | עתיד (atid) | not yet done | `future` |
 
-Biblical names (`qatal`, `yiqtol`) are **aliases** mapped to these three in `baseline_gpt.py`.
-Imperative and infinitive are **moods/forms**, not a fourth tense — the prompt explicitly forbids
-imperative unless requested.
+Glosses are defined in `research/languages/he.yaml`. Biblical names (`qatal`, `yiqtol`) are
+**not** valid profile values — use the three canonical labels above.
+Imperative and infinitive are **moods/forms**, not a fourth tense.
 
 ---
 
@@ -47,16 +70,16 @@ imperative unless requested.
 
 | ID | Target | Expected form | Constraints | Why it's difficult |
 | --- | --- | --- | --- | --- |
-| 01 | לשאול | שאלתי | qatal, 1sg | Infinitive keyword — may leave `ל+stem` unconjugated (Spanish *dormir* pattern) |
+| 01 | לשאול | שאלתי | past, 1sg | Infinitive keyword — may leave `ל+stem` unconjugated (Spanish *dormir* pattern) |
 | 02 | לכתוב | כותבת | present, 3sg **fem** | Present marks gender on verb; pro-drop |
-| 03 | לשאול | שאלת | qatal, 2sg masc | 2sg past without anchored subject |
-| 04 | ללכת | הלכת | qatal, 2sg **fem** | `הלכת` = 1sg or 2sg fem orthographically |
-| 05 | לכתוב | נכתוב | yiqtol, 1pl | Future needs `נ-` prefix |
-| 06 | לאכול | אכלנו | qatal, 1pl | Past plural suffix `-נו` |
+| 03 | לשאול | שאלת | past, 2sg masc | 2sg past without anchored subject |
+| 04 | ללכת | הלכת | past, 2sg **fem** | `הלכת` = 1sg or 2sg fem orthographically |
+| 05 | לכתוב | נכתוב | future, 1pl | Future needs `נ-` prefix |
+| 06 | לאכול | אכלנו | past, 1pl | Past plural suffix `-נו` |
 | 07 | לדבר | מדבר | present, 1sg **masc** | `אני` is gender-neutral; verb must be masc |
 | 08 | לדבר | מדברת | present, 1sg **fem** | Feminine present 1sg |
-| 09 | ללכת | הלך | qatal, 3sg masc | Irregular suppletive past |
-| 10 | לתת | נתת | qatal, 2sg masc | Past 2sg; narrative `ו-` clitic risk |
+| 09 | ללכת | הלך | past, 3sg masc | Irregular suppletive past |
+| 10 | לתת | נתת | past, 2sg masc | Past 2sg; narrative `ו-` clitic risk |
 
 ---
 
@@ -120,28 +143,28 @@ it did not understand bare biblical labels alone.
 
 ### 2. Gender and subject anchoring are required for Hebrew
 
-Cases 02, 08 (gender) and 03, 04, 10 (2nd person past) needed explicit agreement lines and
-Hebrew subject hints (`אתה`, `את`, `היא`). These are now built into `baseline_gpt.py` for
-`target_language=he` without needing `explicit_subject_required=True` on the method preset.
+Cases 02, 08 (gender) and 03, 04, 10 (2nd person past) needed gender in the constraint dict
+and finite-verb instructions. Round 2 used a temporary Hebrew block in `baseline_gpt.py`; Round 3
+achieves the same rates via `research/languages/he.yaml` + `prompt_builder.py`.
 
 ### 3. Clitic stripping still not observed on short drills
 
-0/30 needed clitic-aware matching in either round. Implement for framework completeness; low
+0/30 needed clitic-aware matching in any round. Implement for framework completeness; low
 expected impact on short `hebrew_basic` items.
 
 ### 4. Proceed to E1
 
-Gate passed. Next: `hebrew_basic.yaml`, wire `gender` from `extra_constraints` through pipeline,
-clitic-aware `expected_form_match`, Stanza morph config.
+Gate passed (Round 3). Next: `hebrew_basic.yaml`, clitic-aware `expected_form_match`, Stanza morph config.
+Gender is already a flat constraint key validated by the language profile.
 
 ---
 
 ## Round 2 — long sentences (10–16 tokens)
 
-Same 10 cases, `sentence_length=long`, Hebrew tense block enabled.
-Raw JSON: [`eval_hebrew_e0_spike_long_results.json`](eval_hebrew_e0_spike_long_results.json)
+Same 10 cases, `sentence_length=long`, temporary Hebrew tense block in `baseline_gpt.py`.
+Raw JSON superseded by Round 3 long run (same filename).
 
-| Metric | Short (Round 2) | **Long** |
+| Metric | Short (Round 2) | **Long (Round 2)** |
 | --- | --- | --- |
 | EF strict | 100% (30/30) | **97% (29/30)** |
 | EF clitic-aware | 100% | **97%** |
@@ -184,3 +207,10 @@ python3 research/scripts/e0_hebrew_spike.py --length long
 ```
 
 Results: `docs/eval_hebrew_e0_spike_{short,long}_results.json`
+
+---
+
+## Round 3 — long sentences (10–16 tokens)
+
+Same 10 cases with language-profile prompts. Mean tokens **12.2**; all 30 candidates in-band
+(vs 57% in Round 2). No EF failures; case 06 (past 1pl) held 3/3 after the Round 2 person slip.

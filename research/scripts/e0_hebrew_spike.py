@@ -43,7 +43,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לשאול",
         expected_form="שאלתי",
         translation="to ask",
-        tense="qatal",
+        tense="past",
         person="1st",
         number="singular",
         gender=None,
@@ -54,7 +54,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לכתוב",
         expected_form="כותבת",
         translation="to write",
-        tense="present_participle",
+        tense="present",
         person="3rd",
         number="singular",
         gender="feminine",
@@ -65,7 +65,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לשאול",
         expected_form="שאלת",
         translation="to ask",
-        tense="qatal",
+        tense="past",
         person="2nd",
         number="singular",
         gender="masculine",
@@ -76,7 +76,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="ללכת",
         expected_form="הלכת",
         translation="to go",
-        tense="qatal",
+        tense="past",
         person="2nd",
         number="singular",
         gender="feminine",
@@ -87,7 +87,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לכתוב",
         expected_form="נכתוב",
         translation="to write",
-        tense="yiqtol",
+        tense="future",
         person="1st",
         number="plural",
         gender=None,
@@ -98,7 +98,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לאכול",
         expected_form="אכלנו",
         translation="to eat",
-        tense="qatal",
+        tense="past",
         person="1st",
         number="plural",
         gender=None,
@@ -109,7 +109,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לדבר",
         expected_form="מדבר",
         translation="to speak",
-        tense="present_participle",
+        tense="present",
         person="1st",
         number="singular",
         gender="masculine",
@@ -120,7 +120,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לדבר",
         expected_form="מדברת",
         translation="to speak",
-        tense="present_participle",
+        tense="present",
         person="1st",
         number="singular",
         gender="feminine",
@@ -131,7 +131,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="ללכת",
         expected_form="הלך",
         translation="to go",
-        tense="qatal",
+        tense="past",
         person="3rd",
         number="singular",
         gender="masculine",
@@ -142,7 +142,7 @@ E0_CASES: list[ConstraintCase] = [
         keyword="לתת",
         expected_form="נתת",
         translation="to give",
-        tense="qatal",
+        tense="past",
         person="2nd",
         number="singular",
         gender="masculine",
@@ -195,6 +195,18 @@ def find_expected(sentence: str, expected_form: str) -> dict:
     }
 
 
+def case_constraints(case: ConstraintCase) -> dict[str, str]:
+    """Flat constraint dict validated by ``research/languages/he.yaml``."""
+    out: dict[str, str] = {
+        "tense": case.tense,
+        "person": case.person,
+        "number": case.number,
+    }
+    if case.gender is not None:
+        out["gender"] = case.gender
+    return out
+
+
 def verb_tokens(sentence: str, keyword: str) -> list[str]:
     """Tokens containing keyword root or expected-form-like material."""
     kw = keyword.replace("ל", "", 1) if keyword.startswith("ל") else keyword
@@ -209,29 +221,24 @@ def verb_tokens(sentence: str, keyword: str) -> list[str]:
 def run_spike(*, samples: int = 3, sentence_length: str = "short") -> dict:
     results: list[dict] = []
     for case in E0_CASES:
+        constraints = case_constraints(case)
         prompt = build_prompt(
             keyword=case.keyword,
             translation=case.translation,
-            tense=case.tense,
-            person=case.person,
-            number=case.number,
+            constraints=constraints,
             num_candidates=samples,
             target_language="he",
             sentence_length=sentence_length,
             explicit_subject_required=False,
-            gender=case.gender,
         )
         candidates = generate(
             keyword=case.keyword,
             translation=case.translation,
-            tense=case.tense,
-            person=case.person,
-            number=case.number,
+            constraints=constraints,
             num_candidates=samples,
             target_language="he",
             sentence_length=sentence_length,
             explicit_subject_required=False,
-            gender=case.gender,
         )
         case_rows = []
         for i, cand in enumerate(candidates):
@@ -334,7 +341,7 @@ def main() -> None:
 
     print(
         f"Running E0 Hebrew spike (baseline_gpt, gpt-5.4-nano, temp=0.7, "
-        f"{args.length}, n={args.samples}, Hebrew tense block)...\n"
+        f"{args.length}, n={args.samples}, language profile he.yaml)...\n"
     )
     data = run_spike(samples=args.samples, sentence_length=args.length)
     summary = summarize(data)
