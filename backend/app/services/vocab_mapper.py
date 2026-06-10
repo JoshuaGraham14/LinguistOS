@@ -37,7 +37,7 @@ def vocab_out(vocab: Vocab, lexeme: Lexeme | None = None) -> VocabOut:
     if vocab.mastery is not None:
         mastery = MasteryOut.model_validate(vocab.mastery)
 
-    enriching = not is_lexeme_complete(lx) or lx.enrichment_status == "pending"
+    enriching = not is_lexeme_complete(lx)
 
     return VocabOut(
         id=vocab.id,
@@ -45,7 +45,7 @@ def vocab_out(vocab: Vocab, lexeme: Lexeme | None = None) -> VocabOut:
         lexeme_id=lx.id,
         word=vocab.surface_form or vocab.word,
         translation=gloss,
-        tags=tags or ["other"],
+        tags=tags if tags or not enriching else [],
         learned=vocab.learned,
         created_at=vocab.created_at,
         enriching=enriching,

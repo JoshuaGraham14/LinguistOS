@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
+import threading
+import time
 from datetime import datetime
 
 from sqlalchemy import select
@@ -22,7 +23,7 @@ from app.services.enrichment import (
 
 logger = logging.getLogger(__name__)
 
-_sweeper_task: asyncio.Task[None] | None = None
+_sweeper_thread: threading.Thread | None = None
 
 
 def maybe_enqueue_enrichment(
@@ -145,26 +146,22 @@ def sweep_incomplete_lexemes(limit: int = 50) -> int:
     return enqueued
 
 
-async def _sweeper_loop() -> None:
+def _sweeper_loop() -> None:
     while True:
+        time.sleep(3600)
         try:
             sweep_incomplete_lexemes()
             process_pending_jobs()
         except Exception:
             logger.exception("Enrichment sweeper iteration failed")
-        await asyncio.sleep(3600)
 
 
 def start_enrichment_scheduler() -> None:
-    global _sweeper_task
-    if _sweeper_task is not None and not _sweeper_task.done():
+    global _sweeper_thread
+    if _sweeper_thread is not None and _sweeper_thread.is_alive():
         return
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            _sweeper_task = asyncio.create_task(_sweeper_loop())
-    except RuntimeError:
-        pass
+    _sweeper_thread = threading.Thread(target=_sweeper_loop, name="lexeme-sweeper", daemon=True)
+    _sweeper_thread.start()
 
 
 def run_startup_enrichment() -> None:
