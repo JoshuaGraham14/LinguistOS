@@ -535,9 +535,9 @@ function WordCard({
             other
           </span>
         ) : (
-          item.tags.map((t) => (
+          item.tags.map((t, i) => (
             <span
-              key={t}
+              key={`${item.id}-${t}-${i}`}
               className={cn(
                 "text-xs px-3 py-1 rounded-full font-medium capitalize",
                 TAG_COLORS[t],
