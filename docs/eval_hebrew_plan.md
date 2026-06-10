@@ -70,7 +70,11 @@ Run `reset_db()` after schema changes; method YAML loader is insert-only (see ha
 
 ---
 
-## Phase E0 — Scoping spike (½ day, throw-away OK)
+## Phase E0 — Scoping spike — **DONE** (Round 3, June 2026)
+
+**Status:** Gate passed. 100% EF short + long via `research/languages/he.yaml` glosses.
+Findings: [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md). Script:
+`research/scripts/e0_hebrew_spike.py`.
 
 **Goal:** Validate that GPT Hebrew generation is good enough to evaluate, and measure clitic
 attachment frequency before writing matchers.
@@ -105,50 +109,36 @@ No code required; informs E1 benchmark design.
 
 ## Phase E1 — Benchmark + Hebrew-aware constraint matching
 
-### E1.1 — Schema: `gender` on constraint sets
+### E1.1 — Schema: flat `constraints` dict (implemented on refactor branch)
 
-**Option A (recommended):** store in `extra_constraints` JSON — no migration.
+Gender and other Hebrew-specific axes are **top-level YAML keys** validated against
+`research/languages/he.yaml`. Stored in `ConstraintSet.constraints` JSON.
 
 ```yaml
 # hebrew_basic.yaml example
 - keyword: לשאול
   expected_form: שאלתי
   translation: to ask
-  tense: qatal          # past / perfective
+  tense: past
   person: 1st
   number: singular
-  extra_constraints:
-    gender: masculine   # or feminine
+  gender: masculine   # optional; required when gender is morphologically marked
 ```
 
-**Option B:** add nullable `gender` column on `ConstraintSet` if you want it in SQL queries.
-Only do this if notebook pivots need `gender` as a first-class filter.
-
-Update `ConstraintSet.to_constraints_dict()` to flatten `gender` from `extra_constraints`
-into the top-level constraints dict passed to evaluators and prompts:
-
-```python
-if self.extra_constraints:
-    out["extra_constraints"] = self.extra_constraints
-    if "gender" in self.extra_constraints:
-        out["gender"] = self.extra_constraints["gender"]
-```
+`to_constraints_dict()` returns the flat dict for evaluators and `prompt_builder`.
 
 ### E1.2 — Hebrew tense vocabulary
 
-Use precise Hebrew tense names in benchmark YAML (per
-[`eval_verb_morphology_plan.md`](eval_verb_morphology_plan.md) §3). Map to UD features in
-`morph_configs/he.yaml`.
+Use Modern Hebrew tense labels in benchmark YAML (`past`, `present`, `future`). Glosses for
+prompts live in `research/languages/he.yaml`. Map to UD features in `morph_configs/he.yaml`.
 
 | Benchmark `tense` | Linguistic label | UD `Tense` (Stanza) | Notes |
 | --- | --- | --- | --- |
-| `qatal` | Past / perfective | `Past` | Most common "past" for drills |
-| `yiqtol` | Future / imperfective | `Fut` | |
-| `present_participle` | Present (Benoni) | `Pres` | Gender always marked |
-| `wayyiqtol` | Narrative past | `Past` | Optional; advanced benchmark only |
-| `imperative` | Imperative | *(no Tense)* | Use `Mood=Imp` in morph config |
+| `past` | Past / perfective (עבר) | `Past` | Replaces biblical `qatal` label |
+| `present` | Present (Benoni / הווה) | `Pres` | Gender always marked |
+| `future` | Future (עתיד) | `Fut` | Replaces biblical `yiqtol` label |
 
-Start `hebrew_basic` with `qatal`, `yiqtol`, `present_participle` only.
+Start `hebrew_basic` with `past`, `present`, `future` only.
 
 ### E1.3 — Benchmark YAML: `hebrew_basic`
 
@@ -164,12 +154,12 @@ Design principles:
 
 | keyword | expected_form | tense | person | number | gender | gloss |
 | --- | --- | --- | --- | --- | --- | --- |
-| לשאול | שאלתי | qatal | 1st | singular | masc | I asked |
-| לשאול | שאלת | qatal | 2nd | singular | masc | you asked |
-| לכתוב | כותבת | present_participle | 3rd | singular | fem | she writes |
-| לכתוב | נכתוב | yiqtol | 1st | plural | — | we will write |
-| לאכול | אכלנו | qatal | 1st | plural | — | we ate |
-| ללכת | הלכת | qatal | 2nd | singular | fem | you (f) went |
+| לשאול | שאלתי | past | 1st | singular | masc | I asked |
+| לשאול | שאלת | past | 2nd | singular | masc | you asked |
+| לכתוב | כותבת | present | 3rd | singular | fem | she writes |
+| לכתוב | נכתוב | future | 1st | plural | — | we will write |
+| לאכול | אכלנו | past | 1st | plural | — | we ate |
+| ללכת | הלכת | past | 2nd | singular | fem | you (f) went |
 
 Use `gender: null` or omit where tense does not mark gender (1st past, 1st future plural).
 
@@ -257,10 +247,9 @@ model: he
 pos_filter: [VERB, AUX]
 
 tense_map:
-  qatal: Past
-  yiqtol: Fut
-  present_participle: Pres
-  wayyiqtol: Past
+  past: Past
+  present: Pres
+  future: Fut
   imperative: null   # checked via Mood instead
 
 person_map:
@@ -392,33 +381,17 @@ Experiment names: `hebrew_basic__baseline_default__live` (existing naming conven
 
 ---
 
-## Phase E5 — Gender-aware prompt anchoring
+## Phase E5 — Gender-aware prompt anchoring — **largely done** (language-profile refactor)
 
-### E5.1 — Extend `build_prompt` in `baseline_gpt.py` / `individual_gpt.py`
+Gender and tense glosses are driven by `research/languages/he.yaml` and
+`research/generation/prompt_builder.py`. No Hebrew branches in `baseline_gpt.py`.
 
-Add parameters:
-- `explicit_subject_required: bool` (already exists — extend for Hebrew)
-- `gender_required: bool` (new — read from method YAML)
+Remaining E5 work:
+- `explicit_subject_required: true` on method presets for long challenging items (generic line, no pronoun tables)
+- Optional `gender_required` method flag if benchmarks need to force subject+gender anchoring beyond flat constraints
 
-Hebrew subject hints (`_SUBJECT_EXAMPLES_HE`):
-
-| person | number | gender | hint examples |
-| --- | --- | --- | --- |
-| 1st | singular | — | `אני` (gender-neutral pronoun; verb still gendered in present) |
-| 2nd | singular | masc | `אתה` |
-| 2nd | singular | fem | `את` |
-| 3rd | singular | masc | `הוא` or named masculine noun |
-| 3rd | singular | fem | `היא` or named feminine noun |
-| 1st | plural | — | `אנחנו` |
-| 3rd | plural | masc | `הם` |
-| 3rd | plural | fem | `הן` |
-
-**Present tense special case:** 1st singular still needs gender on the verb
-(`אני כותב` vs `אני כותבת`). When `gender` is set and tense is `present_participle`,
-prompt must say: *"The subject is masculine/feminine; the verb must agree in gender."*
-
-For 1st singular present without gender in constraints, pick one gender in the benchmark
-and enforce via `extra_constraints.gender` — do not leave it ambiguous.
+**Present tense special case:** 1st singular still needs `gender` in the constraint dict
+(`אני כותב` vs `אני כותבת`). E0 Round 3 passed with gender as a flat YAML key.
 
 ### E5.2 — Method YAML flag
 
@@ -581,7 +554,7 @@ Keep Stanza import lazy inside `verb_morphology.py` (mock-only runs should not r
 
 | Decision | Options | Recommendation |
 | --- | --- | --- |
-| `gender` storage | `extra_constraints` vs DB column | `extra_constraints` for Tier 1 |
+| `gender` storage | Flat `constraints` dict | **Resolved** — flat key in `he.yaml` / `ConstraintSet.constraints` |
 | EF matcher scope | Extend existing vs new evaluator name | Extend existing; record `match_strategy` in `details` |
 | Suffix clitics | Strip in Tier 1 vs defer | Defer unless E0 shows >30% suffix attachment |
 | LT for Hebrew | Skip vs LLM judge | Skip Tier 1; LLM judge Tier 2 if needed |
@@ -618,8 +591,8 @@ Keep Stanza import lazy inside `verb_morphology.py` (mock-only runs should not r
 | `research/evaluation/morph_configs/__init__.py` | Optional `gender_map` |
 | `research/evaluation/length_bands.py` | Per-language bands (Tier 2) |
 | `research/evaluation/distribution/tokens.py` | Hebrew tokenization |
-| `research/generation/baseline_gpt.py` | Hebrew subject/gender hints |
-| `research/generation/individual_gpt.py` | Same |
+| `research/languages/he.yaml` | Constraint schema + tense glosses |
+| `research/generation/prompt_builder.py` | Generic prompt assembly |
 | `research/analysis/live_experiments.py` | Shared helpers + RTL |
 | `research/explore_live_hebrew_basic.ipynb` | Analysis |
 | `research/tests/test_hebrew_*.py` | Unit tests |

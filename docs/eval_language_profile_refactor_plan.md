@@ -1,5 +1,8 @@
 # Language-profile prompt refactor — plan (June 2026)
 
+> **Status:** Implemented on branch `research/eval-hebrew-e0-spike` (Phases 1–7, June 2026).
+> E0 Round 3: 100% EF short + long without Hebrew patch. Ready to merge to `main`.
+
 > Replace the Hebrew patch in `baseline_gpt.py` with a **single generic prompt** driven
 > by per-language schemas. One source of truth for which constraints exist in each
 > language, what they're called in the prompt, and (optionally) how they're displayed.

@@ -7,9 +7,12 @@
 
 ---
 
-## Git state (as of push to `main`)
+## Git state (as of June 2026)
 
-**`main`** is at `baeb8d2` on `origin/main` — clean, synced.
+**`main`** is at `baeb8d2` on `origin/main` (Spanish eval phases A/B/C/F merged).
+
+**Active branch:** `research/eval-hebrew-e0-spike` — language-profile refactor (Phases 1–7)
++ Hebrew E0 Round 3. **Not merged to `main` yet.**
 
 ```
 *   baeb8d2  Merge research/eval-sentence-length: sentence length control and explicit-subject prompts.
@@ -74,10 +77,15 @@ Self-contained YAML under `methods/baseline/` and `methods/individual/` (see
 Experiment names: `{benchmark}__{preset_name}__{live|mock}` (e.g.
 `spanish_challenging__baseline_long_explicit__live`).
 
-### Generation prompts
+### Generation prompts (language-profile refactor — on `research/eval-hebrew-e0-spike`)
 
-Optional `explicit_subject_required: true` adds a person/number-specific subject hint
-(e.g. *yo*, *él/ella*, *nosotros*) — see `generation/baseline_gpt.py`.
+- Per-language constraint schemas: `research/languages/{es,he}.yaml`
+- Generic prompt assembly: `research/generation/prompt_builder.py`
+- `baseline_gpt.py` is language-agnostic (~80 lines); no Hebrew-specific branches
+- `ConstraintSet.constraints` JSON column (flat dict); `tense`/`person`/`number` are property accessors
+- Benchmark loader validates constraint keys against the language profile at load time
+- Optional `explicit_subject_required: true` adds a generic explicit-subject line (no per-language pronoun tables)
+- Plan: [`eval_language_profile_refactor_plan.md`](eval_language_profile_refactor_plan.md)
 
 ### Benchmarks
 
@@ -87,7 +95,7 @@ Optional `explicit_subject_required: true` adds a person/number-specific subject
 
 ### Tests
 
-**195 tests** passing; run `python3 -m pytest research/tests/ -q`
+**210 tests** passing on `research/eval-hebrew-e0-spike`; run `python3 -m pytest research/tests/ -q`
 
 ### Analysis notebooks
 
@@ -150,10 +158,16 @@ Optional `explicit_subject_required: true` adds a person/number-specific subject
 
 ## Next steps
 
-1. **Dissertation write-up** — use [`eval_thesis_claims.md`](eval_thesis_claims.md)
-2. **Phase E — Hebrew** — see [`eval_hebrew_plan.md`](eval_hebrew_plan.md) (E0 spike → E1 benchmark + clitic matcher → E2 Stanza → E5 gendered prompts)
-3. **Phase D** — human ratings (deferred)
-4. **Shared analysis module** — extract notebook helpers (deferred; Hebrew plan folds this into E1/E5 via `research/analysis/live_experiments.py`)
+1. **Merge `research/eval-hebrew-e0-spike` → `main`** — language-profile refactor + E0 Round 3
+2. **Phase E — Hebrew E1** — see [`eval_hebrew_plan.md`](eval_hebrew_plan.md) (`hebrew_basic.yaml`, clitic-aware matcher, Stanza morph)
+3. **Dissertation write-up** — use [`eval_thesis_claims.md`](eval_thesis_claims.md)
+4. **Phase D** — human ratings (deferred)
+5. **Shared analysis module** — extract notebook helpers (deferred)
+
+### Hebrew E0 status
+
+E0 gate **passed** (Round 3): 100% EF short + long via `he.yaml` glosses, no Hebrew patch.
+Findings: [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md)
 
 ---
 
@@ -196,7 +210,9 @@ Extract duplicated notebook logic into `research/analysis/live_experiments.py`.
 ## Files to read first in a new chat
 
 - [`eval_thesis_claims.md`](eval_thesis_claims.md) — headline claims + evidence
-- [`eval_hebrew_plan.md`](eval_hebrew_plan.md) — Phase E Hebrew implementation (if starting multilingual work)
+- [`eval_language_profile_refactor_plan.md`](eval_language_profile_refactor_plan.md) — refactor architecture (complete on branch)
+- [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md) — E0 spike results (Round 3)
+- [`eval_hebrew_plan.md`](eval_hebrew_plan.md) — Phase E Hebrew E1+ implementation
 - `research/evaluation/sentence/expected_form.py`
 - `research/evaluation/distribution/__init__.py`
 - `research/explore_live_spanish_basic.ipynb`
