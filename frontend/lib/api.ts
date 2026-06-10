@@ -335,6 +335,7 @@ export type VocabSuggestDirection = "en-to-target" | "target-to-en";
 export interface VocabSuggestion {
   text: string;
   pos: VocabTag;
+  context?: string | null;
 }
 
 export interface VocabDraft {

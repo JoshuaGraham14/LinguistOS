@@ -104,7 +104,7 @@ def test_capture_canonical_with_optional_fields(client, workspace) -> None:
 def test_patch_keeps_legacy_and_canonical_in_sync(client, workspace) -> None:
     created = client.post(
         "/api/vocab",
-        json={"workspace_id": workspace["id"], "surface_form": "leche"},
+        json={"workspace_id": workspace["id"], "surface_form": "zaguate"},
     ).json()
     vocab_id = created["id"]
 

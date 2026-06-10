@@ -5,8 +5,26 @@ from __future__ import annotations
 from app.db.backfill_lexemes import find_or_create_lexeme, is_lexeme_complete
 from app.db.database import SessionLocal
 from app.db.models import EnrichmentJob, Lexeme, Vocab, Workspace
-from app.services.enrichment import apply_enrichment_to_lexeme, missing_lexeme_fields
+from app.services.enrichment import (
+    apply_enrichment_to_lexeme,
+    has_rich_metadata,
+    missing_lexeme_fields,
+    needs_enrichment,
+)
 from app.services.enrichment_worker import maybe_enqueue_enrichment, process_enrichment_job
+
+
+def test_needs_enrichment_for_thin_complete_lexeme() -> None:
+    lexeme = Lexeme(
+        language="es",
+        lemma="casa",
+        pos="noun",
+        gloss_primary="house",
+        tags=["noun"],
+        enrichment_status="complete",
+    )
+    assert has_rich_metadata(lexeme) is False
+    assert needs_enrichment(lexeme) is True
 
 
 def test_missing_lexeme_fields_detects_gaps() -> None:
