@@ -130,6 +130,8 @@ interface ApiMastery {
 interface ApiVocab {
   id: number;
   workspace_id: number;
+  lexeme_id: number | null;
+  enriching?: boolean;
   word: string;
   translation: string;
   tags: VocabTag[];
@@ -188,6 +190,8 @@ function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
   return {
     id: item.id,
     workspaceId: item.workspace_id,
+    lexemeId: item.lexeme_id ?? null,
+    enriching: item.enriching ?? false,
     word: item.word,
     translation: item.translation,
     language,

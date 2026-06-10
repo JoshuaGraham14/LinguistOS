@@ -21,6 +21,8 @@ export interface MasteryState {
 export interface VocabItem {
   id: number;
   workspaceId: number;
+  lexemeId: number | null;
+  enriching: boolean;
   word: string;
   translation: string;
   language: LanguageCode;
