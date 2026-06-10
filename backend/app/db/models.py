@@ -93,7 +93,7 @@ class Lexeme(Base):
     tags: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     cefr: Mapped[str | None] = mapped_column(String(8), nullable=True)
     frequency_rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    gender: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(16), nullable=True)
     conjugation_class: Mapped[str | None] = mapped_column(String(32), nullable=True)
     morph_features: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     ipa: Mapped[str | None] = mapped_column(String(128), nullable=True)
