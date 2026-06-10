@@ -7,6 +7,8 @@ candidates in a single prompt degrades quality or diversity.
 
 from __future__ import annotations
 
+from typing import Any
+
 from research.generation.base import BaseGenerator
 from research.generation.baseline_gpt import generate
 
@@ -26,9 +28,7 @@ class IndividualGPTGenerator(BaseGenerator):
         self,
         keyword: str,
         translation: str,
-        tense: str,
-        person: str,
-        number: str,
+        constraints: dict[str, Any],
         num_candidates: int,
         *,
         target_language: str = "es",
@@ -41,9 +41,7 @@ class IndividualGPTGenerator(BaseGenerator):
             batch = generate(
                 keyword=keyword,
                 translation=translation,
-                tense=tense,
-                person=person,
-                number=number,
+                constraints=constraints,
                 num_candidates=1,
                 target_language=target_language,
                 cefr_level=cefr_level,

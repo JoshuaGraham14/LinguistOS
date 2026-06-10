@@ -15,43 +15,25 @@ from typing import Any
 
 from research.generation.base import BaseGenerator
 from research.generation.prompt_builder import build_prompt as _build_prompt
+from research.generation.prompt_builder import language_display_name
 
 
 def build_prompt(
     keyword: str,
     translation: str,
-    tense: str,
-    person: str,
-    number: str,
+    constraints: dict[str, Any],
     num_candidates: int,
     target_language: str = "es",
     sentence_length: str = "short",
     cefr_level: str | None = None,
     explicit_subject_required: bool = False,
-    gender: str | None = None,
-    *,
-    constraints: dict[str, Any] | None = None,
 ) -> str:
-    """Build the prompt for unconstrained sentence generation.
-
-    When *constraints* is omitted, assembles a dict from tense/person/number
-    (and optional gender) for backward compatibility.
-    """
-    merged = dict(constraints or {})
-    if "tense" not in merged:
-        merged["tense"] = tense
-    if "person" not in merged:
-        merged["person"] = person
-    if "number" not in merged:
-        merged["number"] = number
-    if gender and "gender" not in merged:
-        merged["gender"] = gender.strip().lower()
-
+    """Build the prompt for unconstrained sentence generation."""
     return _build_prompt(
         keyword=keyword,
         translation=translation,
         target_language=target_language,
-        constraints=merged,
+        constraints=constraints,
         num_candidates=num_candidates,
         sentence_length=sentence_length,
         cefr_level=cefr_level,
@@ -77,17 +59,13 @@ def parse_candidates(raw: str) -> list[dict[str, str]]:
 def generate(
     keyword: str,
     translation: str,
-    tense: str,
-    person: str,
-    number: str,
+    constraints: dict[str, Any],
     num_candidates: int = 5,
     *,
     target_language: str = "es",
     cefr_level: str | None = None,
     sentence_length: str = "short",
     explicit_subject_required: bool = False,
-    gender: str | None = None,
-    constraints: dict[str, Any] | None = None,
     model: str = "gpt-5.4-nano",
     temperature: float = 0.7,
     api_key: str | None = None,
@@ -103,23 +81,16 @@ def generate(
     from openai import OpenAI
 
     client = OpenAI(api_key=key)
-
-    from research.generation.prompt_builder import language_display_name
-
     lang = language_display_name(target_language)
     prompt = build_prompt(
         keyword=keyword,
         translation=translation,
-        tense=tense,
-        person=person,
-        number=number,
+        constraints=constraints,
         num_candidates=num_candidates,
         target_language=target_language,
         cefr_level=cefr_level,
         sentence_length=sentence_length,
         explicit_subject_required=explicit_subject_required,
-        gender=gender,
-        constraints=constraints,
     )
 
     completion = client.chat.completions.create(
@@ -156,31 +127,23 @@ class BaselineGPTGenerator(BaseGenerator):
         self,
         keyword: str,
         translation: str,
-        tense: str,
-        person: str,
-        number: str,
+        constraints: dict[str, Any],
         num_candidates: int,
         *,
         target_language: str = "es",
         cefr_level: str | None = None,
         sentence_length: str = "short",
         explicit_subject_required: bool = False,
-        gender: str | None = None,
-        constraints: dict[str, Any] | None = None,
     ) -> list[dict[str, str]]:
         return generate(
             keyword=keyword,
             translation=translation,
-            tense=tense,
-            person=person,
-            number=number,
+            constraints=constraints,
             num_candidates=num_candidates,
             target_language=target_language,
             cefr_level=cefr_level,
             sentence_length=sentence_length,
             explicit_subject_required=explicit_subject_required,
-            gender=gender,
-            constraints=constraints,
             model=self._model,
             temperature=self._temperature,
         )

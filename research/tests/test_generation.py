@@ -31,14 +31,16 @@ def test_concrete_subclass_works():
         def name(self):
             return "dummy"
 
-        def generate(self, keyword, translation, tense, person, number,
+        def generate(self, keyword, translation, constraints,
                      num_candidates, *, target_language="es", cefr_level=None,
-                     sentence_length="short"):
+                     sentence_length="short", explicit_subject_required=False):
             return [{"sentence": "Hola.", "translation": "Hello."}]
 
     gen = Dummy()
     assert gen.name == "dummy"
-    result = gen.generate("x", "y", "present", "1st", "singular", 1)
+    result = gen.generate(
+        "x", "y", {"tense": "present", "person": "1st", "number": "singular"}, 1
+    )
     assert len(result) == 1
 
 
@@ -58,14 +60,24 @@ def test_individual_generator_name():
 def test_baseline_generator_returns_empty_without_api_key(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     gen = BaselineGPTGenerator()
-    result = gen.generate("comer", "to eat", "past", "1st", "plural", 3)
+    result = gen.generate(
+        "comer",
+        "to eat",
+        {"tense": "preterite", "person": "1st", "number": "plural"},
+        3,
+    )
     assert result == []
 
 
 def test_individual_generator_returns_empty_without_api_key(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     gen = IndividualGPTGenerator()
-    result = gen.generate("comer", "to eat", "past", "1st", "plural", 3)
+    result = gen.generate(
+        "comer",
+        "to eat",
+        {"tense": "preterite", "person": "1st", "number": "plural"},
+        3,
+    )
     assert result == []
 
 
