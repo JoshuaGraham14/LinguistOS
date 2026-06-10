@@ -1,0 +1,920 @@
+{
+  "data": {
+    "cases": [
+      {
+        "case": {
+          "id": "es_si_imperf_subj",
+          "language": "es",
+          "keyword": "correr",
+          "translation": "to run",
+          "constraints": {
+            "tense": "imperfect",
+            "mood": "subjunctive",
+            "person": "3rd",
+            "number": "singular"
+          },
+          "expected_form": "corriera",
+          "expected_phrase": null,
+          "exercise_type": "conditional sentence with si-clause",
+          "sentence_length": "medium",
+          "notes": "",
+          "manual_checks": [
+            "si-clause uses subjunctive (not indicative)",
+            "main clause conditional (not present/future)"
+          ]
+        },
+        "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"correr\" (English: \"to run\")\nConstraints:\n  Tense: Imperfect\n  Mood: Subjunctive\n  Person: 3rd\n  Number: Singular\n  length: medium (5–9 tokens).\nExercise type: conditional sentence with si-clause.\nProduce 3 natural Spanish sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "Si él corriera más, llegaría antes.",
+            "translation": "If he ran more, he would arrive earlier.",
+            "token_count": 6,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "corriera",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "Si ella corriera cada día, estaría más fuerte.",
+            "translation": "If she ran every day, she would be stronger.",
+            "token_count": 8,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "corriera",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "Si usted corriera despacio, no se lastimaría.",
+            "translation": "If you ran slowly, you wouldn't get hurt.",
+            "token_count": 7,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "corriera",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "es_pluperf_subj",
+          "language": "es",
+          "keyword": "comer",
+          "translation": "to eat",
+          "constraints": {
+            "tense": "imperfect",
+            "mood": "subjunctive",
+            "person": "1st",
+            "number": "singular"
+          },
+          "expected_form": null,
+          "expected_phrase": [
+            "hubiera",
+            "comido"
+          ],
+          "exercise_type": "compound pluperfect subjunctive",
+          "sentence_length": "medium",
+          "notes": "",
+          "manual_checks": [
+            "auxiliary hubiera/hubiese (not había indicative)",
+            "past participle agrees in number with subject if applicable"
+          ]
+        },
+        "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"comer\" (English: \"to eat\")\nConstraints:\n  Tense: Imperfect\n  Mood: Subjunctive\n  Person: 1st\n  Number: Singular\n  length: medium (5–9 tokens).\nExercise type: compound pluperfect subjunctive.\nProduce 3 natural Spanish sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "Yo comiera cuando me llamaran, aunque ya había comido.",
+            "translation": "I would have eaten when they called me, even though I had already eaten.",
+            "token_count": 9,
+            "in_length_band": true,
+            "phrase_match": false,
+            "matched_span": null,
+            "start_index": null,
+            "scoring_mode": "phrase"
+          },
+          {
+            "idx": 2,
+            "sentence": "Yo comiera despacio, si antes me hubieran servido comida, como ya había comido.",
+            "translation": "I would have eaten slowly, if they had served me food before, as I had already eaten.",
+            "token_count": 13,
+            "in_length_band": false,
+            "phrase_match": false,
+            "matched_span": null,
+            "start_index": null,
+            "scoring_mode": "phrase"
+          },
+          {
+            "idx": 3,
+            "sentence": "Yo comiera contigo, si hubiera sido posible, aunque ya había comido antes.",
+            "translation": "I would have eaten with you, if it had been possible, even though I had already eaten before.",
+            "token_count": 12,
+            "in_length_band": false,
+            "phrase_match": false,
+            "matched_span": null,
+            "start_index": null,
+            "scoring_mode": "phrase"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "es_vosotros_imperf_subj",
+          "language": "es",
+          "keyword": "hablar",
+          "translation": "to speak",
+          "constraints": {
+            "tense": "imperfect",
+            "mood": "subjunctive",
+            "person": "2nd",
+            "number": "plural",
+            "dialect": "peninsular"
+          },
+          "expected_form": "hablarais",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "medium",
+          "notes": "",
+          "manual_checks": [
+            "vosotros/vosotras subject or clear 2pl peninsular (not ustedes hablaran)"
+          ]
+        },
+        "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"hablar\" (English: \"to speak\")\nConstraints:\n  Tense: Imperfect\n  Mood: Subjunctive\n  Person: 2nd\n  Number: Plural\n  Dialect: Peninsular Spanish (vosotros for 2pl)\n  length: medium (5–9 tokens).\nProduce 3 natural Spanish sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "Esperábamos que vosotros hablarais con claridad.",
+            "translation": "We hoped that you all would speak clearly.",
+            "token_count": 6,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "hablarais",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "Era importante que vosotros hablarais sin miedo.",
+            "translation": "It was important that you all spoke without fear.",
+            "token_count": 7,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "hablarais",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "Queríamos que vosotros hablarais más despacio.",
+            "translation": "We wanted you all to speak more slowly.",
+            "token_count": 6,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "hablarais",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "es_passive_se",
+          "language": "es",
+          "keyword": "vender",
+          "translation": "to sell",
+          "constraints": {
+            "tense": "present",
+            "mood": "indicative",
+            "person": "3rd",
+            "number": "plural"
+          },
+          "expected_form": "venden",
+          "expected_phrase": null,
+          "exercise_type": "passive se",
+          "sentence_length": "medium",
+          "notes": "",
+          "manual_checks": [
+            "se + plural verb agreeing with following plural noun (not se vende + plural noun)"
+          ]
+        },
+        "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"vender\" (English: \"to sell\")\nConstraints:\n  Tense: Present\n  Mood: Indicative\n  Person: 3rd\n  Number: Plural\n  length: medium (5–9 tokens).\nExercise type: passive se.\nProduce 3 natural Spanish sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "Los productos se venden en esta tienda todos los días.",
+            "translation": "The products are sold in this store every day.",
+            "token_count": 10,
+            "in_length_band": false,
+            "strict": true,
+            "matched_token": "venden",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "Las entradas se venden rápidamente para ese concierto.",
+            "translation": "The tickets are sold quickly for that concert.",
+            "token_count": 8,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "venden",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "Los libros se venden en línea desde el lunes.",
+            "translation": "The books are sold online starting Monday.",
+            "token_count": 9,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "venden",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "es_clitic_doubling",
+          "language": "es",
+          "keyword": "decir",
+          "translation": "to say",
+          "constraints": {
+            "tense": "preterite",
+            "mood": "indicative",
+            "person": "1st",
+            "number": "singular"
+          },
+          "expected_form": null,
+          "expected_phrase": [
+            "se",
+            "lo",
+            "dije"
+          ],
+          "exercise_type": "clitic doubling",
+          "sentence_length": "medium",
+          "notes": "",
+          "manual_checks": [
+            "IO clitic before DO clitic (se/te/le + lo/la)",
+            "le→se mutation before lo if applicable"
+          ]
+        },
+        "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"decir\" (English: \"to say\")\nConstraints:\n  Tense: Preterite (pretérito indefinido)\n  Mood: Indicative\n  Person: 1st\n  Number: Singular\n  length: medium (5–9 tokens).\nExercise type: clitic doubling.\nProduce 3 natural Spanish sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "Se lo dije ayer en casa.",
+            "translation": "I told it to him/her at home yesterday.",
+            "token_count": 6,
+            "in_length_band": true,
+            "phrase_match": true,
+            "matched_span": [
+              "Se",
+              "lo",
+              "dije"
+            ],
+            "start_index": 0,
+            "scoring_mode": "phrase"
+          },
+          {
+            "idx": 2,
+            "sentence": "Se lo dije por teléfono anoche.",
+            "translation": "I told it to him/her by phone last night.",
+            "token_count": 6,
+            "in_length_band": true,
+            "phrase_match": true,
+            "matched_span": [
+              "Se",
+              "lo",
+              "dije"
+            ],
+            "start_index": 0,
+            "scoring_mode": "phrase"
+          },
+          {
+            "idx": 3,
+            "sentence": "Se lo dije sin pensarlo dos veces.",
+            "translation": "I told it to him/her without thinking twice.",
+            "token_count": 7,
+            "in_length_band": true,
+            "phrase_match": true,
+            "matched_span": [
+              "Se",
+              "lo",
+              "dije"
+            ],
+            "start_index": 0,
+            "scoring_mode": "phrase"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "es_voseo",
+          "language": "es",
+          "keyword": "comer",
+          "translation": "to eat",
+          "constraints": {
+            "tense": "present",
+            "mood": "indicative",
+            "person": "2nd",
+            "number": "singular",
+            "dialect": "voseo"
+          },
+          "expected_form": "comés",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": [
+            "vos subject with voseo verb form (not tú comes)"
+          ]
+        },
+        "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"comer\" (English: \"to eat\")\nConstraints:\n  Tense: Present\n  Mood: Indicative\n  Person: 2nd\n  Number: Singular\n  Dialect: Rioplatense voseo (vos for 2sg)\n  length: short (2–5 tokens).\nProduce 3 natural Spanish sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "Vos comés mucho.",
+            "translation": "You eat a lot.",
+            "token_count": 3,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "comés",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "¿Vos comés hoy?",
+            "translation": "Do you eat today?",
+            "token_count": 3,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "comés",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "Vos comés rápido.",
+            "translation": "You eat fast.",
+            "token_count": 3,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "comés",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "he_hifil_future_weak",
+          "language": "he",
+          "keyword": "לְהוֹרִיד",
+          "translation": "to bring down / lower",
+          "constraints": {
+            "tense": "future",
+            "person": "3rd",
+            "number": "singular",
+            "gender": "masculine",
+            "binyan": "hifil"
+          },
+          "expected_form": "יוריד",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": [
+            "hif'il future of ירד, not pa'al ירד"
+          ]
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לְהוֹרִיד\" (English: \"to bring down / lower\")\nConstraints:\n  Tense: Future (עתיד)\n  Person: 3rd\n  Number: Singular\n  Gender: Masculine\n  Binyan: Hif'il (causative)\n  length: short (2–5 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "הוא יוריד את המחיר.",
+            "translation": "He will lower the price.",
+            "token_count": 4,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "יוריד",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "הוא יוריד את הלהבה.",
+            "translation": "He will lower the flame.",
+            "token_count": 4,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "יוריד",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "הוא יוריד את הטמפרטורה.",
+            "translation": "He will lower the temperature.",
+            "token_count": 4,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "יוריד",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "he_piel_only",
+          "language": "he",
+          "keyword": "לְדַבֵּר",
+          "translation": "to speak",
+          "constraints": {
+            "tense": "past",
+            "person": "3rd",
+            "number": "singular",
+            "gender": "masculine",
+            "binyan": "piel"
+          },
+          "expected_form": "דיבר",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": [
+            "pi'el past (no pa'al in modern for this root)"
+          ]
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לְדַבֵּר\" (English: \"to speak\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 3rd\n  Number: Singular\n  Gender: Masculine\n  Binyan: Pi'el\n  length: short (2–5 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "הוא דִּבֵּר.",
+            "translation": "He spoke.",
+            "token_count": 2,
+            "in_length_band": true,
+            "strict": false,
+            "matched_token": null,
+            "match_strategy": null,
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "הוא לִדַבֵּר.",
+            "translation": "He to speak.",
+            "token_count": 2,
+            "in_length_band": true,
+            "strict": false,
+            "matched_token": null,
+            "match_strategy": null,
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "הוא דִּבֵּר מעט.",
+            "translation": "He spoke a little.",
+            "token_count": 3,
+            "in_length_band": true,
+            "strict": false,
+            "matched_token": null,
+            "match_strategy": null,
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "he_hitpael_past",
+          "language": "he",
+          "keyword": "לְהִתְלַבֵּשׁ",
+          "translation": "to get dressed",
+          "constraints": {
+            "tense": "past",
+            "person": "1st",
+            "number": "singular",
+            "binyan": "hitpael"
+          },
+          "expected_form": "התלבשתי",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": []
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לְהִתְלַבֵּשׁ\" (English: \"to get dressed\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 1st\n  Number: Singular\n  Binyan: Hitpa'el (reflexive)\n  length: short (2–5 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "התלבשתי.",
+            "translation": "I got dressed.",
+            "token_count": 1,
+            "in_length_band": false,
+            "strict": true,
+            "matched_token": "התלבשתי",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "התלבשתי מהר.",
+            "translation": "I got dressed quickly.",
+            "token_count": 2,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "התלבשתי",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "התלבשתי הבוקר.",
+            "translation": "I got dressed this morning.",
+            "token_count": 2,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "התלבשתי",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "he_hollow_future_fem",
+          "language": "he",
+          "keyword": "לָקוּם",
+          "translation": "to rise / get up",
+          "constraints": {
+            "tense": "future",
+            "person": "3rd",
+            "number": "singular",
+            "gender": "feminine"
+          },
+          "expected_form": "תקום",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": [
+            "feminine future of hollow root קום"
+          ]
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לָקוּם\" (English: \"to rise / get up\")\nConstraints:\n  Tense: Future (עתיד)\n  Person: 3rd\n  Number: Singular\n  Gender: Feminine\n  length: short (2–5 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "היא תָּקוּם מחר.",
+            "translation": "She will get up tomorrow.",
+            "token_count": 3,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "תָּקוּם",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "היא תָּקוּם בקרוב.",
+            "translation": "She will get up soon.",
+            "token_count": 3,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "תָּקוּם",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "היא תָּקוּם מוקדם.",
+            "translation": "She will get up early.",
+            "token_count": 3,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "תָּקוּם",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "he_neg_imperative",
+          "language": "he",
+          "keyword": "לָלֶכֶת",
+          "translation": "to go",
+          "constraints": {
+            "person": "2nd",
+            "number": "singular",
+            "gender": "feminine"
+          },
+          "expected_form": null,
+          "expected_phrase": [
+            "אל",
+            "תלכי"
+          ],
+          "exercise_type": "negative imperative",
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": [
+            "אל negator (not לא + infinitive)",
+            "2sg feminine imperative form"
+          ]
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לָלֶכֶת\" (English: \"to go\")\nConstraints:\n  Person: 2nd\n  Number: Singular\n  Gender: Feminine\n  length: short (2–5 tokens).\nExercise type: negative imperative.\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אל תלכי לשם.",
+            "translation": "Don't go there.",
+            "token_count": 3,
+            "in_length_band": true,
+            "phrase_match": true,
+            "matched_span": [
+              "אל",
+              "תלכי"
+            ],
+            "start_index": 0,
+            "scoring_mode": "phrase"
+          },
+          {
+            "idx": 2,
+            "sentence": "אל תלכי הביתה.",
+            "translation": "Don't go home.",
+            "token_count": 3,
+            "in_length_band": true,
+            "phrase_match": true,
+            "matched_span": [
+              "אל",
+              "תלכי"
+            ],
+            "start_index": 0,
+            "scoring_mode": "phrase"
+          },
+          {
+            "idx": 3,
+            "sentence": "אל תלכי עכשיו.",
+            "translation": "Don't go now.",
+            "token_count": 3,
+            "in_length_band": true,
+            "phrase_match": true,
+            "matched_span": [
+              "אל",
+              "תלכי"
+            ],
+            "start_index": 0,
+            "scoring_mode": "phrase"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "he_object_suffix",
+          "language": "he",
+          "keyword": "לִרְאוֹת",
+          "translation": "to see",
+          "constraints": {
+            "tense": "past",
+            "person": "1st",
+            "number": "singular",
+            "gender": "masculine"
+          },
+          "expected_form": "ראיתיה",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": [
+            "object suffix -ה on verb (not separate אותה)"
+          ]
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לִרְאוֹת\" (English: \"to see\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 1st\n  Number: Singular\n  Gender: Masculine\n  length: short (2–5 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "ראיתי.",
+            "translation": "I saw.",
+            "token_count": 1,
+            "in_length_band": false,
+            "strict": false,
+            "matched_token": null,
+            "match_strategy": null,
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "ראיתי אותו.",
+            "translation": "I saw him.",
+            "token_count": 2,
+            "in_length_band": true,
+            "strict": false,
+            "matched_token": null,
+            "match_strategy": null,
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "ראיתי שם.",
+            "translation": "I saw there.",
+            "token_count": 2,
+            "in_length_band": true,
+            "strict": false,
+            "matched_token": null,
+            "match_strategy": null,
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "he_hifil_fem_pl_present",
+          "language": "he",
+          "keyword": "לְהָכִין",
+          "translation": "to prepare",
+          "constraints": {
+            "tense": "present",
+            "person": "3rd",
+            "number": "plural",
+            "gender": "feminine",
+            "binyan": "hifil"
+          },
+          "expected_form": "מכינות",
+          "expected_phrase": null,
+          "exercise_type": null,
+          "sentence_length": "short",
+          "notes": "",
+          "manual_checks": [
+            "hif'il present feminine plural (not pa'al מכינות homograph risk)"
+          ]
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לְהָכִין\" (English: \"to prepare\")\nConstraints:\n  Tense: Present (הווה)\n  Person: 3rd\n  Number: Plural\n  Gender: Feminine\n  Binyan: Hif'il (causative)\n  length: short (2–5 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "הן מכינות את האוכל.",
+            "translation": "They prepare the food.",
+            "token_count": 4,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "מכינות",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 2,
+            "sentence": "הן מכינות את השיעורים.",
+            "translation": "They prepare the lessons.",
+            "token_count": 4,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "מכינות",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          },
+          {
+            "idx": 3,
+            "sentence": "הן מכינות את המסמכים.",
+            "translation": "They prepare the documents.",
+            "token_count": 4,
+            "in_length_band": true,
+            "strict": true,
+            "matched_token": "מכינות",
+            "match_strategy": "strict",
+            "scoring_mode": "token"
+          }
+        ],
+        "n_returned": 3
+      }
+    ],
+    "samples_per_case": 3
+  },
+  "summary": {
+    "per_case": [
+      {
+        "id": "es_si_imperf_subj",
+        "language": "es",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      },
+      {
+        "id": "es_pluperf_subj",
+        "language": "es",
+        "metric": "phrase_match",
+        "pass_rate": 0.0,
+        "clitic_aware_rate": null,
+        "n": 3
+      },
+      {
+        "id": "es_vosotros_imperf_subj",
+        "language": "es",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      },
+      {
+        "id": "es_passive_se",
+        "language": "es",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      },
+      {
+        "id": "es_clitic_doubling",
+        "language": "es",
+        "metric": "phrase_match",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": null,
+        "n": 3
+      },
+      {
+        "id": "es_voseo",
+        "language": "es",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      },
+      {
+        "id": "he_hifil_future_weak",
+        "language": "he",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      },
+      {
+        "id": "he_piel_only",
+        "language": "he",
+        "metric": "ef_strict",
+        "pass_rate": 0.0,
+        "clitic_aware_rate": 0.0,
+        "n": 3
+      },
+      {
+        "id": "he_hitpael_past",
+        "language": "he",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      },
+      {
+        "id": "he_hollow_future_fem",
+        "language": "he",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      },
+      {
+        "id": "he_neg_imperative",
+        "language": "he",
+        "metric": "phrase_match",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": null,
+        "n": 3
+      },
+      {
+        "id": "he_object_suffix",
+        "language": "he",
+        "metric": "ef_strict",
+        "pass_rate": 0.0,
+        "clitic_aware_rate": 0.0,
+        "n": 3
+      },
+      {
+        "id": "he_hifil_fem_pl_present",
+        "language": "he",
+        "metric": "ef_strict",
+        "pass_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "n": 3
+      }
+    ],
+    "samples_per_case": 3
+  }
+}

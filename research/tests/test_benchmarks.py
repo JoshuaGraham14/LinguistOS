@@ -6,6 +6,7 @@ import textwrap
 from pathlib import Path
 
 import pytest
+import yaml
 
 from research.benchmarks.loader import load_benchmark, _validate_raw
 from research.db.models import Benchmark, ConstraintSet
@@ -199,6 +200,35 @@ def test_validate_missing_constraint_field(tmp_path):
         _validate_raw(data, tmp_path / "x.yaml")
 
 
+def test_validate_rejects_invalid_tense_for_language(tmp_path):
+    p = tmp_path / "bad_he.yaml"
+    data = {
+        "name": "bad_he",
+        "language": "he",
+        "constraint_sets": [{
+            "keyword": "לשאול",
+            "translation": "to ask",
+            "tense": "qatal",
+            "person": "1st",
+            "number": "singular",
+        }],
+    }
+    with pytest.raises(ValueError, match="invalid value 'qatal'"):
+        _validate_raw(data, p)
+
+
+def test_load_stores_constraints_json(session, yaml_path):
+    bm = load_benchmark(session, yaml_path)
+    comer = session.query(ConstraintSet).filter_by(
+        benchmark_id=bm.id, keyword="comer"
+    ).one()
+    assert comer.constraints == {
+        "tense": "preterite",
+        "person": "1st",
+        "number": "plural",
+    }
+
+
 def test_load_spanish_challenging_yaml(session):
     yaml_path = (
         Path(__file__).resolve().parent.parent / "benchmarks" / "spanish_challenging.yaml"
@@ -233,6 +263,15 @@ def test_load_spanish_grammar_probe_yaml(session):
     assert bm.name == "spanish_grammar_probe"
     assert bm.mock_only is True
     assert len(bm.constraint_sets) == 4
+
+
+def test_all_repo_benchmark_yamls_validate():
+    """Every benchmark YAML in research/benchmarks/ passes schema validation."""
+    bench_dir = Path(__file__).resolve().parent.parent / "benchmarks"
+    for path in sorted(bench_dir.glob("*.yaml")):
+        with open(path) as f:
+            data = yaml.safe_load(f)
+        _validate_raw(data, path)
 
 
 def test_load_spanish_basic_yaml(session):

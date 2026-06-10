@@ -1,0 +1,44 @@
+code: he
+name: Hebrew
+
+dimensions:
+  tense:
+    - past
+    - present
+    - future
+  person:
+    - "1st"
+    - "2nd"
+    - "3rd"
+  number:
+    - singular
+    - plural
+  gender:
+    - masculine
+    - feminine
+  binyan:
+    - paal
+    - piel
+    - hifil
+    - hitpael
+    - nifal
+    - pual
+    - hufal
+
+labels:
+  binyan: Binyan
+
+glosses:
+  tense:
+    past: "Past (עבר)"
+    present: "Present (הווה)"
+    future: "Future (עתיד)"
+  binyan:
+    hifil: "Hif'il (causative)"
+    piel: "Pi'el"
+    hitpael: "Hitpa'el (reflexive)"
+
+required:
+  - tense
+  - person
+  - number

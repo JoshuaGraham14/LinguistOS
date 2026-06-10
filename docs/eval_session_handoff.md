@@ -1,32 +1,28 @@
 # Evaluation work — session handoff (June 2026)
 
 > **For the next chat:** start here for context on research-mode sentence evaluation.
+> Thesis claims (automatic only): [`eval_thesis_claims.md`](eval_thesis_claims.md).
 > Detailed plan: [`evaluation_metrics_implementation_plan.md`](evaluation_metrics_implementation_plan.md).
 > spaCy evaluator notes: [`eval_verb_morphology_plan.md`](eval_verb_morphology_plan.md).
 
 ---
 
-## Git state (as of push to `main`)
+## Git state (as of June 2026)
 
-**`main`** is at `33f5f3d` on `origin/main` — clean, synced.
+**`main`** is at `baeb8d2` on `origin/main` (Spanish eval phases A/B/C/F merged).
+
+**Active branch:** `research/eval-hebrew-e0-spike` — language-profile refactor (Phases 1–7)
++ Hebrew E0 Round 3. **Not merged to `main` yet.**
 
 ```
-*   33f5f3d  Merge research/eval-verb-morphology: expected_form and verb_morphology evaluators.
+*   baeb8d2  Merge research/eval-sentence-length: sentence length control and explicit-subject prompts.
 |\  
-| * 9c73e4a  parser disagreement diagnostics (expected_form candidate locator)
-| * b211bff  verb_morphology + morph configs
-| * 3797539  expected_form gold labels + expected_form_match
-| * 34b3e53  evaluation metrics implementation plan
+| * 9f38f9f  simplify method presets (self-contained YAML in subfolders)
+| * 6dca044  YAML extends, random length, MethodRunConfig, experiment naming
+| * 6f13fd7  Phase F length evaluators + explicit-subject prompts
 |/  
-* 787ce57  (previous main)
+*   47582c9  Merge research/eval-diversity-metrics
 ```
-
-**Feature branches** (still on remote; work is merged into `main`):
-
-| Branch | Tip | Notes |
-| --- | --- | --- |
-| `research/eval-expected-form` | `3797539` | Fully contained in verb-morphology branch |
-| `research/eval-verb-morphology` | `9c73e4a` | Superset of expected-form; use this or `main` for continued work |
 
 **Branching pattern:** `research/*` feature branch → `--no-ff` merge to `main` with
 `Merge research/<branch>: …` message (visible fork in history).
@@ -49,6 +45,8 @@
 | `expected_form_match` | **Primary constraint metric** — whole-token match on gold surface form | `sentence/expected_form.py` |
 | `verb_morphology` | **Diagnostic only** — spaCy morph check + `parser_disagreement` in `details` | `sentence/verb_morphology.py` |
 | `grammar_languagetool` | **Secondary grammar quality** — LanguageTool rule check (filtered categories) | `sentence/languagetool.py` |
+| `length_in_band` | **Length compliance** — token count within band | `sentence/length_in_band.py` |
+| `clause_count` | **Syntactic complexity** — normalised clause count (spaCy) | `sentence/clause_count.py` |
 
 ### Distribution metrics (Stage 2b)
 
@@ -58,17 +56,36 @@
 | `self_bleu` | Mean sentence BLEU vs rest of batch (lower = more diverse) | `distribution/self_bleu.py` |
 | `template_rate` | Share with same first-k-token prefix (higher = mode collapse) | `distribution/template_rate.py` |
 | `distinct_1` / `distinct_2` | Unique unigrams / bigrams ÷ total (higher = more diverse) | `distribution/distinct_ngram.py` |
+| `mean_token_count` | Mean token count per batch | `distribution/mean_token_count.py` |
+| `length_cv` | Coefficient of variation of token counts | `distribution/length_cv.py` |
+| `mean_clauses` | Mean normalised clause score | `distribution/mean_clauses.py` |
 | `lt_error_breakdown` | LT category histogram | `distribution/lt_error_breakdown.py` |
 
-Each diversity metric registers `constraint_set` and `_experiment` scopes (12 group-metric
-instances total across 6 metric types). Shared tokenization: `distribution/tokens.py`
-(strips `¿¡` and standard punctuation).
+Diversity metrics: 12 group-metric instances (6 types × 2 scopes). Length metrics add 6 more
+(3 types × 2 scopes). Total **54 group-metric rows** per full experiment on `spanish_basic`.
 
-**Self-BLEU:** sacrebleu with `tokenize='intl'`, `smooth_method='exp'`,
-`effective_order=True`; score stored on 0–1 scale. Batches with fewer than 2 sentences
-return `0.0` with `details.skipped=true`.
+### Method presets
 
-**Template rate:** default `k=3`; sentences shorter than k use their full token list as prefix.
+Self-contained YAML under `methods/baseline/` and `methods/individual/` (see
+[`methods/README.md`](../research/methods/README.md)). CLI uses preset `name`:
+
+- `baseline_{default,short,medium,long,random,long_explicit}`
+- `individual_{default,short,medium,long,random,long_explicit}`
+
+`MethodRunConfig` (`methods/run_config.py`) parses config; `random` draws a band per sample.
+
+Experiment names: `{benchmark}__{preset_name}__{live|mock}` (e.g.
+`spanish_challenging__baseline_long_explicit__live`).
+
+### Generation prompts (language-profile refactor — on `research/eval-hebrew-e0-spike`)
+
+- Per-language constraint schemas: `research/languages/{es,he}.yaml`
+- Generic prompt assembly: `research/generation/prompt_builder.py`
+- `baseline_gpt.py` is language-agnostic (~80 lines); no Hebrew-specific branches
+- `ConstraintSet.constraints` JSON column (flat dict); `tense`/`person`/`number` are property accessors
+- Benchmark loader validates constraint keys against the language profile at load time
+- Optional `explicit_subject_required: true` adds a generic explicit-subject line (no per-language pronoun tables)
+- Plan: [`eval_language_profile_refactor_plan.md`](eval_language_profile_refactor_plan.md)
 
 ### Benchmarks
 
@@ -76,105 +93,81 @@ return `0.0` with `details.skipped=true`.
 - `spanish_challenging` — morphology live benchmark (stem-change, irregular preterite/conditional, orthographic)
 - `spanish_grammar_probe` — `mock_only: true` fixture for LT vs `expected_form_match` disagreement
 
-### Morph configs
-
-- `research/evaluation/morph_configs/es.yaml` — tense/person/number → UD features, `es_core_news_sm`
-- `load_morph_config()` in `research/evaluation/morph_configs/__init__.py`
-
 ### Tests
 
-- `research/tests/test_evaluation.py` — expected_form, verb_morphology, grammar_languagetool
-- `research/tests/test_group_metrics.py` — diversity metrics (repetitive / varied / near-duplicate batches)
-- `research/tests/test_morph_configs.py`
-- **165 tests** passing; run `python3 -m pytest research/tests/ -q`
-
-### Mock data
-
-- `research/fixtures/mock_outputs.py` — canned outputs for `spanish_basic`, `spanish_challenging`, `spanish_grammar_probe`
-- `spanish_basic`: 15 sentences; all pass `expected_form_match`; ~10–11 pass `verb_morphology` depending on spaCy model
-- Mock runs use identical canned data per benchmark regardless of method — diversity metrics only diverge on **live** output
+**210 tests** passing on `research/eval-hebrew-e0-spike`; run `python3 -m pytest research/tests/ -q`
 
 ### Analysis notebooks
 
-- `research/explore_live_spanish_basic.ipynb` — method comparison pivot incl. diversity columns
-- `research/explore_live_spanish_challenging.ipynb` — same for morphology benchmark
+- `research/explore_live_spanish_basic.ipynb` — default comparison + §4 length grid (exps 12–17)
+- `research/explore_live_spanish_challenging.ipynb` — default comparison + §4 long / explicit-subject (exps 22–24)
 
 ---
 
 ## Key decisions (do not re-litigate without reason)
 
 1. **Headline constraint satisfaction = `expected_form_match`**, not spaCy morph tags.
-   Generation goal is “use the word in *this* form”; gold surface form is the direct check.
 
-2. **spaCy is not reliable enough for pass/fail** on Spanish mock outputs (~67–73% on
-   correct sentences across `es_core_news_sm` / `md` / `lg`). Keep `verb_morphology` in
-   the registry for tool-reliability analysis (`parser_disagreement` in `details`); do not
-   use `pass_rate::verb_morphology` as the headline method-comparison column.
+2. **spaCy is diagnostic only** (~67–73% VM on mock sentences that are 100% EF). Report
+   `pass_rate::verb_morphology` for tool-reliability analysis only.
 
-3. **Grammar quality = LanguageTool (Phase C).** Secondary metric, independent of spaCy.
-   Not ground truth; catches agreement/concordance slips `expected_form_match` misses.
-   Full pipeline mapping documented in plan (Stage 1 / 2a / 2b).
+3. **Grammar quality = LanguageTool.** 100% on all reported live runs; does not catch
+   constraint-specific person/form slips when sentences are internally coherent.
 
-4. **Batch diversity = four complementary metrics.** Headline method-comparison columns are
-   experiment-wide: `uniqueness_ratio_experiment`, `self_bleu_experiment`,
-   `template_rate_experiment`, `distinct_1_experiment`, `distinct_2_experiment`. All should
-   point the same direction (baseline more diverse than individual). Skipped: `length_cv`,
-   parser batch diagnostics (`morph_failure_mode`, `parse_failure_rate`).
+4. **Batch diversity = four complementary metrics** at experiment scope.
 
-5. **Removed from scope:** `llm_morph_match`, `keyword_presence`, `alignment`, `fluency_heuristic`.
-   Also deferred: parser batch diagnostics, Stanza-as-primary, bigger spaCy models as fix.
+5. **Sentence length bands:** short 2–5, medium 5–9, long 10–16 tokens; `random` draws per sample.
 
-6. **Sentence length (Phase F):** bands are short 2–5, medium 5–9, long 10–16 tokens.
-   New evaluators: `length_in_band`, `clause_count`. Grid: 6 live runs on `spanish_basic`
-   (`baseline_{short,medium,long}` × `individual_{short,medium,long}`).
-   Plan: [`eval_sentence_length_plan.md`](eval_sentence_length_plan.md).
+6. **Explicit-subject prompt anchoring** fixes long challenging EF (71% → 100%) without
+   evaluator changes.
+
+7. **Removed from scope:** `llm_morph_match`, `keyword_presence`, `alignment`, `fluency_heuristic`.
 
 ---
 
-## Live diversity validation (`spanish_basic`, June 2026)
+## Live experiment reference
 
-Fresh live runs (experiments id=9 baseline, id=10 individual) — all five diversity metrics
-separate methods as expected:
+### `spanish_basic`
 
-| Metric | `baseline_default` | `individual_default` |
-| --- | --- | --- |
-| `uniqueness_ratio_experiment` | 1.00 | 0.67 |
-| `self_bleu_experiment` | 0.26 | 0.77 |
-| `template_rate_experiment` | 0.00 | 0.80 |
-| `distinct_1_experiment` | 0.70 | 0.47 |
-| `distinct_2_experiment` | 0.91 | 0.51 |
+| Exp | Preset | EF | Notes |
+| --- | --- | --- | --- |
+| 9 | `baseline_default` | 93% | Diversity baseline |
+| 10 | `individual_default` | 100% | Diversity baseline |
+| 12–17 | length grid | 93–100% | 6 runs: method × {short,medium,long} |
+| 18–19 | `*_long_explicit` (early 3rd-sg-only hint) | 80–100% | Superseded by generalized hint |
 
-Individual shows exact duplicates (`"Yo corro todos los días."` ×2, `"Él vivirá en Madrid."` ×2)
-and shared openings (`template_rate` 0.67–1.0 per constraint set). Baseline keeps all strings
-unique with varied openings. Stored DB values match direct recomputation.
+### `spanish_challenging`
 
----
-
-## spaCy model probe (June 2026, 15 mock sentences)
-
-| Model | `verb_morphology` pass | `expected_form_match` pass |
-| --- | --- | --- |
-| `es_core_news_sm` | 10/15 | 15/15 |
-| `es_core_news_md` | 10/15 | 15/15 |
-| `es_core_news_lg` | 11/15 | 15/15 |
-
-Persistent failures: `Ayer comimos paella juntos`, `Corro todas las mañanas`; model-specific
-errors on `Hablas español muy bien`, some `correr`/`hablar` sentences.
-
-Install: `python3 -m spacy download es_core_news_sm` (see `research/README.md`).
+| Exp | Preset | EF | Notes |
+| --- | --- | --- | --- |
+| 5–6 | `*_default` | 100% | Early default-length runs |
+| 20–22 | `baseline_long` | 71–79% | No explicit subject |
+| 21 | `individual_long` | 83% | No explicit subject |
+| 23 | `baseline_long_explicit` | **100%** | Generalized explicit subject |
+| 24 | `individual_long_explicit` | **100%** | Generalized explicit subject |
 
 ---
 
-## Next steps (recommended order)
+## Completed phases
 
 1. ~~**Phase A** — constraint core + live analysis notebooks~~ **Done**
+2. ~~**Phase B** — diversity metrics~~ **Done**
+3. ~~**Phase C** — LanguageTool grammar~~ **Done**
+4. ~~**Phase F** — sentence length + clause metrics + live grids~~ **Done**
+5. ~~**Explicit-subject prompts** — generalized person/number anchoring~~ **Done**
 
-2. ~~**Phase B** — diversity metrics (`self_bleu`, `template_rate`, `distinct_1/2`)~~ **Done**
+## Next steps
 
-3. ~~**Phase F** — sentence length wiring + evaluators~~ **Done** (code + six method YAMLs).
-   Run live 6-grid on `spanish_basic` to populate DB. Plan: [`eval_sentence_length_plan.md`](eval_sentence_length_plan.md).
+1. **Merge `research/eval-hebrew-e0-spike` → `main`** — language-profile refactor + E0 Round 3
+2. **Phase E — Hebrew E1** — see [`eval_hebrew_plan.md`](eval_hebrew_plan.md) (`hebrew_basic.yaml`, clitic-aware matcher, Stanza morph)
+3. **Dissertation write-up** — use [`eval_thesis_claims.md`](eval_thesis_claims.md)
+4. **Phase D** — human ratings (deferred)
+5. **Shared analysis module** — extract notebook helpers (deferred)
 
-4. **Phase D** — human ratings (acceptability, naturalness, pedagogical fit by length band)
+### Hebrew E0 status
+
+E0 gate **passed** (Round 3): 100% EF short + long via `he.yaml` glosses, no Hebrew patch.
+Findings: [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md)
 
 ---
 
@@ -184,18 +177,17 @@ Install: `python3 -m spacy download es_core_news_sm` (see `research/README.md`).
 # Tests
 python3 -m pytest research/tests/ -q
 
-# Mock experiment (from repo root)
-python3 -m research.run_experiment --benchmark spanish_basic --method baseline_default
-
-# Live method comparison (populates diversity metrics)
+# Live method comparison
 python3 -m research.run_experiment --benchmark spanish_basic --method baseline_default --live
 python3 -m research.run_experiment --benchmark spanish_basic --method individual_default --live
 
-# Length grid (Phase F — after method configs exist)
-python3 -m research.run_experiment --benchmark spanish_basic --method baseline_short --live
-python3 -m research.run_experiment --benchmark spanish_basic --method individual_long --live
+# Length grid
+python3 -m research.run_experiment --benchmark spanish_basic --method baseline_long --live
 
-# Reset research DB after benchmark schema changes
+# Challenging + explicit subject
+python3 -m research.run_experiment --benchmark spanish_challenging --method baseline_long_explicit --live
+
+# Reset research DB after schema changes
 python3 -c "from research.db.database import reset_db; reset_db()"
 ```
 
@@ -205,42 +197,25 @@ python3 -c "from research.db.database import reset_db; reset_db()"
 
 ### Shared live-analysis module (planned)
 
-Extract duplicated notebook logic into `research/analysis/live_experiments.py`:
-
-- `load_live_experiments(session, benchmark, method_names=None)`
-- `metric_pivot(experiments, metrics)`
-- `constraint_pass_table(experiment_id)`
-- `disagreement_rows(experiment_id)`
-- `length_grid_summary(benchmark)`
-
-Then thin `explore_live_spanish_basic.ipynb` and `explore_live_spanish_challenging.ipynb`
-to parameterised shells. **Status:** not started; challenging notebook still missing
-experiments 22–24.
+Extract duplicated notebook logic into `research/analysis/live_experiments.py`.
+**Status:** not started.
 
 ### Method loader YAML sync (deferred — not merge-blocking)
 
-`load_method_config` is **insert-only**: after the first load, edits to a preset YAML
-are ignored until `reset_db()`. This is a **footgun**, not a correctness bug — existing
-experiments keep their stored `generation_meta`; only *new* runs are affected.
-
-**When it bites:** you change `temperature` or `explicit_subject_required` in
-`methods/baseline/long.yaml` and re-run `--method baseline_long` without resetting the DB.
-
-**Workaround today:** `reset_db()` then re-run, or use a new preset `name`.
-
-**Proper fix (later):** upsert `MethodConfig.config` when YAML content changes.
+`load_method_config` is **insert-only**: YAML edits after first load are ignored until
+`reset_db()`. Workaround: reset DB or use a new preset `name`.
 
 ---
 
 ## Files to read first in a new chat
 
+- [`eval_thesis_claims.md`](eval_thesis_claims.md) — headline claims + evidence
+- [`eval_language_profile_refactor_plan.md`](eval_language_profile_refactor_plan.md) — refactor architecture (complete on branch)
+- [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md) — E0 spike results (Round 3)
+- [`eval_hebrew_plan.md`](eval_hebrew_plan.md) — Phase E Hebrew E1+ implementation
 - `research/evaluation/sentence/expected_form.py`
-- `research/evaluation/sentence/verb_morphology.py`
-- `research/evaluation/distribution/__init__.py` (group metric registry)
-- `research/evaluation/distribution/self_bleu.py`, `template_rate.py`, `distinct_ngram.py`
-- `research/benchmarks/spanish_basic.yaml`
+- `research/evaluation/distribution/__init__.py`
 - `research/explore_live_spanish_basic.ipynb`
-- `docs/evaluation_metrics_implementation_plan.md`
+- `research/explore_live_spanish_challenging.ipynb`
+- `research/methods/README.md`
 - `docs/eval_sentence_length_plan.md`
-- `research/methods/README.md` (preset layout, `random` length)
-- `research/methods/run_config.py` (`MethodRunConfig`)

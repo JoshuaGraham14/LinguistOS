@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class BaseGenerator(ABC):
@@ -18,9 +19,7 @@ class BaseGenerator(ABC):
         self,
         keyword: str,
         translation: str,
-        tense: str,
-        person: str,
-        number: str,
+        constraints: dict[str, Any],
         num_candidates: int,
         *,
         target_language: str = "es",

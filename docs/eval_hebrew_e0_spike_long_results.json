@@ -1,0 +1,703 @@
+{
+  "data": {
+    "cases": [
+      {
+        "case": {
+          "id": "01_infinitive_trap",
+          "keyword": "לשאול",
+          "expected_form": "שאלתי",
+          "translation": "to ask",
+          "tense": "past",
+          "person": "1st",
+          "number": "singular",
+          "gender": null,
+          "difficulty": "Infinitive keyword — GPT may leave ל+stem instead of conjugating (Spanish dormir pattern)."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לשאול\" (English: \"to ask\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 1st\n  Number: Singular\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתמול שאלתי את המורה שאלה על שיעורי הבית, והיא הסבירה לי בסבלנות.",
+            "translation": "Yesterday I asked the teacher a question about the homework, and she explained it to me patiently.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלתי",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          },
+          {
+            "idx": 2,
+            "sentence": "לפני שבוע שאלתי את השכן אם הוא יודע מתי מתחילים הבנייה ליד הבניין.",
+            "translation": "A week ago I asked the neighbor if he knows when the construction near the building will start.",
+            "token_count": 13,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלתי",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הוא"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "בפגישה האחרונה שאלתי את הבוס שלי לגבי התוכנית החדשה, והוא אמר שנעדכן בקרוב.",
+            "translation": "In the last meeting I asked my boss about the new plan, and he said we would update soon.",
+            "token_count": 13,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלתי",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "והוא"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "02_present_3sg_fem",
+          "keyword": "לכתוב",
+          "expected_form": "כותבת",
+          "translation": "to write",
+          "tense": "present",
+          "person": "3rd",
+          "number": "singular",
+          "gender": "feminine",
+          "difficulty": "Present (Benoni) marks gender on verb; pro-drop common — no overt subject."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לכתוב\" (English: \"to write\")\nConstraints:\n  Tense: Present (הווה)\n  Person: 3rd\n  Number: Singular\n  Gender: Feminine\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "היא כותבת מאמרים ארוכים בכל שבוע ומקפידה על ניסוח ברור מאוד.",
+            "translation": "She writes long articles every week and makes sure the wording is very clear.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "כותבת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "בכל"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "בכל ערב היא כותבת ביומן האישי שלה על היום שעבר ועל מה שהיא לומדת.",
+            "translation": "Every evening she writes in her personal diary about the day that passed and what she is learning.",
+            "token_count": 14,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "כותבת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "בכל",
+              "שלה",
+              "מה"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "היא כותבת מכתב תודה למורה שלה, ומדגישה כמה המילים שלה חשובות לה.",
+            "translation": "She writes a thank-you letter to her teacher, and emphasizes how important the words are to her.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "כותבת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "שלה",
+              "כמה",
+              "שלה",
+              "לה"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "03_past_2sg_masc",
+          "keyword": "לשאול",
+          "expected_form": "שאלת",
+          "translation": "to ask",
+          "tense": "past",
+          "person": "2nd",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "2sg past — easy to produce 3sg or 1sg form without anchored subject."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לשאול\" (English: \"to ask\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 2nd\n  Number: Singular\n  Gender: Masculine\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתמול שאלת את המורה כמה שיעורים נשארו עד המבחן הקרוב",
+            "translation": "Yesterday you asked the teacher how many lessons were left until the upcoming exam",
+            "token_count": 10,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "כמה"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "בישיבה הקודמת שאלת אותי למה התוכנית משתנה בכל שבוע מחדש",
+            "translation": "In the previous meeting you asked me why the plan changes every week again",
+            "token_count": 10,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "למה",
+              "בכל"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "לפני כמה ימים שאלת את אבא אם הוא יוכל להסיע אותך לתחנה בשעה שבע",
+            "translation": "A few days ago you asked your dad if he could drive you to the station at seven o'clock",
+            "token_count": 14,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "שאלת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "כמה",
+              "הוא"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "04_past_2sg_fem_ambiguous",
+          "keyword": "ללכת",
+          "expected_form": "הלכת",
+          "translation": "to go",
+          "tense": "past",
+          "person": "2nd",
+          "number": "singular",
+          "gender": "feminine",
+          "difficulty": "הלכת is orthographically identical to 1sg past — person disambiguation needs context."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"ללכת\" (English: \"to go\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 2nd\n  Number: Singular\n  Gender: Feminine\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתמול את הלכת לעבודה מוקדם מאוד, ולכן הצלחת להגיע לפני הפקקים.",
+            "translation": "Yesterday you (feminine, singular) went to work very early, so you managed to arrive before the traffic.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלכת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הלכת"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "בשבוע שעבר את הלכת לטיול עם המשפחה, ותמיד תזכרי את הנוף היפה.",
+            "translation": "Last week you (feminine, singular) went on a trip with your family, and you will always remember the beautiful scenery.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלכת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הלכת"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "לפני יומיים את הלכת לחנות הקרובה כדי לקנות לחם טרי, וחזרת עם חיוך גדול.",
+            "translation": "Two days ago you (feminine, singular) went to the nearby store to buy fresh bread, and you came back with a big smile.",
+            "token_count": 14,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלכת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "הלכת"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "05_future_1pl",
+          "keyword": "לכתוב",
+          "expected_form": "נכתוב",
+          "translation": "to write",
+          "tense": "future",
+          "person": "1st",
+          "number": "plural",
+          "gender": null,
+          "difficulty": "Future 1pl requires נ- prefix; GPT may use present or wrong person."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לכתוב\" (English: \"to write\")\nConstraints:\n  Tense: Future (עתיד)\n  Person: 1st\n  Number: Plural\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "מחר בבוקר נכתוב את התרגיל במחברת ונבדוק את התשובות יחד בכיתה.",
+            "translation": "Tomorrow morning we will write the exercise in the notebook and check the answers together in class.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נכתוב",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נכתוב"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "בשבוע הבא נכתוב מכתב ארוך למשפחה ונשלח אותו בדואר כדי שיגיע בזמן.",
+            "translation": "Next week we will write a long letter to the family and send it by mail so it arrives on time.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נכתוב",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נכתוב"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "במהלך החופשה נכתוב סיפורים קצרים משלנו ונפרסם אותם באתר של בית הספר.",
+            "translation": "During the vacation we will write short stories of our own and publish them on the school website.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נכתוב",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נכתוב",
+              "של"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "06_past_1pl",
+          "keyword": "לאכול",
+          "expected_form": "אכלנו",
+          "translation": "to eat",
+          "tense": "past",
+          "person": "1st",
+          "number": "plural",
+          "gender": null,
+          "difficulty": "Past 1pl suffix -נו; tests plural morphology."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לאכול\" (English: \"to eat\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 1st\n  Number: Plural\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתמול בערב אכלנו ארוחת ערב איטלקית טעימה עם פסטה וירקות טריים.",
+            "translation": "Yesterday evening we ate a delicious Italian dinner with pasta and fresh vegetables.",
+            "token_count": 11,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "אכלנו",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          },
+          {
+            "idx": 2,
+            "sentence": "בשבת בבוקר אכלנו ארוחת בוקר גדולה שכללה ביצים, לחם טרי וגבינה מקומית.",
+            "translation": "On Saturday morning we ate a big breakfast that included eggs, fresh bread, and local cheese.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "אכלנו",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "שכללה"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "לפני כמה ימים אכלנו בחוץ במסעדה טובה, והמלצר המליץ לנו על מנה מיוחדת.",
+            "translation": "A few days ago we ate out at a good restaurant, and the waiter recommended a special dish to us.",
+            "token_count": 13,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "אכלנו",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "כמה"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "07_present_1sg_masc",
+          "keyword": "לדבר",
+          "expected_form": "מדבר",
+          "translation": "to speak",
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "1sg present is gender-marked despite gender-neutral pronoun אני."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לדבר\" (English: \"to speak\")\nConstraints:\n  Tense: Present (הווה)\n  Person: 1st\n  Number: Singular\n  Gender: Masculine\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אני מדבר כל יום עם המורה שלי כדי לשפר את הדיבור שלי בעברית.",
+            "translation": "I speak every day with my teacher to improve my speaking in Hebrew.",
+            "token_count": 13,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדבר",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדבר",
+              "כל"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "אני מדבר לאט וברור, כי חשוב לי שהחברים שלי יבינו אותי היטב.",
+            "translation": "I speak slowly and clearly because it’s important to me that my friends understand me well.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדבר",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדבר"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "אני מדבר עם המשפחה שלי בערב, ואני נהנה לשתף אותם בסיפורים חדשים.",
+            "translation": "I speak with my family in the evening, and I enjoy sharing new stories with them.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדבר",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדבר"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "08_present_1sg_fem",
+          "keyword": "לדבר",
+          "expected_form": "מדברת",
+          "translation": "to speak",
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "gender": "feminine",
+          "difficulty": "Feminine present 1sg — common GPT slip to masculine מדבר."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לדבר\" (English: \"to speak\")\nConstraints:\n  Tense: Present (הווה)\n  Person: 1st\n  Number: Singular\n  Gender: Feminine\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אני מדברת עם המורה על השיעור החדש כל יום בבוקר בשקט ובסבלנות.",
+            "translation": "I speak with the teacher about the new lesson every morning quietly and patiently.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדברת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדברת",
+              "כל"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "בדרך לעבודה אני מדברת בטלפון עם אמא ומספרת לה איך עבר עליי היום.",
+            "translation": "On my way to work I speak on the phone with my mom and tell her how my day went.",
+            "token_count": 13,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדברת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדברת",
+              "לה"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "כשיש לי מחשבות על העתיד אני מדברת עליהן בקול רם כדי לחדד את הכיוון.",
+            "translation": "When I have thoughts about the future, I speak about them out loud to clarify my direction.",
+            "token_count": 14,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "מדברת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "מדברת"
+            ]
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "09_irregular_past_3sg_masc",
+          "keyword": "ללכת",
+          "expected_form": "הלך",
+          "translation": "to go",
+          "tense": "past",
+          "person": "3rd",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "Irregular suppletive past (go → went); high error rate expected."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"ללכת\" (English: \"to go\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 3rd\n  Number: Singular\n  Gender: Masculine\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתמול יוסף הלך מוקדם לעבודה, כי הוא רצה להספיק את הפגישה החשובה.",
+            "translation": "Yesterday, Yosef went early to work because he wanted to make it in time for the important meeting.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלך",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          },
+          {
+            "idx": 2,
+            "sentence": "בשבת האחרונה הוא הלך עם חבריו לטייל לאורך הנהר ולצלם תמונות יפות.",
+            "translation": "Last Saturday he went with his friends to stroll along the river and take beautiful photos.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלך",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "בשבת"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "בבוקר הגשום הוא הלך לבדו לבית הספר, למרות שהדרך הייתה ארוכה ומלאה בשלוליות.",
+            "translation": "On the rainy morning, he went alone to school, even though the road was long and full of puddles.",
+            "token_count": 13,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "הלך",
+            "match_strategy": "strict",
+            "verb_like_tokens": []
+          }
+        ],
+        "n_returned": 3
+      },
+      {
+        "case": {
+          "id": "10_clitic_prone_past_2sg",
+          "keyword": "לתת",
+          "expected_form": "נתת",
+          "translation": "to give",
+          "tense": "past",
+          "person": "2nd",
+          "number": "singular",
+          "gender": "masculine",
+          "difficulty": "Narrative contexts attach ו- (and); tests clitic fusion on target verb."
+        },
+        "prompt": "You generate Hebrew example sentences for vocabulary practice.\nTarget word: \"לתת\" (English: \"to give\")\nConstraints:\n  Tense: Past (עבר)\n  Person: 2nd\n  Number: Singular\n  Gender: Masculine\n  length: long (10–16 tokens).\nProduce 3 natural Hebrew sentences within the length band that contain the target word, each with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+        "candidates": [
+          {
+            "idx": 1,
+            "sentence": "אתמול נתת לי את המפתח לפני שיצאת לעבודה, ואני ממש מודה לך.",
+            "translation": "Yesterday you gave me the key before you left for work, and I really thank you.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נתת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נתת",
+              "ממש"
+            ]
+          },
+          {
+            "idx": 2,
+            "sentence": "בשיחה ההיא נתת לי עצה מצוינת, ובזכותה הצלחתי לסיים את הפרויקט בזמן.",
+            "translation": "In that conversation you gave me an excellent piece of advice, and because of it I managed to finish the project on time.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נתת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נתת"
+            ]
+          },
+          {
+            "idx": 3,
+            "sentence": "במהלך הטיול נתת לאחיך את הכרטיסים מראש, כדי שלא נעמוד בתור בתחנה.",
+            "translation": "During the trip you gave your brother the tickets in advance, so we wouldn’t stand in line at the station.",
+            "token_count": 12,
+            "in_length_band": true,
+            "strict": true,
+            "clitic_aware": true,
+            "matched_token": "נתת",
+            "match_strategy": "strict",
+            "verb_like_tokens": [
+              "נתת"
+            ]
+          }
+        ],
+        "n_returned": 3
+      }
+    ],
+    "samples_per_case": 3,
+    "sentence_length": "long"
+  },
+  "summary": {
+    "sentence_length": "long",
+    "total_candidates": 30,
+    "strict_pass_rate": 1.0,
+    "clitic_aware_pass_rate": 1.0,
+    "length_in_band_rate": 1.0,
+    "mean_token_count": 12.2,
+    "clitic_attachment_fixes": 0,
+    "per_case": [
+      {
+        "id": "01_infinitive_trap",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 12.666666666666666,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "02_present_3sg_fem",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 12.333333333333334,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "03_past_2sg_masc",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 11.333333333333334,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "04_past_2sg_fem_ambiguous",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 12.333333333333334,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "05_future_1pl",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 11.666666666666666,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "06_past_1pl",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 12.0,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "07_present_1sg_masc",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 12.333333333333334,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "08_present_1sg_fem",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 13.0,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "09_irregular_past_3sg_masc",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 12.333333333333334,
+        "clitic_only_fixes": 0,
+        "n": 3
+      },
+      {
+        "id": "10_clitic_prone_past_2sg",
+        "strict_rate": 1.0,
+        "clitic_aware_rate": 1.0,
+        "length_rate": 1.0,
+        "mean_tokens": 12.0,
+        "clitic_only_fixes": 0,
+        "n": 3
+      }
+    ]
+  }
+}

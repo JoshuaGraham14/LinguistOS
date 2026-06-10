@@ -1,0 +1,39 @@
+code: es
+name: Spanish
+
+dimensions:
+  tense:
+    - present
+    - preterite
+    - imperfect
+    - future
+    - conditional
+  mood:
+    - indicative
+    - subjunctive
+    - imperative
+  person:
+    - "1st"
+    - "2nd"
+    - "3rd"
+  number:
+    - singular
+    - plural
+  dialect:
+    - peninsular
+    - latin_american
+    - voseo
+
+glosses:
+  tense:
+    preterite: "Preterite (pretérito indefinido)"
+  mood:
+    subjunctive: Subjunctive
+  dialect:
+    peninsular: "Peninsular Spanish (vosotros for 2pl)"
+    voseo: "Rioplatense voseo (vos for 2sg)"
+
+required:
+  - tense
+  - person
+  - number

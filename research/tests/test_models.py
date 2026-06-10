@@ -42,8 +42,11 @@ def test_cascade_delete_benchmark_removes_constraint_sets(session):
     session.add(bm)
     session.flush()
     session.add(ConstraintSet(
-        benchmark_id=bm.id, keyword="x", translation="y",
-        tense="present", person="1st", number="singular", target_language="es",
+        benchmark_id=bm.id,
+        keyword="x",
+        translation="y",
+        constraints={"tense": "present", "person": "1st", "number": "singular"},
+        target_language="es",
     ))
     session.commit()
     assert session.query(ConstraintSet).count() == 1
@@ -61,9 +64,7 @@ def test_constraint_set_creation(session, sample_benchmark):
         benchmark_id=sample_benchmark.id,
         keyword="vivir",
         translation="to live",
-        tense="future",
-        person="3rd",
-        number="singular",
+        constraints={"tense": "future", "person": "3rd", "number": "singular"},
         target_language="es",
     )
     session.add(cs)
@@ -83,9 +84,7 @@ def test_constraint_set_with_cefr(session, sample_benchmark):
         benchmark_id=sample_benchmark.id,
         keyword="hablar",
         translation="to speak",
-        tense="present",
-        person="2nd",
-        number="singular",
+        constraints={"tense": "present", "person": "2nd", "number": "singular"},
         target_language="es",
         cefr_level="B1",
     )
@@ -96,23 +95,24 @@ def test_constraint_set_with_cefr(session, sample_benchmark):
     assert row.cefr_level == "B1"
 
 
-def test_constraint_set_extra_constraints_json(session, sample_benchmark):
+def test_constraint_set_optional_dimensions_in_json(session, sample_benchmark):
     cs = ConstraintSet(
         benchmark_id=sample_benchmark.id,
         keyword="ser",
         translation="to be",
-        tense="present",
-        person="1st",
-        number="singular",
+        constraints={
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "mood": "subjunctive",
+        },
         target_language="es",
-        extra_constraints={"mood": "subjunctive", "formality": "formal"},
     )
     session.add(cs)
     session.commit()
 
     row = session.query(ConstraintSet).filter_by(keyword="ser").one()
-    assert row.extra_constraints["mood"] == "subjunctive"
-    assert row.extra_constraints["formality"] == "formal"
+    assert row.constraints["mood"] == "subjunctive"
 
 
 def test_constraint_set_to_constraints_dict(session, sample_benchmark):
@@ -121,12 +121,14 @@ def test_constraint_set_to_constraints_dict(session, sample_benchmark):
         keyword="comer",
         expected_form="comimos",
         translation="to eat",
-        tense="preterite",
-        person="1st",
-        number="plural",
+        constraints={
+            "tense": "preterite",
+            "person": "1st",
+            "number": "plural",
+            "mood": "indicative",
+        },
         target_language="es",
         cefr_level="A2",
-        extra_constraints={"mood": "indicative"},
     )
     d = cs.to_constraints_dict()
     assert d["keyword"] == "comer"
@@ -135,9 +137,9 @@ def test_constraint_set_to_constraints_dict(session, sample_benchmark):
     assert d["tense"] == "preterite"
     assert d["person"] == "1st"
     assert d["number"] == "plural"
+    assert d["mood"] == "indicative"
     assert d["target_language"] == "es"
     assert d["cefr_level"] == "A2"
-    assert d["extra_constraints"] == {"mood": "indicative"}
 
 
 def test_constraint_set_to_constraints_dict_omits_expected_form_when_none(
@@ -148,11 +150,11 @@ def test_constraint_set_to_constraints_dict_omits_expected_form_when_none(
     assert "expected_form" not in d
 
 
-def test_constraint_set_to_constraints_dict_omits_extra_when_none(
+def test_constraint_set_to_constraints_dict_flattens_constraints(
     session, sample_constraint_set
 ):
     d = sample_constraint_set.to_constraints_dict()
-    assert "extra_constraints" not in d
+    assert d["tense"] == "preterite"
     assert d["keyword"] == "comer"
 
 

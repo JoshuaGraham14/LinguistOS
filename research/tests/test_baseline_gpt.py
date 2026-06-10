@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from research.generation.baseline_gpt import build_prompt, generate, parse_candidates
 
+_ES_PRETERITE_1PL = {"tense": "preterite", "person": "1st", "number": "plural"}
+_ES_FUTURE_3SG = {"tense": "future", "person": "3rd", "number": "singular"}
+_ES_PRESENT_2SG = {"tense": "present", "person": "2nd", "number": "singular"}
+
 
 # ── build_prompt ─────────────────────────────────────────────────────────────
 
 
 def test_prompt_contains_target_language_spanish():
-    prompt = build_prompt("comer", "to eat", "past", "1st", "plural", 3)
+    prompt = build_prompt("comer", "to eat", _ES_PRETERITE_1PL, 3)
     assert "Spanish" in prompt
     assert "comer" in prompt
     assert "to eat" in prompt
@@ -17,39 +21,43 @@ def test_prompt_contains_target_language_spanish():
 
 def test_prompt_contains_target_language_hebrew():
     prompt = build_prompt(
-        "לאכול", "to eat", "past", "1st", "plural", 3, target_language="he"
+        "לאכול",
+        "to eat",
+        {"tense": "past", "person": "1st", "number": "plural"},
+        3,
+        target_language="he",
     )
     assert "Hebrew" in prompt
     assert "Spanish" not in prompt
 
 
 def test_prompt_contains_constraints():
-    prompt = build_prompt("vivir", "to live", "future", "3rd", "singular", 5)
-    assert "tense=future" in prompt
-    assert "person=3rd" in prompt
-    assert "number=singular" in prompt
+    prompt = build_prompt("vivir", "to live", _ES_FUTURE_3SG, 5)
+    assert "Tense: Future" in prompt
+    assert "Person: 3rd" in prompt
+    assert "Number: Singular" in prompt
 
 
 def test_prompt_requests_correct_candidate_count():
-    prompt = build_prompt("hablar", "to speak", "present", "2nd", "singular", 7)
+    prompt = build_prompt("hablar", "to speak", _ES_PRESENT_2SG, 7)
     assert "7" in prompt
 
 
 def test_prompt_without_cefr_omits_cefr_line():
-    prompt = build_prompt("comer", "to eat", "past", "1st", "plural", 3)
+    prompt = build_prompt("comer", "to eat", _ES_PRETERITE_1PL, 3)
     assert "CEFR" not in prompt
 
 
 def test_prompt_with_cefr_includes_level():
     prompt = build_prompt(
-        "comer", "to eat", "past", "1st", "plural", 3, cefr_level="B1"
+        "comer", "to eat", _ES_PRETERITE_1PL, 3, cefr_level="B1"
     )
     assert "CEFR level: B1" in prompt
 
 
 def test_prompt_includes_numeric_length_band():
     prompt = build_prompt(
-        "comer", "to eat", "past", "1st", "plural", 3, sentence_length="medium"
+        "comer", "to eat", _ES_PRETERITE_1PL, 3, sentence_length="medium"
     )
     assert "medium (5–9 tokens)" in prompt
     assert "length band" in prompt
@@ -57,57 +65,34 @@ def test_prompt_includes_numeric_length_band():
 
 def test_prompt_with_cefr_none_omits_line():
     prompt = build_prompt(
-        "comer", "to eat", "past", "1st", "plural", 3, cefr_level=None
+        "comer", "to eat", _ES_PRETERITE_1PL, 3, cefr_level=None
     )
     assert "CEFR" not in prompt
 
 
-def test_prompt_explicit_subject_hint_for_3rd_singular():
+def test_prompt_explicit_subject_hint_generic():
     prompt = build_prompt(
         "vivir",
         "to live",
-        "future",
-        "3rd",
-        "singular",
+        _ES_FUTURE_3SG,
         3,
         sentence_length="long",
         explicit_subject_required=True,
     )
     assert "explicit subject" in prompt
     assert "person=3rd, number=singular" in prompt
-    assert "él" in prompt
-    assert "ella" in prompt
+    assert "él" not in prompt
 
 
-def test_prompt_explicit_subject_hint_for_1st_plural():
+def test_hebrew_prompt_glosses_past():
     prompt = build_prompt(
-        "comer",
-        "to eat",
-        "preterite",
-        "1st",
-        "plural",
+        "לשאול",
+        "to ask",
+        {"tense": "past", "person": "1st", "number": "singular"},
         3,
-        sentence_length="long",
-        explicit_subject_required=True,
+        target_language="he",
     )
-    assert "explicit subject" in prompt
-    assert "person=1st, number=plural" in prompt
-    assert "nosotros" in prompt
-
-
-def test_prompt_explicit_subject_hint_for_2nd_singular():
-    prompt = build_prompt(
-        "hablar",
-        "to speak",
-        "present",
-        "2nd",
-        "singular",
-        3,
-        explicit_subject_required=True,
-    )
-    assert "explicit subject" in prompt
-    assert "person=2nd, number=singular" in prompt
-    assert "tú" in prompt
+    assert "Past (עבר)" in prompt
 
 
 # ── parse_candidates ─────────────────────────────────────────────────────────
@@ -174,5 +159,5 @@ def test_parse_strips_whitespace():
 
 def test_generate_returns_empty_without_api_key(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    result = generate("comer", "to eat", "past", "1st", "plural")
+    result = generate("comer", "to eat", _ES_PRETERITE_1PL)
     assert result == []

@@ -17,6 +17,7 @@ Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/
 | `explore_live_spanish_basic.ipynb` | Live method comparison (`spanish_basic`) |
 | `explore_live_spanish_challenging.ipynb` | Live method comparison (`spanish_challenging`) |
 | `app.py` | Streamlit stub (not wired to the pipeline) |
+| `prototyping/` | Ad-hoc live GPT spikes (not part of `run_experiment`); see [`prototyping/README.md`](prototyping/README.md) |
 
 ## Setup
 

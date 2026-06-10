@@ -223,9 +223,7 @@ def _generate_live_candidates(
     common = dict(
         keyword=cs.keyword,
         translation=cs.translation,
-        tense=cs.tense,
-        person=cs.person,
-        number=cs.number,
+        constraints=dict(cs.constraints),
         target_language=cs.target_language,
         cefr_level=cs.cefr_level,
         explicit_subject_required=run_config.explicit_subject_required,
@@ -338,6 +336,7 @@ def run_experiment(
                             "sentence_length": run_config.sentence_length,
                             "resolved_sentence_length": resolved_length,
                             "explicit_subject_required": run_config.explicit_subject_required,
+                            "constraints": dict(cs.constraints),
                         },
                     )
                     session.add(gen)
