@@ -11,6 +11,7 @@ LanguageCode = Literal["es", "he", "fr"]
 VocabTag = Literal["noun", "verb", "adjective", "adverb", "preposition", "other"]
 MasteryOutcome = Literal["correct", "incorrect", "skipped", "hinted"]
 EnrichmentStatus = Literal["pending", "done", "failed"]
+LexemeEnrichmentStatus = Literal["pending", "complete", "failed"]
 
 
 class WorkspaceCreate(BaseModel):
@@ -105,14 +106,40 @@ class VocabUpdate(BaseModel):
     notes: str | None = None
 
 
+class LexemeOut(BaseModel):
+    id: int
+    language: LanguageCode
+    lemma: str
+    pos: str
+    gloss_primary: str
+    glosses: list[str] = Field(default_factory=list)
+    tags: list[VocabTag]
+    cefr: str | None = None
+    frequency_rank: int | None = None
+    gender: str | None = None
+    conjugation_class: str | None = None
+    morph_features: dict[str, Any] | None = None
+    ipa: str | None = None
+    audio_url: str | None = None
+    image_url: str | None = None
+    dictionary_notes: str | None = None
+    enrichment_status: LexemeEnrichmentStatus
+    enriched_at: datetime | None = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class VocabOut(BaseModel):
     id: int
     workspace_id: int
+    lexeme_id: int | None = None
     word: str
     translation: str
     tags: list[VocabTag]
     learned: bool
     created_at: datetime
+    enriching: bool = False
 
     lemma: str | None = None
     surface_form: str | None = None
@@ -142,7 +169,8 @@ class VocabListResponse(BaseModel):
 
 class EnrichmentJobOut(BaseModel):
     id: int
-    vocab_id: int
+    lexeme_id: int | None = None
+    vocab_id: int | None = None
     status: EnrichmentStatus
     requested_fields: list[str]
     result: dict[str, Any] | None

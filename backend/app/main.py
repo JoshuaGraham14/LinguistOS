@@ -15,7 +15,11 @@ from app.api import (
 from app.config import settings
 from app.db.database import Base, engine
 from app.db import models  # noqa: F401
-from app.db.migrate import ensure_vocab_canonical_columns
+from app.db.migrate import (
+    ensure_enrichment_job_lexeme_column,
+    ensure_lexeme_vocab_columns,
+    ensure_vocab_canonical_columns,
+)
 from app.db.seed import (
     backfill_canonical_word_fields,
     ensure_default_workspace_and_vocab,
@@ -47,6 +51,8 @@ app.include_router(voice.router, tags=["voice"])
 @app.on_event("startup")
 def _init_db() -> None:
     ensure_vocab_canonical_columns(engine)
+    ensure_lexeme_vocab_columns(engine)
+    ensure_enrichment_job_lexeme_column(engine)
     Base.metadata.create_all(bind=engine)
     ensure_default_workspace_and_vocab()
     backfill_canonical_word_fields()

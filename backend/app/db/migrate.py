@@ -16,6 +16,15 @@ from sqlalchemy import inspect, text
 from sqlalchemy.engine import Engine
 
 # Each entry is (column_name, SQL type for ADD COLUMN, default literal or None).
+_LEXEME_VOCAB_COLUMNS: list[tuple[str, str, str | None]] = [
+    ("lexeme_id", "INTEGER", None),
+    ("gloss_override", "VARCHAR(255)", None),
+]
+
+_ENRICHMENT_JOB_COLUMNS: list[tuple[str, str, str | None]] = [
+    ("lexeme_id", "INTEGER", None),
+]
+
 _VOCAB_COLUMNS: list[tuple[str, str, str | None]] = [
     ("lemma", "VARCHAR(255)", None),
     ("surface_form", "VARCHAR(255)", None),
@@ -36,21 +45,41 @@ _VOCAB_COLUMNS: list[tuple[str, str, str | None]] = [
 ]
 
 
+def _add_missing_columns(
+    engine: Engine,
+    table: str,
+    columns: list[tuple[str, str, str | None]],
+) -> list[str]:
+    inspector = inspect(engine)
+    if table not in inspector.get_table_names():
+        return []
+    existing = {col["name"] for col in inspector.get_columns(table)}
+    added: list[str] = []
+    with engine.begin() as conn:
+        for name, sql_type, default in columns:
+            if name in existing:
+                continue
+            default_clause = f" DEFAULT {default}" if default is not None else ""
+            conn.execute(
+                text(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}{default_clause}")
+            )
+            added.append(name)
+    return added
+
+
+def ensure_lexeme_vocab_columns(engine: Engine) -> list[str]:
+    """Add lexeme_id and gloss_override to an existing vocab table."""
+    return _add_missing_columns(engine, "vocab", _LEXEME_VOCAB_COLUMNS)
+
+
+def ensure_enrichment_job_lexeme_column(engine: Engine) -> list[str]:
+    """Add lexeme_id to an existing enrichment_jobs table."""
+    return _add_missing_columns(engine, "enrichment_jobs", _ENRICHMENT_JOB_COLUMNS)
+
+
 def ensure_vocab_canonical_columns(engine: Engine) -> list[str]:
     """Add any LOS-101 columns missing from an existing ``vocab`` table.
 
     Returns the list of column names added.
     """
-    inspector = inspect(engine)
-    if "vocab" not in inspector.get_table_names():
-        return []
-    existing = {col["name"] for col in inspector.get_columns("vocab")}
-    added: list[str] = []
-    with engine.begin() as conn:
-        for name, sql_type, default in _VOCAB_COLUMNS:
-            if name in existing:
-                continue
-            default_clause = f" DEFAULT {default}" if default is not None else ""
-            conn.execute(text(f"ALTER TABLE vocab ADD COLUMN {name} {sql_type}{default_clause}"))
-            added.append(name)
-    return added
+    return _add_missing_columns(engine, "vocab", _VOCAB_COLUMNS)
