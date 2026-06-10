@@ -102,6 +102,88 @@ _DEPRECATED_VOCAB_COLUMNS: tuple[str, ...] = (
 )
 
 
+def migrate_enrichment_jobs_for_lexeme(engine: Engine) -> bool:
+    """Rebuild enrichment_jobs so vocab_id is nullable and lexeme_id exists.
+
+    SQLite cannot relax NOT NULL on an existing column; rebuild the table
+    when upgrading from the pre-Lexeme schema.
+    """
+    inspector = inspect(engine)
+    if "enrichment_jobs" not in inspector.get_table_names():
+        return False
+
+    cols = {col["name"]: col for col in inspector.get_columns("enrichment_jobs")}
+    vocab_col = cols.get("vocab_id")
+    needs_rebuild = vocab_col is not None and not vocab_col.get("nullable", True)
+    needs_rebuild = needs_rebuild or "lexeme_id" not in cols
+    if not needs_rebuild:
+        return False
+
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                """
+                CREATE TABLE enrichment_jobs_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    lexeme_id INTEGER REFERENCES lexemes(id),
+                    vocab_id INTEGER REFERENCES vocab(id),
+                    status VARCHAR(16) NOT NULL DEFAULT 'pending',
+                    requested_fields JSON NOT NULL DEFAULT '[]',
+                    result JSON,
+                    confidence FLOAT,
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    completed_at DATETIME
+                )
+                """
+            )
+        )
+        if "lexeme_id" in cols:
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO enrichment_jobs_new (
+                        id, lexeme_id, vocab_id, status, requested_fields,
+                        result, confidence, created_at, completed_at
+                    )
+                    SELECT
+                        id, lexeme_id, vocab_id, status, requested_fields,
+                        result, confidence, created_at, completed_at
+                    FROM enrichment_jobs
+                    """
+                )
+            )
+        else:
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO enrichment_jobs_new (
+                        id, vocab_id, status, requested_fields,
+                        result, confidence, created_at, completed_at
+                    )
+                    SELECT
+                        id, vocab_id, status, requested_fields,
+                        result, confidence, created_at, completed_at
+                    FROM enrichment_jobs
+                    """
+                )
+            )
+        conn.execute(text("DROP TABLE enrichment_jobs"))
+        conn.execute(text("ALTER TABLE enrichment_jobs_new RENAME TO enrichment_jobs"))
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_enrichment_lexeme_status "
+                "ON enrichment_jobs (lexeme_id, status)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_enrichment_vocab_status "
+                "ON enrichment_jobs (vocab_id, status)"
+            )
+        )
+    return True
+
+
 def drop_deprecated_vocab_columns(engine: Engine) -> list[str]:
     """Drop linguistic columns migrated to Lexeme (SQLite 3.35+)."""
     inspector = inspect(engine)
