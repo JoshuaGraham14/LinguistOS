@@ -27,6 +27,7 @@ def build_prompt(
     sentence_length: str = "short",
     cefr_level: str | None = None,
     explicit_subject_required: bool = False,
+    exercise_type: str | None = None,
 ) -> str:
     """Build the prompt for unconstrained sentence generation."""
     return _build_prompt(
@@ -38,6 +39,7 @@ def build_prompt(
         sentence_length=sentence_length,
         cefr_level=cefr_level,
         explicit_subject_required=explicit_subject_required,
+        exercise_type=exercise_type,
     )
 
 
@@ -66,6 +68,7 @@ def generate(
     cefr_level: str | None = None,
     sentence_length: str = "short",
     explicit_subject_required: bool = False,
+    exercise_type: str | None = None,
     model: str = "gpt-5.4-nano",
     temperature: float = 0.7,
     api_key: str | None = None,
@@ -91,6 +94,7 @@ def generate(
         cefr_level=cefr_level,
         sentence_length=sentence_length,
         explicit_subject_required=explicit_subject_required,
+        exercise_type=exercise_type,
     )
 
     completion = client.chat.completions.create(

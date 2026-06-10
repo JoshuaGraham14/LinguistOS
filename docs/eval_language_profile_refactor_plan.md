@@ -364,7 +364,7 @@ If pass rate ≥ 95%, the examples were unnecessary. If not, document and revisi
 
 | Step | Action |
 |---|---|
-| 1 | Update `research/scripts/e0_hebrew_spike.py` to use new generic prompt |
+| 1 | Update `research/prototyping/e0_hebrew_spike.py` to use new generic prompt |
 | 2 | Re-run `--length short`; expect ≥95% EF |
 | 3 | Re-run `--length long`; expect ≥90% EF |
 | 4 | If regression: turn on `explicit_subject_required` and re-test — that's the only fallback knob |
@@ -437,7 +437,7 @@ If pass rate ≥ 95%, the examples were unnecessary. If not, document and revisi
 | `research/benchmarks/spanish_challenging.yaml` | Flatten |
 | `research/benchmarks/spanish_grammar_probe.yaml` | Flatten |
 | `research/pipeline.py` | Pass constraints dict |
-| `research/scripts/e0_hebrew_spike.py` | Use new prompt builder |
+| `research/prototyping/e0_hebrew_spike.py` | Use new prompt builder |
 | `research/tests/test_languages.py` | NEW |
 | `research/tests/test_prompt_builder.py` | NEW |
 | `research/tests/test_baseline_gpt.py` | Update Hebrew tests |

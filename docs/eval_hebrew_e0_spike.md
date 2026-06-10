@@ -3,7 +3,7 @@
 > Live GPT run via `research/generation/baseline_gpt.py` + `prompt_builder.py`
 > (`gpt-5.4-nano`, temperature 0.7, 3 candidates per case).
 >
-> Script: `research/scripts/e0_hebrew_spike.py`
+> Script: `research/prototyping/e0_hebrew_spike.py`
 > Raw JSON (Round 3): [`eval_hebrew_e0_spike_short_results.json`](eval_hebrew_e0_spike_short_results.json),
 > [`eval_hebrew_e0_spike_long_results.json`](eval_hebrew_e0_spike_long_results.json)
 > Round 1 archive: [`eval_hebrew_e0_spike_results.json`](eval_hebrew_e0_spike_results.json)
@@ -194,7 +194,7 @@ GPT produces **longer** sentences (mean 10.3 tokens vs ~3 short) but often **und
 **Interpretation:** Hebrew long constraint satisfaction is strong; length band compliance is weaker than Spanish (Spanish short grid was 100% in-band). Likely needs Hebrew-specific long bands (e.g. 8–14) or stronger numeric emphasis in the prompt. Clitic attachment still **0/30**.
 
 ```bash
-python3 research/scripts/e0_hebrew_spike.py --length long
+python3 research/prototyping/e0_hebrew_spike.py --length long
 ```
 
 ---
@@ -202,8 +202,8 @@ python3 research/scripts/e0_hebrew_spike.py --length long
 ## Re-run commands
 
 ```bash
-python3 research/scripts/e0_hebrew_spike.py --length short
-python3 research/scripts/e0_hebrew_spike.py --length long
+python3 research/prototyping/e0_hebrew_spike.py --length short
+python3 research/prototyping/e0_hebrew_spike.py --length long
 ```
 
 Results: `docs/eval_hebrew_e0_spike_{short,long}_results.json`

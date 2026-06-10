@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E0 Hebrew scoping spike — live GPT via baseline_gpt (same prompt as Spanish pipeline)."""
+"""E0 Hebrew scoping spike — live GPT via baseline_gpt (prototyping; not the pipeline)."""
 
 from __future__ import annotations
 

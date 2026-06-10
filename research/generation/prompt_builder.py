@@ -67,6 +67,7 @@ def build_prompt(
     sentence_length: str = "short",
     cefr_level: str | None = None,
     explicit_subject_required: bool = False,
+    exercise_type: str | None = None,
 ) -> str:
     """Build a generation prompt from a language profile and constraint values."""
     lang = language_display_name(target_language)
@@ -89,10 +90,15 @@ def build_prompt(
         constraints, explicit_subject_required=explicit_subject_required
     )
 
+    exercise_line = ""
+    if exercise_type:
+        exercise_line = f"Exercise type: {exercise_type}.\n"
+
     return (
         f"You generate {lang} example sentences for vocabulary practice.\n"
         f'Target word: "{keyword}" (English: "{translation}")\n'
         f"{constraint_block}"
+        f"{exercise_line}"
         f"{subject_line}"
         f"{cefr_line}"
         f"Produce {num_candidates} natural {lang} sentences within the length band "

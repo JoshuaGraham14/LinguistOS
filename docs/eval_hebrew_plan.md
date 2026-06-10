@@ -74,7 +74,7 @@ Run `reset_db()` after schema changes; method YAML loader is insert-only (see ha
 
 **Status:** Gate passed. 100% EF short + long via `research/languages/he.yaml` glosses.
 Findings: [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md). Script:
-`research/scripts/e0_hebrew_spike.py`.
+`research/prototyping/e0_hebrew_spike.py`.
 
 **Goal:** Validate that GPT Hebrew generation is good enough to evaluate, and measure clitic
 attachment frequency before writing matchers.
