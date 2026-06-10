@@ -24,6 +24,8 @@ SCAFFOLD_KEYS = frozenset({
 
 def format_constraint_value(value: str) -> str:
     """Default display for a constraint value (snake_case → Title Case)."""
+    if value in ("1st", "2nd", "3rd"):
+        return value
     return value.replace("_", " ").title()
 
 

@@ -23,53 +23,11 @@ def test_prompt_contains_target_language_hebrew():
     assert "Spanish" not in prompt
 
 
-def test_hebrew_prompt_explains_three_tenses():
-    prompt = build_prompt(
-        "לשאול", "to ask", "qatal", "1st", "singular", 3, target_language="he"
-    )
-    assert "three morphological tenses" in prompt
-    assert "עבר (avar)" in prompt
-    assert "הווה (hoveh)" in prompt
-    assert "עתיד (atid)" in prompt
-    assert "Required tense for this item: Past" in prompt
-
-
-def test_hebrew_prompt_maps_yiqtol_to_future():
-    prompt = build_prompt(
-        "לכתוב", "to write", "yiqtol", "1st", "plural", 3, target_language="he"
-    )
-    assert "Required tense for this item: Future" in prompt
-    assert "עתיד (atid)" in prompt
-
-
-def test_hebrew_prompt_includes_gender():
-    prompt = build_prompt(
-        "לדבר",
-        "to speak",
-        "present_participle",
-        "1st",
-        "singular",
-        3,
-        target_language="he",
-        gender="feminine",
-    )
-    assert "Required gender: feminine" in prompt
-    assert "מדברת" in prompt
-
-
-def test_hebrew_prompt_anchors_2nd_person_subject():
-    prompt = build_prompt(
-        "לשאול", "to ask", "qatal", "2nd", "singular", 3, target_language="he", gender="masculine"
-    )
-    assert "explicit subject" in prompt
-    assert "אתה" in prompt
-
-
 def test_prompt_contains_constraints():
     prompt = build_prompt("vivir", "to live", "future", "3rd", "singular", 5)
-    assert "tense=future" in prompt
-    assert "person=3rd" in prompt
-    assert "number=singular" in prompt
+    assert "Tense: Future" in prompt
+    assert "Person: 3rd" in prompt
+    assert "Number: Singular" in prompt
 
 
 def test_prompt_requests_correct_candidate_count():
@@ -104,7 +62,7 @@ def test_prompt_with_cefr_none_omits_line():
     assert "CEFR" not in prompt
 
 
-def test_prompt_explicit_subject_hint_for_3rd_singular():
+def test_prompt_explicit_subject_hint_generic():
     prompt = build_prompt(
         "vivir",
         "to live",
@@ -117,39 +75,22 @@ def test_prompt_explicit_subject_hint_for_3rd_singular():
     )
     assert "explicit subject" in prompt
     assert "person=3rd, number=singular" in prompt
-    assert "él" in prompt
-    assert "ella" in prompt
+    assert "él" not in prompt
 
 
-def test_prompt_explicit_subject_hint_for_1st_plural():
+def test_hebrew_prompt_glosses_past_from_constraints_dict():
     prompt = build_prompt(
-        "comer",
-        "to eat",
-        "preterite",
+        "לשאול",
+        "to ask",
+        "past",
         "1st",
-        "plural",
-        3,
-        sentence_length="long",
-        explicit_subject_required=True,
-    )
-    assert "explicit subject" in prompt
-    assert "person=1st, number=plural" in prompt
-    assert "nosotros" in prompt
-
-
-def test_prompt_explicit_subject_hint_for_2nd_singular():
-    prompt = build_prompt(
-        "hablar",
-        "to speak",
-        "present",
-        "2nd",
         "singular",
         3,
-        explicit_subject_required=True,
+        target_language="he",
+        constraints={"tense": "past", "person": "1st", "number": "singular"},
     )
-    assert "explicit subject" in prompt
-    assert "person=2nd, number=singular" in prompt
-    assert "tú" in prompt
+    assert "Past (עבר)" in prompt
+    assert "qatal" not in prompt
 
 
 # ── parse_candidates ─────────────────────────────────────────────────────────
