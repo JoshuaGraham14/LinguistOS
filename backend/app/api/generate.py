@@ -20,11 +20,12 @@ from typing import Any, Literal
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.config import settings
 from app.db.database import get_db
 from app.db.models import Vocab
+from app.services.lexeme_resolver import lexeme_lemma
 
 router = APIRouter()
 
@@ -67,7 +68,9 @@ def _allowed_vocab(req: GenerateRequest, db: Session) -> list[Vocab]:
         return []
 
     rows = db.scalars(
-        select(Vocab).where(Vocab.workspace_id == req.workspace_id)
+        select(Vocab)
+        .options(selectinload(Vocab.lexeme))
+        .where(Vocab.workspace_id == req.workspace_id)
     ).all()
     if req.lexicon_constraint == "known_only":
         return [r for r in rows if r.learned]
@@ -86,7 +89,7 @@ def _build_prompt(req: GenerateRequest, allowed: list[Vocab]) -> str:
     length = req.sentence_length or "short"
     constraint_block = ""
     if allowed:
-        words = ", ".join(sorted({(r.lemma or r.word) for r in allowed}))
+        words = ", ".join(sorted({lexeme_lemma(r) for r in allowed}))
         constraint_block = (
             "\nVocabulary constraint: every content word must come from this list "
             "(plus closed-class function words like articles, prepositions, "
@@ -166,7 +169,7 @@ def _filter_by_lexicon(
 
     allowed_terms: dict[str, int] = {}
     for r in allowed:
-        for term in {r.word, r.lemma, r.surface_form, *(r.surface_forms or [])}:
+        for term in {r.word, lexeme_lemma(r), r.surface_form, *(r.surface_forms or [])}:
             if term:
                 allowed_terms[term.lower()] = r.id
 

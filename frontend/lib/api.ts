@@ -130,6 +130,8 @@ interface ApiMastery {
 interface ApiVocab {
   id: number;
   workspace_id: number;
+  lexeme_id: number | null;
+  enriching?: boolean;
   word: string;
   translation: string;
   tags: VocabTag[];
@@ -188,6 +190,8 @@ function toVocab(item: ApiVocab, language: LanguageCode): VocabItem {
   return {
     id: item.id,
     workspaceId: item.workspace_id,
+    lexemeId: item.lexeme_id ?? null,
+    enriching: item.enriching ?? false,
     word: item.word,
     translation: item.translation,
     language,
@@ -488,6 +492,21 @@ export async function getVocab(
 ): Promise<VocabItem> {
   const item = await apiFetch<ApiVocab>(`/api/vocab/${vocabId}`);
   return toVocab(item, language);
+}
+
+export async function pollVocabUntilEnriched(
+  vocabId: number,
+  language: LanguageCode,
+  opts?: { maxAttempts?: number; intervalMs?: number },
+): Promise<VocabItem> {
+  const maxAttempts = opts?.maxAttempts ?? 12;
+  const intervalMs = opts?.intervalMs ?? 500;
+  let item = await getVocab(vocabId, language);
+  for (let attempt = 0; attempt < maxAttempts && item.enriching; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    item = await getVocab(vocabId, language);
+  }
+  return item;
 }
 
 export async function recordMasteryEvent(

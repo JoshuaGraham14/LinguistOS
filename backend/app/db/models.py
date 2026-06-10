@@ -68,32 +68,29 @@ class Workspace(Base):
     )
 
 
-class Vocab(Base):
-    __tablename__ = "vocab"
+class Lexeme(Base):
+    """Shared per-language dictionary entry (one row per word-sense)."""
+
+    __tablename__ = "lexemes"
     __table_args__ = (
-        Index("ix_vocab_workspace_word", "workspace_id", "word"),
-        Index("ix_vocab_workspace_lemma", "workspace_id", "lemma"),
+        Index(
+            "ix_lexeme_sense_key",
+            "language",
+            "lemma",
+            "pos",
+            "gloss_primary",
+            unique=True,
+        ),
+        Index("ix_lexeme_language_lemma_pos", "language", "lemma", "pos"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    workspace_id: Mapped[int] = mapped_column(
-        ForeignKey("workspaces.id"), nullable=False, index=True
-    )
-
-    # Legacy fields (kept until adapter retirement, see implementation_spec.md §5.3).
-    word: Mapped[str] = mapped_column(String(255), nullable=False)
-    translation: Mapped[str] = mapped_column(String(255), nullable=False)
+    language: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    lemma: Mapped[str] = mapped_column(String(255), nullable=False)
+    pos: Mapped[str] = mapped_column(String(32), nullable=False, default="other")
+    gloss_primary: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    glosses: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     tags: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
-    learned: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.utcnow, nullable=False
-    )
-
-    # Canonical word fields (LOS-101).
-    lemma: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    surface_form: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    surface_forms: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
-    pos: Mapped[str | None] = mapped_column(String(32), nullable=True)
     cefr: Mapped[str | None] = mapped_column(String(8), nullable=True)
     frequency_rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
     gender: Mapped[str | None] = mapped_column(String(8), nullable=True)
@@ -102,14 +99,57 @@ class Vocab(Base):
     ipa: Mapped[str | None] = mapped_column(String(128), nullable=True)
     audio_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     image_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
-    gloss_primary: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    glosses: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    dictionary_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    enrichment_status: Mapped[str] = mapped_column(
+        String(16), default="pending", nullable=False
+    )
+    enriched_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, nullable=False
+    )
+
+    vocab_links: Mapped[list["Vocab"]] = relationship(back_populates="lexeme")
+    enrichment_jobs: Mapped[list["EnrichmentJob"]] = relationship(
+        back_populates="lexeme", cascade="all, delete-orphan"
+    )
+
+
+class Vocab(Base):
+    __tablename__ = "vocab"
+    __table_args__ = (
+        Index("ix_vocab_workspace_word", "workspace_id", "word"),
+        Index("ix_vocab_workspace_lexeme", "workspace_id", "lexeme_id", unique=True),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    workspace_id: Mapped[int] = mapped_column(
+        ForeignKey("workspaces.id"), nullable=False, index=True
+    )
+    lexeme_id: Mapped[int | None] = mapped_column(
+        ForeignKey("lexemes.id"), nullable=True, index=True
+    )
+
+    # Legacy mirrors synced on write (see vocab_mapper).
+    word: Mapped[str] = mapped_column(String(255), nullable=False)
+    translation: Mapped[str] = mapped_column(String(255), nullable=False)
+    learned: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, nullable=False
+    )
+
+    # Per-learner fields.
+    surface_form: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    surface_forms: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    gloss_override: Mapped[str | None] = mapped_column(String(255), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     last_seen_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
     workspace: Mapped[Workspace] = relationship(back_populates="vocab_items")
+    lexeme: Mapped["Lexeme | None"] = relationship(back_populates="vocab_links")
     mastery: Mapped["WordMastery | None"] = relationship(
         back_populates="vocab", uselist=False, cascade="all, delete-orphan"
     )
@@ -165,16 +205,20 @@ class WordMastery(Base):
 
 
 class EnrichmentJob(Base):
-    """Async enrichment work for a captured word (LOS-106)."""
+    """Async enrichment work for a shared lexeme (LOS-106)."""
 
     __tablename__ = "enrichment_jobs"
     __table_args__ = (
+        Index("ix_enrichment_lexeme_status", "lexeme_id", "status"),
         Index("ix_enrichment_vocab_status", "vocab_id", "status"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    vocab_id: Mapped[int] = mapped_column(
-        ForeignKey("vocab.id"), nullable=False, index=True
+    lexeme_id: Mapped[int | None] = mapped_column(
+        ForeignKey("lexemes.id"), nullable=True, index=True
+    )
+    vocab_id: Mapped[int | None] = mapped_column(
+        ForeignKey("vocab.id"), nullable=True, index=True
     )
     status: Mapped[str] = mapped_column(String(16), default="pending", nullable=False)
     requested_fields: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
@@ -187,7 +231,8 @@ class EnrichmentJob(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    vocab: Mapped[Vocab] = relationship(back_populates="enrichment_jobs")
+    lexeme: Mapped["Lexeme | None"] = relationship(back_populates="enrichment_jobs")
+    vocab: Mapped[Vocab | None] = relationship(back_populates="enrichment_jobs")
 
 
 class Sentence(Base):
