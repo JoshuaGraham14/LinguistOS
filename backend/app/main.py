@@ -23,6 +23,7 @@ from app.db.migrate import (
     ensure_enrichment_job_lexeme_column,
     ensure_lexeme_vocab_columns,
     ensure_vocab_canonical_columns,
+    migrate_complete_to_enriched,
     migrate_enrichment_jobs_for_lexeme,
 )
 from app.db.seed import (
@@ -65,6 +66,7 @@ def _init_db() -> None:
     backfill_lexemes()
     drop_deprecated_vocab_columns(engine)
     migrate_enrichment_jobs_for_lexeme(engine)
+    migrate_complete_to_enriched(engine)
     run_startup_enrichment()
     start_enrichment_scheduler()
 

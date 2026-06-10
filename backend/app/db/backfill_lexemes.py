@@ -62,7 +62,7 @@ def _field_count(lexeme: Lexeme) -> int:
 
 
 def is_lexeme_complete(lexeme: Lexeme) -> bool:
-    return lexeme.enrichment_status == "complete"
+    return lexeme.enrichment_status in ("complete", "enriched")
 
 
 def find_or_create_lexeme(
@@ -98,7 +98,7 @@ def find_or_create_lexeme(
     )
     if existing is not None:
         if tags:
-            existing.tags = tags
+            existing.tags = list(dict.fromkeys(tags))
         if glosses:
             existing.glosses = glosses
         if cefr:
@@ -128,7 +128,7 @@ def find_or_create_lexeme(
         pos=norm_pos,
         gloss_primary=norm_gloss,
         glosses=glosses or ([gloss_primary] if gloss_primary else []),
-        tags=list(tags or []),
+        tags=list(dict.fromkeys(tags or [])),
         cefr=cefr,
         frequency_rank=frequency_rank,
         gender=gender,
@@ -219,7 +219,7 @@ def backfill_lexemes() -> int:
             legacy = _load_legacy_row(vocab.id)
             lexeme = _lexeme_from_vocab_row(db, vocab, workspace.language, legacy)
             if lexeme.lemma and lexeme.pos and lexeme.gloss_primary and lexeme.tags:
-                lexeme.enrichment_status = "complete"
+                lexeme.enrichment_status = "enriched"
                 lexeme.enriched_at = lexeme.enriched_at or datetime.utcnow()
             vocab.lexeme_id = lexeme.id
             if not vocab.surface_form:
