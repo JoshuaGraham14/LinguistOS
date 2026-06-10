@@ -15,7 +15,9 @@ from app.api import (
 from app.config import settings
 from app.db.database import Base, engine
 from app.db import models  # noqa: F401
+from app.db.backfill_lexemes import backfill_lexemes
 from app.db.migrate import (
+    drop_deprecated_vocab_columns,
     ensure_enrichment_job_lexeme_column,
     ensure_lexeme_vocab_columns,
     ensure_vocab_canonical_columns,
@@ -56,6 +58,8 @@ def _init_db() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_default_workspace_and_vocab()
     backfill_canonical_word_fields()
+    backfill_lexemes()
+    drop_deprecated_vocab_columns(engine)
 
 
 @app.get("/health")

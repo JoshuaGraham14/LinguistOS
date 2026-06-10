@@ -148,21 +148,6 @@ class Vocab(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    # Deprecated columns kept until backfill drops them (phase 2 migration).
-    tags: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
-    lemma: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    pos: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    cefr: Mapped[str | None] = mapped_column(String(8), nullable=True)
-    frequency_rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    gender: Mapped[str | None] = mapped_column(String(8), nullable=True)
-    conjugation_class: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    morph_features: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    ipa: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    audio_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
-    image_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
-    gloss_primary: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    glosses: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
-
     workspace: Mapped[Workspace] = relationship(back_populates="vocab_items")
     lexeme: Mapped["Lexeme | None"] = relationship(back_populates="vocab_links")
     mastery: Mapped["WordMastery | None"] = relationship(

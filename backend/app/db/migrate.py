@@ -83,3 +83,36 @@ def ensure_vocab_canonical_columns(engine: Engine) -> list[str]:
     Returns the list of column names added.
     """
     return _add_missing_columns(engine, "vocab", _VOCAB_COLUMNS)
+
+
+_DEPRECATED_VOCAB_COLUMNS: tuple[str, ...] = (
+    "tags",
+    "lemma",
+    "pos",
+    "cefr",
+    "frequency_rank",
+    "gender",
+    "conjugation_class",
+    "morph_features",
+    "ipa",
+    "audio_url",
+    "image_url",
+    "gloss_primary",
+    "glosses",
+)
+
+
+def drop_deprecated_vocab_columns(engine: Engine) -> list[str]:
+    """Drop linguistic columns migrated to Lexeme (SQLite 3.35+)."""
+    inspector = inspect(engine)
+    if "vocab" not in inspector.get_table_names():
+        return []
+    existing = {col["name"] for col in inspector.get_columns("vocab")}
+    dropped: list[str] = []
+    with engine.begin() as conn:
+        for name in _DEPRECATED_VOCAB_COLUMNS:
+            if name not in existing:
+                continue
+            conn.execute(text(f"ALTER TABLE vocab DROP COLUMN {name}"))
+            dropped.append(name)
+    return dropped
