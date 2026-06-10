@@ -3,6 +3,17 @@
 from __future__ import annotations
 
 
+def test_capture_canonical_only_marks_enriching(client, workspace) -> None:
+    resp = client.post(
+        "/api/vocab",
+        json={"workspace_id": workspace["id"], "surface_form": "nadan"},
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["enriching"] is True
+    assert body["lexeme_id"] is not None
+
+
 def test_capture_canonical_only(client, workspace) -> None:
     resp = client.post(
         "/api/vocab",

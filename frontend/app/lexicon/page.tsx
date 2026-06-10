@@ -326,6 +326,11 @@ function LexiconRow({
       <td className="px-4 py-2 text-slate-600">{item.cefr ?? "—"}</td>
       <td className="px-4 py-2">
         <div className="flex flex-wrap gap-1">
+          {item.enriching && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+              enriching…
+            </span>
+          )}
           {item.tags.length === 0 ? (
             <span className="text-xs text-slate-400">—</span>
           ) : (

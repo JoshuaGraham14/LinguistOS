@@ -383,6 +383,16 @@ export function useVocab() {
         translation: input.translation,
       });
       setVocab((prev) => [item, ...prev]);
+      if (item.enriching) {
+        void api
+          .pollVocabUntilEnriched(item.id, activeWorkspace.language)
+          .then((enriched) => {
+            setVocab((prev) =>
+              prev.map((v) => (v.id === enriched.id ? enriched : v)),
+            );
+          })
+          .catch(() => undefined);
+      }
       return item;
     },
     [activeWorkspaceId, activeWorkspace],

@@ -494,6 +494,21 @@ export async function getVocab(
   return toVocab(item, language);
 }
 
+export async function pollVocabUntilEnriched(
+  vocabId: number,
+  language: LanguageCode,
+  opts?: { maxAttempts?: number; intervalMs?: number },
+): Promise<VocabItem> {
+  const maxAttempts = opts?.maxAttempts ?? 12;
+  const intervalMs = opts?.intervalMs ?? 500;
+  let item = await getVocab(vocabId, language);
+  for (let attempt = 0; attempt < maxAttempts && item.enriching; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    item = await getVocab(vocabId, language);
+  }
+  return item;
+}
+
 export async function recordMasteryEvent(
   vocabId: number,
   outcome: MasteryOutcome,
