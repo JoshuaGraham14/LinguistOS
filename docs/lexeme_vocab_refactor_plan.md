@@ -261,11 +261,11 @@ Move shared LLM helpers to `enrichment.py`:
 
 - Query `Lexeme.enrichment_status != 'complete'`
 - Enqueue jobs idempotently (skip if pending job exists)
-- Run on app startup + hourly asyncio timer
+- Run on app startup + hourly daemon thread (see post-implementation notes)
 
 ### New endpoints
 
-- `POST /api/vocab/{id}/enrich` — enqueue job for vocab's lexeme
+- `POST /api/enrichment/vocab/{id}` — enqueue job for vocab's lexeme (not `/api/vocab/{id}/enrich`, to avoid clashing with `/api/vocab/suggest/enrich`)
 - `GET /api/lexemes/{id}/enrichment` — status + pending fields
 
 ### Updated startup ([`main.py`](../backend/app/main.py))
@@ -339,4 +339,42 @@ feat: refactor vocab CRUD to use Lexeme resolver/mapper   # phase 3
 feat: align frontend with lexeme-backed vocab API         # phase 4
 feat: add async lexeme enrichment worker and sweeper      # phase 5
 test: lexeme enrichment coverage and enriching UI badge   # phase 6
+fix: tighten enriching flag and reliable sweeper thread   # post-audit
 ```
+
+---
+
+## Post-implementation audit (June 2026)
+
+Verified on `feat/lexeme-split-auto-tagging`: **37 backend tests pass**, frontend `tsc --noEmit` clean, manual API smoke test confirms shared lexeme dedup across workspaces, 409 on duplicate workspace links, and enrichment on sparse capture.
+
+### Fixed during audit
+
+| Issue | Resolution |
+|---|---|
+| `enriching` flag could stay true on complete rows when `enrichment_status` was stale | Derive `enriching` only from `is_lexeme_complete()` |
+| Incomplete words showed `tags: ["other"]` by default | Return empty `tags` while enriching |
+| Hourly sweeper used `asyncio.create_task()` at startup and often never started | Daemon thread + `time.sleep(3600)` in `enrichment_worker.py` |
+| No integration test for cross-workspace lexeme sharing | Added `backend/tests/test_lexeme_dedup.py` |
+
+### Known gaps and follow-ups
+
+These are intentional deferrals or acceptable limitations for the current single-user dev scope. Track as future work.
+
+1. **Duplicate LLM enrichment code** — `vocab_suggest.py` still owns its own enrichment prompts/schemas for the client preview path; `enrichment.py` is the server worker. The two can drift. **Follow-up:** extract shared prompt/schema/call helpers into one module used by both.
+
+2. **Synchronous startup enrichment** — `run_startup_enrichment()` processes pending jobs inline on every app start. Fine for dev and small DBs; could slow cold start if many incomplete lexemes accumulate. **Follow-up:** enqueue only on startup, process in background thread.
+
+3. **No re-enqueue on PATCH** — updating a vocab/lexeme via `PATCH /api/vocab/{id}` does not trigger enrichment if fields are cleared or left incomplete. Only create paths enqueue today. **Follow-up:** call `maybe_enqueue_enrichment()` after patch when lexeme becomes incomplete.
+
+4. **Homonym key is gloss-dependent** — sense key is `(language, lemma, pos, gloss_primary)`. Two users adding the same word with different glosses create separate lexemes (correct for disambiguation, but can fragment entries). Document for users; consider merge UI later.
+
+5. **Lexeme patches are global** — linguistic field updates on `PATCH` write to the shared `Lexeme` in-place. Acceptable for single-user dev; multi-user needs copy-on-write or fork-on-edit (already listed out of scope).
+
+6. **Enriching UX is partial** — "enriching…" badge exists on the lexicon table; words list and word detail pages do not show it yet. `storage.ts` polls after `addVocab` and updates global vocab state, but UI surfaces are inconsistent. **Follow-up:** shared `EnrichingBadge` component on words list and word home.
+
+7. **`datetime.utcnow()` deprecation** — enrichment and mastery code emit deprecation warnings in tests. Non-functional; migrate to timezone-aware `datetime.now(datetime.UTC)` when touching those files.
+
+8. **Phase 5 plan vs implementation** — plan called for extracting all LLM helpers from `vocab_suggest.py` into `enrichment.py`; only the worker path was extracted. Suggest/enrich preview endpoint still duplicates logic (see gap 1).
+
+9. **Confidence accept/reject UI deferred** — LOS-106 accept/reject flow for low-confidence enrichment results is not built. Worker auto-applies all results today (mock confidence 0.5 still applies).
