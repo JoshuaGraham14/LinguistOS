@@ -203,9 +203,9 @@ export default function WordHomePage() {
         )}
         {item.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
-            {item.tags.map((tag) => (
+            {item.tags.map((tag, i) => (
               <span
-                key={tag}
+                key={`${item.id}-${tag}-${i}`}
                 className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 capitalize"
               >
                 {tag}
