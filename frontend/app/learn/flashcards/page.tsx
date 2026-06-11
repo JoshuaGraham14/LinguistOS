@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import * as api from "@/lib/api";
 import {
   applyLexiconQuery,
   isEmptyLexiconQuery,
@@ -45,6 +46,42 @@ function FlashcardsInner() {
   const searchParams = useSearchParams();
   const wordParam = searchParams.get("word");
   const filterParam = searchParams.get("filter");
+  const viewParam = searchParams.get("view");
+  const [viewFilterReady, setViewFilterReady] = useState(!viewParam);
+  const [viewScopedIds, setViewScopedIds] = useState<Set<number> | null>(null);
+
+  useEffect(() => {
+    if (!viewParam) {
+      setViewScopedIds(null);
+      setViewFilterReady(true);
+      return;
+    }
+    const viewId = Number(viewParam);
+    if (!Number.isFinite(viewId)) {
+      setViewScopedIds(null);
+      setViewFilterReady(true);
+      return;
+    }
+    let cancelled = false;
+    setViewFilterReady(false);
+    void api
+      .getSavedView(viewId)
+      .then((view) => {
+        if (cancelled) return;
+        const filtered = applyLexiconQuery(vocab, view.config.query);
+        setViewScopedIds(new Set(filtered.map((v) => v.id)));
+        setViewFilterReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setViewScopedIds(null);
+          setViewFilterReady(true);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [viewParam, vocab]);
 
   const [shuffle, setShuffle] = useState(true);
   const [direction, setDirection] = useState<"en-to-es" | "es-to-en">("en-to-es");
@@ -65,6 +102,9 @@ function FlashcardsInner() {
         : undefined;
       return match ? [match] : vocab;
     }
+    if (viewParam && viewScopedIds) {
+      return vocab.filter((v) => viewScopedIds.has(v.id));
+    }
     if (filterParam) {
       const query = parseLexiconQuery(decodeURIComponent(filterParam));
       if (!isEmptyLexiconQuery(query)) {
@@ -72,18 +112,18 @@ function FlashcardsInner() {
       }
     }
     return vocab;
-  }, [vocab, wordParam, filterParam]);
+  }, [vocab, wordParam, filterParam, viewParam, viewScopedIds]);
 
   // Build deck whenever vocab/shuffle/scope changes; resets the session.
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !viewFilterReady) return;
     setOrder(shuffle ? shuffleArray(scopedVocab) : scopedVocab);
     setIndex(0);
     setRevealed(false);
     setStats({ knew: 0, didnt: 0 });
     setSeconds(0);
     setFinished(false);
-  }, [scopedVocab, hydrated, shuffle]);
+  }, [scopedVocab, hydrated, shuffle, viewFilterReady]);
 
   // Timer ticks while studying; pauses on finish/empty deck.
   useEffect(() => {
@@ -238,14 +278,24 @@ function FlashcardsInner() {
         </div>
       )}
 
-      {!wordParam && filterParam && (
+      {!wordParam && viewParam && (
         <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700">
-          Practicing the current Lexicon view ({total} words).{" "}
-          <Link
-            href={`/lexicon?${decodeURIComponent(filterParam)}`}
-            className="underline"
-          >
-            Adjust filters
+          Practicing saved vocabulary view ({total} words).{" "}
+          <Link href={`/vocab?view=${viewParam}`} className="underline">
+            Adjust view
+          </Link>{" "}
+          ·{" "}
+          <Link href="/learn/flashcards" className="underline">
+            Use full deck
+          </Link>
+        </div>
+      )}
+
+      {!wordParam && !viewParam && filterParam && (
+        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700">
+          Practicing filtered deck ({total} words).{" "}
+          <Link href="/vocab" className="underline">
+            Open vocabulary
           </Link>{" "}
           ·{" "}
           <Link href="/learn/flashcards" className="underline">

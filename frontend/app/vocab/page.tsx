@@ -4,6 +4,7 @@ import { Download, Upload } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ImportWordsModal } from "@/components/vocab/ImportWordsModal";
+import { VocabBoardView } from "@/components/vocab/VocabBoardView";
 import { VocabGalleryView } from "@/components/vocab/VocabGalleryView";
 import { VocabTableView, toggleSortRule } from "@/components/vocab/VocabTableView";
 import { VocabToolbar } from "@/components/vocab/VocabToolbar";
@@ -239,10 +240,19 @@ function VocabPageInner() {
               onToggleLearned={(id) => void toggleLearned(id)}
             />
           )}
-          {activeView?.layout === "board" && (
-            <div className="glass-card rounded-2xl p-12 text-center text-slate-500">
-              Board view — coming in the next update.
-            </div>
+          {activeView?.layout === "board" && config && (
+            <VocabBoardView
+              items={pipeline.items}
+              config={config}
+              loading={loading}
+              onUpdateField={(id, field, value) => {
+                if (field === "learned") {
+                  void updateVocab(id, { learned: Boolean(value) });
+                } else if (field === "cefr") {
+                  void updateVocab(id, { cefr: String(value) || null });
+                }
+              }}
+            />
           )}
         </div>
 
