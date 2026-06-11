@@ -84,6 +84,26 @@ function VocabPageInner() {
     }
   }
 
+  const layoutParam = searchParams.get("layout");
+
+  const selectView = useCallback(
+    (viewId: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("view", String(viewId));
+      params.delete("layout");
+      router.replace(`/vocab?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
+
+  useEffect(() => {
+    if (!viewsHydrated || views.length === 0 || layoutParam == null) return;
+    const match = views.find((v) => v.layout === layoutParam);
+    if (match && match.id !== activeView?.id) {
+      selectView(match.id);
+    }
+  }, [viewsHydrated, views, layoutParam, activeView?.id, selectView]);
+
   useEffect(() => {
     if (!viewsHydrated || !activeView) return;
     const current = searchParams.get("view");
@@ -91,6 +111,7 @@ function VocabPageInner() {
     if (current !== target) {
       const params = new URLSearchParams(searchParams.toString());
       params.set("view", target);
+      params.delete("layout");
       router.replace(`/vocab?${params.toString()}`, { scroll: false });
     }
   }, [activeView, viewsHydrated, router, searchParams]);
@@ -101,15 +122,6 @@ function VocabPageInner() {
   }, [vocab, config]);
 
   const loading = !viewsHydrated || !vocabHydrated || !config;
-
-  const selectView = useCallback(
-    (viewId: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("view", String(viewId));
-      router.replace(`/vocab?${params.toString()}`, { scroll: false });
-    },
-    [router, searchParams],
-  );
 
   const handleCreateView = useCallback(async () => {
     const name = window.prompt("View name", "New view");

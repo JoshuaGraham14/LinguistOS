@@ -95,11 +95,11 @@ export default function WordHomePage() {
     return (
       <div className="space-y-6">
         <Link
-          href="/lexicon"
+          href="/vocab"
           className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
-          Back to lexicon
+          Back to vocabulary
         </Link>
         <div className="glass-card rounded-2xl p-12 text-center text-slate-500">
           That word isn’t in your lexicon.
@@ -118,18 +118,18 @@ export default function WordHomePage() {
     if (!item) return;
     if (!window.confirm(`Delete "${item.surfaceForm ?? item.word}"?`)) return;
     await removeVocab(item.id);
-    router.push("/lexicon");
+    router.push("/vocab");
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <Link
-          href="/lexicon"
+          href="/vocab"
           className="inline-flex items-center gap-2 glass-pill rounded-2xl px-5 py-3 text-slate-700 font-medium hover:bg-white/80 transition"
         >
           <ArrowLeft className="h-5 w-5" strokeWidth={1.75} />
-          Back to lexicon
+          Back to vocabulary
         </Link>
         <div className="flex gap-2">
           <Link
@@ -147,7 +147,7 @@ export default function WordHomePage() {
             Sentences
           </Link>
           <Link
-            href={`/words?edit=${item.id}`}
+            href={`/vocab?edit=${item.id}`}
             className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium px-4 py-2.5 hover:bg-slate-50 transition"
           >
             <Pencil className="h-4 w-4" strokeWidth={2} />

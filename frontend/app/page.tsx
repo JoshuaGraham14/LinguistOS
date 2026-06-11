@@ -101,8 +101,8 @@ export default function DashboardPage() {
               color="red"
             />
             <QuickActionCard
-              href="/words"
-              label="Words"
+              href="/vocab"
+              label="Vocabulary"
               icon={BookMarked}
               color="green"
             />

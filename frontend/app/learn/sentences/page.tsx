@@ -667,7 +667,7 @@ function SentencePracticeInner() {
         <div className="glass-card rounded-2xl p-12 text-center">
           <p className="text-slate-600">
             Add some words on the{" "}
-            <Link href="/words" className="text-brand-600 underline">
+            <Link href="/vocab" className="text-brand-600 underline">
               Words page
             </Link>{" "}
             first.

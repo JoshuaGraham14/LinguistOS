@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { cn } from "@/lib/cn";
 import { getVocabProperty } from "@/lib/vocab-properties";
 import type { VocabItem } from "@/lib/types";
 import type { VocabGroup, VocabViewConfig } from "@/lib/vocab-view";
