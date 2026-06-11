@@ -289,6 +289,7 @@ function VocabPageInner() {
             onRename={setRenameView}
             onDuplicate={(view) => void handleDuplicateView(view)}
             onDelete={setDeleteView}
+            onMenuOpen={() => setActivePopover(null)}
           />
         </div>
         {config && activeView && (

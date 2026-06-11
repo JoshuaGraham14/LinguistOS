@@ -2,10 +2,42 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { VocabItem } from "./types";
 import {
+  canHideProperty,
   defaultViewConfig,
+  hideProperty,
   orderedVisibleProperties,
+  removeSortRule,
+  setPrimarySortRule,
+  showProperty,
   sortVocab,
+  type VocabViewConfig,
 } from "./vocab-view";
+
+const EMPTY_QUERY = {
+  search: "",
+  tags: [],
+  pos: [],
+  cefr: [],
+  learned: "any" as const,
+  due: "any" as const,
+  statusMatch: "all" as const,
+  boxMin: null,
+  boxMax: null,
+  language: null,
+};
+
+function viewConfig(
+  overrides: Partial<VocabViewConfig> = {},
+): VocabViewConfig {
+  return {
+    query: { ...EMPTY_QUERY },
+    sorts: [],
+    groupBy: null,
+    visibleProperties: ["word", "translation", "pos"],
+    propertyOrder: ["word", "translation", "pos"],
+    ...overrides,
+  };
+}
 
 function item(
   overrides: Partial<VocabItem> & Pick<VocabItem, "id" | "word" | "createdAt">,
@@ -81,25 +113,35 @@ describe("sortVocab", () => {
 
 describe("orderedVisibleProperties", () => {
   it("always includes word as the first column", () => {
-    const columns = orderedVisibleProperties({
-      query: {
-        search: "",
-        tags: [],
-        pos: [],
-        cefr: [],
-        learned: "any",
-        due: "any",
-        statusMatch: "all",
-        boxMin: null,
-        boxMax: null,
-        language: null,
-      },
-      sorts: [],
-      groupBy: null,
-      visibleProperties: ["translation", "pos"],
-      propertyOrder: ["translation", "pos"],
-    });
+    const columns = orderedVisibleProperties(
+      viewConfig({
+        visibleProperties: ["translation", "pos"],
+        propertyOrder: ["translation", "pos"],
+      }),
+    );
     assert.deepEqual(columns[0], "word");
     assert.ok(columns.includes("translation"));
+  });
+});
+
+describe("column menu helpers", () => {
+  it("prevents hiding the title column", () => {
+    assert.equal(canHideProperty("word"), false);
+    const next = hideProperty(viewConfig(), "word");
+    assert.ok(next.visibleProperties.includes("word"));
+  });
+
+  it("hides and shows non-title columns", () => {
+    const hidden = hideProperty(viewConfig(), "pos");
+    assert.ok(!hidden.visibleProperties.includes("pos"));
+    const shown = showProperty(hidden, "pos");
+    assert.ok(shown.visibleProperties.includes("pos"));
+  });
+
+  it("sets and removes primary sort rules", () => {
+    const sorted = setPrimarySortRule([], "cefr", "asc");
+    assert.deepEqual(sorted, [{ field: "cefr", direction: "asc" }]);
+    const cleared = removeSortRule(sorted, "cefr");
+    assert.deepEqual(cleared, []);
   });
 });

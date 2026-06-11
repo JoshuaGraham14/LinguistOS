@@ -34,6 +34,7 @@ export function ViewTabBar({
   onRename,
   onDuplicate,
   onDelete,
+  onMenuOpen,
 }: {
   views: SavedView[];
   activeViewId: number | null;
@@ -42,6 +43,7 @@ export function ViewTabBar({
   onRename: (view: SavedView) => void;
   onDuplicate: (view: SavedView) => void;
   onDelete: (view: SavedView) => void;
+  onMenuOpen?: () => void;
 }) {
   const [menu, setMenu] = useState<MenuState>(null);
 
@@ -51,6 +53,7 @@ export function ViewTabBar({
       : null;
 
   function openViewMenu(viewId: number, x: number, y: number) {
+    onMenuOpen?.();
     setMenu({ kind: "view", viewId, x, y });
   }
 
@@ -65,6 +68,7 @@ export function ViewTabBar({
         onContextMenu={(e) => {
           if ((e.target as HTMLElement).closest("[data-view-tab]")) return;
           e.preventDefault();
+          onMenuOpen?.();
           setMenu({ kind: "empty", x: e.clientX, y: e.clientY });
         }}
       >
