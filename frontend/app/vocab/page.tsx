@@ -1,0 +1,212 @@
+"use client";
+
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { VocabTableView, toggleSortRule } from "@/components/vocab/VocabTableView";
+import { VocabToolbar } from "@/components/vocab/VocabToolbar";
+import {
+  ViewSettingsPanel,
+  type ViewSettingsSection,
+} from "@/components/vocab/ViewSettingsPanel";
+import { ViewTabBar } from "@/components/vocab/ViewTabBar";
+import { isEmptyLexiconQuery, serializeLexiconQuery } from "@/lib/lexicon-query";
+import {
+  useProfile,
+  useSavedViews,
+  useVocab,
+  useWorkspaces,
+} from "@/lib/storage";
+import type { SavedViewLayout } from "@/lib/types";
+import { useDebouncedViewPatch } from "@/lib/useDebouncedViewPatch";
+import { applyViewPipeline } from "@/lib/vocab-view";
+
+function VocabPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { activeWorkspace } = useWorkspaces();
+  const { views, hydrated: viewsHydrated, createView, patchView } = useSavedViews();
+  const { vocab, hydrated: vocabHydrated } = useVocab();
+  const { profile } = useProfile();
+
+  const viewIdParam = searchParams.get("view");
+  const parsedViewId = viewIdParam ? Number(viewIdParam) : null;
+
+  const activeView = useMemo(() => {
+    if (views.length === 0) return null;
+    if (parsedViewId && views.some((v) => v.id === parsedViewId)) {
+      return views.find((v) => v.id === parsedViewId) ?? views[0]!;
+    }
+    return views[0]!;
+  }, [views, parsedViewId]);
+
+  const { config, setConfig, saveStatus } = useDebouncedViewPatch(
+    activeView,
+    patchView,
+  );
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsSection, setSettingsSection] =
+    useState<ViewSettingsSection | null>(null);
+
+  useEffect(() => {
+    if (!viewsHydrated || !activeView) return;
+    const current = searchParams.get("view");
+    const target = String(activeView.id);
+    if (current !== target) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("view", target);
+      router.replace(`/vocab?${params.toString()}`, { scroll: false });
+    }
+  }, [activeView, viewsHydrated, router, searchParams]);
+
+  const pipeline = useMemo(() => {
+    if (!config) return { items: [], groups: null };
+    return applyViewPipeline(vocab, config);
+  }, [vocab, config]);
+
+  const loading = !viewsHydrated || !vocabHydrated || !config;
+
+  const selectView = useCallback(
+    (viewId: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("view", String(viewId));
+      router.replace(`/vocab?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams],
+  );
+
+  const handleCreateView = useCallback(async () => {
+    const name = window.prompt("View name", "New view");
+    if (!name?.trim()) return;
+    const created = await createView({ name: name.trim(), layout: "table" });
+    selectView(created.id);
+  }, [createView, selectView]);
+
+  const handleLayoutChange = useCallback(
+    async (layout: SavedViewLayout) => {
+      if (!activeView) return;
+      await patchView(activeView.id, { layout });
+    },
+    [activeView, patchView],
+  );
+
+  const flashcardsHref = useMemo(() => {
+    if (activeView) {
+      return `/learn/flashcards?view=${activeView.id}`;
+    }
+    if (config && !isEmptyLexiconQuery(config.query)) {
+      const encoded = serializeLexiconQuery(config.query);
+      return `/learn/flashcards?filter=${encodeURIComponent(encoded)}`;
+    }
+    return "/learn/flashcards";
+  }, [activeView, config]);
+
+  const openSettings = (section: ViewSettingsSection | null) => {
+    setSettingsSection(section);
+    setSettingsOpen(true);
+  };
+
+  if (!viewsHydrated) {
+    return <div className="text-slate-400 text-center py-12">Loading…</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <header className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Vocabulary</h1>
+          <p className="text-slate-500 mt-1">
+            {activeWorkspace && (
+              <span>
+                {activeWorkspace.emojiOrFlag} {activeWorkspace.name}
+                {" · "}
+              </span>
+            )}
+            {vocabHydrated
+              ? `${pipeline.items.length} of ${vocab.length} words`
+              : "Loading…"}
+          </p>
+        </div>
+      </header>
+
+      <ViewTabBar
+        views={views}
+        activeViewId={activeView?.id ?? null}
+        onSelect={selectView}
+        onCreate={() => void handleCreateView()}
+      />
+
+      <VocabToolbar
+        search={config?.query.search ?? ""}
+        onSearchChange={(search) =>
+          setConfig((prev) => ({ ...prev, query: { ...prev.query, search } }))
+        }
+        saveStatus={saveStatus}
+        hasActiveFilters={config ? !isEmptyLexiconQuery(config.query) : false}
+        hasActiveSort={(config?.sorts.length ?? 0) > 0}
+        settingsOpen={settingsOpen}
+        onToggleSettings={() => {
+          setSettingsSection(null);
+          setSettingsOpen((o) => !o);
+        }}
+        onOpenFilter={() => openSettings("filter")}
+        onOpenSort={() => openSettings("sort")}
+        flashcardsHref={flashcardsHref}
+        onNew={() => {
+          /* wired in phase 4 */
+        }}
+      />
+
+      <div className="flex gap-4 items-start">
+        <div className="flex-1 min-w-0 space-y-4">
+          {activeView?.layout === "table" && config && (
+            <VocabTableView
+              items={pipeline.items}
+              config={config}
+              loading={loading}
+              wordDisplayMode={profile.wordDisplayMode}
+              onSort={(field) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  sorts: toggleSortRule(prev.sorts, field),
+                }))
+              }
+            />
+          )}
+          {activeView?.layout === "gallery" && (
+            <div className="glass-card rounded-2xl p-12 text-center text-slate-500">
+              Gallery view — coming in the next update.
+            </div>
+          )}
+          {activeView?.layout === "board" && (
+            <div className="glass-card rounded-2xl p-12 text-center text-slate-500">
+              Board view — coming in the next update.
+            </div>
+          )}
+        </div>
+
+        {settingsOpen && config && activeView && (
+          <ViewSettingsPanel
+            open={settingsOpen}
+            section={settingsSection}
+            layout={activeView.layout}
+            config={config}
+            onLayoutChange={(layout) => void handleLayoutChange(layout)}
+            onConfigChange={setConfig}
+            onClose={() => setSettingsOpen(false)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function VocabPage() {
+  return (
+    <Suspense
+      fallback={<div className="text-slate-400 text-center py-12">Loading…</div>}
+    >
+      <VocabPageInner />
+    </Suspense>
+  );
+}
