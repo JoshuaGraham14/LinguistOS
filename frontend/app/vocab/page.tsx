@@ -7,11 +7,10 @@ import { ImportWordsModal } from "@/components/vocab/ImportWordsModal";
 import { VocabBoardView } from "@/components/vocab/VocabBoardView";
 import { VocabGalleryView } from "@/components/vocab/VocabGalleryView";
 import { VocabTableView, toggleSortRule } from "@/components/vocab/VocabTableView";
-import { VocabToolbar } from "@/components/vocab/VocabToolbar";
 import {
-  ViewSettingsPanel,
-  type ViewSettingsSection,
-} from "@/components/vocab/ViewSettingsPanel";
+  VocabDatabaseToolbar,
+  type VocabPopoverId,
+} from "@/components/vocab/VocabDatabaseToolbar";
 import { ViewTabBar } from "@/components/vocab/ViewTabBar";
 import { WordFormModal } from "@/components/vocab/WordFormModal";
 import { isEmptyLexiconQuery, serializeLexiconQuery } from "@/lib/lexicon-query";
@@ -62,9 +61,7 @@ function VocabPageInner() {
     patchView,
   );
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsSection, setSettingsSection] =
-    useState<ViewSettingsSection | null>(null);
+  const [activePopover, setActivePopover] = useState<VocabPopoverId>(null);
 
   useEffect(() => {
     if (!vocabHydrated || !editParam) return;
@@ -149,10 +146,9 @@ function VocabPageInner() {
     return "/learn/flashcards";
   }, [activeView, config]);
 
-  const openSettings = (section: ViewSettingsSection | null) => {
-    setSettingsSection(section);
-    setSettingsOpen(true);
-  };
+  function togglePopover(id: Exclude<VocabPopoverId, null>) {
+    setActivePopover((prev) => (prev === id ? null : id));
+  }
 
   if (!viewsHydrated) {
     return <div className="text-slate-400 text-center py-12">Loading…</div>;
@@ -200,34 +196,37 @@ function VocabPageInner() {
         </div>
       </header>
 
-      <ViewTabBar
-        views={views}
-        activeViewId={activeView?.id ?? null}
-        onSelect={selectView}
-        onCreate={() => void handleCreateView()}
-      />
+      <div className="glass-card rounded-2xl px-4 pt-2">
+        <ViewTabBar
+          views={views}
+          activeViewId={activeView?.id ?? null}
+          onSelect={selectView}
+          onCreate={() => void handleCreateView()}
+        />
+        {config && activeView && (
+          <VocabDatabaseToolbar
+            search={config.query.search}
+            onSearchChange={(search) =>
+              setConfig((prev) => ({ ...prev, query: { ...prev.query, search } }))
+            }
+            saveStatus={saveStatus}
+            activePopover={activePopover}
+            onTogglePopover={togglePopover}
+            hasActiveFilters={!isEmptyLexiconQuery(config.query)}
+            hasActiveSort={config.sorts.length > 0}
+            hasGroup={Boolean(config.groupBy)}
+            config={config}
+            layout={activeView.layout}
+            onLayoutChange={(layout) => void handleLayoutChange(layout)}
+            onConfigChange={setConfig}
+            flashcardsHref={flashcardsHref}
+            onNew={() => setAddOpen(true)}
+          />
+        )}
+      </div>
 
-      <VocabToolbar
-        search={config?.query.search ?? ""}
-        onSearchChange={(search) =>
-          setConfig((prev) => ({ ...prev, query: { ...prev.query, search } }))
-        }
-        saveStatus={saveStatus}
-        hasActiveFilters={config ? !isEmptyLexiconQuery(config.query) : false}
-        hasActiveSort={(config?.sorts.length ?? 0) > 0}
-        settingsOpen={settingsOpen}
-        onToggleSettings={() => {
-          setSettingsSection(null);
-          setSettingsOpen((o) => !o);
-        }}
-        onOpenFilter={() => openSettings("filter")}
-        onOpenSort={() => openSettings("sort")}
-        flashcardsHref={flashcardsHref}
-        onNew={() => setAddOpen(true)}
-      />
-
-      <div className="flex gap-4 items-start">
-        <div className="flex-1 min-w-0 space-y-4">
+      <div className="relative">
+        <div className="min-w-0 space-y-4">
           {activeView?.layout === "table" && config && (
             <VocabTableView
               items={pipeline.items}
@@ -267,18 +266,6 @@ function VocabPageInner() {
             />
           )}
         </div>
-
-        {settingsOpen && config && activeView && (
-          <ViewSettingsPanel
-            open={settingsOpen}
-            section={settingsSection}
-            layout={activeView.layout}
-            config={config}
-            onLayoutChange={(layout) => void handleLayoutChange(layout)}
-            onConfigChange={setConfig}
-            onClose={() => setSettingsOpen(false)}
-          />
-        )}
       </div>
 
       <WordFormModal
