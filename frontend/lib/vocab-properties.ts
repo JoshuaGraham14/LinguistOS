@@ -124,7 +124,7 @@ export const VOCAB_PROPERTIES: VocabPropertyDef[] = [
   },
   {
     key: "createdAt",
-    label: "Added",
+    label: "Date Added",
     type: "date",
     sortable: true,
     groupable: false,

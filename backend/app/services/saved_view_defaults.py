@@ -27,6 +27,7 @@ _ALL_PROPERTIES = [
     "pos",
     "cefr",
     "tags",
+    "createdAt",
     "box",
     "nextDue",
 ]
@@ -56,7 +57,7 @@ DEFAULT_VIEW_SPECS: list[tuple[str, str | None, SavedViewLayout, dict, int]] = [
         "All words",
         "📋",
         "table",
-        _config(sorts=[{"field": "word", "direction": "asc"}]),
+        _config(sorts=[{"field": "createdAt", "direction": "desc"}]),
         0,
     ),
     (
@@ -89,6 +90,47 @@ DEFAULT_VIEW_SPECS: list[tuple[str, str | None, SavedViewLayout, dict, int]] = [
 ]
 
 
+_ALL_WORDS_SORT = [{"field": "createdAt", "direction": "desc"}]
+
+
+def _is_legacy_all_words_config(config: dict) -> bool:
+    sorts = config.get("sorts") or []
+    if sorts == [{"field": "word", "direction": "asc"}]:
+        return True
+    visible = config.get("visibleProperties") or []
+    return "createdAt" not in visible and sorts == []
+
+
+def migrate_all_words_view_defaults(db: Session, workspace_id: int) -> int:
+    """Patch legacy 'All words' views to Date Added sort and column."""
+    views = db.scalars(
+        select(SavedView).where(
+            SavedView.workspace_id == workspace_id,
+            SavedView.name == "All words",
+        )
+    ).all()
+    updated = 0
+    for view in views:
+        config = dict(view.config or {})
+        if not _is_legacy_all_words_config(config):
+            continue
+        visible = list(config.get("visibleProperties") or _ALL_PROPERTIES)
+        order = list(config.get("propertyOrder") or visible)
+        if "createdAt" not in visible:
+            insert_at = order.index("box") if "box" in order else len(order)
+            visible.insert(insert_at, "createdAt")
+            order.insert(insert_at, "createdAt")
+        config["visibleProperties"] = visible
+        config["propertyOrder"] = order
+        config["sorts"] = _ALL_WORDS_SORT
+        view.config = config
+        db.add(view)
+        updated += 1
+    if updated:
+        db.commit()
+    return updated
+
+
 def ensure_default_saved_views(db: Session, workspace_id: int) -> list[SavedView]:
     """Create the three default views when a workspace has none."""
     count = db.scalar(
@@ -97,6 +139,7 @@ def ensure_default_saved_views(db: Session, workspace_id: int) -> list[SavedView
         .where(SavedView.workspace_id == workspace_id)
     )
     if count and count > 0:
+        migrate_all_words_view_defaults(db, workspace_id)
         return list(
             db.scalars(
                 select(SavedView)

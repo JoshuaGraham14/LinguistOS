@@ -12,6 +12,10 @@ def test_list_views_seeds_defaults(client, workspace) -> None:
     assert views[0]["name"] == "All words"
     assert views[0]["layout"] == "table"
     assert views[0]["position"] == 0
+    assert views[0]["config"]["sorts"] == [
+        {"field": "createdAt", "direction": "desc"}
+    ]
+    assert "createdAt" in views[0]["config"]["visibleProperties"]
     assert views[1]["name"] == "Gallery"
     assert views[1]["layout"] == "gallery"
     assert views[2]["name"] == "Review queue"
