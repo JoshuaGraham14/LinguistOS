@@ -1,0 +1,7 @@
+name: baseline_hf_qwen05b_n20
+method: baseline_hf
+samples_per_case: 20
+config:
+  model: Qwen/Qwen2.5-0.5B-Instruct
+  temperature: 0.7
+  sentence_length: short

@@ -1,0 +1,7 @@
+name: baseline_long_n100_temp2
+method: baseline_gpt
+samples_per_case: 100
+config:
+  model: gpt-5.4-nano
+  temperature: 2.0
+  sentence_length: long
