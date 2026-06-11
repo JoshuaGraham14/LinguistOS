@@ -238,7 +238,7 @@ function VocabPageInner() {
             onClick={() =>
               downloadVocabCsv(
                 "vocabulary.csv",
-                buildVocabCsv(vocab),
+                buildVocabCsv(pipeline.items),
               )
             }
             className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium px-4 py-2.5 hover:bg-slate-50 transition"
@@ -286,6 +286,7 @@ function VocabPageInner() {
           {activeView?.layout === "table" && config && (
             <VocabTableView
               items={pipeline.items}
+              groups={pipeline.groups}
               config={config}
               loading={loading}
               wordDisplayMode={profile.wordDisplayMode}

@@ -15,6 +15,7 @@ _EMPTY_QUERY: dict = {
     "cefr": [],
     "learned": "any",
     "due": "any",
+    "statusMatch": "all",
     "boxMin": None,
     "boxMax": None,
     "language": None,
@@ -80,6 +81,7 @@ DEFAULT_VIEW_SPECS: list[tuple[str, str | None, SavedViewLayout, dict, int]] = [
                 **_EMPTY_QUERY,
                 "learned": "not_learned",
                 "due": "due_now",
+                "statusMatch": "any",
             },
             sorts=[{"field": "nextDue", "direction": "asc"}],
             visible_properties=["word", "translation", "box", "nextDue", "learned"],
@@ -99,6 +101,38 @@ def _is_legacy_all_words_config(config: dict) -> bool:
         return True
     visible = config.get("visibleProperties") or []
     return "createdAt" not in visible and sorts == []
+
+
+def _is_legacy_review_queue_query(query: dict) -> bool:
+    return (
+        query.get("learned") == "not_learned"
+        and query.get("due") == "due_now"
+        and query.get("statusMatch", "all") == "all"
+    )
+
+
+def migrate_review_queue_view_defaults(db: Session, workspace_id: int) -> int:
+    """Patch legacy Review queue views to OR learned/due status filters."""
+    views = db.scalars(
+        select(SavedView).where(
+            SavedView.workspace_id == workspace_id,
+            SavedView.name == "Review queue",
+        )
+    ).all()
+    updated = 0
+    for view in views:
+        config = dict(view.config or {})
+        query = dict(config.get("query") or {})
+        if not _is_legacy_review_queue_query(query):
+            continue
+        query["statusMatch"] = "any"
+        config["query"] = query
+        view.config = config
+        db.add(view)
+        updated += 1
+    if updated:
+        db.commit()
+    return updated
 
 
 def migrate_all_words_view_defaults(db: Session, workspace_id: int) -> int:
@@ -140,6 +174,7 @@ def ensure_default_saved_views(db: Session, workspace_id: int) -> list[SavedView
     )
     if count and count > 0:
         migrate_all_words_view_defaults(db, workspace_id)
+        migrate_review_queue_view_defaults(db, workspace_id)
         return list(
             db.scalars(
                 select(SavedView)

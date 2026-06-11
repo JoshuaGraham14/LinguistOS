@@ -16,6 +16,7 @@ SavedViewLayout = Literal["table", "board", "gallery"]
 SortDirection = Literal["asc", "desc"]
 DueFilter = Literal["any", "due_now", "due_week", "not_due"]
 LearnedFilter = Literal["any", "learned", "not_learned"]
+StatusMatch = Literal["all", "any"]
 
 
 class WorkspaceCreate(BaseModel):
@@ -305,6 +306,7 @@ class LexiconQueryConfig(BaseModel):
     cefr: list[str] = Field(default_factory=list)
     learned: LearnedFilter = "any"
     due: DueFilter = "any"
+    statusMatch: StatusMatch = "all"
     boxMin: int | None = None
     boxMax: int | None = None
     language: LanguageCode | None = None

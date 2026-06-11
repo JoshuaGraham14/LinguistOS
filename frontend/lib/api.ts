@@ -1,3 +1,4 @@
+import { normalizeLexiconQuery } from "./lexicon-query";
 import type { VocabViewConfig } from "./vocab-view";
 import type {
   LanguageCode,
@@ -757,7 +758,10 @@ function toSavedView(item: ApiSavedView): SavedView {
     name: item.name,
     icon: item.icon,
     layout: item.layout,
-    config: item.config,
+    config: {
+      ...item.config,
+      query: normalizeLexiconQuery(item.config.query),
+    },
     position: item.position,
     createdAt: Date.parse(item.created_at),
     updatedAt: Date.parse(item.updated_at),

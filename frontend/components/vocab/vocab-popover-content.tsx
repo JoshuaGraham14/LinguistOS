@@ -7,6 +7,7 @@ import {
   type DueFilter,
   type LearnedFilter,
   type LexiconQuery,
+  type StatusMatch,
 } from "@/lib/lexicon-query";
 import type { SavedViewLayout, SortDirection, SortRule } from "@/lib/types";
 import {
@@ -166,6 +167,33 @@ export function FilterPopoverContent({
           </button>
         ))}
       </div>
+      {query.learned !== "any" && query.due !== "any" && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs uppercase tracking-wide text-slate-500 w-full">
+            Learned / due match
+          </span>
+          {(
+            [
+              { value: "all" as StatusMatch, label: "All (AND)" },
+              { value: "any" as StatusMatch, label: "Any (OR)" },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange({ ...query, statusMatch: opt.value })}
+              className={cn(
+                "px-2.5 py-1 rounded-full text-xs border transition",
+                query.statusMatch === opt.value
+                  ? "bg-sky-100 border-sky-300 text-sky-700"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50",
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
       {!isEmptyLexiconQuery(query) && (
         <button
           type="button"

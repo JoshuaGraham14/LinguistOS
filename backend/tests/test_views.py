@@ -21,6 +21,7 @@ def test_list_views_seeds_defaults(client, workspace) -> None:
     assert views[2]["name"] == "Review queue"
     assert views[2]["config"]["query"]["due"] == "due_now"
     assert views[2]["config"]["query"]["learned"] == "not_learned"
+    assert views[2]["config"]["query"]["statusMatch"] == "any"
 
     # Second list call should not duplicate seeds.
     again = client.get(f"/api/views?workspace_id={wid}")
@@ -51,6 +52,7 @@ def test_create_update_delete_view(client, workspace) -> None:
                     "cefr": [],
                     "learned": "any",
                     "due": "any",
+                    "statusMatch": "all",
                     "boxMin": None,
                     "boxMax": None,
                     "language": None,
