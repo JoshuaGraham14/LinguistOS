@@ -1,10 +1,30 @@
 "use client";
 
 import { MoreHorizontal, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { cn } from "@/lib/cn";
 import type { SavedView } from "@/lib/types";
+import {
+  ContextMenu,
+  ContextMenuItem,
+  ContextMenuLink,
+  ContextMenuSeparator,
+} from "./ContextMenu";
+
+type ViewMenuState = {
+  kind: "view";
+  viewId: number;
+  x: number;
+  y: number;
+};
+
+type EmptyMenuState = {
+  kind: "empty";
+  x: number;
+  y: number;
+};
+
+type MenuState = ViewMenuState | EmptyMenuState | null;
 
 export function ViewTabBar({
   views,
@@ -23,106 +43,134 @@ export function ViewTabBar({
   onDuplicate: (view: SavedView) => void;
   onDelete: (view: SavedView) => void;
 }) {
-  const [menuViewId, setMenuViewId] = useState<number | null>(null);
-  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [menu, setMenu] = useState<MenuState>(null);
 
-  useEffect(() => {
-    if (menuViewId == null) return;
-    function onClick(e: MouseEvent) {
-      if (menuRef.current?.contains(e.target as Node)) return;
-      setMenuViewId(null);
-    }
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [menuViewId]);
+  const menuView =
+    menu?.kind === "view"
+      ? (views.find((v) => v.id === menu.viewId) ?? null)
+      : null;
 
-  const menuView = views.find((v) => v.id === menuViewId) ?? null;
+  function openViewMenu(viewId: number, x: number, y: number) {
+    setMenu({ kind: "view", viewId, x, y });
+  }
 
-  function openMenu(viewId: number, el: HTMLElement) {
-    const rect = el.getBoundingClientRect();
-    setMenuPos({ top: rect.bottom + 4, left: rect.left });
-    setMenuViewId(viewId);
+  function closeMenu() {
+    setMenu(null);
   }
 
   return (
-    <div className="flex items-center gap-1 min-h-10">
-      {views.map((view) => (
-        <div key={view.id} className="flex items-center group shrink-0">
-          <button
-            type="button"
-            onClick={() => onSelect(view.id)}
-            className={cn(
-              "inline-flex items-center gap-1.5 px-3 h-10 text-sm font-medium border-b-2 transition",
-              activeViewId === view.id
-                ? "border-brand-500 text-brand-700"
-                : "border-transparent text-slate-500 hover:text-slate-700",
-            )}
-          >
-            {view.icon && <span aria-hidden>{view.icon}</span>}
-            {view.name}
-          </button>
-          <button
-            type="button"
-            onClick={(e) => openMenu(view.id, e.currentTarget)}
-            className="h-7 w-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100 focus:opacity-100 transition"
-            aria-label={`Options for ${view.name}`}
-          >
-            <MoreHorizontal className="h-4 w-4 mx-auto" />
-          </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={onCreate}
-        className="inline-flex items-center justify-center h-10 w-10 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 shrink-0"
-        title="Add view"
+    <>
+      <div
+        className="flex items-center gap-1 min-h-10 flex-1"
+        onContextMenu={(e) => {
+          if ((e.target as HTMLElement).closest("[data-view-tab]")) return;
+          e.preventDefault();
+          setMenu({ kind: "empty", x: e.clientX, y: e.clientY });
+        }}
       >
-        <Plus className="h-4 w-4" />
-      </button>
-
-      {menuView &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div
-            ref={menuRef}
-            className="fixed z-[360] min-w-[160px] rounded-xl border border-slate-200 bg-white shadow-lg py-1"
-            style={{ top: menuPos.top, left: menuPos.left }}
-          >
+        {views.map((view) => (
+          <div key={view.id} className="flex items-center group shrink-0">
             <button
               type="button"
-              className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              data-view-tab
+              onClick={() => onSelect(view.id)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                openViewMenu(view.id, e.clientX, e.clientY);
+              }}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3 h-10 text-sm font-medium border-b-2 transition",
+                activeViewId === view.id
+                  ? "border-brand-500 text-brand-700"
+                  : "border-transparent text-slate-500 hover:text-slate-700",
+              )}
+            >
+              {view.icon && <span aria-hidden>{view.icon}</span>}
+              {view.name}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => openViewMenu(view.id, e.clientX, e.clientY)}
+              className="h-7 w-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100 focus:opacity-100 transition"
+              aria-label={`Options for ${view.name}`}
+            >
+              <MoreHorizontal className="h-4 w-4 mx-auto" />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex items-center justify-center h-10 w-10 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 shrink-0"
+          title="Add view"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+
+      <ContextMenu
+        open={menu?.kind === "view" && menuView != null}
+        x={menu?.kind === "view" ? menu.x : 0}
+        y={menu?.kind === "view" ? menu.y : 0}
+        onClose={closeMenu}
+      >
+        {menuView && (
+          <>
+            <ContextMenuLink
+              href={`/learn/flashcards?view=${menuView.id}`}
+              onClick={closeMenu}
+            >
+              Practice this view
+            </ContextMenuLink>
+            <ContextMenuSeparator />
+            <ContextMenuItem
               onClick={() => {
                 onRename(menuView);
-                setMenuViewId(null);
+                closeMenu();
               }}
             >
               Rename
-            </button>
-            <button
-              type="button"
-              className="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            </ContextMenuItem>
+            <ContextMenuItem
               onClick={() => {
                 onDuplicate(menuView);
-                setMenuViewId(null);
+                closeMenu();
               }}
             >
               Duplicate
-            </button>
-            <button
-              type="button"
-              className="w-full text-left px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 disabled:opacity-40"
+            </ContextMenuItem>
+            <ContextMenuItem
+              destructive
               disabled={views.length <= 1}
+              title={
+                views.length <= 1 ? "Cannot delete the last view" : undefined
+              }
               onClick={() => {
                 onDelete(menuView);
-                setMenuViewId(null);
+                closeMenu();
               }}
             >
               Delete
-            </button>
-          </div>,
-          document.body,
+            </ContextMenuItem>
+          </>
         )}
-    </div>
+      </ContextMenu>
+
+      <ContextMenu
+        open={menu?.kind === "empty"}
+        x={menu?.kind === "empty" ? menu.x : 0}
+        y={menu?.kind === "empty" ? menu.y : 0}
+        onClose={closeMenu}
+      >
+        <ContextMenuItem
+          onClick={() => {
+            onCreate();
+            closeMenu();
+          }}
+        >
+          New view
+        </ContextMenuItem>
+      </ContextMenu>
+    </>
   );
 }
