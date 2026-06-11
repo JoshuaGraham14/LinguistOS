@@ -9,11 +9,14 @@ import type {
   MasteryState,
   PracticeSettings,
   Profile,
+  SavedView,
+  SavedViewLayout,
   VocabItem,
   VocabTag,
   WordDisplayMode,
   Workspace,
 } from "./types";
+import type { VocabViewConfig } from "./vocab-view";
 
 const SETTINGS_KEY = "linguistos.settings.v3";
 const PROFILE_KEY = "linguistos.profile.v1";
@@ -24,6 +27,7 @@ const VOCAB_ADD_EVENT = "linguistos:vocab-add";
 const VOCAB_UPDATE_EVENT = "linguistos:vocab-update";
 const VOCAB_REMOVE_EVENT = "linguistos:vocab-remove";
 const VOCAB_CLEAR_EVENT = "linguistos:vocab-clear";
+const SAVED_VIEWS_SYNC_EVENT = "linguistos:saved-views-sync";
 
 export type SidebarState = { width: number; collapsed: boolean };
 
@@ -540,5 +544,120 @@ export function useVocab() {
     refresh,
     recordOutcome,
     activeWorkspace,
+  };
+}
+
+function broadcastSavedViews(list: SavedView[]) {
+  window.dispatchEvent(
+    new CustomEvent(SAVED_VIEWS_SYNC_EVENT, { detail: list }),
+  );
+}
+
+export function useSavedViews() {
+  const { activeWorkspaceId, hydrated: workspacesHydrated } = useWorkspaces();
+  const [views, setViews] = useState<SavedView[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const viewsRef = useRef<SavedView[]>([]);
+  viewsRef.current = views;
+
+  const refresh = useCallback(async () => {
+    if (!activeWorkspaceId) {
+      setViews([]);
+      return;
+    }
+    const items = await api.listSavedViews(activeWorkspaceId);
+    setViews(items);
+    broadcastSavedViews(items);
+  }, [activeWorkspaceId]);
+
+  useEffect(() => {
+    if (!workspacesHydrated) return;
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        if (activeWorkspaceId) await refresh();
+        else setViews([]);
+      } catch {
+        if (mounted) setViews([]);
+      } finally {
+        if (mounted) {
+          setHydrated(true);
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [activeWorkspaceId, workspacesHydrated, refresh]);
+
+  useEffect(() => {
+    function handleSync(event: Event) {
+      const list = (event as CustomEvent<SavedView[]>).detail;
+      if (Array.isArray(list)) setViews(list);
+    }
+    window.addEventListener(SAVED_VIEWS_SYNC_EVENT, handleSync);
+    return () => window.removeEventListener(SAVED_VIEWS_SYNC_EVENT, handleSync);
+  }, []);
+
+  const createView = useCallback(
+    async (input: {
+      name: string;
+      icon?: string | null;
+      layout?: SavedViewLayout;
+      config?: VocabViewConfig;
+      position?: number;
+    }) => {
+      if (!activeWorkspaceId) throw new Error("No active workspace");
+      const created = await api.createSavedView({
+        workspaceId: activeWorkspaceId,
+        ...input,
+      });
+      const next = [...viewsRef.current, created].sort(
+        (a, b) => a.position - b.position || a.id - b.id,
+      );
+      broadcastSavedViews(next);
+      return created;
+    },
+    [activeWorkspaceId],
+  );
+
+  const patchView = useCallback(
+    async (
+      viewId: number,
+      patch: {
+        name?: string;
+        icon?: string | null;
+        layout?: SavedViewLayout;
+        config?: VocabViewConfig;
+        position?: number;
+      },
+    ) => {
+      const updated = await api.updateSavedView(viewId, patch);
+      const next = viewsRef.current
+        .map((v) => (v.id === viewId ? updated : v))
+        .sort((a, b) => a.position - b.position || a.id - b.id);
+      broadcastSavedViews(next);
+      return updated;
+    },
+    [],
+  );
+
+  const removeView = useCallback(async (viewId: number) => {
+    await api.deleteSavedView(viewId);
+    const next = viewsRef.current.filter((v) => v.id !== viewId);
+    broadcastSavedViews(next);
+  }, []);
+
+  return {
+    views,
+    hydrated: hydrated && workspacesHydrated,
+    loading,
+    refresh,
+    createView,
+    patchView,
+    removeView,
   };
 }

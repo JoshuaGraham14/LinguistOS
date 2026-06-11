@@ -68,6 +68,26 @@ export interface Workspace {
   updatedAt: number;
 }
 
+export type SavedViewLayout = "table" | "board" | "gallery";
+export type SortDirection = "asc" | "desc";
+
+export interface SortRule {
+  field: string;
+  direction: SortDirection;
+}
+
+export interface SavedView {
+  id: number;
+  workspaceId: number;
+  name: string;
+  icon: string | null;
+  layout: SavedViewLayout;
+  config: import("./vocab-view").VocabViewConfig;
+  position: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export type Tense =
   | "present"
   | "preterite"
