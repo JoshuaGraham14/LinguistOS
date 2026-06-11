@@ -8,6 +8,7 @@ from app.api import (
     practice,
     sentences,
     tokens,
+    views,
     vocab,
     vocab_suggest,
     voice,
@@ -47,6 +48,7 @@ app.include_router(vocab.router, prefix="/api", tags=["vocab"])
 app.include_router(enrichment.router, prefix="/api", tags=["enrichment"])
 app.include_router(vocab_suggest.router, prefix="/api", tags=["vocab-suggest"])
 app.include_router(workspaces.router, prefix="/api", tags=["workspaces"])
+app.include_router(views.router, prefix="/api", tags=["views"])
 app.include_router(mastery.router, prefix="/api", tags=["mastery"])
 app.include_router(sentences.router, prefix="/api", tags=["sentences"])
 app.include_router(tokens.router, prefix="/api", tags=["tokens"])
