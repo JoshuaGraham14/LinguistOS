@@ -34,6 +34,26 @@ _ALL_PROPERTIES = [
 ]
 
 
+def default_view_config_for_layout(layout: SavedViewLayout) -> dict:
+    """Sensible column defaults when creating a view without explicit config."""
+    if layout == "gallery":
+        visible = ["word", "translation", "tags", "learned"]
+        return _config(
+            sorts=[{"field": "createdAt", "direction": "desc"}],
+            visible_properties=visible,
+            property_order=visible,
+        )
+    if layout == "board":
+        visible = ["word", "translation"]
+        return _config(
+            sorts=[{"field": "createdAt", "direction": "desc"}],
+            group_by="learned",
+            visible_properties=visible,
+            property_order=visible,
+        )
+    return _config(sorts=[{"field": "createdAt", "direction": "desc"}])
+
+
 def _config(
     *,
     query: dict | None = None,

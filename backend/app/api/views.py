@@ -6,7 +6,10 @@ from app.api._auth import ensure_workspace_owner
 from app.db.database import get_db
 from app.db.models import SavedView
 from app.db.schemas import SavedViewCreate, SavedViewOut, SavedViewUpdate
-from app.services.saved_view_defaults import ensure_default_saved_views
+from app.services.saved_view_defaults import (
+    default_view_config_for_layout,
+    ensure_default_saved_views,
+)
 
 router = APIRouter()
 
@@ -51,12 +54,16 @@ def create_view(payload: SavedViewCreate, db: Session = Depends(get_db)) -> Save
         )
         position = (max_pos or -1) + 1
 
+    config = payload.config.model_dump()
+    if not config.get("visibleProperties"):
+        config = default_view_config_for_layout(payload.layout)
+
     view = SavedView(
         workspace_id=payload.workspace_id,
         name=payload.name.strip(),
         icon=payload.icon,
         layout=payload.layout,
-        config=payload.config.model_dump(),
+        config=config,
         position=position,
     )
     db.add(view)
@@ -91,6 +98,16 @@ def update_view(
 @router.delete("/views/{view_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_view(view_id: int, db: Session = Depends(get_db)) -> Response:
     view = _get_owned_view(db, view_id)
+    remaining = db.scalar(
+        select(func.count())
+        .select_from(SavedView)
+        .where(SavedView.workspace_id == view.workspace_id)
+    )
+    if remaining is not None and remaining <= 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete the last view in a workspace.",
+        )
     db.delete(view)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

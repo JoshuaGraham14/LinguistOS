@@ -1,7 +1,7 @@
 "use client";
 
 import { Download, Upload } from "lucide-react";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CreateViewModal } from "@/components/vocab/CreateViewModal";
 import { ImportWordsModal } from "@/components/vocab/ImportWordsModal";
@@ -16,7 +16,11 @@ import {
 import { ViewTabBar } from "@/components/vocab/ViewTabBar";
 import { WordFormModal } from "@/components/vocab/WordFormModal";
 import { Modal } from "@/components/Modal";
-import { isEmptyLexiconQuery, serializeLexiconQuery } from "@/lib/lexicon-query";
+import {
+  isEmptyLexiconQuery,
+  parseLexiconQuery,
+  serializeLexiconQuery,
+} from "@/lib/lexicon-query";
 import {
   useProfile,
   useSavedViews,
@@ -26,7 +30,7 @@ import {
 import type { SavedView, SavedViewLayout, VocabItem } from "@/lib/types";
 import { useDebouncedViewPatch } from "@/lib/useDebouncedViewPatch";
 import { buildVocabCsv, downloadVocabCsv } from "@/lib/vocab-csv";
-import { applyViewPipeline } from "@/lib/vocab-view";
+import { applyViewPipeline, defaultViewConfig } from "@/lib/vocab-view";
 
 function VocabPageInner() {
   const router = useRouter();
@@ -58,7 +62,9 @@ function VocabPageInner() {
 
   const viewIdParam = searchParams.get("view");
   const editParam = searchParams.get("edit");
+  const filterParam = searchParams.get("filter");
   const parsedViewId = viewIdParam ? Number(viewIdParam) : null;
+  const appliedFilterRef = useRef<string | null>(null);
 
   const activeView = useMemo(() => {
     if (views.length === 0) return null;
@@ -68,7 +74,7 @@ function VocabPageInner() {
     return views[0]!;
   }, [views, parsedViewId]);
 
-  const { config, setConfig, saveStatus } = useDebouncedViewPatch(
+  const { config, setConfig, flush, saveStatus } = useDebouncedViewPatch(
     activeView,
     patchView,
   );
@@ -125,6 +131,20 @@ function VocabPageInner() {
     }
   }, [activeView, viewsHydrated, router, searchParams]);
 
+  useEffect(() => {
+    if (!filterParam || !config || appliedFilterRef.current === filterParam) {
+      return;
+    }
+    const query = parseLexiconQuery(decodeURIComponent(filterParam));
+    if (isEmptyLexiconQuery(query)) return;
+    appliedFilterRef.current = filterParam;
+    setConfig((prev) => ({ ...prev, query }));
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("filter");
+    const qs = params.toString();
+    router.replace(qs ? `/vocab?${qs}` : "/vocab", { scroll: false });
+  }, [filterParam, config, setConfig, router, searchParams]);
+
   const pipeline = useMemo(() => {
     if (!config) return { items: [], groups: null };
     return applyViewPipeline(vocab, config);
@@ -142,6 +162,7 @@ function VocabPageInner() {
         name: input.name,
         layout: input.layout,
         icon: input.icon,
+        config: defaultViewConfig(input.layout),
       });
       selectView(created.id);
     },
@@ -183,9 +204,10 @@ function VocabPageInner() {
   const handleLayoutChange = useCallback(
     async (layout: SavedViewLayout) => {
       if (!activeView) return;
+      await flush();
       await patchView(activeView.id, { layout });
     },
-    [activeView, patchView],
+    [activeView, patchView, flush],
   );
 
   const flashcardsHref = useMemo(() => {

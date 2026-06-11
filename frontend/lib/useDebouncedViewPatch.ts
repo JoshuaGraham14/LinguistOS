@@ -20,37 +20,52 @@ export function useDebouncedViewPatch(
   );
   const [saveStatus, setSaveStatus] = useState<ViewSaveStatus>("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
   const pendingRef = useRef<VocabViewConfig | null>(null);
   const viewIdRef = useRef<number | null>(view?.id ?? null);
+  const saveGenerationRef = useRef(0);
+  const flushingRef = useRef(false);
 
   const persist = useCallback(
     async (viewId: number, nextConfig: VocabViewConfig) => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
+      const generation = ++saveGenerationRef.current;
       setSaveStatus("saving");
       try {
         await patchView(viewId, { config: nextConfig });
-        if (controller.signal.aborted) return;
+        if (
+          generation !== saveGenerationRef.current ||
+          viewId !== viewIdRef.current
+        ) {
+          return;
+        }
         setSaveStatus("saved");
         pendingRef.current = null;
       } catch {
-        if (!controller.signal.aborted) setSaveStatus("error");
+        if (
+          generation === saveGenerationRef.current &&
+          viewId === viewIdRef.current
+        ) {
+          setSaveStatus("error");
+        }
       }
     },
     [patchView],
   );
 
   const flush = useCallback(async () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    if (flushingRef.current) return;
+    flushingRef.current = true;
+    try {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      const viewId = viewIdRef.current;
+      const pending = pendingRef.current;
+      if (viewId == null || pending == null) return;
+      await persist(viewId, pending);
+    } finally {
+      flushingRef.current = false;
     }
-    const viewId = viewIdRef.current;
-    const pending = pendingRef.current;
-    if (viewId == null || pending == null) return;
-    await persist(viewId, pending);
   }, [persist]);
 
   const schedulePatch = useCallback(
@@ -86,6 +101,7 @@ export function useDebouncedViewPatch(
     if (nextId !== viewIdRef.current) {
       void (async () => {
         await flush();
+        saveGenerationRef.current += 1;
         viewIdRef.current = nextId;
         setConfigState(view?.config ?? null);
         setSaveStatus("idle");
@@ -97,11 +113,20 @@ export function useDebouncedViewPatch(
   }, [view, flush, config]);
 
   useEffect(() => {
+    function handleLeave() {
+      void flush();
+    }
+    function handleVisibility() {
+      if (document.visibilityState === "hidden") void flush();
+    }
+    window.addEventListener("beforeunload", handleLeave);
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
+      window.removeEventListener("beforeunload", handleLeave);
+      document.removeEventListener("visibilitychange", handleVisibility);
       if (timerRef.current) clearTimeout(timerRef.current);
-      abortRef.current?.abort();
     };
-  }, []);
+  }, [flush]);
 
   return { config, setConfig, flush, saveStatus };
 }

@@ -3,7 +3,7 @@ import {
   EMPTY_QUERY,
   type LexiconQuery,
 } from "./lexicon-query";
-import type { SortDirection, SortRule, VocabItem } from "./types";
+import type { SavedViewLayout, SortDirection, SortRule, VocabItem } from "./types";
 
 export interface VocabViewConfig {
   query: LexiconQuery;
@@ -20,6 +20,44 @@ export const EMPTY_VIEW_CONFIG: VocabViewConfig = {
   visibleProperties: [],
   propertyOrder: [],
 };
+
+const TABLE_PROPERTIES = [
+  "word",
+  "lemma",
+  "translation",
+  "pos",
+  "cefr",
+  "tags",
+  "createdAt",
+  "box",
+  "nextDue",
+];
+
+const GALLERY_PROPERTIES = ["word", "translation", "tags", "learned"];
+
+const BOARD_PROPERTIES = ["word", "translation"];
+
+export function defaultViewConfig(layout: SavedViewLayout): VocabViewConfig {
+  const visible =
+    layout === "gallery"
+      ? GALLERY_PROPERTIES
+      : layout === "board"
+        ? BOARD_PROPERTIES
+        : TABLE_PROPERTIES;
+  return {
+    query: { ...EMPTY_QUERY },
+    sorts: [{ field: "createdAt", direction: "desc" }],
+    groupBy: layout === "board" ? "learned" : null,
+    visibleProperties: [...visible],
+    propertyOrder: [...visible],
+  };
+}
+
+export function isEmptyViewConfig(config: VocabViewConfig): boolean {
+  return (
+    config.visibleProperties.length === 0 && config.propertyOrder.length === 0
+  );
+}
 
 export interface VocabGroup {
   key: string;
@@ -144,9 +182,19 @@ export function applyViewPipeline(
 
 export function orderedVisibleProperties(config: VocabViewConfig): string[] {
   const visible = new Set(config.visibleProperties);
+  visible.add("word");
   const ordered = config.propertyOrder.filter((key) => visible.has(key));
   for (const key of config.visibleProperties) {
     if (!ordered.includes(key)) ordered.push(key);
+  }
+  if (!ordered.includes("word")) {
+    ordered.unshift("word");
+  } else {
+    const wordIndex = ordered.indexOf("word");
+    if (wordIndex > 0) {
+      ordered.splice(wordIndex, 1);
+      ordered.unshift("word");
+    }
   }
   return ordered;
 }

@@ -38,6 +38,8 @@ def test_get_view(client, workspace) -> None:
 
 def test_create_update_delete_view(client, workspace) -> None:
     wid = workspace["id"]
+    # Seed default views so delete is not blocked as "last view".
+    client.get(f"/api/views?workspace_id={wid}")
     create = client.post(
         "/api/views",
         json={
@@ -86,3 +88,35 @@ def test_create_update_delete_view(client, workspace) -> None:
 def test_get_view_not_found(client, workspace) -> None:
     resp = client.get("/api/views/999999")
     assert resp.status_code == 404
+
+
+def test_create_view_applies_default_columns(client, workspace) -> None:
+    wid = workspace["id"]
+    create = client.post(
+        "/api/views",
+        json={
+            "workspace_id": wid,
+            "name": "Blank",
+            "layout": "table",
+        },
+    )
+    assert create.status_code == 200, create.text
+    body = create.json()
+    assert "word" in body["config"]["visibleProperties"]
+    assert "createdAt" in body["config"]["visibleProperties"]
+    assert body["config"]["sorts"] == [
+        {"field": "createdAt", "direction": "desc"}
+    ]
+
+
+def test_delete_last_view_rejected(client, workspace) -> None:
+    wid = workspace["id"]
+    views = client.get(f"/api/views?workspace_id={wid}").json()
+    while len(views) > 1:
+        client.delete(f"/api/views/{views[-1]['id']}")
+        views = client.get(f"/api/views?workspace_id={wid}").json()
+
+    last_id = views[0]["id"]
+    resp = client.delete(f"/api/views/{last_id}")
+    assert resp.status_code == 400
+    assert client.get(f"/api/views?workspace_id={wid}").json()

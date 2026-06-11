@@ -58,14 +58,14 @@ export function VocabBoardView({
     value: string | boolean,
   ) => void;
 }) {
-  const groupBy = config.groupBy ?? "learned";
-  const prop = getVocabProperty(groupBy);
+  const groupBy = config.groupBy;
+  const prop = groupBy ? getVocabProperty(groupBy) : null;
   const writable = prop?.writable ?? false;
 
   const groups = useMemo(() => {
+    if (!groupBy) return [{ key: "", label: "All", items }];
     const grouped = groupVocab(items, groupBy);
-    if (grouped) return grouped;
-    return [{ key: "", label: "All", items }];
+    return grouped ?? [{ key: "", label: "All", items }];
   }, [items, groupBy]);
 
   const [draggingId, setDraggingId] = useState<number | null>(null);
@@ -115,7 +115,7 @@ export function VocabBoardView({
                 <BoardCard
                   key={item.id}
                   item={item}
-                  groupBy={groupBy}
+                  groupBy={groupBy ?? ""}
                   onDragStart={() => setDraggingId(item.id)}
                 />
               ))
