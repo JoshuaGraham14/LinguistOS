@@ -1,0 +1,70 @@
+name: spanish_niche
+language: es
+description: >
+  Low-frequency literary, legal, and specialized verbs — rare lemmas where GPT
+  may paraphrase, use an infinitive, or substitute a high-frequency synonym.
+  Intended for live GPT evaluation with random length bands.
+
+constraint_sets:
+  # Literary / archaic, rare preterite
+  - keyword: henchir
+    expected_form: henchí
+    translation: to fill (literary)
+    tense: preterite
+    person: 1st
+    number: singular
+    cefr_level: C1
+
+  # Formal / legal, ü in preterite
+  - keyword: argüir
+    expected_form: argüí
+    translation: to argue (formally)
+    tense: preterite
+    person: 1st
+    number: singular
+    cefr_level: C1
+
+  # Legal / testimony, gü orthographic preterite
+  - keyword: atestiguar
+    expected_form: atestigüé
+    translation: to testify
+    tense: preterite
+    person: 1st
+    number: singular
+    cefr_level: C1
+
+  # Formal written register, ü-family present
+  - keyword: menguar
+    expected_form: menguo
+    translation: to diminish
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: C1
+
+  # Specialized semantics (cloy / sicken)
+  - keyword: empalagar
+    expected_form: empalago
+    translation: to cloy
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: C1
+
+  # Literary / historical, rare lemma
+  - keyword: blandir
+    expected_form: blandí
+    translation: to brandish
+    tense: preterite
+    person: 1st
+    number: singular
+    cefr_level: C1
+
+  # Formal utterance, e→ie on obscure lemma
+  - keyword: proferir
+    expected_form: profiero
+    translation: to utter (threats/insults)
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: C1
