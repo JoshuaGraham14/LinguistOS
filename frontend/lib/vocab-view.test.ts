@@ -4,10 +4,14 @@ import type { VocabItem } from "./types";
 import {
   canHideProperty,
   defaultViewConfig,
+  hideAllProperties,
   hideProperty,
+  orderedPropertyKeys,
   orderedVisibleProperties,
   removeSortRule,
+  reorderPropertyKeys,
   setPrimarySortRule,
+  showAllProperties,
   showProperty,
   sortVocab,
   type VocabViewConfig,
@@ -143,5 +147,31 @@ describe("column menu helpers", () => {
     assert.deepEqual(sorted, [{ field: "cefr", direction: "asc" }]);
     const cleared = removeSortRule(sorted, "cefr");
     assert.deepEqual(cleared, []);
+  });
+
+  it("shows and hides all hideable properties", () => {
+    const hidden = hideAllProperties(viewConfig());
+    assert.deepEqual(hidden.visibleProperties, ["word"]);
+    const shown = showAllProperties(hidden);
+    assert.ok(shown.visibleProperties.includes("translation"));
+    assert.ok(shown.visibleProperties.includes("pos"));
+  });
+
+  it("reorders properties and reflects in visible column order", () => {
+    const base = viewConfig({
+      visibleProperties: ["word", "translation", "pos"],
+      propertyOrder: ["word", "translation", "pos"],
+    });
+    const reordered = reorderPropertyKeys(base, "pos", "word");
+    assert.deepEqual(orderedPropertyKeys(reordered).slice(0, 3), [
+      "pos",
+      "word",
+      "translation",
+    ]);
+    assert.deepEqual(orderedVisibleProperties(reordered), [
+      "word",
+      "pos",
+      "translation",
+    ]);
   });
 });

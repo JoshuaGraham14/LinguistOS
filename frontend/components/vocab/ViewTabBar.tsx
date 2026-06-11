@@ -1,6 +1,13 @@
 "use client";
 
-import { MoreHorizontal, Plus } from "lucide-react";
+import {
+  Copy,
+  GraduationCap,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 import type { SavedView } from "@/lib/types";
@@ -122,12 +129,14 @@ export function ViewTabBar({
           <>
             <ContextMenuLink
               href={`/learn/flashcards?view=${menuView.id}`}
+              icon={GraduationCap}
               onClick={closeMenu}
             >
               Practice this view
             </ContextMenuLink>
             <ContextMenuSeparator />
             <ContextMenuItem
+              icon={Pencil}
               onClick={() => {
                 onRename(menuView);
                 closeMenu();
@@ -136,14 +145,16 @@ export function ViewTabBar({
               Rename
             </ContextMenuItem>
             <ContextMenuItem
+              icon={Copy}
               onClick={() => {
                 onDuplicate(menuView);
                 closeMenu();
               }}
             >
-              Duplicate
+              Duplicate view
             </ContextMenuItem>
             <ContextMenuItem
+              icon={Trash2}
               destructive
               disabled={views.length <= 1}
               title={
@@ -154,7 +165,7 @@ export function ViewTabBar({
                 closeMenu();
               }}
             >
-              Delete
+              Delete view
             </ContextMenuItem>
           </>
         )}
@@ -167,6 +178,7 @@ export function ViewTabBar({
         onClose={closeMenu}
       >
         <ContextMenuItem
+          icon={Plus}
           onClick={() => {
             onCreate();
             closeMenu();

@@ -9,6 +9,8 @@ import {
   type LexiconQuery,
   type StatusMatch,
 } from "@/lib/lexicon-query";
+import { Kanban, LayoutGrid, Table2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { SavedViewLayout, SortDirection, SortRule } from "@/lib/types";
 import {
   groupableProperties,
@@ -28,10 +30,14 @@ const TAG_OPTIONS = [
 
 const POS_OPTIONS = ["noun", "verb", "adjective", "adverb", "preposition"];
 const CEFR_OPTIONS = ["A1", "A2", "B1", "B2", "C1", "C2"];
-const LAYOUT_OPTIONS: { value: SavedViewLayout; label: string }[] = [
-  { value: "table", label: "Table" },
-  { value: "gallery", label: "Cards" },
-  { value: "board", label: "Board" },
+const LAYOUT_OPTIONS: {
+  value: SavedViewLayout;
+  label: string;
+  icon: LucideIcon;
+}[] = [
+  { value: "table", label: "Table", icon: Table2 },
+  { value: "gallery", label: "Cards", icon: LayoutGrid },
+  { value: "board", label: "Board", icon: Kanban },
 ];
 
 const LEARNED_LABELS: Record<LearnedFilter, string> = {
@@ -270,46 +276,6 @@ export function SortPopoverContent({
   );
 }
 
-export function FieldsPopoverContent({
-  config,
-  onConfigChange,
-}: {
-  config: VocabViewConfig;
-  onConfigChange: (updater: (prev: VocabViewConfig) => VocabViewConfig) => void;
-}) {
-  function toggleProperty(key: string) {
-    onConfigChange((prev) => {
-      const visible = prev.visibleProperties.includes(key)
-        ? prev.visibleProperties.filter((k) => k !== key)
-        : [...prev.visibleProperties, key];
-      const order = prev.propertyOrder.includes(key)
-        ? prev.propertyOrder
-        : [...prev.propertyOrder, key];
-      return { ...prev, visibleProperties: visible, propertyOrder: order };
-    });
-  }
-
-  return (
-    <div className="space-y-1 max-h-80 overflow-y-auto">
-      {VOCAB_PROPERTIES.map((prop) => (
-        <label
-          key={prop.key}
-          className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 text-sm text-slate-700 cursor-pointer"
-        >
-          <input
-            type="checkbox"
-            checked={config.visibleProperties.includes(prop.key)}
-            disabled={prop.isTitle}
-            onChange={() => toggleProperty(prop.key)}
-            className="rounded border-slate-300"
-          />
-          {prop.label}
-        </label>
-      ))}
-    </div>
-  );
-}
-
 export function ViewOptionsPopoverContent({
   layout,
   config,
@@ -328,21 +294,31 @@ export function ViewOptionsPopoverContent({
           Layout
         </span>
         <div className="flex flex-col gap-1">
-          {LAYOUT_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onLayoutChange(opt.value)}
-              className={cn(
-                "text-left px-3 py-2 rounded-lg text-sm transition",
-                layout === opt.value
-                  ? "bg-brand-50 text-brand-700 font-medium"
-                  : "text-slate-600 hover:bg-slate-50",
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
+          {LAYOUT_OPTIONS.map((opt) => {
+            const Icon = opt.icon;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => onLayoutChange(opt.value)}
+                className={cn(
+                  "flex items-center gap-2.5 text-left px-3 py-2 rounded-lg text-sm transition w-full",
+                  layout === opt.value
+                    ? "bg-brand-50 text-brand-700 font-medium"
+                    : "text-slate-600 hover:bg-slate-50",
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "h-4 w-4 shrink-0",
+                    layout === opt.value ? "text-brand-600" : "text-slate-500",
+                  )}
+                  strokeWidth={2}
+                />
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
       </div>
       <div className="space-y-2">

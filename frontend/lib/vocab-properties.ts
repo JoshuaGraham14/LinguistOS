@@ -147,7 +147,3 @@ export function sortableProperties(): VocabPropertyDef[] {
   return VOCAB_PROPERTIES.filter((p) => p.sortable);
 }
 
-export function hiddenVocabProperties(visibleKeys: string[]): VocabPropertyDef[] {
-  const visible = new Set(visibleKeys);
-  return VOCAB_PROPERTIES.filter((p) => !p.isTitle && !visible.has(p.key));
-}

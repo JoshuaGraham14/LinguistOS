@@ -2,7 +2,7 @@
 
 import {
   ArrowDownUp,
-  Columns3,
+  Eye,
   Filter,
   LayoutGrid,
   Plus,
@@ -14,8 +14,8 @@ import type { ViewSaveStatus } from "@/lib/useDebouncedViewPatch";
 import type { SavedViewLayout } from "@/lib/types";
 import type { VocabViewConfig } from "@/lib/vocab-view";
 import { VocabPopover } from "./VocabPopover";
+import { PropertyVisibilityPopover } from "./PropertyVisibilityPopover";
 import {
-  FieldsPopoverContent,
   FilterPopoverContent,
   SortPopoverContent,
   ViewOptionsPopoverContent,
@@ -32,6 +32,7 @@ export function VocabDatabaseToolbar({
   hasActiveFilters,
   hasActiveSort,
   hasGroup,
+  hasHiddenProperties,
   config,
   layout,
   onLayoutChange,
@@ -46,6 +47,7 @@ export function VocabDatabaseToolbar({
   hasActiveFilters: boolean;
   hasActiveSort: boolean;
   hasGroup: boolean;
+  hasHiddenProperties: boolean;
   config: VocabViewConfig;
   layout: SavedViewLayout;
   onLayoutChange: (layout: SavedViewLayout) => void;
@@ -100,16 +102,16 @@ export function VocabDatabaseToolbar({
       <button
         ref={fieldsRef}
         type="button"
-        title="Fields"
+        title="Property visibility"
         onClick={() => onTogglePopover("fields")}
         className={cn(
           "h-9 w-9 rounded-lg border flex items-center justify-center transition",
-          activePopover === "fields"
+          activePopover === "fields" || hasHiddenProperties
             ? "bg-brand-50 border-brand-200 text-brand-700"
             : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50",
         )}
       >
-        <Columns3 className="h-4 w-4" />
+        <Eye className="h-4 w-4" />
       </button>
       <button
         ref={viewRef}
@@ -171,10 +173,13 @@ export function VocabDatabaseToolbar({
         open={activePopover === "fields"}
         onClose={() => onTogglePopover("fields")}
         anchorRef={fieldsRef}
-        title="Fields"
-        width={280}
+        title="Property visibility"
+        width={300}
       >
-        <FieldsPopoverContent config={config} onConfigChange={onConfigChange} />
+        <PropertyVisibilityPopover
+          config={config}
+          onConfigChange={onConfigChange}
+        />
       </VocabPopover>
       <VocabPopover
         open={activePopover === "view"}

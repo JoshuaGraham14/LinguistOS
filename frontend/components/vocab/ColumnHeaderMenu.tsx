@@ -1,9 +1,15 @@
 "use client";
 
 import {
-  getVocabProperty,
-  hiddenVocabProperties,
-} from "@/lib/vocab-properties";
+  ArrowDownAZ,
+  ArrowUpAZ,
+  Eye,
+  EyeOff,
+  Layers,
+  Layers2,
+  ListX,
+} from "lucide-react";
+import { getVocabProperty } from "@/lib/vocab-properties";
 import type { SortDirection } from "@/lib/types";
 import {
   canHideProperty,
@@ -42,7 +48,9 @@ export function ColumnHeaderMenu({
   const activeSort = propertyKey
     ? activeSorts.find((s) => s.field === propertyKey)
     : null;
-  const hidden = hiddenVocabProperties(config.visibleProperties);
+  const isVisible = propertyKey
+    ? config.visibleProperties.includes(propertyKey)
+    : false;
 
   function applySort(direction: SortDirection) {
     if (!propertyKey) return;
@@ -56,19 +64,26 @@ export function ColumnHeaderMenu({
   if (!prop || !propertyKey) return null;
 
   return (
-    <ContextMenu open={open} x={x} y={y} onClose={onClose} minWidth={200}>
+    <ContextMenu open={open} x={x} y={y} onClose={onClose} minWidth={220}>
       {prop.sortable && (
         <>
-          <ContextMenuItem onClick={() => applySort("asc")}>
+          <ContextMenuItem
+            icon={ArrowUpAZ}
+            active={activeSort?.direction === "asc"}
+            onClick={() => applySort("asc")}
+          >
             Sort ascending
-            {activeSort?.direction === "asc" ? " ✓" : ""}
           </ContextMenuItem>
-          <ContextMenuItem onClick={() => applySort("desc")}>
+          <ContextMenuItem
+            icon={ArrowDownAZ}
+            active={activeSort?.direction === "desc"}
+            onClick={() => applySort("desc")}
+          >
             Sort descending
-            {activeSort?.direction === "desc" ? " ✓" : ""}
           </ContextMenuItem>
           {config.sorts.some((s) => s.field === propertyKey) && (
             <ContextMenuItem
+              icon={ListX}
               onClick={() => {
                 onConfigChange((prev) => ({
                   ...prev,
@@ -87,6 +102,7 @@ export function ColumnHeaderMenu({
         <>
           {config.groupBy !== propertyKey ? (
             <ContextMenuItem
+              icon={Layers}
               onClick={() => {
                 onConfigChange((prev) => ({ ...prev, groupBy: propertyKey }));
                 onClose();
@@ -96,6 +112,7 @@ export function ColumnHeaderMenu({
             </ContextMenuItem>
           ) : (
             <ContextMenuItem
+              icon={Layers2}
               onClick={() => {
                 onConfigChange((prev) => ({ ...prev, groupBy: null }));
                 onClose();
@@ -109,29 +126,18 @@ export function ColumnHeaderMenu({
       )}
       {canHideProperty(propertyKey) && (
         <ContextMenuItem
+          icon={isVisible ? EyeOff : Eye}
           onClick={() => {
-            onConfigChange((prev) => hideProperty(prev, propertyKey));
+            onConfigChange((prev) =>
+              isVisible
+                ? hideProperty(prev, propertyKey)
+                : showProperty(prev, propertyKey),
+            );
             onClose();
           }}
         >
-          Hide {prop.label}
+          {isVisible ? "Hide in view" : "Show in view"}
         </ContextMenuItem>
-      )}
-      {hidden.length > 0 && (
-        <>
-          <ContextMenuSeparator />
-          {hidden.map((hiddenProp) => (
-            <ContextMenuItem
-              key={hiddenProp.key}
-              onClick={() => {
-                onConfigChange((prev) => showProperty(prev, hiddenProp.key));
-                onClose();
-              }}
-            >
-              Show {hiddenProp.label}
-            </ContextMenuItem>
-          ))}
-        </>
       )}
     </ContextMenu>
   );

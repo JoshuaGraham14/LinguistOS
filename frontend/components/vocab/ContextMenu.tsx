@@ -1,5 +1,7 @@
 "use client";
 
+import { Check } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
@@ -10,7 +12,7 @@ export function ContextMenu({
   y,
   onClose,
   children,
-  minWidth = 160,
+  minWidth = 200,
 }: {
   open: boolean;
   x: number;
@@ -59,7 +61,7 @@ export function ContextMenu({
     <div
       ref={menuRef}
       role="menu"
-      className="fixed z-[360] rounded-xl border border-slate-200 bg-white shadow-lg py-1"
+      className="fixed z-[360] rounded-xl border border-slate-200 bg-white shadow-lg py-1.5"
       style={{ top: pos.top, left: pos.left, minWidth }}
     >
       {children}
@@ -69,15 +71,19 @@ export function ContextMenu({
 }
 
 export function ContextMenuItem({
+  icon: Icon,
   onClick,
   disabled,
   destructive,
+  active,
   title,
   children,
 }: {
+  icon?: LucideIcon;
   onClick?: () => void;
   disabled?: boolean;
   destructive?: boolean;
+  active?: boolean;
   title?: string;
   children: React.ReactNode;
 }) {
@@ -92,23 +98,35 @@ export function ContextMenuItem({
         onClick?.();
       }}
       className={cn(
-        "w-full text-left px-3 py-2 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed",
+        "w-full flex items-center gap-2.5 px-3 py-2 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed",
         destructive
           ? "text-rose-600 hover:bg-rose-50"
           : "text-slate-700 hover:bg-slate-50",
       )}
     >
-      {children}
+      {Icon && (
+        <Icon
+          className={cn(
+            "h-4 w-4 shrink-0",
+            destructive ? "text-rose-500" : "text-slate-500",
+          )}
+          strokeWidth={2}
+        />
+      )}
+      <span className="flex-1 text-left">{children}</span>
+      {active && <Check className="h-4 w-4 shrink-0 text-brand-600" />}
     </button>
   );
 }
 
 export function ContextMenuLink({
   href,
+  icon: Icon,
   onClick,
   children,
 }: {
   href: string;
+  icon?: LucideIcon;
   onClick?: () => void;
   children: React.ReactNode;
 }) {
@@ -117,9 +135,12 @@ export function ContextMenuLink({
       href={href}
       role="menuitem"
       onClick={onClick}
-      className="block w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+      className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
     >
-      {children}
+      {Icon && (
+        <Icon className="h-4 w-4 shrink-0 text-slate-500" strokeWidth={2} />
+      )}
+      <span className="flex-1">{children}</span>
     </a>
   );
 }

@@ -3,7 +3,7 @@ import {
   EMPTY_QUERY,
   type LexiconQuery,
 } from "./lexicon-query";
-import { getVocabProperty } from "./vocab-properties";
+import { getVocabProperty, VOCAB_PROPERTIES } from "./vocab-properties";
 import type { SavedViewLayout, SortDirection, SortRule, VocabItem } from "./types";
 
 export interface VocabViewConfig {
@@ -189,13 +189,50 @@ export function applyViewPipeline(
   return { items: sorted, groups };
 }
 
+const ALL_PROPERTY_KEYS = VOCAB_PROPERTIES.map((p) => p.key);
+
+export function orderedPropertyKeys(config: VocabViewConfig): string[] {
+  const order = config.propertyOrder.filter((k) =>
+    ALL_PROPERTY_KEYS.includes(k),
+  );
+  for (const key of ALL_PROPERTY_KEYS) {
+    if (!order.includes(key)) order.push(key);
+  }
+  return order;
+}
+
+export function hideAllProperties(config: VocabViewConfig): VocabViewConfig {
+  return { ...config, visibleProperties: ["word"] };
+}
+
+export function showAllProperties(config: VocabViewConfig): VocabViewConfig {
+  return {
+    ...config,
+    visibleProperties: [...ALL_PROPERTY_KEYS],
+    propertyOrder: orderedPropertyKeys(config),
+  };
+}
+
+export function reorderPropertyKeys(
+  config: VocabViewConfig,
+  fromKey: string,
+  toKey: string,
+): VocabViewConfig {
+  if (fromKey === toKey) return config;
+  const order = orderedPropertyKeys(config);
+  const from = order.indexOf(fromKey);
+  const to = order.indexOf(toKey);
+  if (from < 0 || to < 0) return config;
+  const next = [...order];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved!);
+  return { ...config, propertyOrder: next };
+}
+
 export function orderedVisibleProperties(config: VocabViewConfig): string[] {
   const visible = new Set(config.visibleProperties);
   visible.add("word");
-  const ordered = config.propertyOrder.filter((key) => visible.has(key));
-  for (const key of config.visibleProperties) {
-    if (!ordered.includes(key)) ordered.push(key);
-  }
+  const ordered = orderedPropertyKeys(config).filter((key) => visible.has(key));
   if (!ordered.includes("word")) {
     ordered.unshift("word");
   } else {

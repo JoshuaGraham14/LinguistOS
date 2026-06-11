@@ -31,6 +31,7 @@ import {
 import type { SavedView, SavedViewLayout, VocabItem } from "@/lib/types";
 import { useDebouncedViewPatch } from "@/lib/useDebouncedViewPatch";
 import { buildVocabCsv, downloadVocabCsv } from "@/lib/vocab-csv";
+import { VOCAB_PROPERTIES } from "@/lib/vocab-properties";
 import { applyViewPipeline, defaultViewConfig } from "@/lib/vocab-view";
 
 function VocabPageInner() {
@@ -150,6 +151,13 @@ function VocabPageInner() {
     if (!config) return { items: [], groups: null };
     return applyViewPipeline(vocab, config);
   }, [vocab, config]);
+
+  const hasHiddenProperties = useMemo(() => {
+    if (!config) return false;
+    return VOCAB_PROPERTIES.some(
+      (p) => !p.isTitle && !config.visibleProperties.includes(p.key),
+    );
+  }, [config]);
 
   const loading = !viewsHydrated || !vocabHydrated || !config;
 
@@ -304,6 +312,7 @@ function VocabPageInner() {
             hasActiveFilters={!isEmptyLexiconQuery(config.query)}
             hasActiveSort={config.sorts.length > 0}
             hasGroup={Boolean(config.groupBy)}
+            hasHiddenProperties={hasHiddenProperties}
             config={config}
             layout={activeView.layout}
             onLayoutChange={(layout) => void handleLayoutChange(layout)}
