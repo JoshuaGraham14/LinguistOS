@@ -1,7 +1,10 @@
 "use client";
 
+import { Download, Upload } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ImportWordsModal } from "@/components/vocab/ImportWordsModal";
+import { VocabGalleryView } from "@/components/vocab/VocabGalleryView";
 import { VocabTableView, toggleSortRule } from "@/components/vocab/VocabTableView";
 import { VocabToolbar } from "@/components/vocab/VocabToolbar";
 import {
@@ -9,6 +12,7 @@ import {
   type ViewSettingsSection,
 } from "@/components/vocab/ViewSettingsPanel";
 import { ViewTabBar } from "@/components/vocab/ViewTabBar";
+import { WordFormModal } from "@/components/vocab/WordFormModal";
 import { isEmptyLexiconQuery, serializeLexiconQuery } from "@/lib/lexicon-query";
 import {
   useProfile,
@@ -16,8 +20,9 @@ import {
   useVocab,
   useWorkspaces,
 } from "@/lib/storage";
-import type { SavedViewLayout } from "@/lib/types";
+import type { SavedViewLayout, VocabItem } from "@/lib/types";
 import { useDebouncedViewPatch } from "@/lib/useDebouncedViewPatch";
+import { buildVocabCsv, downloadVocabCsv } from "@/lib/vocab-csv";
 import { applyViewPipeline } from "@/lib/vocab-view";
 
 function VocabPageInner() {
@@ -25,10 +30,22 @@ function VocabPageInner() {
   const searchParams = useSearchParams();
   const { activeWorkspace } = useWorkspaces();
   const { views, hydrated: viewsHydrated, createView, patchView } = useSavedViews();
-  const { vocab, hydrated: vocabHydrated } = useVocab();
+  const {
+    vocab,
+    hydrated: vocabHydrated,
+    addVocab,
+    removeVocab,
+    updateVocab,
+    toggleLearned,
+  } = useVocab();
   const { profile } = useProfile();
 
+  const [addOpen, setAddOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [editing, setEditing] = useState<VocabItem | null>(null);
+
   const viewIdParam = searchParams.get("view");
+  const editParam = searchParams.get("edit");
   const parsedViewId = viewIdParam ? Number(viewIdParam) : null;
 
   const activeView = useMemo(() => {
@@ -47,6 +64,24 @@ function VocabPageInner() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] =
     useState<ViewSettingsSection | null>(null);
+
+  useEffect(() => {
+    if (!vocabHydrated || !editParam) return;
+    const id = Number(editParam);
+    if (!Number.isFinite(id)) return;
+    const target = vocab.find((v) => v.id === id);
+    if (target) setEditing(target);
+  }, [editParam, vocabHydrated, vocab]);
+
+  function closeEditing() {
+    setEditing(null);
+    if (editParam) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("edit");
+      const qs = params.toString();
+      router.replace(qs ? `/vocab?${qs}` : "/vocab", { scroll: false });
+    }
+  }
 
   useEffect(() => {
     if (!viewsHydrated || !activeView) return;
@@ -127,6 +162,29 @@ function VocabPageInner() {
               : "Loading…"}
           </p>
         </div>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setImportOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium px-4 py-2.5 hover:bg-slate-50 transition"
+          >
+            <Upload className="h-4 w-4" strokeWidth={2.5} />
+            Import
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              downloadVocabCsv(
+                "vocabulary.csv",
+                buildVocabCsv(vocab),
+              )
+            }
+            className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium px-4 py-2.5 hover:bg-slate-50 transition"
+          >
+            <Download className="h-4 w-4" strokeWidth={2.5} />
+            Export
+          </button>
+        </div>
       </header>
 
       <ViewTabBar
@@ -152,9 +210,7 @@ function VocabPageInner() {
         onOpenFilter={() => openSettings("filter")}
         onOpenSort={() => openSettings("sort")}
         flashcardsHref={flashcardsHref}
-        onNew={() => {
-          /* wired in phase 4 */
-        }}
+        onNew={() => setAddOpen(true)}
       />
 
       <div className="flex gap-4 items-start">
@@ -173,10 +229,15 @@ function VocabPageInner() {
               }
             />
           )}
-          {activeView?.layout === "gallery" && (
-            <div className="glass-card rounded-2xl p-12 text-center text-slate-500">
-              Gallery view — coming in the next update.
-            </div>
+          {activeView?.layout === "gallery" && config && (
+            <VocabGalleryView
+              items={pipeline.items}
+              config={config}
+              loading={loading}
+              onEdit={setEditing}
+              onDelete={(id) => void removeVocab(id)}
+              onToggleLearned={(id) => void toggleLearned(id)}
+            />
           )}
           {activeView?.layout === "board" && (
             <div className="glass-card rounded-2xl p-12 text-center text-slate-500">
@@ -197,6 +258,39 @@ function VocabPageInner() {
           />
         )}
       </div>
+
+      <WordFormModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        title="Add word"
+        submitLabel="Add word"
+        sourceLanguageLabel={activeWorkspace?.language.toUpperCase() ?? "Source"}
+        workspaceId={activeWorkspace?.id ?? null}
+        onSubmit={(values) => {
+          void addVocab(values);
+        }}
+      />
+      <WordFormModal
+        open={Boolean(editing)}
+        onClose={closeEditing}
+        title="Edit word"
+        submitLabel="Save changes"
+        sourceLanguageLabel={activeWorkspace?.language.toUpperCase() ?? "Source"}
+        workspaceId={activeWorkspace?.id ?? null}
+        initial={editing}
+        onSubmit={(values) => {
+          if (editing) void updateVocab(editing.id, values);
+        }}
+      />
+      <ImportWordsModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={(rows) => {
+          rows.forEach((r) => {
+            void addVocab(r);
+          });
+        }}
+      />
     </div>
   );
 }
