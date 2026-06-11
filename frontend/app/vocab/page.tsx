@@ -3,7 +3,9 @@
 import { Download, Upload } from "lucide-react";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CreateViewModal } from "@/components/vocab/CreateViewModal";
 import { ImportWordsModal } from "@/components/vocab/ImportWordsModal";
+import { RenameViewModal } from "@/components/vocab/RenameViewModal";
 import { VocabBoardView } from "@/components/vocab/VocabBoardView";
 import { VocabGalleryView } from "@/components/vocab/VocabGalleryView";
 import { VocabTableView, toggleSortRule } from "@/components/vocab/VocabTableView";
@@ -13,6 +15,7 @@ import {
 } from "@/components/vocab/VocabDatabaseToolbar";
 import { ViewTabBar } from "@/components/vocab/ViewTabBar";
 import { WordFormModal } from "@/components/vocab/WordFormModal";
+import { Modal } from "@/components/Modal";
 import { isEmptyLexiconQuery, serializeLexiconQuery } from "@/lib/lexicon-query";
 import {
   useProfile,
@@ -20,7 +23,7 @@ import {
   useVocab,
   useWorkspaces,
 } from "@/lib/storage";
-import type { SavedViewLayout, VocabItem } from "@/lib/types";
+import type { SavedView, SavedViewLayout, VocabItem } from "@/lib/types";
 import { useDebouncedViewPatch } from "@/lib/useDebouncedViewPatch";
 import { buildVocabCsv, downloadVocabCsv } from "@/lib/vocab-csv";
 import { applyViewPipeline } from "@/lib/vocab-view";
@@ -29,7 +32,13 @@ function VocabPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { activeWorkspace } = useWorkspaces();
-  const { views, hydrated: viewsHydrated, createView, patchView } = useSavedViews();
+  const {
+    views,
+    hydrated: viewsHydrated,
+    createView,
+    patchView,
+    removeView,
+  } = useSavedViews();
   const {
     vocab,
     hydrated: vocabHydrated,
@@ -43,6 +52,9 @@ function VocabPageInner() {
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<VocabItem | null>(null);
+  const [createViewOpen, setCreateViewOpen] = useState(false);
+  const [renameView, setRenameView] = useState<SavedView | null>(null);
+  const [deleteView, setDeleteView] = useState<SavedView | null>(null);
 
   const viewIdParam = searchParams.get("view");
   const editParam = searchParams.get("edit");
@@ -120,12 +132,53 @@ function VocabPageInner() {
 
   const loading = !viewsHydrated || !vocabHydrated || !config;
 
-  const handleCreateView = useCallback(async () => {
-    const name = window.prompt("View name", "New view");
-    if (!name?.trim()) return;
-    const created = await createView({ name: name.trim(), layout: "table" });
-    selectView(created.id);
-  }, [createView, selectView]);
+  const handleCreateView = useCallback(
+    async (input: {
+      name: string;
+      layout: SavedViewLayout;
+      icon: string | null;
+    }) => {
+      const created = await createView({
+        name: input.name,
+        layout: input.layout,
+        icon: input.icon,
+      });
+      selectView(created.id);
+    },
+    [createView, selectView],
+  );
+
+  const handleDuplicateView = useCallback(
+    async (view: SavedView) => {
+      const created = await createView({
+        name: `${view.name} copy`,
+        layout: view.layout,
+        icon: view.icon,
+        config: view.config,
+      });
+      selectView(created.id);
+    },
+    [createView, selectView],
+  );
+
+  const handleRenameView = useCallback(
+    async (name: string) => {
+      if (!renameView) return;
+      await patchView(renameView.id, { name });
+    },
+    [renameView, patchView],
+  );
+
+  const handleDeleteView = useCallback(async () => {
+    if (!deleteView || views.length <= 1) return;
+    const deletingId = deleteView.id;
+    const fallback = views.find((v) => v.id !== deletingId);
+    await removeView(deletingId);
+    if (activeView?.id === deletingId && fallback) {
+      selectView(fallback.id);
+    }
+    setDeleteView(null);
+  }, [deleteView, views, removeView, activeView?.id, selectView]);
 
   const handleLayoutChange = useCallback(
     async (layout: SavedViewLayout) => {
@@ -201,7 +254,10 @@ function VocabPageInner() {
           views={views}
           activeViewId={activeView?.id ?? null}
           onSelect={selectView}
-          onCreate={() => void handleCreateView()}
+          onCreate={() => setCreateViewOpen(true)}
+          onRename={setRenameView}
+          onDuplicate={(view) => void handleDuplicateView(view)}
+          onDelete={setDeleteView}
         />
         {config && activeView && (
           <VocabDatabaseToolbar
@@ -300,6 +356,42 @@ function VocabPageInner() {
           });
         }}
       />
+      <CreateViewModal
+        open={createViewOpen}
+        onClose={() => setCreateViewOpen(false)}
+        onSubmit={(input) => void handleCreateView(input)}
+      />
+      <RenameViewModal
+        open={Boolean(renameView)}
+        initialName={renameView?.name ?? ""}
+        onClose={() => setRenameView(null)}
+        onSubmit={(name) => void handleRenameView(name)}
+      />
+      <Modal
+        open={Boolean(deleteView)}
+        onClose={() => setDeleteView(null)}
+        title="Delete view"
+      >
+        <p className="text-slate-600 text-sm">
+          Delete &ldquo;{deleteView?.name}&rdquo;? This cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2 mt-6">
+          <button
+            type="button"
+            onClick={() => setDeleteView(null)}
+            className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleDeleteView()}
+            className="px-5 py-2 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-700 transition"
+          >
+            Delete
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
