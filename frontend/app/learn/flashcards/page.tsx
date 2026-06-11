@@ -5,6 +5,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  GraduationCap,
   RotateCcw,
   Shuffle,
   X,
@@ -251,6 +252,15 @@ function FlashcardsInner() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <header>
+          {viewParam && !wordParam && (
+            <Link
+              href={`/vocab?view=${viewParam}`}
+              className="inline-flex items-center gap-1 text-sm text-fuchsia-700 hover:text-fuchsia-800 font-medium mb-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back to vocabulary
+            </Link>
+          )}
           <h1 className="text-3xl font-bold text-slate-900">Flashcards</h1>
           <p className="text-slate-500 mt-1">
             Flip, score, and review your workspace deck.
@@ -279,12 +289,15 @@ function FlashcardsInner() {
       )}
 
       {!wordParam && viewParam && (
-        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700">
-          Practicing saved vocabulary view ({total} words).{" "}
-          <Link href={`/vocab?view=${viewParam}`} className="underline">
-            Adjust view
-          </Link>{" "}
-          ·{" "}
+        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <GraduationCap className="h-4 w-4 shrink-0" />
+          <span>
+            Practicing saved vocabulary view ({total} words).
+          </span>
+          <Link href={`/vocab?view=${viewParam}`} className="underline font-medium">
+            Back to view
+          </Link>
+          <span aria-hidden>·</span>
           <Link href="/learn/flashcards" className="underline">
             Use full deck
           </Link>

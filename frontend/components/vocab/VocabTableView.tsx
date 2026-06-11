@@ -20,7 +20,7 @@ import type {
 } from "@/lib/types";
 import { getVocabProperty } from "@/lib/vocab-properties";
 import type { VocabGroup, VocabViewConfig } from "@/lib/vocab-view";
-import { orderedVisibleProperties } from "@/lib/vocab-view";
+import { effectiveSorts, orderedVisibleProperties } from "@/lib/vocab-view";
 
 function formatDate(ts: number | null) {
   if (!ts) return "—";
@@ -166,6 +166,7 @@ export function VocabTableView({
 }) {
   const columns = orderedVisibleProperties(config);
   const colSpan = columns.length + 1;
+  const activeSorts = effectiveSorts(config.sorts);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
 
   function toggleGroup(key: string) {
@@ -250,7 +251,7 @@ export function VocabTableView({
             <tr>
               {columns.map((key) => {
                 const prop = getVocabProperty(key);
-                const active = sortIcon(key, config.sorts);
+                const active = sortIcon(key, activeSorts);
                 return (
                   <th key={key} className="px-4 py-2 text-left">
                     {prop?.sortable ? (

@@ -2,7 +2,6 @@
 
 import {
   ArrowDownUp,
-  BookOpen,
   Columns3,
   Filter,
   LayoutGrid,
@@ -37,7 +36,6 @@ export function VocabDatabaseToolbar({
   layout,
   onLayoutChange,
   onConfigChange,
-  flashcardsHref,
   onNew,
 }: {
   search: string;
@@ -52,7 +50,6 @@ export function VocabDatabaseToolbar({
   layout: SavedViewLayout;
   onLayoutChange: (layout: SavedViewLayout) => void;
   onConfigChange: (updater: (prev: VocabViewConfig) => VocabViewConfig) => void;
-  flashcardsHref: string;
   onNew: () => void;
 }) {
   const filterRef = useRef<HTMLButtonElement>(null);
@@ -139,20 +136,13 @@ export function VocabDatabaseToolbar({
         />
       </div>
 
-      <a
-        href={flashcardsHref}
-        title="Flashcards"
-        className="h-9 w-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50 transition"
-      >
-        <BookOpen className="h-4 w-4" />
-      </a>
       <button
         type="button"
         onClick={onNew}
         className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-brand-500 text-white font-medium px-3 text-sm shadow-soft hover:bg-brand-600 transition"
       >
         <Plus className="h-4 w-4" strokeWidth={2.5} />
-        New
+        Word
       </button>
 
       <VocabPopover

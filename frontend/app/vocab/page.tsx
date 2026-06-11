@@ -1,6 +1,7 @@
 "use client";
 
-import { Download, Upload } from "lucide-react";
+import { Download, GraduationCap, Upload } from "lucide-react";
+import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CreateViewModal } from "@/components/vocab/CreateViewModal";
@@ -247,6 +248,13 @@ function VocabPageInner() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <Link
+            href={flashcardsHref}
+            className="inline-flex items-center gap-2 rounded-xl bg-fuchsia-600 text-white font-medium px-4 py-2.5 shadow-soft hover:bg-fuchsia-700 transition"
+          >
+            <GraduationCap className="h-4 w-4" strokeWidth={2.5} />
+            Practice this view
+          </Link>
           <button
             type="button"
             onClick={() => setImportOpen(true)}
@@ -271,21 +279,20 @@ function VocabPageInner() {
         </div>
       </header>
 
-      <div className="glass-card rounded-2xl px-2 sm:px-4">
-        <div className="flex items-center border-b border-slate-100">
-          <div className="flex-1 min-w-0 overflow-x-auto">
-            <ViewTabBar
-              views={views}
-              activeViewId={activeView?.id ?? null}
-              onSelect={selectView}
-              onCreate={() => setCreateViewOpen(true)}
-              onRename={setRenameView}
-              onDuplicate={(view) => void handleDuplicateView(view)}
-              onDelete={setDeleteView}
-            />
-          </div>
-          {config && activeView && (
-            <VocabDatabaseToolbar
+      <div className="flex items-center border-b border-slate-200/80">
+        <div className="flex-1 min-w-0 overflow-x-auto">
+          <ViewTabBar
+            views={views}
+            activeViewId={activeView?.id ?? null}
+            onSelect={selectView}
+            onCreate={() => setCreateViewOpen(true)}
+            onRename={setRenameView}
+            onDuplicate={(view) => void handleDuplicateView(view)}
+            onDelete={setDeleteView}
+          />
+        </div>
+        {config && activeView && (
+          <VocabDatabaseToolbar
             search={config.query.search}
             onSearchChange={(search) =>
               setConfig((prev) => ({ ...prev, query: { ...prev.query, search } }))
@@ -300,11 +307,9 @@ function VocabPageInner() {
             layout={activeView.layout}
             onLayoutChange={(layout) => void handleLayoutChange(layout)}
             onConfigChange={setConfig}
-            flashcardsHref={flashcardsHref}
             onNew={() => setAddOpen(true)}
-            />
-          )}
-        </div>
+          />
+        )}
       </div>
 
       <div className="relative">

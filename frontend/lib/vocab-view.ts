@@ -13,6 +13,10 @@ export interface VocabViewConfig {
   propertyOrder: string[];
 }
 
+export const DEFAULT_SORTS: SortRule[] = [
+  { field: "createdAt", direction: "desc" },
+];
+
 export const EMPTY_VIEW_CONFIG: VocabViewConfig = {
   query: { ...EMPTY_QUERY },
   sorts: [],
@@ -20,6 +24,10 @@ export const EMPTY_VIEW_CONFIG: VocabViewConfig = {
   visibleProperties: [],
   propertyOrder: [],
 };
+
+export function effectiveSorts(sorts: SortRule[]): SortRule[] {
+  return sorts.length > 0 ? sorts : DEFAULT_SORTS;
+}
 
 const TABLE_PROPERTIES = [
   "word",
@@ -46,7 +54,7 @@ export function defaultViewConfig(layout: SavedViewLayout): VocabViewConfig {
         : TABLE_PROPERTIES;
   return {
     query: { ...EMPTY_QUERY },
-    sorts: [{ field: "createdAt", direction: "desc" }],
+    sorts: [...DEFAULT_SORTS],
     groupBy: layout === "board" ? "learned" : null,
     visibleProperties: [...visible],
     propertyOrder: [...visible],
@@ -112,9 +120,9 @@ function compareValues(
 }
 
 export function sortVocab(items: VocabItem[], sorts: SortRule[]): VocabItem[] {
-  if (sorts.length === 0) return items;
+  const rules = effectiveSorts(sorts);
   return [...items].sort((left, right) => {
-    for (const rule of sorts) {
+    for (const rule of rules) {
       const cmp = compareValues(
         sortValue(left, rule.field),
         sortValue(right, rule.field),

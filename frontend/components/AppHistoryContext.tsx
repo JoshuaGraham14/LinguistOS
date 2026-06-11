@@ -1,8 +1,9 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -26,9 +27,11 @@ function currentUrlFromWindow(pathname: string): string {
   return `${pathname}${window.location.search ?? ""}`;
 }
 
-export function AppHistoryProvider({ children }: { children: ReactNode }) {
+function AppHistoryProviderInner({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchKey = searchParams.toString();
   const stackRef = useRef<string[]>([]);
   const indexRef = useRef(-1);
   const navigatingRef = useRef<"back" | "forward" | null>(null);
@@ -65,7 +68,7 @@ export function AppHistoryProvider({ children }: { children: ReactNode }) {
       indexRef.current = nextStack.length - 1;
       setVersion((v) => v + 1);
     }
-  }, [pathname]);
+  }, [pathname, searchKey]);
 
   useEffect(() => {
     function handleWorkspaceChange() {
@@ -104,6 +107,14 @@ export function AppHistoryProvider({ children }: { children: ReactNode }) {
   );
 
   return <AppHistoryContext.Provider value={value}>{children}</AppHistoryContext.Provider>;
+}
+
+export function AppHistoryProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <AppHistoryProviderInner>{children}</AppHistoryProviderInner>
+    </Suspense>
+  );
 }
 
 export function useAppHistory() {
