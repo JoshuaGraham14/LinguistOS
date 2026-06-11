@@ -3,6 +3,7 @@ import {
   EMPTY_QUERY,
   type LexiconQuery,
 } from "./lexicon-query";
+import { getVocabProperty } from "./vocab-properties";
 import type { SavedViewLayout, SortDirection, SortRule, VocabItem } from "./types";
 
 export interface VocabViewConfig {
@@ -205,4 +206,45 @@ export function orderedVisibleProperties(config: VocabViewConfig): string[] {
     }
   }
   return ordered;
+}
+
+export function setPrimarySortRule(
+  sorts: SortRule[],
+  field: string,
+  direction: SortDirection,
+): SortRule[] {
+  const rest = sorts.filter((s) => s.field !== field);
+  return [{ field, direction }, ...rest];
+}
+
+export function removeSortRule(sorts: SortRule[], field: string): SortRule[] {
+  return sorts.filter((s) => s.field !== field);
+}
+
+export function canHideProperty(key: string): boolean {
+  return !getVocabProperty(key)?.isTitle;
+}
+
+export function hideProperty(
+  config: VocabViewConfig,
+  key: string,
+): VocabViewConfig {
+  if (!canHideProperty(key)) return config;
+  return {
+    ...config,
+    visibleProperties: config.visibleProperties.filter((k) => k !== key),
+  };
+}
+
+export function showProperty(
+  config: VocabViewConfig,
+  key: string,
+): VocabViewConfig {
+  const visible = config.visibleProperties.includes(key)
+    ? config.visibleProperties
+    : [...config.visibleProperties, key];
+  const order = config.propertyOrder.includes(key)
+    ? config.propertyOrder
+    : [...config.propertyOrder, key];
+  return { ...config, visibleProperties: visible, propertyOrder: order };
 }

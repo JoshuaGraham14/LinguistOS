@@ -21,6 +21,7 @@ import type {
 import { getVocabProperty } from "@/lib/vocab-properties";
 import type { VocabGroup, VocabViewConfig } from "@/lib/vocab-view";
 import { effectiveSorts, orderedVisibleProperties } from "@/lib/vocab-view";
+import { ColumnHeaderMenu } from "./ColumnHeaderMenu";
 
 function formatDate(ts: number | null) {
   if (!ts) return "—";
@@ -156,6 +157,8 @@ export function VocabTableView({
   loading,
   wordDisplayMode,
   onSort,
+  onConfigChange,
+  onColumnMenuOpen,
 }: {
   items: VocabItem[];
   groups: VocabGroup[] | null;
@@ -163,11 +166,24 @@ export function VocabTableView({
   loading: boolean;
   wordDisplayMode: WordDisplayMode;
   onSort: (field: string) => void;
+  onConfigChange: (updater: (prev: VocabViewConfig) => VocabViewConfig) => void;
+  onColumnMenuOpen?: () => void;
 }) {
   const columns = orderedVisibleProperties(config);
   const colSpan = columns.length + 1;
   const activeSorts = effectiveSorts(config.sorts);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  const [columnMenu, setColumnMenu] = useState<{
+    key: string;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  function openColumnMenu(key: string, e: React.MouseEvent) {
+    e.preventDefault();
+    onColumnMenuOpen?.();
+    setColumnMenu({ key, x: e.clientX, y: e.clientY });
+  }
 
   function toggleGroup(key: string) {
     setCollapsed((prev) => {
@@ -244,44 +260,59 @@ export function VocabTableView({
   }
 
   return (
-    <section className="glass-card rounded-2xl overflow-hidden flex-1 min-h-0">
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 text-slate-500 uppercase text-xs tracking-wide">
-            <tr>
-              {columns.map((key) => {
-                const prop = getVocabProperty(key);
-                const active = sortIcon(key, activeSorts);
-                return (
-                  <th key={key} className="px-4 py-2 text-left">
-                    {prop?.sortable ? (
-                      <button
-                        type="button"
-                        onClick={() => onSort(key)}
-                        className="inline-flex items-center gap-1 hover:text-slate-700"
-                      >
-                        {prop.label}
-                        {active === "asc" ? (
-                          <ArrowUp className="h-3 w-3" />
-                        ) : active === "desc" ? (
-                          <ArrowDown className="h-3 w-3" />
-                        ) : (
-                          <ArrowUpDown className="h-3 w-3 opacity-40" />
-                        )}
-                      </button>
-                    ) : (
-                      prop?.label ?? key
-                    )}
-                  </th>
-                );
-              })}
-              <th className="px-4 py-2" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">{renderBody()}</tbody>
-        </table>
-      </div>
-    </section>
+    <>
+      <section className="glass-card rounded-2xl overflow-hidden flex-1 min-h-0">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-slate-50 text-slate-500 uppercase text-xs tracking-wide">
+              <tr>
+                {columns.map((key) => {
+                  const prop = getVocabProperty(key);
+                  const active = sortIcon(key, activeSorts);
+                  return (
+                    <th
+                      key={key}
+                      className="px-4 py-2 text-left"
+                      onContextMenu={(e) => openColumnMenu(key, e)}
+                    >
+                      {prop?.sortable ? (
+                        <button
+                          type="button"
+                          onClick={() => onSort(key)}
+                          className="inline-flex items-center gap-1 hover:text-slate-700"
+                        >
+                          {prop.label}
+                          {active === "asc" ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : active === "desc" ? (
+                            <ArrowDown className="h-3 w-3" />
+                          ) : (
+                            <ArrowUpDown className="h-3 w-3 opacity-40" />
+                          )}
+                        </button>
+                      ) : (
+                        prop?.label ?? key
+                      )}
+                    </th>
+                  );
+                })}
+                <th className="px-4 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">{renderBody()}</tbody>
+          </table>
+        </div>
+      </section>
+      <ColumnHeaderMenu
+        propertyKey={columnMenu?.key ?? null}
+        config={config}
+        x={columnMenu?.x ?? 0}
+        y={columnMenu?.y ?? 0}
+        open={columnMenu != null}
+        onClose={() => setColumnMenu(null)}
+        onConfigChange={onConfigChange}
+      />
+    </>
   );
 }
 

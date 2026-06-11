@@ -327,6 +327,8 @@ function VocabPageInner() {
                   sorts: toggleSortRule(prev.sorts, field),
                 }))
               }
+              onConfigChange={setConfig}
+              onColumnMenuOpen={() => setActivePopover(null)}
             />
           )}
           {activeView?.layout === "gallery" && config && (
