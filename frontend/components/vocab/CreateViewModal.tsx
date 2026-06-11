@@ -6,7 +6,7 @@ import type { SavedViewLayout } from "@/lib/types";
 
 const LAYOUT_OPTIONS: { value: SavedViewLayout; label: string }[] = [
   { value: "table", label: "Table" },
-  { value: "gallery", label: "Gallery" },
+  { value: "gallery", label: "Cards" },
   { value: "board", label: "Board" },
 ];
 

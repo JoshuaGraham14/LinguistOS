@@ -16,7 +16,7 @@ def test_list_views_seeds_defaults(client, workspace) -> None:
         {"field": "createdAt", "direction": "desc"}
     ]
     assert "createdAt" in views[0]["config"]["visibleProperties"]
-    assert views[1]["name"] == "Gallery"
+    assert views[1]["name"] == "Cards"
     assert views[1]["layout"] == "gallery"
     assert views[2]["name"] == "Review queue"
     assert views[2]["config"]["query"]["due"] == "due_now"

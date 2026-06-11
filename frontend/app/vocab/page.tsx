@@ -271,18 +271,21 @@ function VocabPageInner() {
         </div>
       </header>
 
-      <div className="glass-card rounded-2xl px-4 pt-2">
-        <ViewTabBar
-          views={views}
-          activeViewId={activeView?.id ?? null}
-          onSelect={selectView}
-          onCreate={() => setCreateViewOpen(true)}
-          onRename={setRenameView}
-          onDuplicate={(view) => void handleDuplicateView(view)}
-          onDelete={setDeleteView}
-        />
-        {config && activeView && (
-          <VocabDatabaseToolbar
+      <div className="glass-card rounded-2xl px-2 sm:px-4">
+        <div className="flex items-center border-b border-slate-100">
+          <div className="flex-1 min-w-0 overflow-x-auto">
+            <ViewTabBar
+              views={views}
+              activeViewId={activeView?.id ?? null}
+              onSelect={selectView}
+              onCreate={() => setCreateViewOpen(true)}
+              onRename={setRenameView}
+              onDuplicate={(view) => void handleDuplicateView(view)}
+              onDelete={setDeleteView}
+            />
+          </div>
+          {config && activeView && (
+            <VocabDatabaseToolbar
             search={config.query.search}
             onSearchChange={(search) =>
               setConfig((prev) => ({ ...prev, query: { ...prev.query, search } }))
@@ -299,8 +302,9 @@ function VocabPageInner() {
             onConfigChange={setConfig}
             flashcardsHref={flashcardsHref}
             onNew={() => setAddOpen(true)}
-          />
-        )}
+            />
+          )}
+        </div>
       </div>
 
       <div className="relative">

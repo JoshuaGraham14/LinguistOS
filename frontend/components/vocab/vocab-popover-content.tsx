@@ -30,7 +30,7 @@ const POS_OPTIONS = ["noun", "verb", "adjective", "adverb", "preposition"];
 const CEFR_OPTIONS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const LAYOUT_OPTIONS: { value: SavedViewLayout; label: string }[] = [
   { value: "table", label: "Table" },
-  { value: "gallery", label: "Gallery" },
+  { value: "gallery", label: "Cards" },
   { value: "board", label: "Board" },
 ];
 

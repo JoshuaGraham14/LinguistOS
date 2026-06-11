@@ -61,7 +61,7 @@ export function VocabDatabaseToolbar({
   const viewRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="flex items-center justify-end gap-2 flex-wrap py-2 border-b border-slate-100">
+    <div className="flex items-center gap-2 flex-shrink-0 py-1 pl-2">
       {saveStatus === "saving" && (
         <span className="text-xs text-slate-400 mr-1">Saving…</span>
       )}

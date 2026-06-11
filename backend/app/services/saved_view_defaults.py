@@ -82,7 +82,7 @@ DEFAULT_VIEW_SPECS: list[tuple[str, str | None, SavedViewLayout, dict, int]] = [
         0,
     ),
     (
-        "Gallery",
+        "Cards",
         "🖼️",
         "gallery",
         _config(
@@ -155,6 +155,25 @@ def migrate_review_queue_view_defaults(db: Session, workspace_id: int) -> int:
     return updated
 
 
+def migrate_gallery_view_name(db: Session, workspace_id: int) -> int:
+    """Rename legacy default 'Gallery' views to 'Cards'."""
+    views = db.scalars(
+        select(SavedView).where(
+            SavedView.workspace_id == workspace_id,
+            SavedView.name == "Gallery",
+            SavedView.layout == "gallery",
+        )
+    ).all()
+    updated = 0
+    for view in views:
+        view.name = "Cards"
+        db.add(view)
+        updated += 1
+    if updated:
+        db.commit()
+    return updated
+
+
 def migrate_all_words_view_defaults(db: Session, workspace_id: int) -> int:
     """Patch legacy 'All words' views to Date Added sort and column."""
     views = db.scalars(
@@ -195,6 +214,7 @@ def ensure_default_saved_views(db: Session, workspace_id: int) -> list[SavedView
     if count and count > 0:
         migrate_all_words_view_defaults(db, workspace_id)
         migrate_review_queue_view_defaults(db, workspace_id)
+        migrate_gallery_view_name(db, workspace_id)
         return list(
             db.scalars(
                 select(SavedView)

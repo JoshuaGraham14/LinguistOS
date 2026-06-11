@@ -89,16 +89,17 @@ export function VocabBoardView({
   }
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2">
-      {groups.map((group) => (
-        <div
-          key={group.key || "empty"}
-          className="min-w-[240px] flex-1 glass-card rounded-2xl p-3 flex flex-col gap-2"
-          onDragOver={(e) => {
-            if (writable) e.preventDefault();
-          }}
-          onDrop={() => handleDrop(group)}
-        >
+    <div className="space-y-2">
+      <div className="flex gap-4 overflow-x-auto pb-2">
+        {groups.map((group) => (
+          <div
+            key={group.key || "empty"}
+            className="w-[260px] shrink-0 glass-card rounded-2xl p-3 flex flex-col gap-2"
+            onDragOver={(e) => {
+              if (writable) e.preventDefault();
+            }}
+            onDrop={() => handleDrop(group)}
+          >
           <div className="flex items-center justify-between px-1 pb-2 border-b border-slate-100">
             <h3 className="text-sm font-semibold text-slate-700">
               {group.label}
@@ -122,10 +123,11 @@ export function VocabBoardView({
             )}
           </div>
         </div>
-      ))}
-      {!writable && (
-        <p className="text-xs text-slate-400 self-end pb-2">
-          Group by learned or CEFR to drag cards between columns.
+        ))}
+      </div>
+      {!groupBy && (
+        <p className="text-xs text-slate-400 px-1">
+          Group by learned or CEFR in View options to drag cards between columns.
         </p>
       )}
     </div>

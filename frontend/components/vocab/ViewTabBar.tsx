@@ -46,17 +46,17 @@ export function ViewTabBar({
   }
 
   return (
-    <div className="flex items-center gap-1 flex-wrap pb-0">
+    <div className="flex items-center gap-1 min-h-10">
       {views.map((view) => (
-        <div key={view.id} className="flex items-center group">
+        <div key={view.id} className="flex items-center group shrink-0">
           <button
             type="button"
             onClick={() => onSelect(view.id)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-t-lg border-b-2 -mb-px transition",
+              "inline-flex items-center gap-1.5 px-3 h-10 text-sm font-medium border-b-2 transition",
               activeViewId === view.id
-                ? "border-brand-500 text-brand-700 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50",
+                ? "border-brand-500 text-brand-700"
+                : "border-transparent text-slate-500 hover:text-slate-700",
             )}
           >
             {view.icon && <span aria-hidden>{view.icon}</span>}
@@ -75,7 +75,7 @@ export function ViewTabBar({
       <button
         type="button"
         onClick={onCreate}
-        className="inline-flex items-center gap-1 px-2 py-2 text-sm text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50"
+        className="inline-flex items-center justify-center h-10 w-10 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 shrink-0"
         title="Add view"
       >
         <Plus className="h-4 w-4" />
