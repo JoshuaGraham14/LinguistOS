@@ -5,6 +5,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  GraduationCap,
   RotateCcw,
   Shuffle,
   X,
@@ -13,6 +14,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import * as api from "@/lib/api";
 import {
   applyLexiconQuery,
   isEmptyLexiconQuery,
@@ -20,6 +22,9 @@ import {
 } from "@/lib/lexicon-query";
 import { useVocab } from "@/lib/storage";
 import type { VocabItem } from "@/lib/types";
+import { applyViewPipeline } from "@/lib/vocab-view";
+
+type ViewLoadState = "idle" | "loading" | "ready" | "error";
 
 function shuffleArray<T>(arr: T[]): T[] {
   const copy = [...arr];
@@ -45,6 +50,46 @@ function FlashcardsInner() {
   const searchParams = useSearchParams();
   const wordParam = searchParams.get("word");
   const filterParam = searchParams.get("filter");
+  const viewParam = searchParams.get("view");
+  const [viewLoadState, setViewLoadState] = useState<ViewLoadState>(
+    viewParam ? "loading" : "idle",
+  );
+  const [viewPipelineItems, setViewPipelineItems] = useState<VocabItem[] | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!viewParam) {
+      setViewPipelineItems(null);
+      setViewLoadState("idle");
+      return;
+    }
+    const viewId = Number(viewParam);
+    if (!Number.isFinite(viewId)) {
+      setViewPipelineItems(null);
+      setViewLoadState("error");
+      return;
+    }
+    let cancelled = false;
+    setViewLoadState("loading");
+    void api
+      .getSavedView(viewId)
+      .then((view) => {
+        if (cancelled) return;
+        const { items } = applyViewPipeline(vocab, view.config);
+        setViewPipelineItems(items);
+        setViewLoadState("ready");
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setViewPipelineItems(null);
+          setViewLoadState("error");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [viewParam, vocab]);
 
   const [shuffle, setShuffle] = useState(true);
   const [direction, setDirection] = useState<"en-to-es" | "es-to-en">("en-to-es");
@@ -65,6 +110,12 @@ function FlashcardsInner() {
         : undefined;
       return match ? [match] : vocab;
     }
+    if (viewParam) {
+      if (viewLoadState === "ready" && viewPipelineItems) {
+        return viewPipelineItems;
+      }
+      return [];
+    }
     if (filterParam) {
       const query = parseLexiconQuery(decodeURIComponent(filterParam));
       if (!isEmptyLexiconQuery(query)) {
@@ -72,18 +123,20 @@ function FlashcardsInner() {
       }
     }
     return vocab;
-  }, [vocab, wordParam, filterParam]);
+  }, [vocab, wordParam, filterParam, viewParam, viewLoadState, viewPipelineItems]);
+
+  const viewLoading = Boolean(viewParam && viewLoadState === "loading");
 
   // Build deck whenever vocab/shuffle/scope changes; resets the session.
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || viewLoading) return;
     setOrder(shuffle ? shuffleArray(scopedVocab) : scopedVocab);
     setIndex(0);
     setRevealed(false);
     setStats({ knew: 0, didnt: 0 });
     setSeconds(0);
     setFinished(false);
-  }, [scopedVocab, hydrated, shuffle]);
+  }, [scopedVocab, hydrated, shuffle, viewLoading]);
 
   // Timer ticks while studying; pauses on finish/empty deck.
   useEffect(() => {
@@ -211,6 +264,15 @@ function FlashcardsInner() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <header>
+          {viewParam && !wordParam && (
+            <Link
+              href={`/vocab?view=${viewParam}`}
+              className="inline-flex items-center gap-1 text-sm text-fuchsia-700 hover:text-fuchsia-800 font-medium mb-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Back to vocabulary
+            </Link>
+          )}
           <h1 className="text-3xl font-bold text-slate-900">Flashcards</h1>
           <p className="text-slate-500 mt-1">
             Flip, score, and review your workspace deck.
@@ -238,14 +300,40 @@ function FlashcardsInner() {
         </div>
       )}
 
-      {!wordParam && filterParam && (
+      {!wordParam && viewParam && viewLoadState === "error" && (
+        <div className="rounded-xl bg-rose-50 border border-rose-100 px-4 py-2 text-sm text-rose-700 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span>Could not load this vocabulary view.</span>
+          <Link href={`/vocab?view=${viewParam}`} className="underline font-medium">
+            Back to vocabulary
+          </Link>
+          <span aria-hidden>·</span>
+          <Link href="/learn/flashcards" className="underline">
+            Use full deck
+          </Link>
+        </div>
+      )}
+
+      {!wordParam && viewParam && viewLoadState === "ready" && (
+        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <GraduationCap className="h-4 w-4 shrink-0" />
+          <span>
+            Practicing saved vocabulary view ({total} words).
+          </span>
+          <Link href={`/vocab?view=${viewParam}`} className="underline font-medium">
+            Back to view
+          </Link>
+          <span aria-hidden>·</span>
+          <Link href="/learn/flashcards" className="underline">
+            Use full deck
+          </Link>
+        </div>
+      )}
+
+      {!wordParam && !viewParam && filterParam && (
         <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700">
-          Practicing the current Lexicon view ({total} words).{" "}
-          <Link
-            href={`/lexicon?${decodeURIComponent(filterParam)}`}
-            className="underline"
-          >
-            Adjust filters
+          Practicing filtered deck ({total} words).{" "}
+          <Link href="/vocab" className="underline">
+            Open vocabulary
           </Link>{" "}
           ·{" "}
           <Link href="/learn/flashcards" className="underline">
@@ -314,9 +402,21 @@ function FlashcardsInner() {
                 </>
               ) : (
                 <div className="text-slate-500 text-center">
-                  {hydrated
-                    ? "No words yet. Add some on the Words page."
-                    : "Loading…"}
+                  {!hydrated || viewLoading
+                    ? "Loading…"
+                    : viewParam && viewLoadState === "error"
+                      ? "This view could not be loaded."
+                      : viewParam && total === 0
+                        ? "No words match this view."
+                        : (
+                          <>
+                            No words yet. Add some on the{" "}
+                            <Link href="/vocab" className="text-brand-600 underline">
+                              Vocabulary
+                            </Link>{" "}
+                            page.
+                          </>
+                        )}
                 </div>
               )}
 

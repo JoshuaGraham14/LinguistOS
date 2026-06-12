@@ -19,7 +19,7 @@ def _coerce_pos(pos: str | None, tags: list[str] | None) -> str:
     for tag in tags or []:
         if tag in VALID_POS:
             return tag
-    return "other"
+    return ""
 
 
 def resolve_lexeme(
@@ -45,7 +45,7 @@ def resolve_lexeme(
     resolved_lemma = normalize_key_part(lemma or surface_form) or surface_form.strip()
     resolved_pos = _coerce_pos(pos, tags)
     resolved_gloss = normalize_key_part(gloss_primary or "")
-    resolved_tags = list(tags or []) or ([resolved_pos] if resolved_pos else [])
+    resolved_tags = list(tags or [])
     return find_or_create_lexeme(
         db,
         language=language,

@@ -66,6 +66,9 @@ class Workspace(Base):
     word_occurrences: Mapped[list["WordOccurrence"]] = relationship(
         back_populates="workspace", cascade="all, delete-orphan"
     )
+    saved_views: Mapped[list["SavedView"]] = relationship(
+        back_populates="workspace", cascade="all, delete-orphan"
+    )
 
 
 class Lexeme(Base):
@@ -93,7 +96,7 @@ class Lexeme(Base):
     tags: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     cefr: Mapped[str | None] = mapped_column(String(8), nullable=True)
     frequency_rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    gender: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    gender: Mapped[str | None] = mapped_column(String(16), nullable=True)
     conjugation_class: Mapped[str | None] = mapped_column(String(32), nullable=True)
     morph_features: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     ipa: Mapped[str | None] = mapped_column(String(128), nullable=True)
@@ -333,3 +336,31 @@ class WordOccurrence(Base):
 
     workspace: Mapped[Workspace] = relationship(back_populates="word_occurrences")
     vocab: Mapped[Vocab] = relationship(back_populates="occurrences")
+
+
+class SavedView(Base):
+    """Per-workspace saved vocabulary database view (Notion-style)."""
+
+    __tablename__ = "saved_views"
+    __table_args__ = (Index("ix_saved_view_workspace_position", "workspace_id", "position"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    workspace_id: Mapped[int] = mapped_column(
+        ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    icon: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    layout: Mapped[str] = mapped_column(String(16), nullable=False, default="table")
+    config: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime.utcnow, nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False,
+    )
+
+    workspace: Mapped[Workspace] = relationship(back_populates="saved_views")

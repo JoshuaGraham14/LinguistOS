@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.db.backfill_lexemes import is_lexeme_complete
 from app.db.models import Lexeme, Vocab
 from app.db.schemas import MasteryOut, VocabOut, VocabTag
+from app.services.enrichment import needs_enrichment
 
 
 def _coerce_json_dict(value: Any) -> dict[str, Any] | None:
@@ -37,15 +37,19 @@ def vocab_out(vocab: Vocab, lexeme: Lexeme | None = None) -> VocabOut:
         raise ValueError(f"Vocab {vocab.id} has no linked lexeme")
 
     gloss = _display_gloss(vocab, lx)
-    tags: list[VocabTag] = [t for t in lx.tags if t in {
-        "noun", "verb", "adjective", "adverb", "preposition", "other"
-    }]  # type: ignore[misc]
+    valid = {"noun", "verb", "adjective", "adverb", "preposition", "other"}
+    seen: set[str] = set()
+    tags: list[VocabTag] = []
+    for t in lx.tags:
+        if t in valid and t not in seen:
+            seen.add(t)
+            tags.append(t)  # type: ignore[arg-type]
 
     mastery = None
     if vocab.mastery is not None:
         mastery = MasteryOut.model_validate(vocab.mastery)
 
-    enriching = not is_lexeme_complete(lx)
+    enriching = needs_enrichment(lx)
 
     return VocabOut(
         id=vocab.id,

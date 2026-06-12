@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BookMarked,
   BookOpen,
   ChevronDown,
   ChevronRight,
@@ -36,8 +35,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
     title: "Workspace",
     items: [
       { href: "/", label: "Dashboard", icon: Home },
-      { href: "/words", label: "Words", icon: BookMarked },
-      { href: "/lexicon", label: "Lexicon", icon: Table2 },
+      { href: "/vocab", label: "Vocabulary", icon: Table2 },
     ],
   },
   {

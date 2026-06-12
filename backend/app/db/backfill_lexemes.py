@@ -42,7 +42,7 @@ def _coerce_pos(pos: str | None, tags: list[str] | None) -> str:
     for tag in tags or []:
         if tag in VALID_POS:
             return tag
-    return "other"
+    return ""
 
 
 def _field_count(lexeme: Lexeme) -> int:
@@ -62,12 +62,7 @@ def _field_count(lexeme: Lexeme) -> int:
 
 
 def is_lexeme_complete(lexeme: Lexeme) -> bool:
-    return bool(
-        lexeme.lemma
-        and lexeme.pos
-        and lexeme.gloss_primary
-        and lexeme.tags
-    )
+    return lexeme.enrichment_status in ("complete", "enriched")
 
 
 def find_or_create_lexeme(
@@ -103,7 +98,7 @@ def find_or_create_lexeme(
     )
     if existing is not None:
         if tags:
-            existing.tags = tags
+            existing.tags = list(dict.fromkeys(tags))
         if glosses:
             existing.glosses = glosses
         if cefr:
@@ -124,9 +119,6 @@ def find_or_create_lexeme(
             existing.image_url = image_url
         if dictionary_notes:
             existing.dictionary_notes = dictionary_notes
-        if is_lexeme_complete(existing):
-            existing.enrichment_status = "complete"
-            existing.enriched_at = existing.enriched_at or datetime.utcnow()
         db.add(existing)
         return existing
 
@@ -136,7 +128,7 @@ def find_or_create_lexeme(
         pos=norm_pos,
         gloss_primary=norm_gloss,
         glosses=glosses or ([gloss_primary] if gloss_primary else []),
-        tags=tags or ([norm_pos] if norm_pos else []),
+        tags=list(dict.fromkeys(tags or [])),
         cefr=cefr,
         frequency_rank=frequency_rank,
         gender=gender,
@@ -148,9 +140,6 @@ def find_or_create_lexeme(
         dictionary_notes=dictionary_notes,
         enrichment_status="pending",
     )
-    if is_lexeme_complete(lexeme):
-        lexeme.enrichment_status = "complete"
-        lexeme.enriched_at = datetime.utcnow()
     db.add(lexeme)
     db.flush()
     return lexeme
@@ -229,6 +218,9 @@ def backfill_lexemes() -> int:
                 continue
             legacy = _load_legacy_row(vocab.id)
             lexeme = _lexeme_from_vocab_row(db, vocab, workspace.language, legacy)
+            if lexeme.lemma and lexeme.pos and lexeme.gloss_primary and lexeme.tags:
+                lexeme.enrichment_status = "enriched"
+                lexeme.enriched_at = lexeme.enriched_at or datetime.utcnow()
             vocab.lexeme_id = lexeme.id
             if not vocab.surface_form:
                 vocab.surface_form = vocab.word

@@ -11,7 +11,12 @@ LanguageCode = Literal["es", "he", "fr"]
 VocabTag = Literal["noun", "verb", "adjective", "adverb", "preposition", "other"]
 MasteryOutcome = Literal["correct", "incorrect", "skipped", "hinted"]
 EnrichmentStatus = Literal["pending", "done", "failed"]
-LexemeEnrichmentStatus = Literal["pending", "complete", "failed"]
+LexemeEnrichmentStatus = Literal["pending", "complete", "enriched", "failed"]
+SavedViewLayout = Literal["table", "board", "gallery"]
+SortDirection = Literal["asc", "desc"]
+DueFilter = Literal["any", "due_now", "due_week", "not_due"]
+LearnedFilter = Literal["any", "learned", "not_learned"]
+StatusMatch = Literal["all", "any"]
 
 
 class WorkspaceCreate(BaseModel):
@@ -73,7 +78,7 @@ class VocabCreate(BaseModel):
     pos: str | None = Field(default=None, max_length=32)
     cefr: str | None = Field(default=None, max_length=8)
     frequency_rank: int | None = None
-    gender: str | None = Field(default=None, max_length=8)
+    gender: str | None = Field(default=None, max_length=16)
     conjugation_class: str | None = Field(default=None, max_length=32)
     morph_features: dict[str, Any] | None = None
     ipa: str | None = Field(default=None, max_length=128)
@@ -95,7 +100,7 @@ class VocabUpdate(BaseModel):
     pos: str | None = Field(default=None, max_length=32)
     cefr: str | None = Field(default=None, max_length=8)
     frequency_rank: int | None = None
-    gender: str | None = Field(default=None, max_length=8)
+    gender: str | None = Field(default=None, max_length=16)
     conjugation_class: str | None = Field(default=None, max_length=32)
     morph_features: dict[str, Any] | None = None
     ipa: str | None = Field(default=None, max_length=128)
@@ -287,3 +292,60 @@ class TokenActionResponse(BaseModel):
     vocab: VocabOut | None = None
     occurrence_id: int | None = None
     destination: str | None = None
+
+
+class SortRule(BaseModel):
+    field: str = Field(min_length=1, max_length=64)
+    direction: SortDirection = "asc"
+
+
+class LexiconQueryConfig(BaseModel):
+    search: str = ""
+    tags: list[str] = Field(default_factory=list)
+    pos: list[str] = Field(default_factory=list)
+    cefr: list[str] = Field(default_factory=list)
+    learned: LearnedFilter = "any"
+    due: DueFilter = "any"
+    statusMatch: StatusMatch = "all"
+    boxMin: int | None = None
+    boxMax: int | None = None
+    language: LanguageCode | None = None
+
+
+class SavedViewConfig(BaseModel):
+    query: LexiconQueryConfig = Field(default_factory=LexiconQueryConfig)
+    sorts: list[SortRule] = Field(default_factory=list)
+    groupBy: str | None = None
+    visibleProperties: list[str] = Field(default_factory=list)
+    propertyOrder: list[str] = Field(default_factory=list)
+
+
+class SavedViewCreate(BaseModel):
+    workspace_id: int = Field(ge=1)
+    name: str = Field(min_length=1, max_length=120)
+    icon: str | None = Field(default=None, max_length=16)
+    layout: SavedViewLayout = "table"
+    config: SavedViewConfig = Field(default_factory=SavedViewConfig)
+    position: int | None = Field(default=None, ge=0)
+
+
+class SavedViewUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    icon: str | None = Field(default=None, max_length=16)
+    layout: SavedViewLayout | None = None
+    config: SavedViewConfig | None = None
+    position: int | None = Field(default=None, ge=0)
+
+
+class SavedViewOut(BaseModel):
+    id: int
+    workspace_id: int
+    name: str
+    icon: str | None
+    layout: SavedViewLayout
+    config: SavedViewConfig
+    position: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}

@@ -26,8 +26,8 @@ def test_suggest_returns_direct_candidates_only(client, workspace) -> None:
     body = resp.json()
     assert body["mock"] is True
     assert body["candidates"] == [
-        {"text": "jugar", "pos": "verb"},
-        {"text": "tocar", "pos": "verb"},
+        {"text": "jugar", "pos": "verb", "context": "to play a game or sport"},
+        {"text": "tocar", "pos": "verb", "context": "to play an instrument"},
     ]
 
 
@@ -44,8 +44,8 @@ def test_suggest_handles_target_to_english(client, workspace) -> None:
     assert resp.status_code == 200, resp.text
     body = resp.json()
     assert body["candidates"] == [
-        {"text": "to touch", "pos": "verb"},
-        {"text": "to play music", "pos": "verb"},
+        {"text": "to touch", "pos": "verb", "context": "to make physical contact"},
+        {"text": "to play music", "pos": "verb", "context": "to play an instrument"},
     ]
 
 
@@ -64,7 +64,9 @@ def test_suggest_swaps_when_english_is_in_target_field(client, workspace) -> Non
     assert body["mock"] is True
     assert body["field_swap"] is True
     assert body["resolved_direction"] == "en-to-target"
-    assert body["candidates"] == [{"text": "hola", "pos": "other"}]
+    assert body["candidates"] == [
+        {"text": "hola", "pos": "other", "context": "a greeting"},
+    ]
 
 
 def test_suggest_swaps_when_target_is_in_english_field(client, workspace) -> None:
@@ -81,7 +83,9 @@ def test_suggest_swaps_when_target_is_in_english_field(client, workspace) -> Non
     body = resp.json()
     assert body["field_swap"] is True
     assert body["resolved_direction"] == "target-to-en"
-    assert body["candidates"] == [{"text": "hello", "pos": "other"}]
+    assert body["candidates"] == [
+        {"text": "hello", "pos": "other", "context": "a greeting"},
+    ]
 
 
 def test_enrich_prepares_selected_pair_for_save(client, workspace) -> None:

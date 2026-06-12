@@ -16,7 +16,8 @@ import pytest
 # Configure a private DB before app modules import.
 _TMP_DIR = tempfile.mkdtemp(prefix="linguistos-tests-")
 _DB_PATH = os.path.join(_TMP_DIR, "linguistos-test.db")
-os.environ.setdefault("DATABASE_URL", f"sqlite+pysqlite:///{_DB_PATH}")
+os.environ["DATABASE_URL"] = f"sqlite+pysqlite:///{_DB_PATH}"
+os.environ["LINGUISTOS_DISABLE_ENRICHMENT"] = "1"
 
 
 @pytest.fixture(scope="session")

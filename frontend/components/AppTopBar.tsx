@@ -29,8 +29,8 @@ function initialsFromName(name: string) {
 
 function titleForPath(pathname: string): string {
   if (pathname === "/") return "Dashboard";
-  if (pathname === "/words") return "Words";
-  if (pathname === "/lexicon") return "Lexicon";
+  if (pathname === "/vocab") return "Vocabulary";
+  if (pathname === "/words" || pathname === "/lexicon") return "Vocabulary";
   if (pathname === "/learn") return "All modes";
   if (pathname.startsWith("/learn/flashcards")) return "Flashcards";
   if (pathname.startsWith("/learn/sentences")) return "Sentences";

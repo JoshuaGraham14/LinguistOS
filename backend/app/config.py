@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     # Deepgram is used for streaming speech-to-text (Nova-3). TTS still uses
     # OpenAI's tts-1 model, so both keys are needed when voice mode is in use.
     deepgram_api_key: str = ""
+    linguistos_disable_enrichment: bool = False
 
 
 settings = Settings()

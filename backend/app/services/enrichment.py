@@ -6,12 +6,12 @@ import json
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db.backfill_lexemes import is_lexeme_complete, normalize_key_part
-from app.db.models import Lexeme
+from app.db.models import Lexeme, Vocab
 from app.db.schemas import LanguageCode, VocabTag
 
 LANGUAGE_NAMES: dict[str, str] = {
@@ -24,10 +24,37 @@ VALID_TAGS: set[str] = {"noun", "verb", "adjective", "adverb", "preposition", "o
 
 REQUIRED_FIELDS = ("lemma", "pos", "tags", "gloss_primary")
 
+_MORPH_FEATURE_KEYS = ("number", "gender", "person", "tense", "mood", "case", "definite")
+
 
 def _coerce_tag(value: str | None) -> VocabTag:
     normalized = (value or "other").casefold().strip()
     return normalized if normalized in VALID_TAGS else "other"  # type: ignore[return-value]
+
+
+def has_minimum_lexeme_fields(lexeme: Lexeme) -> bool:
+    return bool(
+        lexeme.lemma
+        and lexeme.pos
+        and lexeme.gloss_primary
+        and lexeme.tags
+    )
+
+
+def _dedupe_tags(tags: list[str] | None) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for tag in tags or []:
+        normalized = str(tag).strip().casefold()
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            out.append(normalized)
+    return out
+
+
+def needs_enrichment(lexeme: Lexeme) -> bool:
+    """True while minimum fields or LLM enrichment are still outstanding."""
+    return lexeme.enrichment_status in ("pending", "complete")
 
 
 def missing_lexeme_fields(lexeme: Lexeme) -> list[str]:
@@ -43,7 +70,34 @@ def missing_lexeme_fields(lexeme: Lexeme) -> list[str]:
     return missing
 
 
-def _enrichment_schema() -> dict[str, Any]:
+def _morph_features_schema() -> dict[str, Any]:
+    properties = {key: {"type": ["string", "null"]} for key in _MORPH_FEATURE_KEYS}
+    return {
+        "anyOf": [
+            {"type": "null"},
+            {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": properties,
+                "required": list(_MORPH_FEATURE_KEYS),
+            },
+        ],
+    }
+
+
+def _coerce_morph_features(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    cleaned = {
+        str(key): str(item)
+        for key, item in value.items()
+        if item is not None and str(item).strip()
+    }
+    return cleaned or None
+
+
+def enrichment_json_schema() -> dict[str, Any]:
+    """Strict JSON schema for OpenAI structured enrichment responses."""
     return {
         "type": "object",
         "additionalProperties": False,
@@ -67,7 +121,7 @@ def _enrichment_schema() -> dict[str, Any]:
             "frequency_rank": {"type": ["integer", "null"]},
             "gender": {"type": ["string", "null"]},
             "conjugation_class": {"type": ["string", "null"]},
-            "morph_features": {"type": ["object", "null"], "additionalProperties": True},
+            "morph_features": _morph_features_schema(),
             "ipa": {"type": ["string", "null"]},
             "notes": {"type": ["string", "null"]},
         },
@@ -179,21 +233,20 @@ def enrich_lexeme_llm(
             pos=pos,
         ),
         "vocab_enrichment",
-        _enrichment_schema(),
+        enrichment_json_schema(),
     )
     if data is None:
-        return (
-            _fallback_enrichment(
-                target_word=target_word,
-                english_gloss=english_gloss,
-                pos=pos,
-                language=language,
-            ),
-            0.5,
-            True,
+        fallback = _fallback_enrichment(
+            target_word=target_word,
+            english_gloss=english_gloss,
+            pos=pos,
+            language=language,
         )
+        return _normalize_enrichment_result(fallback), 0.5, True
     pos_val = _coerce_tag(str(data.get("pos", pos)))
-    tags = [_coerce_tag(str(tag)) for tag in data.get("tags", []) if isinstance(tag, str)]
+    tags = _dedupe_tags(
+        [_coerce_tag(str(tag)) for tag in data.get("tags", []) if isinstance(tag, str)]
+    )
     if not tags:
         tags = [pos_val]
     gloss_primary = str(data.get("gloss_primary") or "").strip() or english_gloss
@@ -210,11 +263,29 @@ def enrich_lexeme_llm(
         "frequency_rank": data.get("frequency_rank"),
         "gender": data.get("gender"),
         "conjugation_class": data.get("conjugation_class"),
-        "morph_features": data.get("morph_features"),
+        "morph_features": _coerce_morph_features(data.get("morph_features")),
         "ipa": data.get("ipa"),
         "dictionary_notes": data.get("notes"),
     }
     return result, 0.9, False
+
+
+def _normalize_enrichment_result(raw: dict[str, Any]) -> dict[str, Any]:
+    notes = raw.get("dictionary_notes") or raw.get("notes")
+    return {
+        "lemma": raw.get("lemma"),
+        "gloss_primary": raw.get("gloss_primary"),
+        "glosses": raw.get("glosses"),
+        "pos": raw.get("pos"),
+        "tags": raw.get("tags"),
+        "cefr": raw.get("cefr"),
+        "frequency_rank": raw.get("frequency_rank"),
+        "gender": raw.get("gender"),
+        "conjugation_class": raw.get("conjugation_class"),
+        "morph_features": _coerce_morph_features(raw.get("morph_features")),
+        "ipa": raw.get("ipa"),
+        "dictionary_notes": notes,
+    }
 
 
 def apply_enrichment_to_lexeme(lexeme: Lexeme, result: dict[str, Any]) -> None:
@@ -223,21 +294,22 @@ def apply_enrichment_to_lexeme(lexeme: Lexeme, result: dict[str, Any]) -> None:
     if result.get("pos"):
         lexeme.pos = str(result["pos"])
     if result.get("tags"):
-        lexeme.tags = list(result["tags"])
+        lexeme.tags = _dedupe_tags(list(result["tags"]))
     if result.get("gloss_primary"):
         lexeme.gloss_primary = normalize_key_part(str(result["gloss_primary"]))
     if result.get("glosses"):
         lexeme.glosses = list(result["glosses"])
     for field in ("cefr", "gender", "conjugation_class", "ipa"):
-        if result.get(field):
+        if result.get(field) is not None:
             setattr(lexeme, field, result[field])
     if result.get("frequency_rank") is not None:
         lexeme.frequency_rank = result["frequency_rank"]
     if result.get("morph_features"):
         lexeme.morph_features = result["morph_features"]
-    if result.get("dictionary_notes"):
-        lexeme.dictionary_notes = str(result["dictionary_notes"])
-    if is_lexeme_complete(lexeme):
+    notes = result.get("dictionary_notes") or result.get("notes")
+    if notes:
+        lexeme.dictionary_notes = str(notes)
+    if has_minimum_lexeme_fields(lexeme):
         lexeme.enrichment_status = "complete"
         lexeme.enriched_at = datetime.utcnow()
     else:
@@ -253,10 +325,60 @@ def find_complete_lexeme_match(db: Session, lexeme: Lexeme) -> Lexeme | None:
             Lexeme.lemma == lexeme.lemma,
             Lexeme.pos == lexeme.pos,
             Lexeme.gloss_primary == lexeme.gloss_primary,
-            Lexeme.enrichment_status == "complete",
+            Lexeme.enrichment_status == "enriched",
             Lexeme.id != lexeme.id,
         )
     )
+
+
+def find_lexeme_with_sense_key(
+    db: Session,
+    *,
+    language: str,
+    lemma: str,
+    pos: str,
+    gloss_primary: str,
+    exclude_id: int | None = None,
+) -> Lexeme | None:
+    query = select(Lexeme).where(
+        Lexeme.language == language,
+        Lexeme.lemma == lemma,
+        Lexeme.pos == pos,
+        Lexeme.gloss_primary == gloss_primary,
+    )
+    if exclude_id is not None:
+        query = query.where(Lexeme.id != exclude_id)
+    return db.scalar(query)
+
+
+def merge_duplicate_lexeme_into(
+    db: Session,
+    duplicate: Lexeme,
+    canonical: Lexeme,
+) -> None:
+    """Point vocab links at the canonical lexeme and drop the empty duplicate."""
+    from app.services.lexeme_resolver import find_vocab_link
+    from app.services.vocab_mapper import sync_legacy_mirrors
+
+    vocabs = db.scalars(
+        select(Vocab).where(Vocab.lexeme_id == duplicate.id)
+    ).all()
+    for vocab in vocabs:
+        existing = find_vocab_link(db, vocab.workspace_id, canonical.id)
+        if existing is not None:
+            db.delete(vocab)
+        else:
+            vocab.lexeme_id = canonical.id
+            sync_legacy_mirrors(vocab, canonical)
+            db.add(vocab)
+    db.flush()
+    remaining = db.scalar(
+        select(func.count())
+        .select_from(Vocab)
+        .where(Vocab.lexeme_id == duplicate.id)
+    )
+    if not remaining:
+        db.delete(duplicate)
 
 
 def copy_lexeme_fields(target: Lexeme, source: Lexeme) -> None:
@@ -274,5 +396,11 @@ def copy_lexeme_fields(target: Lexeme, source: Lexeme) -> None:
     target.audio_url = source.audio_url
     target.image_url = source.image_url
     target.dictionary_notes = source.dictionary_notes
-    target.enrichment_status = "complete"
+    target.enrichment_status = "enriched"
     target.enriched_at = source.enriched_at or datetime.utcnow()
+
+
+def mark_lexeme_enriched(lexeme: Lexeme) -> None:
+    """Mark LLM enrichment as finished so sweepers and UI stop re-checking."""
+    lexeme.enrichment_status = "enriched"
+    lexeme.enriched_at = lexeme.enriched_at or datetime.utcnow()

@@ -19,6 +19,7 @@ from app.config import settings
 from app.db.database import get_db
 from app.db.models import Workspace
 from app.db.schemas import LanguageCode, VocabTag
+from app.services.enrichment import _coerce_morph_features, enrichment_json_schema
 
 router = APIRouter()
 
@@ -42,6 +43,11 @@ class VocabSuggestRequest(BaseModel):
 class VocabSuggestion(BaseModel):
     text: str = Field(min_length=1, max_length=255)
     pos: VocabTag = "other"
+    context: str | None = Field(
+        default=None,
+        max_length=120,
+        description="Very short English usage hint for this sense.",
+    )
 
 
 class VocabSuggestResponse(BaseModel):
@@ -80,20 +86,35 @@ class VocabEnrichResponse(BaseModel):
     mock: bool = False
 
 
-_DEV_LEXICON: dict[tuple[str, SuggestDirection], list[tuple[str, VocabTag]]] = {
-    ("to eat", "en-to-target"): [("comer", "verb")],
-    ("eat", "en-to-target"): [("comer", "verb")],
-    ("to play", "en-to-target"): [("jugar", "verb"), ("tocar", "verb")],
-    ("play", "en-to-target"): [("jugar", "verb"), ("tocar", "verb")],
-    ("comer", "target-to-en"): [("to eat", "verb")],
-    ("jugar", "target-to-en"): [("to play", "verb")],
-    ("tocar", "target-to-en"): [("to touch", "verb"), ("to play music", "verb")],
+_DEV_LEXICON: dict[
+    tuple[str, SuggestDirection],
+    list[tuple[str, VocabTag, str]],
+] = {
+    ("to eat", "en-to-target"): [("comer", "verb", "to consume food")],
+    ("eat", "en-to-target"): [("comer", "verb", "to consume food")],
+    ("to play", "en-to-target"): [
+        ("jugar", "verb", "to play a game or sport"),
+        ("tocar", "verb", "to play an instrument"),
+    ],
+    ("play", "en-to-target"): [
+        ("jugar", "verb", "to play a game or sport"),
+        ("tocar", "verb", "to play an instrument"),
+    ],
+    ("comer", "target-to-en"): [("to eat", "verb", "to consume food")],
+    ("jugar", "target-to-en"): [("to play", "verb", "to play a game or sport")],
+    ("tocar", "target-to-en"): [
+        ("to touch", "verb", "to make physical contact"),
+        ("to play music", "verb", "to play an instrument"),
+    ],
 }
 
 # Second-pass mock: input was in the wrong field; keyed by (text, attempted direction).
-_DEV_MISPLACED: dict[tuple[str, SuggestDirection], list[tuple[str, VocabTag]]] = {
-    ("hello", "target-to-en"): [("hola", "other")],
-    ("hola", "en-to-target"): [("hello", "other")],
+_DEV_MISPLACED: dict[
+    tuple[str, SuggestDirection],
+    list[tuple[str, VocabTag, str]],
+] = {
+    ("hello", "target-to-en"): [("hola", "other", "a greeting")],
+    ("hola", "en-to-target"): [("hello", "other", "a greeting")],
 }
 
 
@@ -129,7 +150,10 @@ def _mock_suggestions(
 ) -> VocabSuggestResponse:
     rows = _DEV_LEXICON.get((_normalize(input_text), direction), [])
     return VocabSuggestResponse(
-        candidates=[VocabSuggestion(text=text, pos=pos) for text, pos in rows],
+        candidates=[
+            VocabSuggestion(text=text, pos=pos, context=context)
+            for text, pos, context in rows
+        ],
         mock=True,
     )
 
@@ -141,7 +165,10 @@ def _mock_misplaced(
     rows = _DEV_MISPLACED.get((_normalize(input_text), direction), [])
     resolved = _opposite_direction(direction)
     return VocabSuggestResponse(
-        candidates=[VocabSuggestion(text=text, pos=pos) for text, pos in rows],
+        candidates=[
+            VocabSuggestion(text=text, pos=pos, context=context)
+            for text, pos, context in rows
+        ],
         mock=True,
         field_swap=bool(rows),
         resolved_direction=resolved if rows else None,
@@ -164,58 +191,13 @@ def _suggestion_schema() -> dict[str, Any]:
                             "type": "string",
                             "enum": ["noun", "verb", "adjective", "adverb", "preposition", "other"],
                         },
+                        "context": {"type": "string"},
                     },
-                    "required": ["text", "pos"],
+                    "required": ["text", "pos", "context"],
                 },
             }
         },
         "required": ["candidates"],
-    }
-
-
-def _enrichment_schema() -> dict[str, Any]:
-    return {
-        "type": "object",
-        "additionalProperties": False,
-        "properties": {
-            "surface_form": {"type": "string"},
-            "lemma": {"type": "string"},
-            "gloss_primary": {"type": "string"},
-            "glosses": {"type": "array", "items": {"type": "string"}},
-            "pos": {
-                "type": "string",
-                "enum": ["noun", "verb", "adjective", "adverb", "preposition", "other"],
-            },
-            "tags": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "enum": ["noun", "verb", "adjective", "adverb", "preposition", "other"],
-                },
-            },
-            "cefr": {"type": ["string", "null"]},
-            "frequency_rank": {"type": ["integer", "null"]},
-            "gender": {"type": ["string", "null"]},
-            "conjugation_class": {"type": ["string", "null"]},
-            "morph_features": {"type": ["object", "null"], "additionalProperties": True},
-            "ipa": {"type": ["string", "null"]},
-            "notes": {"type": ["string", "null"]},
-        },
-        "required": [
-            "surface_form",
-            "lemma",
-            "gloss_primary",
-            "glosses",
-            "pos",
-            "tags",
-            "cefr",
-            "frequency_rank",
-            "gender",
-            "conjugation_class",
-            "morph_features",
-            "ipa",
-            "notes",
-        ],
     }
 
 
@@ -259,10 +241,11 @@ def _parse_candidates(data: dict[str, Any]) -> list[VocabSuggestion]:
             continue
         text = str(item.get("text", "")).strip()
         pos = _coerce_tag(str(item.get("pos", "other")))
+        context = str(item.get("context", "")).strip() or None
         key = (_normalize(text), pos)
         if text and key not in seen:
             seen.add(key)
-            candidates.append(VocabSuggestion(text=text, pos=pos))
+            candidates.append(VocabSuggestion(text=text, pos=pos, context=context))
     return candidates
 
 
@@ -285,8 +268,9 @@ def _suggestion_prompt(payload: VocabSuggestRequest, language: LanguageCode) -> 
         "For broad English verbs, include only the common dictionary senses that match the exact "
         "input. For example, English 'to play' into Spanish should return jugar and tocar, "
         "not actuar unless the input explicitly says 'to play a role' or 'to act'.\n"
-        "Do not return definitions, examples, explanations, inflections, or full sentences.\n"
-        "Each candidate must contain only the translated lexical item and its part-of-speech tag."
+        "Do not return full sentences, long explanations, or inflection tables.\n"
+        "Each candidate must include the translated lexical item, its part-of-speech tag, "
+        "and a very short English context (under 12 words) explaining when that sense is used."
     )
 
 
@@ -309,8 +293,9 @@ def _misplaced_language_prompt(payload: VocabSuggestRequest, language: LanguageC
         "candidates only.\n"
         f"If it is not {expected}, return an empty candidates list.\n"
         "Return as many genuine candidates as the input has, and no filler.\n"
-        "Do not return definitions, examples, explanations, inflections, or full sentences.\n"
-        "Each candidate must contain only the translated lexical item and its part-of-speech tag.\n"
+        "Do not return full sentences, long explanations, or inflection tables.\n"
+        "Each candidate must include the translated lexical item, its part-of-speech tag, "
+        "and a very short English context (under 12 words) explaining when that sense is used.\n"
         f"Resolved lookup direction for this case: {opposite}."
     )
 
@@ -408,7 +393,7 @@ def enrich_vocab_suggestion(
     data = _call_openai_json(
         _enrichment_prompt(payload, language),
         "vocab_enrichment",
-        _enrichment_schema(),
+        enrichment_json_schema(),
     )
     if data is None:
         return _fallback_enrichment(payload, language)
@@ -432,7 +417,7 @@ def enrich_vocab_suggestion(
         frequency_rank=data.get("frequency_rank"),
         gender=data.get("gender"),
         conjugation_class=data.get("conjugation_class"),
-        morph_features=data.get("morph_features"),
+        morph_features=_coerce_morph_features(data.get("morph_features")),
         ipa=data.get("ipa"),
         notes=data.get("notes"),
     )

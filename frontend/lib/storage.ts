@@ -2,23 +2,32 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as api from "./api";
+import { pollVocabEnrichedOnce } from "./vocabPoll";
 import type {
   LanguageCode,
   MasteryOutcome,
   MasteryState,
   PracticeSettings,
   Profile,
+  SavedView,
+  SavedViewLayout,
   VocabItem,
   VocabTag,
   WordDisplayMode,
   Workspace,
 } from "./types";
+import type { VocabViewConfig } from "./vocab-view";
 
 const SETTINGS_KEY = "linguistos.settings.v3";
 const PROFILE_KEY = "linguistos.profile.v1";
 const ACTIVE_WORKSPACE_KEY = "linguistos.workspace.active.v1";
 const WORKSPACE_CHANGE_EVENT = "linguistos:workspace-change";
 const WORKSPACES_LIST_SYNC_EVENT = "linguistos:workspaces-list-sync";
+const VOCAB_ADD_EVENT = "linguistos:vocab-add";
+const VOCAB_UPDATE_EVENT = "linguistos:vocab-update";
+const VOCAB_REMOVE_EVENT = "linguistos:vocab-remove";
+const VOCAB_CLEAR_EVENT = "linguistos:vocab-clear";
+const SAVED_VIEWS_SYNC_EVENT = "linguistos:saved-views-sync";
 
 export type SidebarState = { width: number; collapsed: boolean };
 
@@ -84,6 +93,22 @@ function broadcastWorkspaceList(list: Workspace[]) {
   window.dispatchEvent(
     new CustomEvent(WORKSPACES_LIST_SYNC_EVENT, { detail: list }),
   );
+}
+
+function broadcastVocabAdd(item: VocabItem) {
+  window.dispatchEvent(new CustomEvent(VOCAB_ADD_EVENT, { detail: item }));
+}
+
+function broadcastVocabUpdate(item: VocabItem) {
+  window.dispatchEvent(new CustomEvent(VOCAB_UPDATE_EVENT, { detail: item }));
+}
+
+function broadcastVocabRemove(id: number) {
+  window.dispatchEvent(new CustomEvent(VOCAB_REMOVE_EVENT, { detail: id }));
+}
+
+function broadcastVocabClear() {
+  window.dispatchEvent(new CustomEvent(VOCAB_CLEAR_EVENT));
 }
 
 export function useProfile() {
@@ -317,16 +342,34 @@ export function useVocab() {
   } = useWorkspaces();
   const [vocab, setVocab] = useState<VocabItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const pollEnrichingItems = useCallback(
+    (items: VocabItem[]) => {
+      if (!activeWorkspace) return;
+      for (const item of items) {
+        if (!item.enriching) continue;
+        void pollVocabEnrichedOnce(item.id, activeWorkspace.language)
+          .then((enriched) => {
+            setVocab((prev) =>
+              prev.map((v) => (v.id === enriched.id ? enriched : v)),
+            );
+            broadcastVocabUpdate(enriched);
+          })
+          .catch(() => undefined);
+      }
+    },
+    [activeWorkspace],
+  );
 
   const refresh = useCallback(async () => {
     if (!activeWorkspaceId || !activeWorkspace) return;
     try {
       const items = await api.listVocab(activeWorkspaceId, activeWorkspace.language);
       setVocab(items);
+      pollEnrichingItems(items);
     } catch {
       setVocab([]);
     }
-  }, [activeWorkspaceId, activeWorkspace]);
+  }, [activeWorkspaceId, activeWorkspace, pollEnrichingItems]);
 
   useEffect(() => {
     if (!workspacesHydrated || !activeWorkspaceId) return;
@@ -343,6 +386,40 @@ export function useVocab() {
       mounted = false;
     };
   }, [refresh, workspacesHydrated, activeWorkspaceId]);
+
+  useEffect(() => {
+    function handleVocabAdd(event: Event) {
+      const item = (event as CustomEvent<VocabItem>).detail;
+      if (!item || item.workspaceId !== activeWorkspaceId) return;
+      setVocab((prev) => {
+        if (prev.some((v) => v.id === item.id)) return prev;
+        return [item, ...prev];
+      });
+    }
+    function handleVocabUpdate(event: Event) {
+      const item = (event as CustomEvent<VocabItem>).detail;
+      if (!item || item.workspaceId !== activeWorkspaceId) return;
+      setVocab((prev) => prev.map((v) => (v.id === item.id ? item : v)));
+    }
+    function handleVocabRemove(event: Event) {
+      const id = (event as CustomEvent<number>).detail;
+      if (typeof id !== "number") return;
+      setVocab((prev) => prev.filter((v) => v.id !== id));
+    }
+    function handleVocabClear() {
+      setVocab([]);
+    }
+    window.addEventListener(VOCAB_ADD_EVENT, handleVocabAdd);
+    window.addEventListener(VOCAB_UPDATE_EVENT, handleVocabUpdate);
+    window.addEventListener(VOCAB_REMOVE_EVENT, handleVocabRemove);
+    window.addEventListener(VOCAB_CLEAR_EVENT, handleVocabClear);
+    return () => {
+      window.removeEventListener(VOCAB_ADD_EVENT, handleVocabAdd);
+      window.removeEventListener(VOCAB_UPDATE_EVENT, handleVocabUpdate);
+      window.removeEventListener(VOCAB_REMOVE_EVENT, handleVocabRemove);
+      window.removeEventListener(VOCAB_CLEAR_EVENT, handleVocabClear);
+    };
+  }, [activeWorkspaceId]);
 
   const addVocab = useCallback(
     async (input: {
@@ -383,13 +460,14 @@ export function useVocab() {
         translation: input.translation,
       });
       setVocab((prev) => [item, ...prev]);
+      broadcastVocabAdd(item);
       if (item.enriching) {
-        void api
-          .pollVocabUntilEnriched(item.id, activeWorkspace.language)
+        void pollVocabEnrichedOnce(item.id, activeWorkspace.language)
           .then((enriched) => {
             setVocab((prev) =>
               prev.map((v) => (v.id === enriched.id ? enriched : v)),
             );
+            broadcastVocabUpdate(enriched);
           })
           .catch(() => undefined);
       }
@@ -401,6 +479,7 @@ export function useVocab() {
   const removeVocab = useCallback(async (id: number) => {
     await api.removeVocab(id);
     setVocab((prev) => prev.filter((v) => v.id !== id));
+    broadcastVocabRemove(id);
   }, []);
 
   const updateVocab = useCallback(
@@ -408,6 +487,7 @@ export function useVocab() {
       if (!activeWorkspace) throw new Error("No active workspace");
       const updated = await api.updateVocab(id, patch, activeWorkspace.language);
       setVocab((prev) => prev.map((v) => (v.id === id ? updated : v)));
+      broadcastVocabUpdate(updated);
       return updated;
     },
     [activeWorkspace],
@@ -426,6 +506,7 @@ export function useVocab() {
     if (!activeWorkspaceId) return;
     await api.clearVocab(activeWorkspaceId);
     setVocab([]);
+    broadcastVocabClear();
   }, [activeWorkspaceId]);
 
   /**
@@ -463,5 +544,120 @@ export function useVocab() {
     refresh,
     recordOutcome,
     activeWorkspace,
+  };
+}
+
+function broadcastSavedViews(list: SavedView[]) {
+  window.dispatchEvent(
+    new CustomEvent(SAVED_VIEWS_SYNC_EVENT, { detail: list }),
+  );
+}
+
+export function useSavedViews() {
+  const { activeWorkspaceId, hydrated: workspacesHydrated } = useWorkspaces();
+  const [views, setViews] = useState<SavedView[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const viewsRef = useRef<SavedView[]>([]);
+  viewsRef.current = views;
+
+  const refresh = useCallback(async () => {
+    if (!activeWorkspaceId) {
+      setViews([]);
+      return;
+    }
+    const items = await api.listSavedViews(activeWorkspaceId);
+    setViews(items);
+    broadcastSavedViews(items);
+  }, [activeWorkspaceId]);
+
+  useEffect(() => {
+    if (!workspacesHydrated) return;
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        if (activeWorkspaceId) await refresh();
+        else setViews([]);
+      } catch {
+        if (mounted) setViews([]);
+      } finally {
+        if (mounted) {
+          setHydrated(true);
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [activeWorkspaceId, workspacesHydrated, refresh]);
+
+  useEffect(() => {
+    function handleSync(event: Event) {
+      const list = (event as CustomEvent<SavedView[]>).detail;
+      if (Array.isArray(list)) setViews(list);
+    }
+    window.addEventListener(SAVED_VIEWS_SYNC_EVENT, handleSync);
+    return () => window.removeEventListener(SAVED_VIEWS_SYNC_EVENT, handleSync);
+  }, []);
+
+  const createView = useCallback(
+    async (input: {
+      name: string;
+      icon?: string | null;
+      layout?: SavedViewLayout;
+      config?: VocabViewConfig;
+      position?: number;
+    }) => {
+      if (!activeWorkspaceId) throw new Error("No active workspace");
+      const created = await api.createSavedView({
+        workspaceId: activeWorkspaceId,
+        ...input,
+      });
+      const next = [...viewsRef.current, created].sort(
+        (a, b) => a.position - b.position || a.id - b.id,
+      );
+      broadcastSavedViews(next);
+      return created;
+    },
+    [activeWorkspaceId],
+  );
+
+  const patchView = useCallback(
+    async (
+      viewId: number,
+      patch: {
+        name?: string;
+        icon?: string | null;
+        layout?: SavedViewLayout;
+        config?: VocabViewConfig;
+        position?: number;
+      },
+    ) => {
+      const updated = await api.updateSavedView(viewId, patch);
+      const next = viewsRef.current
+        .map((v) => (v.id === viewId ? updated : v))
+        .sort((a, b) => a.position - b.position || a.id - b.id);
+      broadcastSavedViews(next);
+      return updated;
+    },
+    [],
+  );
+
+  const removeView = useCallback(async (viewId: number) => {
+    await api.deleteSavedView(viewId);
+    const next = viewsRef.current.filter((v) => v.id !== viewId);
+    broadcastSavedViews(next);
+  }, []);
+
+  return {
+    views,
+    hydrated: hydrated && workspacesHydrated,
+    loading,
+    refresh,
+    createView,
+    patchView,
+    removeView,
   };
 }

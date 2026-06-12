@@ -1,8 +1,12 @@
+import { normalizeLexiconQuery } from "./lexicon-query";
+import type { VocabViewConfig } from "./vocab-view";
 import type {
   LanguageCode,
   LexiconConstraint,
   MasteryOutcome,
   MasteryState,
+  SavedView,
+  SavedViewLayout,
   SentenceCandidate,
   SentenceLink,
   SentenceLinkRole,
@@ -335,6 +339,7 @@ export type VocabSuggestDirection = "en-to-target" | "target-to-en";
 export interface VocabSuggestion {
   text: string;
   pos: VocabTag;
+  context?: string | null;
 }
 
 export interface VocabDraft {
@@ -732,4 +737,101 @@ export async function tokenAction(input: {
     occurrence_id: res.occurrence_id ?? undefined,
     vocab: res.vocab ? toVocab(res.vocab, input.language) : undefined,
   };
+}
+
+interface ApiSavedView {
+  id: number;
+  workspace_id: number;
+  name: string;
+  icon: string | null;
+  layout: SavedViewLayout;
+  config: VocabViewConfig;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+function toSavedView(item: ApiSavedView): SavedView {
+  return {
+    id: item.id,
+    workspaceId: item.workspace_id,
+    name: item.name,
+    icon: item.icon,
+    layout: item.layout,
+    config: {
+      ...item.config,
+      query: normalizeLexiconQuery(item.config.query),
+    },
+    position: item.position,
+    createdAt: Date.parse(item.created_at),
+    updatedAt: Date.parse(item.updated_at),
+  };
+}
+
+export async function listSavedViews(workspaceId: number): Promise<SavedView[]> {
+  const items = await apiFetch<ApiSavedView[]>(
+    `/api/views?workspace_id=${workspaceId}`,
+  );
+  return items.map(toSavedView);
+}
+
+export async function getSavedView(viewId: number): Promise<SavedView> {
+  const item = await apiFetch<ApiSavedView>(`/api/views/${viewId}`);
+  return toSavedView(item);
+}
+
+export async function createSavedView(input: {
+  workspaceId: number;
+  name: string;
+  icon?: string | null;
+  layout?: SavedViewLayout;
+  config?: VocabViewConfig;
+  position?: number;
+}): Promise<SavedView> {
+  const item = await apiFetch<ApiSavedView>("/api/views", {
+    method: "POST",
+    body: JSON.stringify({
+      workspace_id: input.workspaceId,
+      name: input.name,
+      icon: input.icon ?? null,
+      layout: input.layout ?? "table",
+      config: input.config,
+      position: input.position,
+    }),
+  });
+  return toSavedView(item);
+}
+
+export async function updateSavedView(
+  viewId: number,
+  patch: {
+    name?: string;
+    icon?: string | null;
+    layout?: SavedViewLayout;
+    config?: VocabViewConfig;
+    position?: number;
+  },
+): Promise<SavedView> {
+  const item = await apiFetch<ApiSavedView>(`/api/views/${viewId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      name: patch.name,
+      icon: patch.icon,
+      layout: patch.layout,
+      config: patch.config,
+      position: patch.position,
+    }),
+  });
+  return toSavedView(item);
+}
+
+export async function deleteSavedView(viewId: number): Promise<void> {
+  const res = await fetch(`${API_URL}/api/views/${viewId}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API ${res.status}: ${text || res.statusText}`);
+  }
 }

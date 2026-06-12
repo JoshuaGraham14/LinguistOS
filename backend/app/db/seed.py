@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from sqlalchemy import func, select
 
 from app.api._auth import LOCAL_USER_EMAIL
@@ -177,6 +179,8 @@ def ensure_default_workspace_and_vocab() -> None:
                 tags=tags,
                 glosses=[translation],
             )
+            lexeme.enrichment_status = "enriched"
+            lexeme.enriched_at = lexeme.enriched_at or datetime.utcnow()
             surface = _capitalize_first(word)
             gloss = translation
             db.add(

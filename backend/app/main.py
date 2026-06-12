@@ -8,6 +8,7 @@ from app.api import (
     practice,
     sentences,
     tokens,
+    views,
     vocab,
     vocab_suggest,
     voice,
@@ -23,6 +24,7 @@ from app.db.migrate import (
     ensure_enrichment_job_lexeme_column,
     ensure_lexeme_vocab_columns,
     ensure_vocab_canonical_columns,
+    migrate_complete_to_enriched,
     migrate_enrichment_jobs_for_lexeme,
 )
 from app.db.seed import (
@@ -46,6 +48,7 @@ app.include_router(vocab.router, prefix="/api", tags=["vocab"])
 app.include_router(enrichment.router, prefix="/api", tags=["enrichment"])
 app.include_router(vocab_suggest.router, prefix="/api", tags=["vocab-suggest"])
 app.include_router(workspaces.router, prefix="/api", tags=["workspaces"])
+app.include_router(views.router, prefix="/api", tags=["views"])
 app.include_router(mastery.router, prefix="/api", tags=["mastery"])
 app.include_router(sentences.router, prefix="/api", tags=["sentences"])
 app.include_router(tokens.router, prefix="/api", tags=["tokens"])
@@ -65,8 +68,10 @@ def _init_db() -> None:
     backfill_lexemes()
     drop_deprecated_vocab_columns(engine)
     migrate_enrichment_jobs_for_lexeme(engine)
-    run_startup_enrichment()
-    start_enrichment_scheduler()
+    migrate_complete_to_enriched(engine)
+    if not settings.linguistos_disable_enrichment:
+        run_startup_enrichment()
+        start_enrichment_scheduler()
 
 
 @app.get("/health")

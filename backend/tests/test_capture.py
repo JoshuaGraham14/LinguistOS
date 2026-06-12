@@ -30,6 +30,24 @@ def test_capture_canonical_only(client, workspace) -> None:
     assert body["mastery"] is None
 
 
+def test_capture_accepts_enriched_gender_values(client, workspace) -> None:
+    resp = client.post(
+        "/api/vocab",
+        json={
+            "workspace_id": workspace["id"],
+            "surface_form": "hielo",
+            "word": "hielo",
+            "gloss_primary": "ice",
+            "translation": "ice",
+            "tags": ["noun"],
+            "pos": "noun",
+            "gender": "masculine",
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["gender"] == "masculine"
+
+
 def test_capture_legacy_payload_still_works(client, workspace) -> None:
     resp = client.post(
         "/api/vocab",
@@ -86,7 +104,7 @@ def test_capture_canonical_with_optional_fields(client, workspace) -> None:
 def test_patch_keeps_legacy_and_canonical_in_sync(client, workspace) -> None:
     created = client.post(
         "/api/vocab",
-        json={"workspace_id": workspace["id"], "surface_form": "leche"},
+        json={"workspace_id": workspace["id"], "surface_form": "zaguate"},
     ).json()
     vocab_id = created["id"]
 

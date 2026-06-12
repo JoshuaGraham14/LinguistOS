@@ -14,16 +14,19 @@ from app.db.database import SessionLocal
 from app.db.models import EnrichmentJob, Lexeme, Vocab
 from app.services.enrichment import (
     apply_enrichment_to_lexeme,
-    copy_lexeme_fields,
     enrich_lexeme_llm,
     find_complete_lexeme_match,
-    is_lexeme_complete,
+    find_lexeme_with_sense_key,
+    mark_lexeme_enriched,
+    merge_duplicate_lexeme_into,
     missing_lexeme_fields,
+    needs_enrichment,
 )
 
 logger = logging.getLogger(__name__)
 
 _sweeper_thread: threading.Thread | None = None
+_startup_thread: threading.Thread | None = None
 
 
 def maybe_enqueue_enrichment(
@@ -33,7 +36,7 @@ def maybe_enqueue_enrichment(
     vocab_id: int | None = None,
 ) -> EnrichmentJob | None:
     lexeme = db.get(Lexeme, lexeme_id)
-    if lexeme is None or is_lexeme_complete(lexeme):
+    if lexeme is None or not needs_enrichment(lexeme):
         return None
 
     pending = db.scalar(
@@ -45,11 +48,12 @@ def maybe_enqueue_enrichment(
     if pending is not None:
         return pending
 
+    missing = missing_lexeme_fields(lexeme)
     job = EnrichmentJob(
         lexeme_id=lexeme_id,
         vocab_id=vocab_id,
         status="pending",
-        requested_fields=missing_lexeme_fields(lexeme),
+        requested_fields=missing,
     )
     db.add(job)
     db.flush()
@@ -68,7 +72,7 @@ def process_enrichment_job(db: Session, job_id: int) -> None:
         db.add(job)
         return
 
-    if is_lexeme_complete(lexeme):
+    if not needs_enrichment(lexeme):
         job.status = "done"
         job.completed_at = datetime.utcnow()
         db.add(job)
@@ -76,12 +80,11 @@ def process_enrichment_job(db: Session, job_id: int) -> None:
 
     cached = find_complete_lexeme_match(db, lexeme)
     if cached is not None and cached.id != lexeme.id:
-        copy_lexeme_fields(lexeme, cached)
+        merge_duplicate_lexeme_into(db, lexeme, cached)
         job.status = "done"
         job.result = {"source": "cache", "lexeme_id": cached.id}
         job.confidence = 1.0
         job.completed_at = datetime.utcnow()
-        db.add(lexeme)
         db.add(job)
         return
 
@@ -99,13 +102,26 @@ def process_enrichment_job(db: Session, job_id: int) -> None:
         pos=lexeme.pos,
     )
 
-    if confidence >= 0.85:
-        apply_enrichment_to_lexeme(lexeme, result)
+    apply_enrichment_to_lexeme(lexeme, result)
+    collision = find_lexeme_with_sense_key(
+        db,
+        language=lexeme.language,
+        lemma=lexeme.lemma,
+        pos=lexeme.pos,
+        gloss_primary=lexeme.gloss_primary,
+        exclude_id=lexeme.id,
+    )
+    if collision is not None:
+        merge_duplicate_lexeme_into(db, lexeme, collision)
         job.status = "done"
-    else:
-        job.status = "done"
-        apply_enrichment_to_lexeme(lexeme, result)
+        job.result = {"source": "dedupe", "lexeme_id": collision.id}
+        job.confidence = confidence
+        job.completed_at = datetime.utcnow()
+        db.add(job)
+        return
 
+    mark_lexeme_enriched(lexeme)
+    job.status = "done"
     job.result = result
     job.confidence = confidence
     job.completed_at = datetime.utcnow()
@@ -135,7 +151,7 @@ def sweep_incomplete_lexemes(limit: int = 50) -> int:
     with SessionLocal() as db:
         lexemes = db.scalars(
             select(Lexeme)
-            .where(Lexeme.enrichment_status != "complete")
+            .where(Lexeme.enrichment_status.in_(("pending", "complete")))
             .limit(limit)
         ).all()
         for lexeme in lexemes:
@@ -165,5 +181,21 @@ def start_enrichment_scheduler() -> None:
 
 
 def run_startup_enrichment() -> None:
-    sweep_incomplete_lexemes()
-    process_pending_jobs()
+    """Enqueue and process enrichment work without blocking API startup."""
+    global _startup_thread
+    if _startup_thread is not None and _startup_thread.is_alive():
+        return
+
+    def _run() -> None:
+        try:
+            sweep_incomplete_lexemes()
+            process_pending_jobs()
+        except Exception:
+            logger.exception("Startup enrichment failed")
+
+    _startup_thread = threading.Thread(
+        target=_run,
+        name="lexeme-startup-enrichment",
+        daemon=True,
+    )
+    _startup_thread.start()
