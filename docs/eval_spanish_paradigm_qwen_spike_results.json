@@ -1,0 +1,5221 @@
+{
+  "models": {
+    "qwen05b": "Qwen/Qwen2.5-0.5B-Instruct",
+    "qwen17b": "Qwen/Qwen3-1.7B",
+    "qwen4b": "Qwen/Qwen3-4B-Instruct-2507"
+  },
+  "temperature": 0.0,
+  "prompt_template": "{lemma}, {tense} tense.",
+  "verbs": [
+    "comer",
+    "hablar",
+    "tener",
+    "blandir",
+    "argüir"
+  ],
+  "tenses": [
+    "present",
+    "preterite",
+    "imperfect",
+    "future",
+    "conditional"
+  ],
+  "paradigms": {
+    "comer": {
+      "tier": "common_regular",
+      "tenses": {
+        "present": [
+          "como",
+          "comes",
+          "come",
+          "comemos",
+          "coméis",
+          "comen"
+        ],
+        "preterite": [
+          "comí",
+          "comiste",
+          "comió",
+          "comimos",
+          "comisteis",
+          "comieron"
+        ],
+        "imperfect": [
+          "comía",
+          "comías",
+          "comía",
+          "comíamos",
+          "comíais",
+          "comían"
+        ],
+        "future": [
+          "comeré",
+          "comerás",
+          "comerá",
+          "comeremos",
+          "comeréis",
+          "comerán"
+        ],
+        "conditional": [
+          "comería",
+          "comerías",
+          "comería",
+          "comeríamos",
+          "comeríais",
+          "comerían"
+        ]
+      }
+    },
+    "hablar": {
+      "tier": "common_regular",
+      "tenses": {
+        "present": [
+          "hablo",
+          "hablas",
+          "habla",
+          "hablamos",
+          "habláis",
+          "hablan"
+        ],
+        "preterite": [
+          "hablé",
+          "hablaste",
+          "habló",
+          "hablamos",
+          "hablasteis",
+          "hablaron"
+        ],
+        "imperfect": [
+          "hablaba",
+          "hablabas",
+          "hablaba",
+          "hablábamos",
+          "hablabais",
+          "hablaban"
+        ],
+        "future": [
+          "hablaré",
+          "hablarás",
+          "hablará",
+          "hablaremos",
+          "hablaréis",
+          "hablarán"
+        ],
+        "conditional": [
+          "hablaría",
+          "hablarías",
+          "hablaría",
+          "hablaríamos",
+          "hablaríais",
+          "hablarían"
+        ]
+      }
+    },
+    "tener": {
+      "tier": "common_irregular",
+      "tenses": {
+        "present": [
+          "tengo",
+          "tienes",
+          "tiene",
+          "tenemos",
+          "tenéis",
+          "tienen"
+        ],
+        "preterite": [
+          "tuve",
+          "tuviste",
+          "tuvo",
+          "tuvimos",
+          "tuvisteis",
+          "tuvieron"
+        ],
+        "imperfect": [
+          "tenía",
+          "tenías",
+          "tenía",
+          "teníamos",
+          "teníais",
+          "tenían"
+        ],
+        "future": [
+          "tendré",
+          "tendrás",
+          "tendrá",
+          "tendremos",
+          "tendréis",
+          "tendrán"
+        ],
+        "conditional": [
+          "tendría",
+          "tendrías",
+          "tendría",
+          "tendríamos",
+          "tendríais",
+          "tendrían"
+        ]
+      }
+    },
+    "blandir": {
+      "tier": "rare",
+      "tenses": {
+        "present": [
+          "blando",
+          "blandes",
+          "blande",
+          "blandimos",
+          "blandís",
+          "blanden"
+        ],
+        "preterite": [
+          "blandí",
+          "blandiste",
+          "blandió",
+          "blandimos",
+          "blandisteis",
+          "blandieron"
+        ],
+        "imperfect": [
+          "blandía",
+          "blandías",
+          "blandía",
+          "blandíamos",
+          "blandíais",
+          "blandían"
+        ],
+        "future": [
+          "blandiré",
+          "blandirás",
+          "blandirá",
+          "blandiremos",
+          "blandiréis",
+          "blandirán"
+        ],
+        "conditional": [
+          "blandiría",
+          "blandirías",
+          "blandiría",
+          "blandiríamos",
+          "blandiríais",
+          "blandirían"
+        ]
+      }
+    },
+    "argüir": {
+      "tier": "rare",
+      "tenses": {
+        "present": [
+          "arguyo",
+          "arguyes",
+          "arguye",
+          "arguimos",
+          "arguís",
+          "arguyen"
+        ],
+        "preterite": [
+          "argüí",
+          "argüiste",
+          "arguyó",
+          "arguimos",
+          "argüisteis",
+          "arguyeron"
+        ],
+        "imperfect": [
+          "argüía",
+          "argüías",
+          "argüía",
+          "arguíamos",
+          "argüíais",
+          "argüían"
+        ],
+        "future": [
+          "argüiré",
+          "argüirás",
+          "argüirá",
+          "argüiremos",
+          "argüiréis",
+          "argüirán"
+        ],
+        "conditional": [
+          "argüiría",
+          "argüirías",
+          "argüiría",
+          "argüiríamos",
+          "argüiríais",
+          "argüirían"
+        ]
+      }
+    }
+  },
+  "by_model": {
+    "qwen05b": {
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "elapsed_s": 187.1,
+      "results": [
+        {
+          "case": {
+            "id": "comer__present",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "como",
+              "comes",
+              "come",
+              "comemos",
+              "coméis",
+              "comen"
+            ],
+            "prompt": "comer, present tense."
+          },
+          "latency_s": 7.533,
+          "raw": "I'm here now.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "como",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "come",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comemos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "coméis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comen",
+              "found": false
+            }
+          ],
+          "missing": [
+            "como",
+            "comes",
+            "come",
+            "comemos",
+            "coméis",
+            "comen"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__preterite",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "comí",
+              "comiste",
+              "comió",
+              "comimos",
+              "comisteis",
+              "comieron"
+            ],
+            "prompt": "comer, preterite tense."
+          },
+          "latency_s": 17.968,
+          "raw": "The preterite tense is a grammatical system used to express completed actions or events that have already occurred in the past. It consists of three main parts: the subject (the person or thing performing the action), the verb (the word that describes the action), and the time (when the action took place).\n\nHere's an example sentence using the preterite tense:\n\n- The cat chased the mouse.\n- She finished her homework before bedtime.\n\nIn this sentence:\n- \"Chased\" is the past continuous tense of \"to chase,\" which expresses an ongoing action.\n- \"Finished\" is the past perfect tense of \"finish,\" which indicates that the action has been completed at some point in the past.\n- \"Before bedtime\" is the present participle of \"behave,\" which shows that the action was performed at a specific moment in the past.\n\nUnderstanding the preterite tense helps in expressing completed actions in a concise and clear manner, making it easier for others to understand your message or writing style.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comí",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comió",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "comisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comieron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "comí",
+            "comiste",
+            "comió",
+            "comimos",
+            "comisteis",
+            "comieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__imperfect",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "comía",
+              "comías",
+              "comía",
+              "comíamos",
+              "comíais",
+              "comían"
+            ],
+            "prompt": "comer, imperfect tense."
+          },
+          "latency_s": 4.396,
+          "raw": "Certainly! Here's an example of using the imperfect tense in English:\n\n\"I have been working hard on this project.\"\n\nIn this sentence:\n- \"have\" is used to indicate past actions.\n- \"been\" is used to show that the action was ongoing at some point before the present moment.\n\nThis structure emphasizes the continuous nature of the work being done and implies that the person has been actively engaged in the task throughout their existence.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comía",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comía",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comíamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "comíais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "comía",
+            "comías",
+            "comía",
+            "comíamos",
+            "comíais",
+            "comían"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__future",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "comeré",
+              "comerás",
+              "comerá",
+              "comeremos",
+              "comeréis",
+              "comerán"
+            ],
+            "prompt": "comer, future tense."
+          },
+          "latency_s": 6.055,
+          "raw": "In the future tense, \"come\" is used to express an action that will happen in the near future or at some unspecified time in the future. Here's how it can be used:\n\n1. Present Perfect Tense: \"I have come\"\n2. Future Simple Tense: \"I will come\"\n3. Future Continuous Tense: \"I am coming\"\n4. Future Perfect Tense: \"I will have come\"\n\nFor example:\n- I have come (present perfect)\n- I will come (future simple)\n- I am coming (future continuous)\n- I will have come (future perfect)",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comeré",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comerás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comerá",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comerán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "comeré",
+            "comerás",
+            "comerá",
+            "comeremos",
+            "comeréis",
+            "comerán"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__conditional",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "comería",
+              "comerías",
+              "comería",
+              "comeríamos",
+              "comeríais",
+              "comerían"
+            ],
+            "prompt": "comer, conditional tense."
+          },
+          "latency_s": 7.568,
+          "raw": "In English, the conditional tense is used to express hypothetical or uncertain situations. It involves using \"if\" or \"whether\" in conjunction with a verb to indicate that something will happen under certain conditions.\n\nFor example:\n- If it rains tomorrow, I'll go for a walk.\n- If you study hard, you'll pass the exam.\n- If he works late tonight, he won't be able to attend the party tonight.\n\nThe conditional tense can also be used to describe future events based on present circumstances:\n\n- If it's sunny today, we'll go for a picnic.\n- If she finishes her homework, she'll get an A grade.\n\nUnderstanding and using conditional tenses effectively helps in crafting more natural-sounding sentences and improving overall communication skills.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comería",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comerías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comería",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comerían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "comería",
+            "comerías",
+            "comería",
+            "comeríamos",
+            "comeríais",
+            "comerían"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__present",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "hablo",
+              "hablas",
+              "habla",
+              "hablamos",
+              "habláis",
+              "hablan"
+            ],
+            "prompt": "hablar, present tense."
+          },
+          "latency_s": 0.534,
+          "raw": "¡Hola! ¿Cómo puedo ayudarte hoy?",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablo",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablas",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "habla",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "habláis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablan",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablo",
+            "hablas",
+            "habla",
+            "hablamos",
+            "habláis",
+            "hablan"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__preterite",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "hablé",
+              "hablaste",
+              "habló",
+              "hablamos",
+              "hablasteis",
+              "hablaron"
+            ],
+            "prompt": "hablar, preterite tense."
+          },
+          "latency_s": 8.766,
+          "raw": "En español, el verbo \"hablar\" en el presente perfecto es \"hablaba\". Este verbo se usa para indicar que alguien habló o que habían hablado. Por ejemplo:\n\n- Hablaba mucho.\n- Hablaba con él.\n\nEste verbo cambia su forma de pronombre dependiendo del número y la persona del hablante. Si habla con alguien, se utiliza el singular form (hablaba). Si habla a todos los demás, se usa el plural form (hablaban).\n\nEs importante notar que este verbo también puede ser usado como un conjugado de otro verbo, como \"había\", \"había hablando\" o \"había hablado\". Sin embargo, en general, el verbo \"hablar\" en el presente perfecto es \"hablaba\".",
+          "forms_found": 1,
+          "forms_total": 6,
+          "form_recall": 0.1667,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablé",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablaste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "habló",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablasteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablé",
+            "hablaste",
+            "hablamos",
+            "hablasteis",
+            "hablaron"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__imperfect",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "hablaba",
+              "hablabas",
+              "hablaba",
+              "hablábamos",
+              "hablabais",
+              "hablaban"
+            ],
+            "prompt": "hablar, imperfect tense."
+          },
+          "latency_s": 4.29,
+          "raw": "Entendido! Aquí tienes un ejemplo de cómo hablar en el imperfect tense:\n\n\"Yo me gusta comer helado.\"\n\nEn este caso, \"me gusta\" es una acción pasiva que se realiza en el presente perfecto, y \"comer\" es la acción del verbo principal.\n\nSi quieres aprender más sobre el imperfect tense o cualquier otro tema, no dudes en preguntar. ¡Estoy aquí para ayudarte!",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaba",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablabas",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "hablaba",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablábamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablabais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaban",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablaba",
+            "hablabas",
+            "hablaba",
+            "hablábamos",
+            "hablabais",
+            "hablaban"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__future",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "hablaré",
+              "hablarás",
+              "hablará",
+              "hablaremos",
+              "hablaréis",
+              "hablarán"
+            ],
+            "prompt": "hablar, future tense."
+          },
+          "latency_s": 1.211,
+          "raw": "Claro, estaré encantado de conversar sobre futuro tenses! Como posso ajudá-lo hoje?",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaré",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablarás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "hablará",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablaré",
+            "hablarás",
+            "hablará",
+            "hablaremos",
+            "hablaréis",
+            "hablarán"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__conditional",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "hablaría",
+              "hablarías",
+              "hablaría",
+              "hablaríamos",
+              "hablaríais",
+              "hablarían"
+            ],
+            "prompt": "hablar, conditional tense."
+          },
+          "latency_s": 15.416,
+          "raw": "Claro, puedo hablar sobre el uso de la condición en el lenguaje. La condición es una forma de expresar un estado o situación que se puede cambiar dependiendo del contexto o de las circunstancias específicas.\n\nEn español, la condición se utiliza para indicar que algo debe suceder si ciertos eventos o condiciones son cumplidas. Por ejemplo:\n\n- Si tengo un libro y lo leí, entonces estoy leyendo.\n- Si tengo dinero suficiente, entonces puedo comprar un taxi.\n- Si estás dormido, entonces puedes ir al baño.\n\nLa condición también puede ser utilizada para describir cómo algo ocurrió o cómo se desarrolló. Por ejemplo:\n\n- El evento ocurrió cuando estaba en casa.\n- El evento ocurrió después de que había estado trabajando.\n\nEs importante notar que la condición no implica necesariamente que algo suceda, sino que permite que el resultado sea posible si los elementos mencionados están presentes. Además, la condición puede ser usada para crear situaciones ficticias o imaginarias, como en el caso de la frase \"Siempre me gusta comer pescado\", donde la condición es \"siempre\" y \"me gusta\".",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablarías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "hablaría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablaría",
+            "hablarías",
+            "hablaría",
+            "hablaríamos",
+            "hablaríais",
+            "hablarían"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__present",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "present",
+            "expected": [
+              "tengo",
+              "tienes",
+              "tiene",
+              "tenemos",
+              "tenéis",
+              "tienen"
+            ],
+            "prompt": "tener, present tense."
+          },
+          "latency_s": 11.783,
+          "raw": "Tener es un verbo en el presente del tiempo que se usa para indicar una acción o estado presente. Aquí tienes algunos ejemplos de cómo usarlo:\n\n1. Tengo un libro.\n2. Tengo café.\n3. Tengo un par de gafas.\n4. Tengo un teléfono móvil.\n5. Tengo un par de zapatos.\n\nEn cada caso, \"tengo\" es la forma principal del verbo y se utiliza con el objeto directo del verbo. También puede ser usado como complemento indirecto, como \"Tengo un libro\" (en lugar de \"Tengo un libro\"), pero siempre se usa \"Tengo\" en su forma principal.\n\nEs importante notar que el verbo \"tener\" también tiene otras formas verbales, como \"tiene\", \"tiendo\", \"tiende\" y \"tienden\". Sin embargo, este es el verbo más común y utilizado en el presente del tiempo.",
+          "forms_found": 3,
+          "forms_total": 6,
+          "form_recall": 0.5,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tengo",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tienes",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tiene",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "tenemos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "tenéis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tienen",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tenemos",
+            "tenéis",
+            "tienen"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__preterite",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "preterite",
+            "expected": [
+              "tuve",
+              "tuviste",
+              "tuvo",
+              "tuvimos",
+              "tuvisteis",
+              "tuvieron"
+            ],
+            "prompt": "tener, preterite tense."
+          },
+          "latency_s": 8.432,
+          "raw": "El verbo \"tener\" tiene dos formas principales en el presente perfecto y el pasado perfecto:\n\n1. Verbo en el presente perfecto:\n   - Tengo (el verbo)\n   - Tengo (los verdos)\n\n2. Verbo en el pasado perfecto:\n   - Había (el verbo)\n   - Había (los verdos)\n\nEstos verbos se usan para indicar que algo ha ocurrido o que alguien ha estado existiendo durante un período determinado. Por ejemplo:\n\n- Yo tengo una casa.\n- Ellos habían estado allí hace mucho tiempo.\n\nEn ambos casos, el verbo \"tener\" es usado con los verdos \"tiene\" y \"había\", respectivamente.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tuve",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "tuviste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "tuvo",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "tuvimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "tuvisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tuvieron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tuve",
+            "tuviste",
+            "tuvo",
+            "tuvimos",
+            "tuvisteis",
+            "tuvieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__imperfect",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "imperfect",
+            "expected": [
+              "tenía",
+              "tenías",
+              "tenía",
+              "teníamos",
+              "teníais",
+              "tenían"
+            ],
+            "prompt": "tener, imperfect tense."
+          },
+          "latency_s": 10.851,
+          "raw": "Tener es un verbo en el imperfect tense que se usa para indicar una acción o estado que se realizó hace algún tiempo, pero no ha terminado aún. Aquí tienes algunos ejemplos:\n\n1. Tengo un libro.\n2. Tengo un café.\n3. Tengo un par de gatos.\n\nEn estos casos, \"tengo\" es la forma del verbo \"tener\", y \"un\" es el sustantivo que indica el número y el tipo de objeto que se está hablando sobre.\n\nEl imperfect tense también puede ser usado para indicar acciones que se han realizado durante un período específico, aunque no haya terminado todavía. Por ejemplo:\n\n4. Tengo un libro antiguo.\n5. Tengo un café congelado.\n6. Tengo un par de gatos vivos.\n\nEste uso del imperfect tense es común en contextos históricos, culturales o sociales donde se menciona un evento que ya no se ha completado, pero aún se ha hecho.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tenía",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "tenías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "tenía",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "teníamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "teníais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tenían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tenía",
+            "tenías",
+            "tenía",
+            "teníamos",
+            "teníais",
+            "tenían"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__future",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "future",
+            "expected": [
+              "tendré",
+              "tendrás",
+              "tendrá",
+              "tendremos",
+              "tendréis",
+              "tendrán"
+            ],
+            "prompt": "tener, future tense."
+          },
+          "latency_s": 7.225,
+          "raw": "Tener es un verbo que se usa en el futuro simple o el futuro continuo. Aquí te explico cómo se usa:\n\n1. Futuro Simple:\n   - Tengo (el verbo \"tener\" en singular)\n   - Tienes (el verbo \"tener\" en plural)\n\n2. Futuro Continuo:\n   - Tendré (el verbo \"tener\" en singular)\n   - Tendré (el verbo \"tener\" en plural)\n\nEstos son los verbos básicos de tener y su uso en diferentes contextos. Si necesitas más ejemplos o información adicional sobre este tema, no dudes en preguntar.",
+          "forms_found": 1,
+          "forms_total": 6,
+          "form_recall": 0.1667,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tendré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tendrás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "tendrá",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "tendremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "tendréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tendrán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tendrás",
+            "tendrá",
+            "tendremos",
+            "tendréis",
+            "tendrán"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__conditional",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "conditional",
+            "expected": [
+              "tendría",
+              "tendrías",
+              "tendría",
+              "tendríamos",
+              "tendríais",
+              "tendrían"
+            ],
+            "prompt": "tener, conditional tense."
+          },
+          "latency_s": 13.212,
+          "raw": "Tener es un verbo que se usa en el condicional (condicional) y no en el subjuntivo (subjunctivo). El condicional es una forma de hablar o decir algo con la intención de hacerlo, pero sin necesariamente ser cierto.\n\nAquí tienes algunos ejemplos:\n\n1. Siempre te amo.\n   - Esta frase está usando el condicional para expresar una intención de amar a alguien, pero no es cierta.\n\n2. No puedo ir al gimnasio hoy.\n   - Esta frase también está usando el condicional para expresar una intención de no ir al gimnasio, pero no es cierta.\n\n3. Tengo que irme pronto.\n   - Esta frase usa el subjuntivo (subjunctivo), lo cual es incorrecto porque no se habla sobre si alguien puede irse o no.\n\n4. Siempre me siento bien.\n   - Esta frase usa el subjuntivo (subjunctivo), lo cual es correcto porque se habla sobre si alguien puede sentirse bien.\n\n5. No puedo creer que esté mal.\n   - Esta frase usa el subjuntivo (subjunctivo), lo cual es correcto porque se habla",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tendría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "tendrías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "tendría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "tendríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "tendríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tendrían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tendría",
+            "tendrías",
+            "tendría",
+            "tendríamos",
+            "tendríais",
+            "tendrían"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__present",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "present",
+            "expected": [
+              "blando",
+              "blandes",
+              "blande",
+              "blandimos",
+              "blandís",
+              "blanden"
+            ],
+            "prompt": "blandir, present tense."
+          },
+          "latency_s": 0.98,
+          "raw": "Certainly! Here's the sentence in the present tense:\n\n\"Yesterday, I bled.\"",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blando",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blande",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandís",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blanden",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blando",
+            "blandes",
+            "blande",
+            "blandimos",
+            "blandís",
+            "blanden"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__preterite",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "preterite",
+            "expected": [
+              "blandí",
+              "blandiste",
+              "blandió",
+              "blandimos",
+              "blandisteis",
+              "blandieron"
+            ],
+            "prompt": "blandir, preterite tense."
+          },
+          "latency_s": 7.681,
+          "raw": "Bien sûr, je peux vous aider avec cela. Le préterite est une tenseur qui se réfère à des événements ou des actions qui ont été effectués au cours de l'année précédente. Voici quelques exemples pour illustrer le préterite:\n\n1. Je suis allé au musée.\n2. Nous avons visité la ville.\n3. Ils ont commencé leur travail.\n\nCes phrases indiquent que les événements ont été réalisés dans l'année écoulée. Si vous avez besoin d'autres exemples ou d'aide avec ce sujet spécifique, n'hésitez pas à me demander!",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandí",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandió",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandieron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandí",
+            "blandiste",
+            "blandió",
+            "blandimos",
+            "blandisteis",
+            "blandieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__imperfect",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "imperfect",
+            "expected": [
+              "blandía",
+              "blandías",
+              "blandía",
+              "blandíamos",
+              "blandíais",
+              "blandían"
+            ],
+            "prompt": "blandir, imperfect tense."
+          },
+          "latency_s": 3.719,
+          "raw": "Certainly! Here's an example of using the imperfect tense in English:\n\n\"I have been studying for several hours.\"\n\nIn this sentence:\n- \"have been\" is used to indicate that the action has been ongoing or completed.\n- \"studying\" is the main verb and is in the past perfect tense.\n\nThis construction emphasizes the continuous nature of the action being performed over time.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandía",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandía",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandíamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandíais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandía",
+            "blandías",
+            "blandía",
+            "blandíamos",
+            "blandíais",
+            "blandían"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__future",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "future",
+            "expected": [
+              "blandiré",
+              "blandirás",
+              "blandirá",
+              "blandiremos",
+              "blandiréis",
+              "blandirán"
+            ],
+            "prompt": "blandir, future tense."
+          },
+          "latency_s": 1.96,
+          "raw": "In the future tense, \"blandir\" would be expressed as:\n\n\"Will blander\"\n\nThis is a common way to express the idea of something becoming less or less in the future.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandiré",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandirás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandirá",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandiremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandiréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandirán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandiré",
+            "blandirás",
+            "blandirá",
+            "blandiremos",
+            "blandiréis",
+            "blandirán"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__conditional",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "conditional",
+            "expected": [
+              "blandiría",
+              "blandirías",
+              "blandiría",
+              "blandiríamos",
+              "blandiríais",
+              "blandirían"
+            ],
+            "prompt": "blandir, conditional tense."
+          },
+          "latency_s": 12.279,
+          "raw": "In English, the conditional tense is used to express hypothetical or uncertain situations. It involves using \"if\" or \"whether\" in conjunction with a verb to indicate that something will happen under certain conditions.\n\nFor example:\n- If it rains tomorrow, we'll go for a walk.\n- If you study hard, you'll pass the exam.\n- If I have enough money, I'll buy a new car.\n\nThe conditional tense can be further divided into two types: simple and complex:\n\n1. **Simple Conditional Tense**: This uses only one conditional clause. For example:\n   - If it's raining, we'll stay inside.\n   - If he passes the exam, he'll get a prize.\n\n2. **Complex Conditional Tense**: This includes multiple clauses and requires more than one conditional clause. For example:\n   - If it's raining, we'll stay inside; if not, we'll go out.\n   - If he passes the exam, he'll get a prize; if not, he won't receive any.\n\nUnderstanding conditional tenses is crucial for writing clear and logical sentences in English. They help convey uncertainty and provide context about future events based on current circumstances.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandiría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandirías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandiría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandiríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandiríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandirían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandiría",
+            "blandirías",
+            "blandiría",
+            "blandiríamos",
+            "blandiríais",
+            "blandirían"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__present",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "present",
+            "expected": [
+              "arguyo",
+              "arguyes",
+              "arguye",
+              "arguimos",
+              "arguís",
+              "arguyen"
+            ],
+            "prompt": "argüir, present tense."
+          },
+          "latency_s": 0.886,
+          "raw": "\"Present tense is the most common and commonly used form of English grammar.\"",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "arguyo",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "arguyes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "arguye",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "arguís",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "arguyen",
+              "found": false
+            }
+          ],
+          "missing": [
+            "arguyo",
+            "arguyes",
+            "arguye",
+            "arguimos",
+            "arguís",
+            "arguyen"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__preterite",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "preterite",
+            "expected": [
+              "argüí",
+              "argüiste",
+              "arguyó",
+              "arguimos",
+              "argüisteis",
+              "arguyeron"
+            ],
+            "prompt": "argüir, preterite tense."
+          },
+          "latency_s": 3.772,
+          "raw": "Ou seja, \"I will go\" é um exemplo de preterite tense. \n\nInclui o verbo \"will\", que indica uma intenção futura e o gerundio \"go\", que representa o passado do verbo.\n\nEm outras palavras, \"I will go\" significa \"Eu vou\" ou \"Eu vou ir\".",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüí",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "arguyó",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "arguyeron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüí",
+            "argüiste",
+            "arguyó",
+            "arguimos",
+            "argüisteis",
+            "arguyeron"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__imperfect",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "imperfect",
+            "expected": [
+              "argüía",
+              "argüías",
+              "argüía",
+              "arguíamos",
+              "argüíais",
+              "argüían"
+            ],
+            "prompt": "argüir, imperfect tense."
+          },
+          "latency_s": 7.171,
+          "raw": "I understand you're asking about the use of imperfect tense in English. Imperfect tense is used to express actions that have not yet been completed or are currently being performed but will be completed at some point in the future.\n\nHere's an example sentence using imperfect tense:\n\n\"I am reading a book.\"\n\nIn this sentence:\n- \"am\" indicates the present perfect tense (the action has already begun)\n- \"reading\" is the main verb and it's in the past tense\n\nThe imperfect tense is commonly used for actions that are ongoing or planned but haven't happened yet. It's often used when describing activities that are happening now or when discussing plans that are still in progress.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüía",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "argüía",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguíamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüíais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "argüían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüía",
+            "argüías",
+            "argüía",
+            "arguíamos",
+            "argüíais",
+            "argüían"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__future",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "future",
+            "expected": [
+              "argüiré",
+              "argüirás",
+              "argüirá",
+              "argüiremos",
+              "argüiréis",
+              "argüirán"
+            ],
+            "prompt": "argüir, future tense."
+          },
+          "latency_s": 8.887,
+          "raw": "Aqui está uma versão em português do que você pediu:\n\n\"Argumentos futuros\"\n\nEsta frase é bastante amplamente usada em linguagem oral e escrita para expressar um pensamento ou ideia que se tornará verdade após algum tempo futuro. É uma forma de afirmar que algo será realizado ou acontecerá no futuro.\n\nExemplos comuns:\n\n1. \"Eu planejo visitar o país daqui a dois anos.\"\n2. \"Estou ansioso para ver o filme 'O Senhor dos Anéis' em breve.\"\n3. \"Vamos começar a trabalhar agora, já que estamos pronto para o próximo ano.\"\n\nEssas expressões são frequentemente utilizadas na comunicação verbal para criar uma atmosfera de expectativa e preparação para o futuro.",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüiré",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüirás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "argüirá",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "argüiremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüiréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "argüirán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüiré",
+            "argüirás",
+            "argüirá",
+            "argüiremos",
+            "argüiréis",
+            "argüirán"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__conditional",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "conditional",
+            "expected": [
+              "argüiría",
+              "argüirías",
+              "argüiría",
+              "argüiríamos",
+              "argüiríais",
+              "argüirían"
+            ],
+            "prompt": "argüir, conditional tense."
+          },
+          "latency_s": 14.475,
+          "raw": "Conditional tense is a type of verb form that expresses the possibility or likelihood of an action based on certain conditions or circumstances. It's often used to describe situations where something could happen but not necessarily will.\n\nHere’s how you might use conditional tense in different contexts:\n\n1. **Present Conditional (If-Then):**\n   - If it rains tomorrow, we will go for a walk.\n   - If I have enough money, I will buy a new car.\n\n2. **Past Conditional (Then-If):**\n   - He would come if he had time.\n   - She would study if she had more time.\n\n3. **Future Conditional (Then-Then):**\n   - They will visit us if they can.\n   - We will eat dinner if we have food available.\n\n4. **Conditional with Possessive Forms:**\n   - The dog belongs to my friend.\n   - Her hair is brown and curly.\n\n5. **Conditional with Adverbial Phrases:**\n   - She usually goes to work early.\n   - He always arrives late.\n\n6. **Conditional with Prepositional Phrases:**\n   - She arrived at the airport before the flight was supposed to start.\n   - He left his house after finishing his homework.\n\n7. **Conditional",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüiría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüirías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "argüiría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "argüiríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüiríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "argüirían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüiría",
+            "argüirías",
+            "argüiría",
+            "argüiríamos",
+            "argüiríais",
+            "argüirían"
+          ]
+        }
+      ]
+    },
+    "qwen17b": {
+      "model_id": "Qwen/Qwen3-1.7B",
+      "elapsed_s": 492.3,
+      "results": [
+        {
+          "case": {
+            "id": "comer__present",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "como",
+              "comes",
+              "come",
+              "comemos",
+              "coméis",
+              "comen"
+            ],
+            "prompt": "comer, present tense."
+          },
+          "latency_s": 36.246,
+          "raw": "In the **present tense**, the verb **\"comer\"** (to eat) is conjugated as follows for the first person singular:\n\n- **Yo** (I) → **comer**  \n- **Tú** (You) → **comer**  \n- **Él/Ella** (He/She) → **come**  \n- **Nosotros/Nosotras** (We) → **comemos**  \n- **Vosotros/Vosotras** (You) → **coméis**  \n- **Ellos/ellas** (They) → **comen**\n\n### Example sentence:\n- **Yo comí un pan.** (I ate a bread.)  \n- **Tú comes un café.** (You eat a coffee.)  \n- **Él come un helado.** (He eats an ice cream.)  \n- **Nosotros comemos un pastel.** (We eat a cake.)  \n- **Vosotros coméis un helado.** (You eat an ice cream.)  \n- **Ellos comen un café.** (They eat a coffee.)\n\nLet me know if you'd like the **past tense** or **future tense** as well!",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "como",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comes",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "come",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comemos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "coméis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comen",
+              "found": true
+            }
+          ],
+          "missing": [
+            "como"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__preterite",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "comí",
+              "comiste",
+              "comió",
+              "comimos",
+              "comisteis",
+              "comieron"
+            ],
+            "prompt": "comer, preterite tense."
+          },
+          "latency_s": 20.152,
+          "raw": "The **preterite tense** in Spanish is used to describe **actions that happened in the past** and are **completed**. It is often used for **simple actions** (not repeated) and **events that occurred at a specific time**.\n\n---\n\n### 🔹 **Preterite Tense in Spanish**\n\n**Preterite** is the **past tense** of **verbs** in Spanish. It is used for:\n\n- **Actions that happened in the past** (completed).\n- **Events that occurred at a specific time**.\n- **Simple actions** (not repeated).\n\n---\n\n### 🔹 **Examples of Preterite Tense**\n\n#### 1. **Verbs with **-ar** ending (e.g., comer, hablar, trabajar)\n\n- **comer** → **comí** (I ate)\n- **hablar** → **hablé** (I spoke)\n- **trabajar** → **trabajé** (I worked)\n\n#### 2. **Verbs with **-er** ending (e.g., comer, leer, jugar)**\n\n- **comer** → **comí** (I ate)\n- **leer** → **leí** (I read)\n- **jugar** →",
+          "forms_found": 1,
+          "forms_total": 6,
+          "form_recall": 0.1667,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comí",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comió",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "comisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comieron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "comiste",
+            "comió",
+            "comimos",
+            "comisteis",
+            "comieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__imperfect",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "comía",
+              "comías",
+              "comía",
+              "comíamos",
+              "comíais",
+              "comían"
+            ],
+            "prompt": "comer, imperfect tense."
+          },
+          "latency_s": 20.512,
+          "raw": "In English, the **imperfect tense** is used to describe **ongoing actions, habitual actions, or states in the past**. It is commonly used in **French** as well, but in English, the **imperfect tense** is not used in the same way as in French. However, if you're asking about the **imperfect tense in English**, here's a breakdown:\n\n---\n\n### 🔹 **Imperfect Tense in English (Past)**\n\nThe **imperfect tense** in English is used to describe:\n\n- **Ongoing actions in the past** (e.g., \"I was studying\").\n- **Habitual or repeated actions in the past** (e.g., \"She used to go to the park\").\n- **States or conditions in the past** (e.g., \"He was tired\").\n\n---\n\n### 🔹 **Imperfect Tense in English (Present)**\n\nIn English, the **imperfect tense** is not used in the present. Instead, we use the **present continuous** (e.g., \"I am studying\") or the **present perfect** (e.g., \"I have studied\").\n\n---\n\n### 🔹 **Imperfect Tense in French**\n\nIn French, the **imperfect tense** is used",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comía",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comía",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comíamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "comíais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "comía",
+            "comías",
+            "comía",
+            "comíamos",
+            "comíais",
+            "comían"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__future",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "comeré",
+              "comerás",
+              "comerá",
+              "comeremos",
+              "comeréis",
+              "comerán"
+            ],
+            "prompt": "comer, future tense."
+          },
+          "latency_s": 18.097,
+          "raw": "Sure! Here's the **future tense** of the verb **\"comer\"** (to eat):\n\n### **Future Tense of \"comer\":**\n\n- **I will eat** → **comeré**  \n- **You will eat** → **comerás**  \n- **He/She will eat** → **comerá**  \n- **We will eat** → **comeremos**  \n- **You all will eat** → **comeréis**  \n- **He/She/It will eat** → **comerá**  \n- **They will eat** → **comerán**\n\n---\n\n### Example sentences:\n\n- **I will eat breakfast tomorrow.**  \n  → **Comeré el desayuno mañana.**\n\n- **You will eat pizza for lunch.**  \n  → **Comerás pizza para el almuerzo.**\n\n- **They will eat in the restaurant.**  \n  → **Comerán en el restaurante.**\n\nLet me know if you'd like the **present tense** or **past tense** too!",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comeré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comerás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comerá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comerán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "comer__conditional",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "comería",
+              "comerías",
+              "comería",
+              "comeríamos",
+              "comeríais",
+              "comerían"
+            ],
+            "prompt": "comer, conditional tense."
+          },
+          "latency_s": 20.596,
+          "raw": "The verb **\"comer\"** (to eat) is a **regular verb** in Spanish, and its **conditional tense** is formed using the **conditional perfect** (pretérito pluscuamperfecto) or the **conditional simple** (pretérito imperfecto). Let's break it down:\n\n---\n\n### 1. **Conditional Simple (pretérito imperfecto)**\n\nThis is used to express **possibility, permission, or hypothetical situations** in the past.\n\n**Structure:**\n- **\"comer\" + \"haber\" + past participle** (in this case, \"comido\")\n\n**Examples:**\n\n- **Si comiera** (If I ate)\n- **Si comiera, yo estaría lleno** (If I ate, I would be full)\n- **Si comiera, no me gustaría** (If I ate, I wouldn't like it)\n\n---\n\n### 2. **Conditional Perfect (pretérito pluscuamperfecto)**\n\nThis is used to express **actions that happened before another action in the past**.\n\n**Structure:**\n- **\"haber\" + \"comido\"**\n\n**Examples:**\n\n- **Si hubiera comido** (If I had eaten",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comería",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comerías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comería",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comerían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "comería",
+            "comerías",
+            "comería",
+            "comeríamos",
+            "comeríais",
+            "comerían"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__present",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "hablo",
+              "hablas",
+              "habla",
+              "hablamos",
+              "habláis",
+              "hablan"
+            ],
+            "prompt": "hablar, present tense."
+          },
+          "latency_s": 20.318,
+          "raw": "Claro, aquí tienes un ejemplo de cómo hablar en el presente tense (presente simple) en español:\n\n---\n\n**Ejemplo 1:**\n\n- **Yo** como.  \n- **Tú** comes.  \n- **Él/Ella** come.  \n- **Nosotros/Nosotras** comemos.  \n- **Ellos/Ellas** comen.\n\n---\n\n**Ejemplo 2:**\n\n- **Yo** trabajo.  \n- **Tú** trabajas.  \n- **Él/Ella** trabaja.  \n- **Nosotros/Nosotras** trabajamos.  \n- **Ellos/Ellas** trabajan.\n\n---\n\n**Ejemplo 3:**\n\n- **Yo** juego.  \n- **Tú** juegas.  \n- **Él/Ella** juega.  \n- **Nosotros/Nosotras** jugamos.  \n- **Ellos/Ellas** juegan.\n\n---\n\nSi quieres un ejemplo con verbos que cambian según el sujeto, por ejemplo **\"ir\"**, aquí tienes:\n\n- **Yo** voy.  \n- **Tú** vas.  \n- **Él/Ella** va.  \n- **Nosotros",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablo",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablas",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "habla",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "habláis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablan",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablo",
+            "hablas",
+            "habla",
+            "hablamos",
+            "habláis",
+            "hablan"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__preterite",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "hablé",
+              "hablaste",
+              "habló",
+              "hablamos",
+              "hablasteis",
+              "hablaron"
+            ],
+            "prompt": "hablar, preterite tense."
+          },
+          "latency_s": 19.208,
+          "raw": "Claro, puedo ayudarte a entender el **pretérito** (pretérito simple y pretérito compuesto) en español. El **pretérito** es el tiempo de **ocurrimiento** (lo que sucedió), y se usa para describir acciones que **sucedieron en el pasado**.\n\n---\n\n### 🔹 **Pretérito simple (pretérito indefinido)**\n\nEs el tiempo de **ocurrimiento** y se usa para acciones que **sucedieron en el pasado** y que **no están relacionadas con un evento específico**.\n\n**Ejemplos:**\n\n- **Hablé** (yo hablé)  \n- **Escribí** (yo escribí)  \n- **Lloré** (yo lloré)  \n- **Comí** (yo comí)\n\n**Uso:**  \nSe usa para acciones que **sucedieron en el pasado** y que **no están relacionadas con un evento específico**.\n\n---\n\n### 🔹 **Pretérito compuesto (pretérito perfecto)**\n\nEs el tiempo de **ocurrimiento** y se usa para acciones que **sucedieron en el pasado** y",
+          "forms_found": 1,
+          "forms_total": 6,
+          "form_recall": 0.1667,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablé",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablaste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "habló",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablasteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablaste",
+            "habló",
+            "hablamos",
+            "hablasteis",
+            "hablaron"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__imperfect",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "hablaba",
+              "hablabas",
+              "hablaba",
+              "hablábamos",
+              "hablabais",
+              "hablaban"
+            ],
+            "prompt": "hablar, imperfect tense."
+          },
+          "latency_s": 18.847,
+          "raw": "¡Claro! El **imperfecto** es un tiempo del verbo que se usa para describir acciones pasadas, estados en el pasado, o situaciones que se estaban ocurriendo en el pasado. Es muy común en español para hablar de lo que se estaba haciendo, lo que se sentía, lo que se estaba pensando, o lo que se estaba experimentando en un momento específico del pasado.\n\n### Ejemplos de uso del imperfecto:\n\n#### 1. **Hablar de acciones pasadas:**\n- **Ella **hablaba** de su vida en la universidad.**  \n  (Ella estaba hablando de su vida en la universidad.)\n\n- **Él **comía** un café en la cafetería.**  \n  (Él estaba comiendo un café en la cafetería.)\n\n#### 2. **Hablar de estados o sentimientos:**\n- **Ella **estaba triste** porque no podía ver a su madre.**  \n  (Ella estaba triste porque no podía ver a su madre.)\n\n- **Él **sentía** miedo** cuando llegaba a la escuela.**  \n  (Él sentía miedo",
+          "forms_found": 2,
+          "forms_total": 6,
+          "form_recall": 0.3333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaba",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablabas",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "hablaba",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablábamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablabais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaban",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablabas",
+            "hablábamos",
+            "hablabais",
+            "hablaban"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__future",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "hablaré",
+              "hablarás",
+              "hablará",
+              "hablaremos",
+              "hablaréis",
+              "hablarán"
+            ],
+            "prompt": "hablar, future tense."
+          },
+          "latency_s": 19.379,
+          "raw": "¡Claro! Aquí tienes un ejemplo de cómo hablar en el **pretérito** (pretérito indefinido) y el **pretérito perfecto** (pretérito perfecto), que son dos formas del **pretérito** en español, y que se usan para expresar acciones pasadas.\n\n---\n\n### 1. **Pretérito indefinido (hablar)**\n\nSe usa para hablar de acciones que **ocurrieron en el pasado** y que **son comunes o frecuentes**.\n\n**Ejemplo:**\n- Yo **hablé** con él.  \n- Ella **habló** en la clase.  \n- Ellos **hablaron** en la reunión.\n\n---\n\n### 2. **Pretérito perfecto (pretérito perfecto)**\n\nSe usa para hablar de acciones que **ocurrieron en el pasado** y que **son más específicas o particulares**.\n\n**Ejemplo:**\n- Yo **he hablado** con él.  \n- Ella **ha hablado** en la clase.  \n- Ellos **han hablado** en la reunión.\n\n---\n\n### 3. **Preté",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaré",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablarás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "hablará",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablaré",
+            "hablarás",
+            "hablará",
+            "hablaremos",
+            "hablaréis",
+            "hablarán"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__conditional",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "hablaría",
+              "hablarías",
+              "hablaría",
+              "hablaríamos",
+              "hablaríais",
+              "hablarían"
+            ],
+            "prompt": "hablar, conditional tense."
+          },
+          "latency_s": 19.154,
+          "raw": "¡Claro! Vamos a hablar sobre **el condicional del verbo en español**. El condicional es un tiempo verbal que se usa para expresar **haber hecho algo en un futuro o en un caso hipotético**.\n\n---\n\n### ✅ **¿Qué es el condicional?**\n\nEl **condicional** es un tiempo verbal que se usa para expresar:\n\n- **Hacer algo en el futuro** (por ejemplo: *Voy a comer un desayuno*).\n- **Hacer algo en un caso hipotético o improbable** (por ejemplo: *Si llueve, llevaré un par de sombreros*).\n\n---\n\n### 📌 **Estructura del condicional**\n\nEl condicional se forma con el **verbo en infinitivo** y se le añade **\"ir\"** o **\"ir a\"** al final, seguido de **\"a\"**.\n\n#### 1. **Verbo en infinitivo** + **\"ir\"** + **\"a\"**\n\n- **Voy** + **\"a\"** → **Voy a**\n- **Comer** + **\"ir\"** + **\"a\"** → **Comer a**",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "hablarías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "hablaría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "hablaría",
+            "hablarías",
+            "hablaría",
+            "hablaríamos",
+            "hablaríais",
+            "hablarían"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__present",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "present",
+            "expected": [
+              "tengo",
+              "tienes",
+              "tiene",
+              "tenemos",
+              "tenéis",
+              "tienen"
+            ],
+            "prompt": "tener, present tense."
+          },
+          "latency_s": 7.846,
+          "raw": "Sure! Here's the **present tense** of the verb **\"tener\"** (to have) in Spanish:\n\n### **Tener** (to have)  \n- **yo** tengo  \n- **tú** tienes  \n- **eso** tiene  \n- **nosotros** tenemos  \n- **vos** tenéis  \n- **ustedes** tienen  \n- **ellos/ellas** tienen  \n\nLet me know if you'd like a conjugation chart or example sentences! 😊",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tengo",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tienes",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tiene",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "tenemos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "tenéis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "tienen",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "tener__preterite",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "preterite",
+            "expected": [
+              "tuve",
+              "tuviste",
+              "tuvo",
+              "tuvimos",
+              "tuvisteis",
+              "tuvieron"
+            ],
+            "prompt": "tener, preterite tense."
+          },
+          "latency_s": 19.061,
+          "raw": "The **preterite tense** (also known as the **simple past tense**) is used to describe **actions that happened in the past** and were **completed**. It is commonly used in Spanish for **events that occurred at a specific time in the past**, **general past actions**, or **events that happened in the past but are not repeated**.\n\n---\n\n### 🔹 **Preterite Tense in Spanish**\n\n#### 1. **Regular Verbs**\nMost regular verbs in Spanish follow the **-ar**, **-er**, and **-ir** conjugations.\n\n- **-ar**:\n  - **Yo** = **comí**\n  - **Tú** = **comiste**\n  - **Él/Ella** = **comió**\n  - **Nosotros** = **comimos**\n  - **Vosotros** = **comisteis**\n  - **Ellos/Ellas** = **comieron**\n\n- **-er**:\n  - **Yo** = **comí**\n  - **Tú** = **comiste**\n  - **Él/Ella** = **comió**\n  - **Nosotros** = **comimos**\n  - **Vosotros** = **",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tuve",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "tuviste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "tuvo",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "tuvimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "tuvisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tuvieron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tuve",
+            "tuviste",
+            "tuvo",
+            "tuvimos",
+            "tuvisteis",
+            "tuvieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__imperfect",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "imperfect",
+            "expected": [
+              "tenía",
+              "tenías",
+              "tenía",
+              "teníamos",
+              "teníais",
+              "tenían"
+            ],
+            "prompt": "tener, imperfect tense."
+          },
+          "latency_s": 19.171,
+          "raw": "Sure! The **imperfect tense** in Spanish is used to describe **continuous actions, habits, states, or ongoing situations** in the past. It is often used to describe what someone was doing, feeling, or thinking at a specific time in the past.\n\n### Example:  \n**Tener** (to have) in the **imperfect tense**:\n\n- **Tengo** (I have)  \n- **Tienes** (You have)  \n- **Tiene** (He/She/It has)  \n- **Teníamos** (We had)  \n- **Teníais** (You all had)  \n- **Tienen** (They have)  \n\n---\n\n### Example Sentences:\n\n1. **Yo tenía un libro en la mano.**  \n   *I had a book in my hand.*\n\n2. **Tú tenías un libro en la mano.**  \n   *You had a book in your hand.*\n\n3. **Él tenía un libro en la mano.**  \n   *He had a book in his hand.*\n\n4. **Nosotros teníamos un libro en la mano.**  \n   *We had a book in our hand.*\n\n5. **Vosotros teníais un libro en",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tenía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tenías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tenía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "teníamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "teníais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "tenían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tenían"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__future",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "future",
+            "expected": [
+              "tendré",
+              "tendrás",
+              "tendrá",
+              "tendremos",
+              "tendréis",
+              "tendrán"
+            ],
+            "prompt": "tener, future tense."
+          },
+          "latency_s": 19.058,
+          "raw": "Sure! Here's how to form the **future tense** of the verb **\"tener\"** (to have) in Spanish:\n\n---\n\n### **1. Present Tense:**\n- **tengo** (I have)  \n- **tienes** (you have)  \n- **tiene** (he/she/it has)  \n- **tenemos** (we have)  \n- **tenéis** (you all have)  \n- **tiene** (they have)\n\n---\n\n### **2. Future Tense:**\nThe future tense of \"tener\" is formed using the **future tense of the verb \"tener\"**.\n\n#### **Future Tense:**\n- **tendré** (I will have)  \n- **tendrás** (you will have)  \n- **tendrá** (he/she/it will have)  \n- **tendremos** (we will have)  \n- **tendréis** (you all will have)  \n- **tendrán** (they will have)\n\n---\n\n### **3. Example Sentences:**\n- **Tendré un libro.** (I will have a book.)  \n- **Tendrás un examen mañana.**",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tendré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tendrás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tendrá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "tendremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "tendréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "tendrán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "tener__conditional",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "conditional",
+            "expected": [
+              "tendría",
+              "tendrías",
+              "tendría",
+              "tendríamos",
+              "tendríais",
+              "tendrían"
+            ],
+            "prompt": "tener, conditional tense."
+          },
+          "latency_s": 19.479,
+          "raw": "The **conditional tense** in Spanish is used to express **conditional or hypothetical situations**. It is used to describe what would happen if a certain condition were met. There are two main types of conditional tenses in Spanish:\n\n---\n\n### **1. Conditional Perfect (Pretérito Perfeito Composto)**\nUsed to express **conditional or hypothetical situations in the past**.\n\n**Structure:**\n- **Si + past tense (imperfect or past perfect)**\n- **+ would + base verb (imperfect or past tense)**\n\n**Example:**\n- Si yo tuviera más tiempo, iría a la fiesta.\n- Si él hubiera ido a la fiesta, nos habría visto.\n\n---\n\n### **2. Conditional Simple (Pretérito Imperfecto)**\nUsed to express **conditional or hypothetical situations in the present or future**.\n\n**Structure:**\n- **Si + past tense (imperfect)**\n- **+ would + base verb (imperfect)**\n\n**Example:**\n- Si yo tuviera más tiempo, estudiaría más.\n- Si él fuera mayor, se habría casado ya.\n\n---\n\n### **Key Differences:**\n\n| Type of Conditional | Use | Example |\n|--------------------|",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tendría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "tendrías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "tendría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "tendríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "tendríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tendrían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "tendría",
+            "tendrías",
+            "tendría",
+            "tendríamos",
+            "tendríais",
+            "tendrían"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__present",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "present",
+            "expected": [
+              "blando",
+              "blandes",
+              "blande",
+              "blandimos",
+              "blandís",
+              "blanden"
+            ],
+            "prompt": "blandir, present tense."
+          },
+          "latency_s": 19.022,
+          "raw": "In the **present tense**, the verb **\"blandir\"** (which is a Spanish verb meaning \"to blandir\" or \"to brandish\") is used as follows:\n\n### Present Tense of \"blandir\" (Spanish):\n\n**Blandir** is a verb that is **irregular** in the present tense. Here's how it is conjugated in the present tense:\n\n| Subject | Present Tense |\n|---------|---------------|\n| I       | blandir       |\n| You     | blandas       |\n| He/She  | blande       |\n| We      | blandimos     |\n| You all | blandáis      |\n| They    | blanden       |\n\n### Example Sentences:\n\n- **I blandir** (I brandish)\n- **You blandas** (You brandish)\n- **He blande** (He brandishes)\n- **We blandimos** (We brandish)\n- **You all blandáis** (You all brandish)\n- **They blanden** (They brandish)\n\nLet me know if you'd like the **past tense** or **future tense** as well!",
+          "forms_found": 3,
+          "forms_total": 6,
+          "form_recall": 0.5,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blando",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blande",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandís",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blanden",
+              "found": true
+            }
+          ],
+          "missing": [
+            "blando",
+            "blandes",
+            "blandís"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__preterite",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "preterite",
+            "expected": [
+              "blandí",
+              "blandiste",
+              "blandió",
+              "blandimos",
+              "blandisteis",
+              "blandieron"
+            ],
+            "prompt": "blandir, preterite tense."
+          },
+          "latency_s": 20.482,
+          "raw": "**Blandir** is a verb in Spanish, and its **preterite tense** (past tense) is used to describe actions that occurred in the past. Let's look at the preterite form of **blandir**:\n\n### 1. **Blandir** (to make bland, to soften, to make less sharp)\n\n#### Preterite Tense:\n- **blandí** (past tense)\n\n---\n\n### 2. **Blandir** (to make bland, to soften, to make less sharp) – **third person singular** (he/she/it)\n\n#### Preterite Tense:\n- **blandió** (he/she/it made bland)\n\n---\n\n### 3. **Blandir** (to make bland, to soften, to make less sharp) – **first person singular** (I)\n\n#### Preterite Tense:\n- **blandí** (I made bland)\n\n---\n\n### 4. **Blandir** (to make bland, to soften, to make less sharp) – **second person singular** (you)\n\n#### Preterite Tense:\n- **blandíste** (you made bland)\n\n---\n\n### 5. **Blandir**",
+          "forms_found": 2,
+          "forms_total": 6,
+          "form_recall": 0.3333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandí",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "blandiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandió",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandieron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandiste",
+            "blandimos",
+            "blandisteis",
+            "blandieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__imperfect",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "imperfect",
+            "expected": [
+              "blandía",
+              "blandías",
+              "blandía",
+              "blandíamos",
+              "blandíais",
+              "blandían"
+            ],
+            "prompt": "blandir, imperfect tense."
+          },
+          "latency_s": 19.228,
+          "raw": "The **imperfect tense** in **Spanish** is used to describe **ongoing actions, habitual actions in the past, or background situations**. It is also used to describe **mental states** (like thinking, feeling, or desiring) in the past.\n\n### Example: **Blandir** (a name, so it's not a verb)\n\nIf you're asking about the **imperfect tense of \"blandir\"**, it's important to note that **\"blandir\"** is not a verb in the Spanish language. It is a **noun** (meaning \"to blander\" or \"to make more bland\" in some contexts, but it's not a standard verb).\n\nSo, if you're asking about the **imperfect tense of a verb**, you need to provide a verb first.\n\n---\n\n### Example: **If you meant \"blandir\" as a verb**\n\nLet's say you meant the verb **\"blandir\"** (which is not a standard verb in Spanish). In that case, you might be referring to the verb **\"blandear\"** (to make something bland), which is a verb.\n\n### Imperfect Tense of **\"blandear\"**:\n\n- **bland",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandía",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandía",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandíamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandíais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandía",
+            "blandías",
+            "blandía",
+            "blandíamos",
+            "blandíais",
+            "blandían"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__future",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "future",
+            "expected": [
+              "blandiré",
+              "blandirás",
+              "blandirá",
+              "blandiremos",
+              "blandiréis",
+              "blandirán"
+            ],
+            "prompt": "blandir, future tense."
+          },
+          "latency_s": 21.026,
+          "raw": "Sure! Here's a simple explanation of **\"blandir\"** in the **future tense**:\n\n---\n\n### **Blandir** (future tense)\n\n**Blandir** is a verb that means **\"to be bland\"** or **\"to be uninteresting\"** in English. In the **future tense**, it would be:\n\n**Blandir** (future tense) = **Blandir** (no change)\n\nWait — that doesn't make sense. Let me clarify.\n\n---\n\n### ✅ Correct usage of \"blandir\" in the future tense:\n\nIf you're using **\"blandir\"** as a verb meaning **\"to be bland\"**, then in the **future tense**, it would be:\n\n**Blandir** (future tense) = **Blandir** (no change)\n\nBecause the verb is not changing form in the future tense.\n\n---\n\n### 🧠 Example:\n\n- I **blandir** tomorrow.  \n  → I will be bland tomorrow.\n\n---\n\n### 🔍 Notes:\n\n- \"Blandir\" is not a standard English verb. It might be a misspelling or a less common word.\n- If you meant **\"to be bland\"**, the future tense is",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandiré",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandirás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandirá",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandiremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandiréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandirán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandiré",
+            "blandirás",
+            "blandirá",
+            "blandiremos",
+            "blandiréis",
+            "blandirán"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__conditional",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "conditional",
+            "expected": [
+              "blandiría",
+              "blandirías",
+              "blandiría",
+              "blandiríamos",
+              "blandiríais",
+              "blandirían"
+            ],
+            "prompt": "blandir, conditional tense."
+          },
+          "latency_s": 19.115,
+          "raw": "Blandir is not a standard English word, and it does not appear to be a common or recognized term in English grammar or linguistics. It might be a misspelling or a term from a specific context (e.g., a book, a movie, a game, or a specialized field).\n\nIf you're referring to **\"conditional tense\"**, that's a grammatical concept in English. Let me explain it briefly:\n\n---\n\n### **Conditional Tense in English Grammar**\n\nThe **conditional tense** is used to express **conditional or hypothetical situations**. There are **four main types** of conditional sentences in English:\n\n1. **Zero Conditional**  \n   - Used for **general truths** or **safe, predictable situations**.\n   - Structure: **If + present simple, then + present simple**.\n   - Example:  \n     - If it is cold, then the windows will freeze.  \n     - If you study, you will pass.\n\n2. **First Conditional**  \n   - Used for **real, possible future events**.\n   - Structure: **If + present simple, then + will + base verb**.\n   - Example:  \n     - If it rains, we will stay home.  \n     - If you study hard, you",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandiría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandirías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandiría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandiríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandiríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandirían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandiría",
+            "blandirías",
+            "blandiría",
+            "blandiríamos",
+            "blandiríais",
+            "blandirían"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__present",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "present",
+            "expected": [
+              "arguyo",
+              "arguyes",
+              "arguye",
+              "arguimos",
+              "arguís",
+              "arguyen"
+            ],
+            "prompt": "argüir, present tense."
+          },
+          "latency_s": 19.667,
+          "raw": "Claro! Aqui está uma explicação sobre **\"argüir\"** no **pretérito perfeito** (pretérito mais-que-perfeito) e **pretérito imperfeito**, que são os dois tempos mais comuns em português, especialmente no contexto de **\"argüir\"** (discutir, contestar, questionar).\n\n---\n\n### 1. **Argüir no Pretérito Perfeito (pretérito mais-que-perfeito)**\n\n**Forma:**  \n- **argüi** (feminino)  \n- **argui** (masculino)  \n- **arguí** (plural)\n\n**Exemplos:**\n\n- Ele **argui** que a empresa está falindo.  \n- Ela **argui** contra a decisão do conselho.  \n- Eles **arguíram** sobre o projeto.\n\n**Significado:**  \nO pretérito mais-que-perfeito indica uma ação que ocorreu **antes de outra ação no passado**.  \nExemplo:  \n- \"Eles **arguíram** sobre o projeto antes de tomar a decisão.\"  \n- \"Ela **argui** contra a decisão do",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "arguyo",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "arguyes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "arguye",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "arguís",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "arguyen",
+              "found": false
+            }
+          ],
+          "missing": [
+            "arguyo",
+            "arguyes",
+            "arguye",
+            "arguimos",
+            "arguís",
+            "arguyen"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__preterite",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "preterite",
+            "expected": [
+              "argüí",
+              "argüiste",
+              "arguyó",
+              "arguimos",
+              "argüisteis",
+              "arguyeron"
+            ],
+            "prompt": "argüir, preterite tense."
+          },
+          "latency_s": 19.192,
+          "raw": "Claro! El **pretérito** es el **tiempo del verbo en español** que se usa para describir acciones que **ocurrieron en el pasado** y que **son completas o finales**. Es el tiempo más común en el español y se usa para narrar eventos que tuvieron lugar en el pasado.\n\n---\n\n### ✅ **¿Qué es el pretérito?**\nEl **pretérito** es el tiempo del verbo que se usa para describir acciones que **ocurrieron en el pasado** y que **son completas o finales**. Es el tiempo más usado en el español.\n\n---\n\n### 📌 **Ejemplos de pretérito**\n\n- **Yo **comí** un pan.**  \n  (Yo comí un pan. El pan fue comido.)\n\n- **El niño **dijo** \"¡Hola!\"**  \n  (El niño dijo \"¡Hola!\". El niño habló.)\n\n- **El profesor **enseñó** la lección.**  \n  (El profesor enseñó la lección. La lección fue enseñada.)\n\n---\n\n### 📌 **Tipos de pretérito**\n\nEn el",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüí",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "arguyó",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "arguyeron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüí",
+            "argüiste",
+            "arguyó",
+            "arguimos",
+            "argüisteis",
+            "arguyeron"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__imperfect",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "imperfect",
+            "expected": [
+              "argüía",
+              "argüías",
+              "argüía",
+              "arguíamos",
+              "argüíais",
+              "argüían"
+            ],
+            "prompt": "argüir, imperfect tense."
+          },
+          "latency_s": 19.232,
+          "raw": "Claro! Vamos a hablar sobre el **pretérito imperfecto** (imperfecto) en español, que es un tiempo verbal muy común en la lengua española, especialmente para describir acciones que ocurren en el pasado, estados, emociones, o acciones que se repetían en el pasado.\n\n---\n\n## ✅ **¿Qué es el pretérito imperfecto?**\n\nEl **pretérito imperfecto** es un tiempo verbal que se usa para:\n\n- Describir **acciones pasadas** que se repetían o que estaban ocurriendo en el pasado.\n- Expresar **estados o emociones** en el pasado.\n- Describir **habilidades, gustos, costumbres, lugares, etc.** en el pasado.\n\n---\n\n## 📌 **Ejemplos de uso**\n\n### 1. **Acciones pasadas que se repetían:**\n- **Yo comía un café cada mañana.**\n- **Él trabajaba en la oficina todos los días.**\n- **Ella estudiaba mucho antes de la clase.**\n\n### 2. **Estados o emociones:**\n- **Ella estaba triste cuando vino a visitarla",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüía",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "argüía",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguíamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüíais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "argüían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüía",
+            "argüías",
+            "argüía",
+            "arguíamos",
+            "argüíais",
+            "argüían"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__future",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "future",
+            "expected": [
+              "argüiré",
+              "argüirás",
+              "argüirá",
+              "argüiremos",
+              "argüiréis",
+              "argüirán"
+            ],
+            "prompt": "argüir, future tense."
+          },
+          "latency_s": 19.006,
+          "raw": "Claro! Vamos a explorar el **pretérito** y el **futuro** en el **argüir** (es decir, **argumentar**), que es un verbo que se usa para **expresar una opinión o una idea**.\n\n---\n\n### 1. **Verbo: **argüir** (pretérito)**\n\n- **Significado**: **Argumentar** (expresar una opinión, defender una idea, etc.)\n- **Forma del pretérito**: **argüí**\n- **Ejemplo**:\n  - **Yo arguí** que no debíamos salir.  \n  - **Ellos argüieron** que el partido era injusto.\n\n---\n\n### 2. **Verbo: **argüir** (futuro)**\n\n- **Significado**: **Argumentar** en el futuro.\n- **Forma del futuro**: **arguiré**\n- **Ejemplo**:\n  - **Yo arguiré** que no debíamos salir.  \n  - **Ellos arguirán** que el partido es injusto.\n\n---\n\n### 3. **Conjugación del futuro**\n\n| Yo | Tú | Él/Ella |",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüiré",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüirás",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "argüirá",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "argüiremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüiréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "argüirán",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüiré",
+            "argüirás",
+            "argüirá",
+            "argüiremos",
+            "argüiréis",
+            "argüirán"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__conditional",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "conditional",
+            "expected": [
+              "argüiría",
+              "argüirías",
+              "argüiría",
+              "argüiríamos",
+              "argüiríais",
+              "argüirían"
+            ],
+            "prompt": "argüir, conditional tense."
+          },
+          "latency_s": 19.165,
+          "raw": "Certainly! Let's explore **\"argüir\"** (to argue) in the **conditional tense** in French, which is a common grammatical structure in French.\n\n---\n\n### 🔹 **1. Base Form: \"arguer\"**\n\n- **To argue** = **arguer**\n- **To argue (in the conditional tense)** = **arguer**\n\n---\n\n### 🔹 **2. Conditional Tense in French**\n\nIn French, the **conditional tense** is used to express **hypothetical or conditional situations**. The conditional tense of \"arguer\" is:\n\n- **arguer** (in the conditional tense) = **arguer**\n\n---\n\n### 🔹 **3. Conditional Tense Structure**\n\nThe **conditional tense** in French is formed using the **imparfait** or **passé composé** of the verb, depending on the context.\n\n#### **a. Conditional with the imparfait:**\n\n- **Je arguis** (I argue)\n- **Tu arguis** (You argue)\n- **Il/Elle arguait** (He/She argued)\n- **Nous arguons** (We argue)\n- **Vous arguiez** (You all argued)\n- **Ils/El",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüiría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüirías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "argüiría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "argüiríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüiríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "argüirían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüiría",
+            "argüirías",
+            "argüiría",
+            "argüiríamos",
+            "argüiríais",
+            "argüirían"
+          ]
+        }
+      ]
+    },
+    "qwen4b": {
+      "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+      "elapsed_s": 563.8,
+      "results": [
+        {
+          "case": {
+            "id": "comer__present",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "como",
+              "comes",
+              "come",
+              "comemos",
+              "coméis",
+              "comen"
+            ],
+            "prompt": "comer, present tense."
+          },
+          "latency_s": 72.267,
+          "raw": "In the present tense, \"comer\" (to eat) in Spanish is:\n\n**como** (I eat)  \n**comes** (you eat)  \n**come** (he/she/it eats)  \n**comemos** (we eat)  \n**comen** (they eat)  \n**comen** (you all eat – formal or plural)\n\nSo, the present tense conjugation of *comer* is:\n\n- yo como  \n- tú comes  \n- él/ella/usted come  \n- nosotros/nosotras comemos  \n- vosotros/vosotras coméis  \n- ellos/ellas/ustedes comen\n\nNote: \"comes\" is used for \"you\" (tú), and \"come\" for \"he/she/it\" or \"you\" (usted). In some regions (like Spain), \"coméis\" is used for \"you all\" (vosotros), while in Latin America, \"comen\" is used for \"you all\" (ustedes).\n\nLet me know if you'd like it in a specific region or with examples! 😊",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "como",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comes",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "come",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comemos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "coméis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comen",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "comer__preterite",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "comí",
+              "comiste",
+              "comió",
+              "comimos",
+              "comisteis",
+              "comieron"
+            ],
+            "prompt": "comer, preterite tense."
+          },
+          "latency_s": 12.626,
+          "raw": "The preterite tense of **\"comer\"** (to eat) in Spanish is **\"comió\"**.\n\n- **él/ella/usted** comió  \n- **nosotros/nosotras** comimos  \n- **vosotros/vosotras** comisteis  \n- **ellos/ellas/ustedes** comieron  \n\nSo, the simple past form for \"he/she/you (formal) ate\" is **comió**. ✅",
+          "forms_found": 4,
+          "forms_total": 6,
+          "form_recall": 0.6667,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comí",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "comió",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comisteis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comieron",
+              "found": true
+            }
+          ],
+          "missing": [
+            "comí",
+            "comiste"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__imperfect",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "comía",
+              "comías",
+              "comía",
+              "comíamos",
+              "comíais",
+              "comían"
+            ],
+            "prompt": "comer, imperfect tense."
+          },
+          "latency_s": 20.515,
+          "raw": "The imperfect tense of the verb **comer** (to eat) in Spanish is:\n\n**comía**\n\n### Explanation:\n- **comer** = to eat\n- **imperfect tense** is used to describe ongoing or habitual actions in the past, or to set the scene in a past narrative.\n\n### Conjugation (imperfect tense):\n- yo **comía**\n- tú **comías**\n- él/ella/usted **comía**\n- nosotros/nosotras **comíamos**\n- vosotros/vosotras **comíais**\n- ellos/ellas/ustedes **comían**\n\n### Example:\n- Cuando era niño, **comía** manzanas todos los días.  \n  (When I was a child, I used to eat apples every day.)\n\nLet me know if you'd like the present tense or other tenses as well! 😊",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comíamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comíais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "comer__future",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "comeré",
+              "comerás",
+              "comerá",
+              "comeremos",
+              "comeréis",
+              "comerán"
+            ],
+            "prompt": "comer, future tense."
+          },
+          "latency_s": 14.336,
+          "raw": "The future tense of \"comer\" (to eat) in Spanish is **comeré**.\n\n- **Yo comeré** = I will eat  \n- **Tú comerás** = You will eat  \n- **Él/ella/usted comerá** = He/She/You (formal) will eat  \n- **Nosotros/nosotras comeremos** = We will eat  \n- **Vosotros/vosotras comeréis** = You all will eat  \n- **Ellos/ellas/ustedes comerán** = They/You all (formal) will eat\n\nSo, the future tense form of \"comer\" is **comeré** (for \"I will eat\").",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comeré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comerás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comerá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comerán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "comer__conditional",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "comería",
+              "comerías",
+              "comería",
+              "comeríamos",
+              "comeríais",
+              "comerían"
+            ],
+            "prompt": "comer, conditional tense."
+          },
+          "latency_s": 21.458,
+          "raw": "In Spanish, the **conditional tense** of the verb *comer* (to eat) is formed as follows:\n\n### Conditional tense of *comer*:\n- **Yo comería**  \n- **Tú comerías**  \n- **Él/Ella/Usted comería**  \n- **Nosotros/Nosotras comeríamos**  \n- **Vosotros/Vosotras comeríais**  \n- **Ellos/Ellas/Ustedes comerían**\n\n### Notes:\n- The conditional tense is used to express **hypothetical situations**, **wishes**, **desires**, or **possibilities**.\n- It is often used in conditional sentences (e.g., *Si tuviera dinero, comería en un restaurante* – If I had money, I would eat at a restaurant).\n\n### Example:\n- **¿Qué comerías si tuvieras un día libre?**  \n  (What would you eat if you had a free day?)\n\nLet me know if you'd like examples in context or conjugations for other persons! 😊",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comería",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comerías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comería",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comerían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "hablar__present",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "hablo",
+              "hablas",
+              "habla",
+              "hablamos",
+              "habláis",
+              "hablan"
+            ],
+            "prompt": "hablar, present tense."
+          },
+          "latency_s": 13.357,
+          "raw": "El verbo **hablar** en presente de indicativo (present tense) se conjugan así en español:\n\n- **yo hablo**  \n- **tú hablas**  \n- **él/ella/usted habla**  \n- **nosotros/nosotras hablamos**  \n- **vosotros/vosotras habláis** (solo en España)  \n- **ellos/ellas/ustedes hablan**\n\n✅ Ejemplo:  \n*Yo hablo español todos los días.*  \n*Ellos hablan inglés en la escuela.*\n\n¿Quieres que lo convierta en una oración específica o en otro tipo de tiempo? 😊",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablo",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablas",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "habla",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "habláis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablan",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "hablar__preterite",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "hablé",
+              "hablaste",
+              "habló",
+              "hablamos",
+              "hablasteis",
+              "hablaron"
+            ],
+            "prompt": "hablar, preterite tense."
+          },
+          "latency_s": 17.168,
+          "raw": "Claro, aquí tienes la forma del verbo **hablar** en el **pretérito perfecto** (pretérito indefinido):\n\n| Persona           | Forma               |\n|-------------------|---------------------|\n| Yo                | hablé                |\n| Tú                | hablaste             |\n| Él/Ella/Usted     | habló                |\n| Nosotros          | hablamos             |\n| Vosotros          | habláis              |\n| Ellos/Ellas/Ustedes | hablaron           |\n\n✅ Ejemplo:  \n- Ayer **hablé** con mi amigo.  \n- Ella **habló** en el consejo.  \n- Nosotros **hablamos** por teléfono.\n\n¿Quieres que lo use en un contexto o que lo convierta en una oración completa? 😊",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablé",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablaste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "habló",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablasteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaron",
+              "found": true
+            }
+          ],
+          "missing": [
+            "hablasteis"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__imperfect",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "hablaba",
+              "hablabas",
+              "hablaba",
+              "hablábamos",
+              "hablabais",
+              "hablaban"
+            ],
+            "prompt": "hablar, imperfect tense."
+          },
+          "latency_s": 25.492,
+          "raw": "Claro, aquí tienes la forma del verbo **hablar** en el **pretérito imperfecto** (tense imperfecto) en español, que se usa para describir acciones que ocurrían en el pasado, pero de forma continua, habitual o en un contexto general.\n\n---\n\n### **Hablar – Imperfecto (pretérito imperfecto)**\n\n| Persona | Forma |\n|--------|-------|\n| Yo | hablaba |\n| Tú | hablabas |\n| Él/Ella/Usted | hablaba |\n| Nosotros | hablábamos |\n| Vosotros | hablabais |\n| Ellos/Ellas/Ustedes | hablaban |\n\n---\n\n### ✅ Ejemplos:\n\n- Cuando era niño, **hablaba** mucho con mis abuelos.  \n- Cada noche, **hablábamos** sobre nuestros sueños.  \n- En la escuela, **hablaba** con mis amigos en el patio.  \n- Ella **hablaba** español desde que tenía 5 años.  \n- Nosotros **hablábamos** mucho de la naturaleza.\n\n---\n\n💡 **Nota**: El imperfecto se usa para:\n- Acciones en",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaba",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablabas",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "hablaba",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablábamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablabais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaban",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "hablar__future",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "hablaré",
+              "hablarás",
+              "hablará",
+              "hablaremos",
+              "hablaréis",
+              "hablarán"
+            ],
+            "prompt": "hablar, future tense."
+          },
+          "latency_s": 17.215,
+          "raw": "El verbo **hablar** en futuro tense (futuro simple) se forma añadiendo los sufijos correspondientes al verbo **hablar** en la forma de infinitivo.\n\nLas formas en futuro tense son:\n\n- **Yo hablaré**  \n- **Tú hablarás**  \n- **Él/Ella/Usted hablará**  \n- **Nosotros/nosotras hablaremos**  \n- **Vosotros/vosotras hablaréis** (en España, menos común; en América, se usa \"hablarán\" en lugar de \"hablaréis\")  \n- **Ellos/ellas/ustedes hablarán**\n\n✅ Ejemplo:  \n*Mañana yo **hablaré** con mi amigo.*\n\n¿Quieres que te dé ejemplos en contexto o en otro tipo de futuro (como futuro progresivo)?",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablarás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "hablará",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "hablar__conditional",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "hablaría",
+              "hablarías",
+              "hablaría",
+              "hablaríamos",
+              "hablaríais",
+              "hablarían"
+            ],
+            "prompt": "hablar, conditional tense."
+          },
+          "latency_s": 24.325,
+          "raw": "Claro, aquí tienes una explicación del verbo **\"hablar\"** en el **tiempo condicional** en español:\n\n---\n\n### 🌟 Verbo \"hablar\" en el condicional\n\nEl verbo **\"hablar\"** (hablar = hablar) se usa para expresar acciones que **podrían ocurrir** en el futuro, bajo ciertas condiciones. Es un verbo que se forma con el **presente de indicativo** del verbo \"hablar\" y se añade el sufijo **-ía, -ías, -ía, -íamos, -íais, -ían**.\n\n---\n\n#### ✅ Forma del condicional de \"hablar\":\n\n| Persona | Condicional |\n|--------|-------------|\n| Yo     | hablaría   |\n| Tú     | hablarías  |\n| Él/Ella/Usted | hablaría |\n| Nosotros | hablaríamos |\n| Vosotros | hablaríais |\n| Ellos/Ellas/Ustedes | hablarían |\n\n---\n\n#### 📝 Ejemplos:\n\n1. **Si tuviera más tiempo, hablaría con mi madre.**  \n   *(Si tuviera más tiempo, hablar",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaría",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablarías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "hablaría",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "tener__present",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "present",
+            "expected": [
+              "tengo",
+              "tienes",
+              "tiene",
+              "tenemos",
+              "tenéis",
+              "tienen"
+            ],
+            "prompt": "tener, present tense."
+          },
+          "latency_s": 13.801,
+          "raw": "The present tense of **\"tener\"** (to have) in Spanish is:\n\n**Tengo** – I have  \n**Tienes** – You have  \n**Tiene** – He/She/It has  \n**Tenemos** – We have  \n**Tienen** – They have  \n\nExample sentences:  \n- Yo tengo un perro. (I have a dog.)  \n- Ella tiene 20 años. (She is 20 years old.)  \n- Nosotros tenemos un carro. (We have a car.)  \n\nLet me know if you'd like the conjugation in another tense or with a specific subject! 😊",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tengo",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tienes",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tiene",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "tenemos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "tenéis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "tienen",
+              "found": true
+            }
+          ],
+          "missing": [
+            "tenéis"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__preterite",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "preterite",
+            "expected": [
+              "tuve",
+              "tuviste",
+              "tuvo",
+              "tuvimos",
+              "tuvisteis",
+              "tuvieron"
+            ],
+            "prompt": "tener, preterite tense."
+          },
+          "latency_s": 19.717,
+          "raw": "The preterite tense of **\"tener\"** (to have) in Spanish is **\"tuvo\"** for the third person singular (he/she/it had).\n\nHere is the full preterite tense conjugation of **\"tener\"**:\n\n- **yo tuve** – I had  \n- **tú tuviste** – you had  \n- **él/ella/usted tuvo** – he/she/you formal had  \n- **nosotros/nosotras tuvimos** – we had  \n- **vosotros/vosotras tuvisteis** – you all had (Spain)  \n- **ellos/ellas/ustedes tuvieron** – they/you all (formal) had  \n\n✅ Example:  \n*Ella tuvo un problema ayer.*  \n(She had a problem yesterday.)\n\nLet me know if you'd like it in another tense or with examples! 😊",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tuve",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tuviste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tuvo",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "tuvimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "tuvisteis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "tuvieron",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "tener__imperfect",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "imperfect",
+            "expected": [
+              "tenía",
+              "tenías",
+              "tenía",
+              "teníamos",
+              "teníais",
+              "tenían"
+            ],
+            "prompt": "tener, imperfect tense."
+          },
+          "latency_s": 24.99,
+          "raw": "The verb **\"tener\"** in the **imperfect tense** in Spanish is used to describe ongoing, habitual, or background actions in the past. It is formed with the stem **\"tení-\"** and the imperfect endings.\n\n### Imperfect tense of *tener*:\n| Subject       | Form         |\n|---------------|--------------|\n| yo            | tenía        |\n| tú            | tenías       |\n| él/ella/usted | tenía        |\n| nosotros/nosotras | teníamos   |\n| vosotros/vosotras | teníais   |\n| ellos/ellas/ustedes | tenían   |\n\n### Examples:\n- **Yo tenía un perro.**  \n  I had a dog. (used to have)\n\n- **Ella tenían miedo de hablar en público.**  \n  She was afraid to speak in public. (was afraid)\n\n- **Nosotros teníamos que estudiar.**  \n  We had to study. (had to)\n\n- **Ellos tenían mucho dinero.**  \n  They had a lot of money. (had)\n\n> Note: In the imperfect, \"tener\" is used to express states, habits, or conditions in the past — not specific events.",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tenía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tenías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tenía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "teníamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "teníais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "tenían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "tener__future",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "future",
+            "expected": [
+              "tendré",
+              "tendrás",
+              "tendrá",
+              "tendremos",
+              "tendréis",
+              "tendrán"
+            ],
+            "prompt": "tener, future tense."
+          },
+          "latency_s": 22.228,
+          "raw": "The future tense of **\"tener\"** (to have) in Spanish is formed with the auxiliary verb **\"haber\"** plus the past participle **\"tenido\"**.\n\nSo, the future tense of *tener* is:\n\n👉 **Tendré** (I will have)  \n👉 **Tendrás** (You will have)  \n👉 **Tendrá** (He/She/It will have)  \n👉 **Tendremos** (We will have)  \n👉 **Tendréis** (You all will have)  \n👉 **Tendrán** (They will have)\n\n### Example:\n- **Yo tendré un coche.** → I will have a car.  \n- **Ellos tendrán un hijo.** → They will have a son.\n\n✅ Note: \"Tener\" is an irregular verb in the future tense, and its future form is **\"tendr-\"**.\n\nLet me know if you'd like the full conjugation or examples in context! 😊",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tendré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tendrás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tendrá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "tendremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "tendréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "tendrán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "tener__conditional",
+            "lemma": "tener",
+            "tier": "common_irregular",
+            "tense": "conditional",
+            "expected": [
+              "tendría",
+              "tendrías",
+              "tendría",
+              "tendríamos",
+              "tendríais",
+              "tendrían"
+            ],
+            "prompt": "tener, conditional tense."
+          },
+          "latency_s": 24.68,
+          "raw": "The verb **\"tener\"** in the **conditional tense** in Spanish is used to express hypothetical or desired actions in the future, often with a condition or a wish.\n\n### Conditional Tense of \"Tener\"\n\n| Subject | Conditional (Tener) |\n|--------|---------------------|\n| yo     | tendría             |\n| tú     | tendrías            |\n| él/ella/usted | tendría         |\n| nosotros/nosotras | tendríamos     |\n| vosotros/vosotras | tendríais     |\n| ellos/ellas/ustedes | tendrían     |\n\n---\n\n### Examples:\n\n1. **Yo tendría un coche si tuviera dinero.**  \n   *I would have a car if I had money.*\n\n2. **Ella tendría más tiempo si trabajara menos.**  \n   *She would have more time if she worked less.*\n\n3. **Nosotros tendríamos una casa en la playa.**  \n   *We would have a house on the beach.*\n\n4. **¿Tendrías un momento para hablar?**  \n   *Would you have a moment to talk?*\n\n5. **Ellos tendrían éxito si se esfuerzan.**  \n   *",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "tendría",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "tendrías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "tendría",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "tendríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "tendríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "tendrían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "blandir__present",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "present",
+            "expected": [
+              "blando",
+              "blandes",
+              "blande",
+              "blandimos",
+              "blandís",
+              "blanden"
+            ],
+            "prompt": "blandir, present tense."
+          },
+          "latency_s": 28.233,
+          "raw": "The verb **blandir** in the present tense in Spanish is:\n\n**blandez** (for *él/ella/usted* – third person singular)  \n**blandimos** (for *nosotros* – first person plural)  \n**blandís** (for *vosotros* – second person plural, in Spain)  \n**blanden** (for *ellos/ellas/ustedes* – third person plural)\n\nWait — correction: **\"blandir\"** is a verb that means \"to soothe,\" \"to pacify,\" or \"to stroke\" (as in a pet), and its conjugation in the present tense is:\n\n- **yo blandisco**  \n- **tú blandeces**  \n- **él/ella/usted blandece**  \n- **nosotros/nosotras blandecimos**  \n- **vosotros/vosotras blandecís** (in Spain)  \n- **ellos/ellas/ustedes blandecen**\n\n✅ Correct present tense conjugation of **blandir**:\n\n| Subject        | Conjugation       |\n|----------------|-------------------|\n| yo             | blandisco         |\n| tú             | blandeces         |\n|",
+          "forms_found": 3,
+          "forms_total": 6,
+          "form_recall": 0.5,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blando",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blande",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandís",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "blanden",
+              "found": true
+            }
+          ],
+          "missing": [
+            "blando",
+            "blandes",
+            "blande"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__preterite",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "preterite",
+            "expected": [
+              "blandí",
+              "blandiste",
+              "blandió",
+              "blandimos",
+              "blandisteis",
+              "blandieron"
+            ],
+            "prompt": "blandir, preterite tense."
+          },
+          "latency_s": 11.464,
+          "raw": "The verb **blandir** in the **preterite tense** in Spanish is:\n\n**blandió**\n\n### Example:\n- Ella **blandió** el pincel con cuidado.  \n  (She brushed the brush carefully.)\n\nNote: *Blandir* is a regular verb in the -ir group, and its preterite form follows the pattern:  \n**blandir → blandió**\n\nLet me know if you'd like the conjugation for other persons or tenses!",
+          "forms_found": 1,
+          "forms_total": 6,
+          "form_recall": 0.1667,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandí",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "blandiste",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "blandió",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandisteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "blandieron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "blandí",
+            "blandiste",
+            "blandimos",
+            "blandisteis",
+            "blandieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__imperfect",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "imperfect",
+            "expected": [
+              "blandía",
+              "blandías",
+              "blandía",
+              "blandíamos",
+              "blandíais",
+              "blandían"
+            ],
+            "prompt": "blandir, imperfect tense."
+          },
+          "latency_s": 24.247,
+          "raw": "The verb **blandir** in the **imperfect tense** in Spanish is:\n\n**blanqueaba** (for the first person singular: *yo blanqueaba*)\n\nHowever, it's important to clarify: **\"blandir\"** is a verb that means \"to soften,\" \"to make soft,\" or \"to caress\" (as in \"to gently touch\" or \"to soothe\"). It is not commonly used in modern Spanish, and its usage is quite rare or archaic.\n\nBut let's go through the correct conjugation of **blandir** in the **imperfect tense** (preterite of the imperfect):\n\n### Imperfect tense of *blandir*:\n| Subject        | Conjugation       |\n|----------------|-------------------|\n| yo             | blandía           |\n| tú             | blandías          |\n| él/ella/usted  | blandía           |\n| nosotros       | blandíamos        |\n| vosotros       | blandíais         |\n| ellos/ellas/ustedes | blandían     |\n\n✅ So, the correct form is **blandía** (not *blanqueaba* — that's a common mistake due to a homonym with *blanque",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "blandías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "blandía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandíamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandíais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "blandían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "blandir__future",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "future",
+            "expected": [
+              "blandiré",
+              "blandirás",
+              "blandirá",
+              "blandiremos",
+              "blandiréis",
+              "blandirán"
+            ],
+            "prompt": "blandir, future tense."
+          },
+          "latency_s": 15.819,
+          "raw": "The future tense of *blandir* (to soothe, to pacify) in Spanish is **blandirá**.\n\nExample:  \n*Ella blandirá al niño con sus palabras.*  \n(She will soothe the child with her words.)\n\nNote: *Blandir* is a regular -ir verb, so its future tense is formed by taking the future stem *blandi-* and adding *-rá* (for the 3rd person singular).  \n- Yo blandiré  \n- Tú blandirás  \n- Él/Ella/Ud. blandirá  \n- Nosotros blandiremos  \n- Vosotros blandiréis  \n- Ellos/Ellas/Uds. blandirán\n\nLet me know if you'd like the conjugation in full or in another tense!",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandiré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "blandirás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "blandirá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandiremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandiréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "blandirán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "blandir__conditional",
+            "lemma": "blandir",
+            "tier": "rare",
+            "tense": "conditional",
+            "expected": [
+              "blandiría",
+              "blandirías",
+              "blandiría",
+              "blandiríamos",
+              "blandiríais",
+              "blandirían"
+            ],
+            "prompt": "blandir, conditional tense."
+          },
+          "latency_s": 23.95,
+          "raw": "The verb **\"blandir\"** in Spanish means \"to soothe,\" \"to pacify,\" or \"to comfort.\" In the **conditional tense**, it expresses a hypothetical or desired action under certain conditions.\n\n### Conditional tense of *blandir*:\n\n| Person       | Conditional (present)         |\n|--------------|-------------------------------|\n| yo           | blandiría                    |\n| tú           | blandirías                  |\n| él/ella/usted | blandiría                  |\n| nosotros/nosotras | blandiríamos            |\n| vosotros/vosotras | blandiríais            |\n| ellos/ellas/ustedes | blandirían           |\n\n### Examples in context:\n- **Yo blandiría al niño si tuviera tiempo.**  \n  *I would soothe the child if I had time.*  \n- **¿Tú blandirías a tu hermano si estuviera triste?**  \n  *Would you comfort your brother if he were sad?*  \n- **El médico blandiría al paciente con palabras suaves.**  \n  *The doctor would soothe the patient with gentle words.*\n\n> Note: The conditional is formed by adding the appropriate conditional endings to the present",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "blandiría",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "blandirías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "blandiría",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "blandiríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "blandiríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "blandirían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "argüir__present",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "present",
+            "expected": [
+              "arguyo",
+              "arguyes",
+              "arguye",
+              "arguimos",
+              "arguís",
+              "arguyen"
+            ],
+            "prompt": "argüir, present tense."
+          },
+          "latency_s": 25.042,
+          "raw": "The present tense of **\"argüir\"** in Spanish is **\"argüe\"**.\n\n### Explanation:\n- \"Argüir\" means \"to argue\" or \"to contend\" (often in a legal or formal context).\n- In the present tense, the verb **\"argüir\"** is conjugated as:\n  - **yo argüe** (I argue)\n  - **tú argües** (you argue)\n  - **él/ella/usted argüe** (he/she/you formal argues)\n  - **nosotros/nosotras argüimos** (we argue)\n  - **vosotros/vosotras argüís** (you all argue – used in Spain)\n  - **ellos/ellas/ustedes argüen** (they/you all argue)\n\n✅ So, the correct present tense form for **\"argüir\"** is **\"argüe\"** (for the first person singular, \"I argue\").\n\n> Note: \"Argüir\" is a regular -ir verb, and its present tense follows the pattern:  \n> -ir verbs: **-o, -es, -e, -emos, -éis, -",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "arguyo",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "arguyes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "arguye",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "arguís",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "arguyen",
+              "found": false
+            }
+          ],
+          "missing": [
+            "arguyo",
+            "arguyes",
+            "arguye",
+            "arguimos",
+            "arguís",
+            "arguyen"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__preterite",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "preterite",
+            "expected": [
+              "argüí",
+              "argüiste",
+              "arguyó",
+              "arguimos",
+              "argüisteis",
+              "arguyeron"
+            ],
+            "prompt": "argüir, preterite tense."
+          },
+          "latency_s": 24.275,
+          "raw": "The verb **\"argüir\"** in the **preterite tense** in Spanish is:\n\n**argüí**\n\n### Explanation:\n- \"Argüir\" means \"to argue\" or \"to contend\" (often in a legal or formal context).\n- In the preterite tense, it follows the regular -ir verb pattern with the stem **argü-**.\n- The preterite endings for -ir verbs are:\n  - -é (yo)\n  - -iste (tú)\n  - -ió (él/ella/usted)\n  - -imos (nosotros)\n  - -isteis (vosotros)\n  - -ieron (ellos/ellas/ustedes)\n\nSo, the conjugations in the preterite are:\n\n| Subject        | Conjugation |\n|----------------|-------------|\n| yo             | argüí       |\n| tú             | argüiste    |\n| él/ella/usted  | argüió      |\n| nosotros       | argüimos    |\n| vosotros       | argüisteis  |\n| ellos/ellas/ustedes | argüieron |\n\n✅ Example:  \n*El abogado **argüió** que el contrato no era válido.*",
+          "forms_found": 3,
+          "forms_total": 6,
+          "form_recall": 0.5,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüí",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "argüiste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "arguyó",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüisteis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "arguyeron",
+              "found": false
+            }
+          ],
+          "missing": [
+            "arguyó",
+            "arguimos",
+            "arguyeron"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__imperfect",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "imperfect",
+            "expected": [
+              "argüía",
+              "argüías",
+              "argüía",
+              "arguíamos",
+              "argüíais",
+              "argüían"
+            ],
+            "prompt": "argüir, imperfect tense."
+          },
+          "latency_s": 24.046,
+          "raw": "The verb **\"argüir\"** in Spanish is used to mean \"to argue,\" \"to contend,\" or \"to assert\" (often in a formal or legal context). In the **imperfect tense**, it describes ongoing, habitual, or repeated actions in the past.\n\n### Imperfect tense of *argüir*:\n**Argüía** (yo)  \n**Argüías** (tú)  \n**Argüía** (él/ella/usted)  \n**Argüíamos** (nosotros)  \n**Argüíais** (vosotros)  \n**Argüían** (ellos/ellas/ustedes)\n\n---\n\n### Example sentences in the imperfect tense:\n\n1. **Cuando era niño, argüía mucho con mis padres.**  \n   *When I was a child, I often argued with my parents.*\n\n2. **Ella siempre argüía que no tenía tiempo para estudiar.**  \n   *She always argued that she didn’t have time to study.*\n\n3. **En la reunión, todos argüían sobre el presupuesto.**  \n   *At the meeting, everyone was arguing about the budget.*\n\n4. **Yo argüía con mi hermano",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "argüías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "argüía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "arguíamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüíais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "argüían",
+              "found": true
+            }
+          ],
+          "missing": [
+            "arguíamos"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__future",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "future",
+            "expected": [
+              "argüiré",
+              "argüirás",
+              "argüirá",
+              "argüiremos",
+              "argüiréis",
+              "argüirán"
+            ],
+            "prompt": "argüir, future tense."
+          },
+          "latency_s": 18.572,
+          "raw": "The future tense of **\"argüir\"** in Spanish is **\"argüiré\"**.\n\n### Explanation:\n- **\"Argüir\"** means \"to argue\" or \"to contend\" (often in a legal or formal context, like \"to raise a point\").\n- In the future tense, the verb **\"argüir\"** follows the regular -ir verb pattern.\n\n#### Future tense conjugation of *argüir*:\n- Yo **argüiré**\n- Tú **argüirás**\n- Él/Ella/Ud. **argüirá**\n- Nosotros **argüiremos**\n- Vosotros **argüiréis**\n- Ellos/Ellas/Uds. **argüirán**\n\n✅ So, the correct future tense form for \"I will argue\" is: **\"argüiré\"**.\n\nLet me know if you'd like the full conjugation or examples in context!",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüiré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "argüirás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "argüirá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "argüiremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüiréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "argüirán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "argüir__conditional",
+            "lemma": "argüir",
+            "tier": "rare",
+            "tense": "conditional",
+            "expected": [
+              "argüiría",
+              "argüirías",
+              "argüiría",
+              "argüiríamos",
+              "argüiríais",
+              "argüirían"
+            ],
+            "prompt": "argüir, conditional tense."
+          },
+          "latency_s": 23.97,
+          "raw": "The verb **\"argüir\"** in Spanish is a regular verb that belongs to the **-uir** conjugation. However, it's important to clarify that **\"argüir\"** is not a common or standard verb in modern Spanish. The correct and standard verb is **\"argumentar\"**, which means \"to argue\" or \"to present an argument.\"\n\nIt seems there may be a confusion or typo: **\"argüir\"** is an older or archaic form, and in modern usage, **\"argumentar\"** is the correct verb.\n\nLet’s clarify and address your request:\n\n---\n\n### ✅ Correct verb: **argumentar**  \n(To argue, to present an argument)\n\n#### Conditional tense (present conditional) of **argumentar**:\n\nThe conditional tense is used to express **hypothetical situations**, **wishes**, **desires**, or **possibilities**.\n\nHere is the **present conditional** of **argumentar**:\n\n| Subject        | Conditional (argumentar)       |\n|---------------|-------------------------------|\n| yo            | argumentaría                  |\n| tú            | argumentarías                |\n| él/ella/usted | argumentaría                  |\n| nosotros/nosotras | argumentaríamos",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "argüiría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "argüirías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "argüiría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "argüiríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "argüiríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "argüirían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "argüiría",
+            "argüirías",
+            "argüiría",
+            "argüiríamos",
+            "argüiríais",
+            "argüirían"
+          ]
+        }
+      ]
+    }
+  },
+  "summary": {
+    "per_model": {
+      "qwen05b": {
+        "overall": {
+          "cases": 25,
+          "forms_correct": 5,
+          "forms_total": 150,
+          "form_recall": 0.0333,
+          "wilson_95_ci": [
+            0.0143,
+            0.0757
+          ],
+          "mean_recall_per_case": 0.0333
+        },
+        "common_regular": {
+          "cases": 10,
+          "forms_correct": 1,
+          "forms_total": 60,
+          "form_recall": 0.0167,
+          "wilson_95_ci": [
+            0.0029,
+            0.0886
+          ],
+          "mean_recall_per_case": 0.0167
+        },
+        "common_irregular": {
+          "cases": 5,
+          "forms_correct": 4,
+          "forms_total": 30,
+          "form_recall": 0.1333,
+          "wilson_95_ci": [
+            0.0531,
+            0.2968
+          ],
+          "mean_recall_per_case": 0.1333
+        },
+        "rare": {
+          "cases": 10,
+          "forms_correct": 0,
+          "forms_total": 60,
+          "form_recall": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.0602
+          ],
+          "mean_recall_per_case": 0.0
+        },
+        "by_verb": {
+          "comer": {
+            "cases": 5,
+            "forms_correct": 0,
+            "forms_total": 30,
+            "form_recall": 0.0,
+            "wilson_95_ci": [
+              0.0,
+              0.1135
+            ],
+            "mean_recall_per_case": 0.0
+          },
+          "hablar": {
+            "cases": 5,
+            "forms_correct": 1,
+            "forms_total": 30,
+            "form_recall": 0.0333,
+            "wilson_95_ci": [
+              0.0059,
+              0.1667
+            ],
+            "mean_recall_per_case": 0.0333
+          },
+          "tener": {
+            "cases": 5,
+            "forms_correct": 4,
+            "forms_total": 30,
+            "form_recall": 0.1333,
+            "wilson_95_ci": [
+              0.0531,
+              0.2968
+            ],
+            "mean_recall_per_case": 0.1333
+          },
+          "blandir": {
+            "cases": 5,
+            "forms_correct": 0,
+            "forms_total": 30,
+            "form_recall": 0.0,
+            "wilson_95_ci": [
+              0.0,
+              0.1135
+            ],
+            "mean_recall_per_case": 0.0
+          },
+          "argüir": {
+            "cases": 5,
+            "forms_correct": 0,
+            "forms_total": 30,
+            "form_recall": 0.0,
+            "wilson_95_ci": [
+              0.0,
+              0.1135
+            ],
+            "mean_recall_per_case": 0.0
+          }
+        },
+        "by_tense": {
+          "present": {
+            "cases": 5,
+            "forms_correct": 3,
+            "forms_total": 30,
+            "form_recall": 0.1,
+            "wilson_95_ci": [
+              0.0346,
+              0.2562
+            ],
+            "mean_recall_per_case": 0.1
+          },
+          "preterite": {
+            "cases": 5,
+            "forms_correct": 1,
+            "forms_total": 30,
+            "form_recall": 0.0333,
+            "wilson_95_ci": [
+              0.0059,
+              0.1667
+            ],
+            "mean_recall_per_case": 0.0333
+          },
+          "imperfect": {
+            "cases": 5,
+            "forms_correct": 0,
+            "forms_total": 30,
+            "form_recall": 0.0,
+            "wilson_95_ci": [
+              0.0,
+              0.1135
+            ],
+            "mean_recall_per_case": 0.0
+          },
+          "future": {
+            "cases": 5,
+            "forms_correct": 1,
+            "forms_total": 30,
+            "form_recall": 0.0333,
+            "wilson_95_ci": [
+              0.0059,
+              0.1667
+            ],
+            "mean_recall_per_case": 0.0333
+          },
+          "conditional": {
+            "cases": 5,
+            "forms_correct": 0,
+            "forms_total": 30,
+            "form_recall": 0.0,
+            "wilson_95_ci": [
+              0.0,
+              0.1135
+            ],
+            "mean_recall_per_case": 0.0
+          }
+        }
+      },
+      "qwen17b": {
+        "overall": {
+          "cases": 25,
+          "forms_correct": 37,
+          "forms_total": 150,
+          "form_recall": 0.2467,
+          "wilson_95_ci": [
+            0.1846,
+            0.3214
+          ],
+          "mean_recall_per_case": 0.2467
+        },
+        "common_regular": {
+          "cases": 10,
+          "forms_correct": 15,
+          "forms_total": 60,
+          "form_recall": 0.25,
+          "wilson_95_ci": [
+            0.1578,
+            0.3723
+          ],
+          "mean_recall_per_case": 0.25
+        },
+        "common_irregular": {
+          "cases": 5,
+          "forms_correct": 17,
+          "forms_total": 30,
+          "form_recall": 0.5667,
+          "wilson_95_ci": [
+            0.392,
+            0.7262
+          ],
+          "mean_recall_per_case": 0.5667
+        },
+        "rare": {
+          "cases": 10,
+          "forms_correct": 5,
+          "forms_total": 60,
+          "form_recall": 0.0833,
+          "wilson_95_ci": [
+            0.0361,
+            0.1807
+          ],
+          "mean_recall_per_case": 0.0833
+        },
+        "by_verb": {
+          "comer": {
+            "cases": 5,
+            "forms_correct": 12,
+            "forms_total": 30,
+            "form_recall": 0.4,
+            "wilson_95_ci": [
+              0.2459,
+              0.5768
+            ],
+            "mean_recall_per_case": 0.4
+          },
+          "hablar": {
+            "cases": 5,
+            "forms_correct": 3,
+            "forms_total": 30,
+            "form_recall": 0.1,
+            "wilson_95_ci": [
+              0.0346,
+              0.2562
+            ],
+            "mean_recall_per_case": 0.1
+          },
+          "tener": {
+            "cases": 5,
+            "forms_correct": 17,
+            "forms_total": 30,
+            "form_recall": 0.5667,
+            "wilson_95_ci": [
+              0.392,
+              0.7262
+            ],
+            "mean_recall_per_case": 0.5667
+          },
+          "blandir": {
+            "cases": 5,
+            "forms_correct": 5,
+            "forms_total": 30,
+            "form_recall": 0.1667,
+            "wilson_95_ci": [
+              0.0734,
+              0.3356
+            ],
+            "mean_recall_per_case": 0.1667
+          },
+          "argüir": {
+            "cases": 5,
+            "forms_correct": 0,
+            "forms_total": 30,
+            "form_recall": 0.0,
+            "wilson_95_ci": [
+              0.0,
+              0.1135
+            ],
+            "mean_recall_per_case": 0.0
+          }
+        },
+        "by_tense": {
+          "present": {
+            "cases": 5,
+            "forms_correct": 14,
+            "forms_total": 30,
+            "form_recall": 0.4667,
+            "wilson_95_ci": [
+              0.3023,
+              0.6386
+            ],
+            "mean_recall_per_case": 0.4667
+          },
+          "preterite": {
+            "cases": 5,
+            "forms_correct": 4,
+            "forms_total": 30,
+            "form_recall": 0.1333,
+            "wilson_95_ci": [
+              0.0531,
+              0.2968
+            ],
+            "mean_recall_per_case": 0.1333
+          },
+          "imperfect": {
+            "cases": 5,
+            "forms_correct": 7,
+            "forms_total": 30,
+            "form_recall": 0.2333,
+            "wilson_95_ci": [
+              0.1179,
+              0.4093
+            ],
+            "mean_recall_per_case": 0.2333
+          },
+          "future": {
+            "cases": 5,
+            "forms_correct": 12,
+            "forms_total": 30,
+            "form_recall": 0.4,
+            "wilson_95_ci": [
+              0.2459,
+              0.5768
+            ],
+            "mean_recall_per_case": 0.4
+          },
+          "conditional": {
+            "cases": 5,
+            "forms_correct": 0,
+            "forms_total": 30,
+            "form_recall": 0.0,
+            "wilson_95_ci": [
+              0.0,
+              0.1135
+            ],
+            "mean_recall_per_case": 0.0
+          }
+        }
+      },
+      "qwen4b": {
+        "overall": {
+          "cases": 25,
+          "forms_correct": 122,
+          "forms_total": 150,
+          "form_recall": 0.8133,
+          "wilson_95_ci": [
+            0.7434,
+            0.8676
+          ],
+          "mean_recall_per_case": 0.8133
+        },
+        "common_regular": {
+          "cases": 10,
+          "forms_correct": 57,
+          "forms_total": 60,
+          "form_recall": 0.95,
+          "wilson_95_ci": [
+            0.863,
+            0.9829
+          ],
+          "mean_recall_per_case": 0.95
+        },
+        "common_irregular": {
+          "cases": 5,
+          "forms_correct": 29,
+          "forms_total": 30,
+          "form_recall": 0.9667,
+          "wilson_95_ci": [
+            0.8333,
+            0.9941
+          ],
+          "mean_recall_per_case": 0.9667
+        },
+        "rare": {
+          "cases": 10,
+          "forms_correct": 36,
+          "forms_total": 60,
+          "form_recall": 0.6,
+          "wilson_95_ci": [
+            0.4737,
+            0.7143
+          ],
+          "mean_recall_per_case": 0.6
+        },
+        "by_verb": {
+          "comer": {
+            "cases": 5,
+            "forms_correct": 28,
+            "forms_total": 30,
+            "form_recall": 0.9333,
+            "wilson_95_ci": [
+              0.7868,
+              0.9815
+            ],
+            "mean_recall_per_case": 0.9333
+          },
+          "hablar": {
+            "cases": 5,
+            "forms_correct": 29,
+            "forms_total": 30,
+            "form_recall": 0.9667,
+            "wilson_95_ci": [
+              0.8333,
+              0.9941
+            ],
+            "mean_recall_per_case": 0.9667
+          },
+          "tener": {
+            "cases": 5,
+            "forms_correct": 29,
+            "forms_total": 30,
+            "form_recall": 0.9667,
+            "wilson_95_ci": [
+              0.8333,
+              0.9941
+            ],
+            "mean_recall_per_case": 0.9667
+          },
+          "blandir": {
+            "cases": 5,
+            "forms_correct": 22,
+            "forms_total": 30,
+            "form_recall": 0.7333,
+            "wilson_95_ci": [
+              0.5555,
+              0.8582
+            ],
+            "mean_recall_per_case": 0.7333
+          },
+          "argüir": {
+            "cases": 5,
+            "forms_correct": 14,
+            "forms_total": 30,
+            "form_recall": 0.4667,
+            "wilson_95_ci": [
+              0.3023,
+              0.6386
+            ],
+            "mean_recall_per_case": 0.4667
+          }
+        },
+        "by_tense": {
+          "present": {
+            "cases": 5,
+            "forms_correct": 20,
+            "forms_total": 30,
+            "form_recall": 0.6667,
+            "wilson_95_ci": [
+              0.4878,
+              0.8077
+            ],
+            "mean_recall_per_case": 0.6667
+          },
+          "preterite": {
+            "cases": 5,
+            "forms_correct": 19,
+            "forms_total": 30,
+            "form_recall": 0.6333,
+            "wilson_95_ci": [
+              0.4551,
+              0.7813
+            ],
+            "mean_recall_per_case": 0.6333
+          },
+          "imperfect": {
+            "cases": 5,
+            "forms_correct": 29,
+            "forms_total": 30,
+            "form_recall": 0.9667,
+            "wilson_95_ci": [
+              0.8333,
+              0.9941
+            ],
+            "mean_recall_per_case": 0.9667
+          },
+          "future": {
+            "cases": 5,
+            "forms_correct": 30,
+            "forms_total": 30,
+            "form_recall": 1.0,
+            "wilson_95_ci": [
+              0.8865,
+              1.0
+            ],
+            "mean_recall_per_case": 1.0
+          },
+          "conditional": {
+            "cases": 5,
+            "forms_correct": 24,
+            "forms_total": 30,
+            "form_recall": 0.8,
+            "wilson_95_ci": [
+              0.6269,
+              0.905
+            ],
+            "mean_recall_per_case": 0.8
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,3659 @@
+{
+  "models": {
+    "qwen05b": "Qwen/Qwen2.5-0.5B-Instruct",
+    "qwen17b": "Qwen/Qwen3-1.7B",
+    "qwen4b": "Qwen/Qwen3-4B-Instruct-2507"
+  },
+  "temperature": 0.0,
+  "tasks": [
+    "conjugation",
+    "recognition"
+  ],
+  "verb_entries": [
+    {
+      "lemma": "comer",
+      "gloss": "to eat",
+      "tier": "common_regular",
+      "forms": {
+        "first person plural preterite (nosotros)": [
+          "comimos"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "vivir",
+      "gloss": "to live",
+      "tier": "common_regular",
+      "forms": {
+        "third person singular future": [
+          "vivirá"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "hablar",
+      "gloss": "to speak",
+      "tier": "common_regular",
+      "forms": {
+        "second person singular present (tú)": [
+          "hablas"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "escribir",
+      "gloss": "to write",
+      "tier": "common_regular",
+      "forms": {
+        "third person plural preterite (ellos)": [
+          "escribieron"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "correr",
+      "gloss": "to run",
+      "tier": "common_regular",
+      "forms": {
+        "first person singular present (yo)": [
+          "corro"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "pedir",
+      "gloss": "to ask for",
+      "tier": "common_irregular",
+      "forms": {
+        "first person singular present (yo)": [
+          "pido"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "dormir",
+      "gloss": "to sleep",
+      "tier": "common_irregular",
+      "forms": {
+        "first person singular present (yo)": [
+          "duermo"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "decir",
+      "gloss": "to say",
+      "tier": "common_irregular",
+      "forms": {
+        "first person singular preterite (yo)": [
+          "dije"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "tener",
+      "gloss": "to have",
+      "tier": "common_irregular",
+      "forms": {
+        "third person plural preterite (ellos)": [
+          "tuvieron"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "conducir",
+      "gloss": "to drive",
+      "tier": "common_irregular",
+      "forms": {
+        "third person plural preterite (ellos)": [
+          "condujeron"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "poner",
+      "gloss": "to put",
+      "tier": "common_irregular",
+      "forms": {
+        "first person singular conditional (yo)": [
+          "pondría"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "venir",
+      "gloss": "to come",
+      "tier": "common_irregular",
+      "forms": {
+        "first person singular conditional (yo)": [
+          "vendría"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "llegar",
+      "gloss": "to arrive",
+      "tier": "common_irregular",
+      "forms": {
+        "first person singular preterite (yo)": [
+          "llegué"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "henchir",
+      "gloss": "to fill (literary)",
+      "tier": "rare",
+      "forms": {
+        "first person singular preterite (yo)": [
+          "henchí"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "argüir",
+      "gloss": "to argue (formally)",
+      "tier": "rare",
+      "forms": {
+        "first person singular preterite (yo)": [
+          "argüí"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "atestiguar",
+      "gloss": "to testify",
+      "tier": "rare",
+      "forms": {
+        "first person singular preterite (yo)": [
+          "atestigüé"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "menguar",
+      "gloss": "to diminish",
+      "tier": "rare",
+      "forms": {
+        "first person singular present (yo)": [
+          "menguo"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "empalagar",
+      "gloss": "to cloy",
+      "tier": "rare",
+      "forms": {
+        "first person singular present (yo)": [
+          "empalago"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "blandir",
+      "gloss": "to brandish",
+      "tier": "rare",
+      "forms": {
+        "first person singular preterite (yo)": [
+          "blandí"
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "lemma": "proferir",
+      "gloss": "to utter (threats or insults)",
+      "tier": "rare",
+      "forms": {
+        "first person singular present (yo)": [
+          "profiero"
+        ]
+      },
+      "notes": ""
+    }
+  ],
+  "by_model": {
+    "qwen05b": {
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "elapsed_s": 13.1,
+      "results": [
+        {
+          "case": {
+            "id": "comer__recognition",
+            "task": "recognition",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "comer"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to eat\"? Reply with one word only."
+          },
+          "latency_s": 6.187,
+          "raw": "eat",
+          "parsed_token": "eat",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "comer"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__first_person_plural_preterite_(nosotros)",
+            "task": "conjugation",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common_regular",
+            "form_label": "first person plural preterite (nosotros)",
+            "expected": [
+              "comimos"
+            ],
+            "prompt": "What is the first person plural preterite (nosotros) of the Spanish verb \"comer\" (meaning: to eat)? Reply with one word only."
+          },
+          "latency_s": 0.309,
+          "raw": "comimos",
+          "parsed_token": "comimos",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "comimos"
+          ]
+        },
+        {
+          "case": {
+            "id": "vivir__recognition",
+            "task": "recognition",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "vivir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to live\"? Reply with one word only."
+          },
+          "latency_s": 0.083,
+          "raw": "live",
+          "parsed_token": "live",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "vivir"
+          ]
+        },
+        {
+          "case": {
+            "id": "vivir__third_person_singular_future",
+            "task": "conjugation",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common_regular",
+            "form_label": "third person singular future",
+            "expected": [
+              "vivirá"
+            ],
+            "prompt": "What is the third person singular future of the Spanish verb \"vivir\" (meaning: to live)? Reply with one word only."
+          },
+          "latency_s": 0.382,
+          "raw": "vivirá",
+          "parsed_token": "vivirá",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "vivirá"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__recognition",
+            "task": "recognition",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "hablar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to speak\"? Reply with one word only."
+          },
+          "latency_s": 0.151,
+          "raw": "speak",
+          "parsed_token": "speak",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "hablar"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__second_person_singular_present_(tú)",
+            "task": "conjugation",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common_regular",
+            "form_label": "second person singular present (tú)",
+            "expected": [
+              "hablas"
+            ],
+            "prompt": "What is the second person singular present (tú) of the Spanish verb \"hablar\" (meaning: to speak)? Reply with one word only."
+          },
+          "latency_s": 0.261,
+          "raw": "hace",
+          "parsed_token": "hace",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "hablas"
+          ]
+        },
+        {
+          "case": {
+            "id": "escribir__recognition",
+            "task": "recognition",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "escribir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to write\"? Reply with one word only."
+          },
+          "latency_s": 0.087,
+          "raw": "write",
+          "parsed_token": "write",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "escribir"
+          ]
+        },
+        {
+          "case": {
+            "id": "escribir__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common_regular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "escribieron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"escribir\" (meaning: to write)? Reply with one word only."
+          },
+          "latency_s": 0.379,
+          "raw": "escribió",
+          "parsed_token": "escribió",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "escribieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__recognition",
+            "task": "recognition",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "correr"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to run\"? Reply with one word only."
+          },
+          "latency_s": 0.1,
+          "raw": "run",
+          "parsed_token": "run",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "correr"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common_regular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "corro"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"correr\" (meaning: to run)? Reply with one word only."
+          },
+          "latency_s": 0.262,
+          "raw": "corrotes",
+          "parsed_token": "corrotes",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "corro"
+          ]
+        },
+        {
+          "case": {
+            "id": "pedir__recognition",
+            "task": "recognition",
+            "lemma": "pedir",
+            "gloss": "to ask for",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "pedir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to ask for\"? Reply with one word only."
+          },
+          "latency_s": 0.215,
+          "raw": "askar",
+          "parsed_token": "askar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "pedir"
+          ]
+        },
+        {
+          "case": {
+            "id": "pedir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "pedir",
+            "gloss": "to ask for",
+            "tier": "common_irregular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "pido"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"pedir\" (meaning: to ask for)? Reply with one word only."
+          },
+          "latency_s": 0.137,
+          "raw": "pide",
+          "parsed_token": "pide",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "pido"
+          ]
+        },
+        {
+          "case": {
+            "id": "dormir__recognition",
+            "task": "recognition",
+            "lemma": "dormir",
+            "gloss": "to sleep",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "dormir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to sleep\"? Reply with one word only."
+          },
+          "latency_s": 0.106,
+          "raw": "sleep",
+          "parsed_token": "sleep",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "dormir"
+          ]
+        },
+        {
+          "case": {
+            "id": "dormir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "dormir",
+            "gloss": "to sleep",
+            "tier": "common_irregular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "duermo"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"dormir\" (meaning: to sleep)? Reply with one word only."
+          },
+          "latency_s": 0.128,
+          "raw": "siento",
+          "parsed_token": "siento",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "duermo"
+          ]
+        },
+        {
+          "case": {
+            "id": "decir__recognition",
+            "task": "recognition",
+            "lemma": "decir",
+            "gloss": "to say",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "decir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to say\"? Reply with one word only."
+          },
+          "latency_s": 0.086,
+          "raw": "say",
+          "parsed_token": "say",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "decir"
+          ]
+        },
+        {
+          "case": {
+            "id": "decir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "decir",
+            "gloss": "to say",
+            "tier": "common_irregular",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "dije"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"decir\" (meaning: to say)? Reply with one word only."
+          },
+          "latency_s": 0.172,
+          "raw": "dice",
+          "parsed_token": "dice",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "dije"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__recognition",
+            "task": "recognition",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "tener"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to have\"? Reply with one word only."
+          },
+          "latency_s": 0.085,
+          "raw": "have",
+          "parsed_token": "have",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "tener"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common_irregular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "tuvieron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"tener\" (meaning: to have)? Reply with one word only."
+          },
+          "latency_s": 0.127,
+          "raw": "tienes",
+          "parsed_token": "tienes",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "tuvieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "conducir__recognition",
+            "task": "recognition",
+            "lemma": "conducir",
+            "gloss": "to drive",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "conducir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to drive\"? Reply with one word only."
+          },
+          "latency_s": 0.084,
+          "raw": "drive",
+          "parsed_token": "drive",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "conducir"
+          ]
+        },
+        {
+          "case": {
+            "id": "conducir__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "conducir",
+            "gloss": "to drive",
+            "tier": "common_irregular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "condujeron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"conducir\" (meaning: to drive)? Reply with one word only."
+          },
+          "latency_s": 0.194,
+          "raw": "conducen",
+          "parsed_token": "conducen",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "condujeron"
+          ]
+        },
+        {
+          "case": {
+            "id": "poner__recognition",
+            "task": "recognition",
+            "lemma": "poner",
+            "gloss": "to put",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "poner"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to put\"? Reply with one word only."
+          },
+          "latency_s": 0.136,
+          "raw": "putear",
+          "parsed_token": "putear",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "poner"
+          ]
+        },
+        {
+          "case": {
+            "id": "poner__first_person_singular_conditional_(yo)",
+            "task": "conjugation",
+            "lemma": "poner",
+            "gloss": "to put",
+            "tier": "common_irregular",
+            "form_label": "first person singular conditional (yo)",
+            "expected": [
+              "pondría"
+            ],
+            "prompt": "What is the first person singular conditional (yo) of the Spanish verb \"poner\" (meaning: to put)? Reply with one word only."
+          },
+          "latency_s": 0.216,
+          "raw": "deponer",
+          "parsed_token": "deponer",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "pondría"
+          ]
+        },
+        {
+          "case": {
+            "id": "venir__recognition",
+            "task": "recognition",
+            "lemma": "venir",
+            "gloss": "to come",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "venir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to come\"? Reply with one word only."
+          },
+          "latency_s": 0.096,
+          "raw": "come",
+          "parsed_token": "come",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "venir"
+          ]
+        },
+        {
+          "case": {
+            "id": "venir__first_person_singular_conditional_(yo)",
+            "task": "conjugation",
+            "lemma": "venir",
+            "gloss": "to come",
+            "tier": "common_irregular",
+            "form_label": "first person singular conditional (yo)",
+            "expected": [
+              "vendría"
+            ],
+            "prompt": "What is the first person singular conditional (yo) of the Spanish verb \"venir\" (meaning: to come)? Reply with one word only."
+          },
+          "latency_s": 0.237,
+          "raw": "vamos",
+          "parsed_token": "vamos",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "vendría"
+          ]
+        },
+        {
+          "case": {
+            "id": "llegar__recognition",
+            "task": "recognition",
+            "lemma": "llegar",
+            "gloss": "to arrive",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "llegar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to arrive\"? Reply with one word only."
+          },
+          "latency_s": 0.131,
+          "raw": "arriva",
+          "parsed_token": "arriva",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "llegar"
+          ]
+        },
+        {
+          "case": {
+            "id": "llegar__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "llegar",
+            "gloss": "to arrive",
+            "tier": "common_irregular",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "llegué"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"llegar\" (meaning: to arrive)? Reply with one word only."
+          },
+          "latency_s": 0.191,
+          "raw": "Llegué",
+          "parsed_token": "Llegué",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "llegué"
+          ]
+        },
+        {
+          "case": {
+            "id": "henchir__recognition",
+            "task": "recognition",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "henchir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to fill (literary)\"? Reply with one word only."
+          },
+          "latency_s": 0.152,
+          "raw": "fillir",
+          "parsed_token": "fillir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "henchir"
+          ]
+        },
+        {
+          "case": {
+            "id": "henchir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "henchí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"henchir\" (meaning: to fill (literary))? Reply with one word only."
+          },
+          "latency_s": 0.353,
+          "raw": "henché",
+          "parsed_token": "henché",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "henchí"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__recognition",
+            "task": "recognition",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "argüir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to argue (formally)\"? Reply with one word only."
+          },
+          "latency_s": 0.146,
+          "raw": "argue",
+          "parsed_token": "argue",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "argüir"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "argüí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"argüir\" (meaning: to argue (formally))? Reply with one word only."
+          },
+          "latency_s": 0.165,
+          "raw": "argué",
+          "parsed_token": "argué",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "argüí"
+          ]
+        },
+        {
+          "case": {
+            "id": "atestiguar__recognition",
+            "task": "recognition",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "atestiguar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to testify\"? Reply with one word only."
+          },
+          "latency_s": 0.146,
+          "raw": "testar",
+          "parsed_token": "testar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "atestiguar"
+          ]
+        },
+        {
+          "case": {
+            "id": "atestiguar__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "atestigüé"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"atestiguar\" (meaning: to testify)? Reply with one word only."
+          },
+          "latency_s": 0.274,
+          "raw": "testiguéstea",
+          "parsed_token": "testiguéstea",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "atestigüé"
+          ]
+        },
+        {
+          "case": {
+            "id": "menguar__recognition",
+            "task": "recognition",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "menguar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to diminish\"? Reply with one word only."
+          },
+          "latency_s": 0.174,
+          "raw": "diminuir",
+          "parsed_token": "diminuir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "menguar"
+          ]
+        },
+        {
+          "case": {
+            "id": "menguar__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "menguo"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"menguar\" (meaning: to diminish)? Reply with one word only."
+          },
+          "latency_s": 0.199,
+          "raw": "diminuir",
+          "parsed_token": "diminuir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "menguo"
+          ]
+        },
+        {
+          "case": {
+            "id": "empalagar__recognition",
+            "task": "recognition",
+            "lemma": "empalagar",
+            "gloss": "to cloy",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "empalagar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to cloy\"? Reply with one word only."
+          },
+          "latency_s": 0.142,
+          "raw": "cloy",
+          "parsed_token": "cloy",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "empalagar"
+          ]
+        },
+        {
+          "case": {
+            "id": "empalagar__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "empalagar",
+            "gloss": "to cloy",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "empalago"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"empalagar\" (meaning: to cloy)? Reply with one word only."
+          },
+          "latency_s": 0.177,
+          "raw": "cuelga",
+          "parsed_token": "cuelga",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "empalago"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__recognition",
+            "task": "recognition",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "blandir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to brandish\"? Reply with one word only."
+          },
+          "latency_s": 0.132,
+          "raw": "brandear",
+          "parsed_token": "brandear",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "blandir"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "blandí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"blandir\" (meaning: to brandish)? Reply with one word only."
+          },
+          "latency_s": 0.188,
+          "raw": "brandeja",
+          "parsed_token": "brandeja",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "blandí"
+          ]
+        },
+        {
+          "case": {
+            "id": "proferir__recognition",
+            "task": "recognition",
+            "lemma": "proferir",
+            "gloss": "to utter (threats or insults)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "proferir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to utter (threats or insults)\"? Reply with one word only."
+          },
+          "latency_s": 0.093,
+          "raw": "utter",
+          "parsed_token": "utter",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "proferir"
+          ]
+        },
+        {
+          "case": {
+            "id": "proferir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "proferir",
+            "gloss": "to utter (threats or insults)",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "profiero"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"proferir\" (meaning: to utter (threats or insults))? Reply with one word only."
+          },
+          "latency_s": 0.192,
+          "raw": "ústran",
+          "parsed_token": "ústran",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "profiero"
+          ]
+        }
+      ]
+    },
+    "qwen17b": {
+      "model_id": "Qwen/Qwen3-1.7B",
+      "elapsed_s": 20.7,
+      "results": [
+        {
+          "case": {
+            "id": "comer__recognition",
+            "task": "recognition",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "comer"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to eat\"? Reply with one word only."
+          },
+          "latency_s": 8.874,
+          "raw": "comer",
+          "parsed_token": "comer",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "comer"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__first_person_plural_preterite_(nosotros)",
+            "task": "conjugation",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common_regular",
+            "form_label": "first person plural preterite (nosotros)",
+            "expected": [
+              "comimos"
+            ],
+            "prompt": "What is the first person plural preterite (nosotros) of the Spanish verb \"comer\" (meaning: to eat)? Reply with one word only."
+          },
+          "latency_s": 0.362,
+          "raw": "comimos",
+          "parsed_token": "comimos",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "comimos"
+          ]
+        },
+        {
+          "case": {
+            "id": "vivir__recognition",
+            "task": "recognition",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "vivir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to live\"? Reply with one word only."
+          },
+          "latency_s": 0.302,
+          "raw": "vivir",
+          "parsed_token": "vivir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "vivir"
+          ]
+        },
+        {
+          "case": {
+            "id": "vivir__third_person_singular_future",
+            "task": "conjugation",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common_regular",
+            "form_label": "third person singular future",
+            "expected": [
+              "vivirá"
+            ],
+            "prompt": "What is the third person singular future of the Spanish verb \"vivir\" (meaning: to live)? Reply with one word only."
+          },
+          "latency_s": 0.484,
+          "raw": "viviré",
+          "parsed_token": "viviré",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "vivirá"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__recognition",
+            "task": "recognition",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "hablar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to speak\"? Reply with one word only."
+          },
+          "latency_s": 0.228,
+          "raw": "hablar",
+          "parsed_token": "hablar",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "hablar"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__second_person_singular_present_(tú)",
+            "task": "conjugation",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common_regular",
+            "form_label": "second person singular present (tú)",
+            "expected": [
+              "hablas"
+            ],
+            "prompt": "What is the second person singular present (tú) of the Spanish verb \"hablar\" (meaning: to speak)? Reply with one word only."
+          },
+          "latency_s": 0.433,
+          "raw": "hablas",
+          "parsed_token": "hablas",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "hablas"
+          ]
+        },
+        {
+          "case": {
+            "id": "escribir__recognition",
+            "task": "recognition",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "escribir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to write\"? Reply with one word only."
+          },
+          "latency_s": 0.28,
+          "raw": "escribir",
+          "parsed_token": "escribir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "escribir"
+          ]
+        },
+        {
+          "case": {
+            "id": "escribir__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common_regular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "escribieron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"escribir\" (meaning: to write)? Reply with one word only."
+          },
+          "latency_s": 0.698,
+          "raw": "escribieron",
+          "parsed_token": "escribieron",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "escribieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__recognition",
+            "task": "recognition",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "correr"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to run\"? Reply with one word only."
+          },
+          "latency_s": 0.232,
+          "raw": "correr",
+          "parsed_token": "correr",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "correr"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common_regular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "corro"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"correr\" (meaning: to run)? Reply with one word only."
+          },
+          "latency_s": 0.326,
+          "raw": "correr",
+          "parsed_token": "correr",
+          "correct": false,
+          "infinitive_fallback": true,
+          "expected": [
+            "corro"
+          ]
+        },
+        {
+          "case": {
+            "id": "pedir__recognition",
+            "task": "recognition",
+            "lemma": "pedir",
+            "gloss": "to ask for",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "pedir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to ask for\"? Reply with one word only."
+          },
+          "latency_s": 0.305,
+          "raw": "pedir",
+          "parsed_token": "pedir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "pedir"
+          ]
+        },
+        {
+          "case": {
+            "id": "pedir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "pedir",
+            "gloss": "to ask for",
+            "tier": "common_irregular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "pido"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"pedir\" (meaning: to ask for)? Reply with one word only."
+          },
+          "latency_s": 0.239,
+          "raw": "pedir",
+          "parsed_token": "pedir",
+          "correct": false,
+          "infinitive_fallback": true,
+          "expected": [
+            "pido"
+          ]
+        },
+        {
+          "case": {
+            "id": "dormir__recognition",
+            "task": "recognition",
+            "lemma": "dormir",
+            "gloss": "to sleep",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "dormir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to sleep\"? Reply with one word only."
+          },
+          "latency_s": 0.313,
+          "raw": "duerme",
+          "parsed_token": "duerme",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "dormir"
+          ]
+        },
+        {
+          "case": {
+            "id": "dormir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "dormir",
+            "gloss": "to sleep",
+            "tier": "common_irregular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "duermo"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"dormir\" (meaning: to sleep)? Reply with one word only."
+          },
+          "latency_s": 0.306,
+          "raw": "dormir",
+          "parsed_token": "dormir",
+          "correct": false,
+          "infinitive_fallback": true,
+          "expected": [
+            "duermo"
+          ]
+        },
+        {
+          "case": {
+            "id": "decir__recognition",
+            "task": "recognition",
+            "lemma": "decir",
+            "gloss": "to say",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "decir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to say\"? Reply with one word only."
+          },
+          "latency_s": 0.221,
+          "raw": "decir",
+          "parsed_token": "decir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "decir"
+          ]
+        },
+        {
+          "case": {
+            "id": "decir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "decir",
+            "gloss": "to say",
+            "tier": "common_irregular",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "dije"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"decir\" (meaning: to say)? Reply with one word only."
+          },
+          "latency_s": 0.334,
+          "raw": "dije",
+          "parsed_token": "dije",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "dije"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__recognition",
+            "task": "recognition",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "tener"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to have\"? Reply with one word only."
+          },
+          "latency_s": 0.158,
+          "raw": "tener",
+          "parsed_token": "tener",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "tener"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common_irregular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "tuvieron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"tener\" (meaning: to have)? Reply with one word only."
+          },
+          "latency_s": 0.288,
+          "raw": "tuvieron",
+          "parsed_token": "tuvieron",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "tuvieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "conducir__recognition",
+            "task": "recognition",
+            "lemma": "conducir",
+            "gloss": "to drive",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "conducir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to drive\"? Reply with one word only."
+          },
+          "latency_s": 0.278,
+          "raw": "dirigir",
+          "parsed_token": "dirigir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "conducir"
+          ]
+        },
+        {
+          "case": {
+            "id": "conducir__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "conducir",
+            "gloss": "to drive",
+            "tier": "common_irregular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "condujeron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"conducir\" (meaning: to drive)? Reply with one word only."
+          },
+          "latency_s": 0.304,
+          "raw": "conducían",
+          "parsed_token": "conducían",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "condujeron"
+          ]
+        },
+        {
+          "case": {
+            "id": "poner__recognition",
+            "task": "recognition",
+            "lemma": "poner",
+            "gloss": "to put",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "poner"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to put\"? Reply with one word only."
+          },
+          "latency_s": 0.226,
+          "raw": "poner",
+          "parsed_token": "poner",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "poner"
+          ]
+        },
+        {
+          "case": {
+            "id": "poner__first_person_singular_conditional_(yo)",
+            "task": "conjugation",
+            "lemma": "poner",
+            "gloss": "to put",
+            "tier": "common_irregular",
+            "form_label": "first person singular conditional (yo)",
+            "expected": [
+              "pondría"
+            ],
+            "prompt": "What is the first person singular conditional (yo) of the Spanish verb \"poner\" (meaning: to put)? Reply with one word only."
+          },
+          "latency_s": 0.242,
+          "raw": "pongo",
+          "parsed_token": "pongo",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "pondría"
+          ]
+        },
+        {
+          "case": {
+            "id": "venir__recognition",
+            "task": "recognition",
+            "lemma": "venir",
+            "gloss": "to come",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "venir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to come\"? Reply with one word only."
+          },
+          "latency_s": 0.157,
+          "raw": "venir",
+          "parsed_token": "venir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "venir"
+          ]
+        },
+        {
+          "case": {
+            "id": "venir__first_person_singular_conditional_(yo)",
+            "task": "conjugation",
+            "lemma": "venir",
+            "gloss": "to come",
+            "tier": "common_irregular",
+            "form_label": "first person singular conditional (yo)",
+            "expected": [
+              "vendría"
+            ],
+            "prompt": "What is the first person singular conditional (yo) of the Spanish verb \"venir\" (meaning: to come)? Reply with one word only."
+          },
+          "latency_s": 0.331,
+          "raw": "vengo",
+          "parsed_token": "vengo",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "vendría"
+          ]
+        },
+        {
+          "case": {
+            "id": "llegar__recognition",
+            "task": "recognition",
+            "lemma": "llegar",
+            "gloss": "to arrive",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "llegar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to arrive\"? Reply with one word only."
+          },
+          "latency_s": 0.294,
+          "raw": "llegar",
+          "parsed_token": "llegar",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "llegar"
+          ]
+        },
+        {
+          "case": {
+            "id": "llegar__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "llegar",
+            "gloss": "to arrive",
+            "tier": "common_irregular",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "llegué"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"llegar\" (meaning: to arrive)? Reply with one word only."
+          },
+          "latency_s": 0.311,
+          "raw": "llegé",
+          "parsed_token": "llegé",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "llegué"
+          ]
+        },
+        {
+          "case": {
+            "id": "henchir__recognition",
+            "task": "recognition",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "henchir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to fill (literary)\"? Reply with one word only."
+          },
+          "latency_s": 0.25,
+          "raw": "llenar",
+          "parsed_token": "llenar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "henchir"
+          ]
+        },
+        {
+          "case": {
+            "id": "henchir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "henchí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"henchir\" (meaning: to fill (literary))? Reply with one word only."
+          },
+          "latency_s": 0.433,
+          "raw": "henchí",
+          "parsed_token": "henchí",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "henchí"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__recognition",
+            "task": "recognition",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "argüir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to argue (formally)\"? Reply with one word only."
+          },
+          "latency_s": 0.239,
+          "raw": "arguir",
+          "parsed_token": "arguir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "argüir"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "argüí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"argüir\" (meaning: to argue (formally))? Reply with one word only."
+          },
+          "latency_s": 0.29,
+          "raw": "argüí",
+          "parsed_token": "argüí",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "argüí"
+          ]
+        },
+        {
+          "case": {
+            "id": "atestiguar__recognition",
+            "task": "recognition",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "atestiguar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to testify\"? Reply with one word only."
+          },
+          "latency_s": 0.233,
+          "raw": "testificar",
+          "parsed_token": "testificar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "atestiguar"
+          ]
+        },
+        {
+          "case": {
+            "id": "atestiguar__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "atestigüé"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"atestiguar\" (meaning: to testify)? Reply with one word only."
+          },
+          "latency_s": 0.366,
+          "raw": "atestigüe",
+          "parsed_token": "atestigüe",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "atestigüé"
+          ]
+        },
+        {
+          "case": {
+            "id": "menguar__recognition",
+            "task": "recognition",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "menguar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to diminish\"? Reply with one word only."
+          },
+          "latency_s": 0.301,
+          "raw": "diminuir",
+          "parsed_token": "diminuir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "menguar"
+          ]
+        },
+        {
+          "case": {
+            "id": "menguar__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "menguo"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"menguar\" (meaning: to diminish)? Reply with one word only."
+          },
+          "latency_s": 0.379,
+          "raw": "menguarme",
+          "parsed_token": "menguarme",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "menguo"
+          ]
+        },
+        {
+          "case": {
+            "id": "empalagar__recognition",
+            "task": "recognition",
+            "lemma": "empalagar",
+            "gloss": "to cloy",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "empalagar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to cloy\"? Reply with one word only."
+          },
+          "latency_s": 0.241,
+          "raw": "cloy",
+          "parsed_token": "cloy",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "empalagar"
+          ]
+        },
+        {
+          "case": {
+            "id": "empalagar__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "empalagar",
+            "gloss": "to cloy",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "empalago"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"empalagar\" (meaning: to cloy)? Reply with one word only."
+          },
+          "latency_s": 0.298,
+          "raw": "empalagar",
+          "parsed_token": "empalagar",
+          "correct": false,
+          "infinitive_fallback": true,
+          "expected": [
+            "empalago"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__recognition",
+            "task": "recognition",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "blandir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to brandish\"? Reply with one word only."
+          },
+          "latency_s": 0.221,
+          "raw": "brandir",
+          "parsed_token": "brandir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "blandir"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "blandí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"blandir\" (meaning: to brandish)? Reply with one word only."
+          },
+          "latency_s": 0.308,
+          "raw": "blandí",
+          "parsed_token": "blandí",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "blandí"
+          ]
+        },
+        {
+          "case": {
+            "id": "proferir__recognition",
+            "task": "recognition",
+            "lemma": "proferir",
+            "gloss": "to utter (threats or insults)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "proferir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to utter (threats or insults)\"? Reply with one word only."
+          },
+          "latency_s": 0.31,
+          "raw": "exclamar",
+          "parsed_token": "exclamar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "proferir"
+          ]
+        },
+        {
+          "case": {
+            "id": "proferir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "proferir",
+            "gloss": "to utter (threats or insults)",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "profiero"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"proferir\" (meaning: to utter (threats or insults))? Reply with one word only."
+          },
+          "latency_s": 0.329,
+          "raw": "proferir",
+          "parsed_token": "proferir",
+          "correct": false,
+          "infinitive_fallback": true,
+          "expected": [
+            "profiero"
+          ]
+        }
+      ]
+    },
+    "qwen4b": {
+      "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+      "elapsed_s": 56.4,
+      "results": [
+        {
+          "case": {
+            "id": "comer__recognition",
+            "task": "recognition",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "comer"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to eat\"? Reply with one word only."
+          },
+          "latency_s": 39.146,
+          "raw": "comer",
+          "parsed_token": "comer",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "comer"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__first_person_plural_preterite_(nosotros)",
+            "task": "conjugation",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common_regular",
+            "form_label": "first person plural preterite (nosotros)",
+            "expected": [
+              "comimos"
+            ],
+            "prompt": "What is the first person plural preterite (nosotros) of the Spanish verb \"comer\" (meaning: to eat)? Reply with one word only."
+          },
+          "latency_s": 0.545,
+          "raw": "comimos",
+          "parsed_token": "comimos",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "comimos"
+          ]
+        },
+        {
+          "case": {
+            "id": "vivir__recognition",
+            "task": "recognition",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "vivir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to live\"? Reply with one word only."
+          },
+          "latency_s": 0.467,
+          "raw": "vivir",
+          "parsed_token": "vivir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "vivir"
+          ]
+        },
+        {
+          "case": {
+            "id": "vivir__third_person_singular_future",
+            "task": "conjugation",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common_regular",
+            "form_label": "third person singular future",
+            "expected": [
+              "vivirá"
+            ],
+            "prompt": "What is the third person singular future of the Spanish verb \"vivir\" (meaning: to live)? Reply with one word only."
+          },
+          "latency_s": 0.612,
+          "raw": "vivirá",
+          "parsed_token": "vivirá",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "vivirá"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__recognition",
+            "task": "recognition",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "hablar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to speak\"? Reply with one word only."
+          },
+          "latency_s": 0.359,
+          "raw": "hablar",
+          "parsed_token": "hablar",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "hablar"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__second_person_singular_present_(tú)",
+            "task": "conjugation",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common_regular",
+            "form_label": "second person singular present (tú)",
+            "expected": [
+              "hablas"
+            ],
+            "prompt": "What is the second person singular present (tú) of the Spanish verb \"hablar\" (meaning: to speak)? Reply with one word only."
+          },
+          "latency_s": 0.434,
+          "raw": "hablas",
+          "parsed_token": "hablas",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "hablas"
+          ]
+        },
+        {
+          "case": {
+            "id": "escribir__recognition",
+            "task": "recognition",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "escribir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to write\"? Reply with one word only."
+          },
+          "latency_s": 0.437,
+          "raw": "escribir",
+          "parsed_token": "escribir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "escribir"
+          ]
+        },
+        {
+          "case": {
+            "id": "escribir__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common_regular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "escribieron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"escribir\" (meaning: to write)? Reply with one word only."
+          },
+          "latency_s": 0.704,
+          "raw": "escribieron",
+          "parsed_token": "escribieron",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "escribieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__recognition",
+            "task": "recognition",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common_regular",
+            "form_label": null,
+            "expected": [
+              "correr"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to run\"? Reply with one word only."
+          },
+          "latency_s": 0.369,
+          "raw": "correr",
+          "parsed_token": "correr",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "correr"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common_regular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "corro"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"correr\" (meaning: to run)? Reply with one word only."
+          },
+          "latency_s": 0.483,
+          "raw": "yo corro",
+          "parsed_token": "yo",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "corro"
+          ]
+        },
+        {
+          "case": {
+            "id": "pedir__recognition",
+            "task": "recognition",
+            "lemma": "pedir",
+            "gloss": "to ask for",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "pedir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to ask for\"? Reply with one word only."
+          },
+          "latency_s": 0.57,
+          "raw": "pedir",
+          "parsed_token": "pedir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "pedir"
+          ]
+        },
+        {
+          "case": {
+            "id": "pedir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "pedir",
+            "gloss": "to ask for",
+            "tier": "common_irregular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "pido"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"pedir\" (meaning: to ask for)? Reply with one word only."
+          },
+          "latency_s": 0.351,
+          "raw": "pido",
+          "parsed_token": "pido",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "pido"
+          ]
+        },
+        {
+          "case": {
+            "id": "dormir__recognition",
+            "task": "recognition",
+            "lemma": "dormir",
+            "gloss": "to sleep",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "dormir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to sleep\"? Reply with one word only."
+          },
+          "latency_s": 0.443,
+          "raw": "dormir",
+          "parsed_token": "dormir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "dormir"
+          ]
+        },
+        {
+          "case": {
+            "id": "dormir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "dormir",
+            "gloss": "to sleep",
+            "tier": "common_irregular",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "duermo"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"dormir\" (meaning: to sleep)? Reply with one word only."
+          },
+          "latency_s": 0.366,
+          "raw": "duermo",
+          "parsed_token": "duermo",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "duermo"
+          ]
+        },
+        {
+          "case": {
+            "id": "decir__recognition",
+            "task": "recognition",
+            "lemma": "decir",
+            "gloss": "to say",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "decir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to say\"? Reply with one word only."
+          },
+          "latency_s": 0.352,
+          "raw": "decir",
+          "parsed_token": "decir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "decir"
+          ]
+        },
+        {
+          "case": {
+            "id": "decir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "decir",
+            "gloss": "to say",
+            "tier": "common_irregular",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "dije"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"decir\" (meaning: to say)? Reply with one word only."
+          },
+          "latency_s": 0.423,
+          "raw": "dije",
+          "parsed_token": "dije",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "dije"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__recognition",
+            "task": "recognition",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "tener"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to have\"? Reply with one word only."
+          },
+          "latency_s": 0.261,
+          "raw": "tener",
+          "parsed_token": "tener",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "tener"
+          ]
+        },
+        {
+          "case": {
+            "id": "tener__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common_irregular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "tuvieron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"tener\" (meaning: to have)? Reply with one word only."
+          },
+          "latency_s": 0.424,
+          "raw": "tuvieron",
+          "parsed_token": "tuvieron",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "tuvieron"
+          ]
+        },
+        {
+          "case": {
+            "id": "conducir__recognition",
+            "task": "recognition",
+            "lemma": "conducir",
+            "gloss": "to drive",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "conducir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to drive\"? Reply with one word only."
+          },
+          "latency_s": 0.434,
+          "raw": "conducir",
+          "parsed_token": "conducir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "conducir"
+          ]
+        },
+        {
+          "case": {
+            "id": "conducir__third_person_plural_preterite_(ellos)",
+            "task": "conjugation",
+            "lemma": "conducir",
+            "gloss": "to drive",
+            "tier": "common_irregular",
+            "form_label": "third person plural preterite (ellos)",
+            "expected": [
+              "condujeron"
+            ],
+            "prompt": "What is the third person plural preterite (ellos) of the Spanish verb \"conducir\" (meaning: to drive)? Reply with one word only."
+          },
+          "latency_s": 0.562,
+          "raw": "condujeron",
+          "parsed_token": "condujeron",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "condujeron"
+          ]
+        },
+        {
+          "case": {
+            "id": "poner__recognition",
+            "task": "recognition",
+            "lemma": "poner",
+            "gloss": "to put",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "poner"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to put\"? Reply with one word only."
+          },
+          "latency_s": 0.357,
+          "raw": "poner",
+          "parsed_token": "poner",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "poner"
+          ]
+        },
+        {
+          "case": {
+            "id": "poner__first_person_singular_conditional_(yo)",
+            "task": "conjugation",
+            "lemma": "poner",
+            "gloss": "to put",
+            "tier": "common_irregular",
+            "form_label": "first person singular conditional (yo)",
+            "expected": [
+              "pondría"
+            ],
+            "prompt": "What is the first person singular conditional (yo) of the Spanish verb \"poner\" (meaning: to put)? Reply with one word only."
+          },
+          "latency_s": 0.35,
+          "raw": "pondría",
+          "parsed_token": "pondría",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "pondría"
+          ]
+        },
+        {
+          "case": {
+            "id": "venir__recognition",
+            "task": "recognition",
+            "lemma": "venir",
+            "gloss": "to come",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "venir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to come\"? Reply with one word only."
+          },
+          "latency_s": 0.262,
+          "raw": "venir",
+          "parsed_token": "venir",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "venir"
+          ]
+        },
+        {
+          "case": {
+            "id": "venir__first_person_singular_conditional_(yo)",
+            "task": "conjugation",
+            "lemma": "venir",
+            "gloss": "to come",
+            "tier": "common_irregular",
+            "form_label": "first person singular conditional (yo)",
+            "expected": [
+              "vendría"
+            ],
+            "prompt": "What is the first person singular conditional (yo) of the Spanish verb \"venir\" (meaning: to come)? Reply with one word only."
+          },
+          "latency_s": 0.591,
+          "raw": "vendría",
+          "parsed_token": "vendría",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "vendría"
+          ]
+        },
+        {
+          "case": {
+            "id": "llegar__recognition",
+            "task": "recognition",
+            "lemma": "llegar",
+            "gloss": "to arrive",
+            "tier": "common_irregular",
+            "form_label": null,
+            "expected": [
+              "llegar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to arrive\"? Reply with one word only."
+          },
+          "latency_s": 0.435,
+          "raw": "llegar",
+          "parsed_token": "llegar",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "llegar"
+          ]
+        },
+        {
+          "case": {
+            "id": "llegar__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "llegar",
+            "gloss": "to arrive",
+            "tier": "common_irregular",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "llegué"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"llegar\" (meaning: to arrive)? Reply with one word only."
+          },
+          "latency_s": 0.47,
+          "raw": "llegué",
+          "parsed_token": "llegué",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "llegué"
+          ]
+        },
+        {
+          "case": {
+            "id": "henchir__recognition",
+            "task": "recognition",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "henchir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to fill (literary)\"? Reply with one word only."
+          },
+          "latency_s": 0.36,
+          "raw": "llenar",
+          "parsed_token": "llenar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "henchir"
+          ]
+        },
+        {
+          "case": {
+            "id": "henchir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "henchí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"henchir\" (meaning: to fill (literary))? Reply with one word only."
+          },
+          "latency_s": 0.594,
+          "raw": "hinchí",
+          "parsed_token": "hinchí",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "henchí"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__recognition",
+            "task": "recognition",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "argüir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to argue (formally)\"? Reply with one word only."
+          },
+          "latency_s": 0.358,
+          "raw": "argumentar",
+          "parsed_token": "argumentar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "argüir"
+          ]
+        },
+        {
+          "case": {
+            "id": "argüir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "argüí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"argüir\" (meaning: to argue (formally))? Reply with one word only."
+          },
+          "latency_s": 0.465,
+          "raw": "argüí",
+          "parsed_token": "argüí",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "argüí"
+          ]
+        },
+        {
+          "case": {
+            "id": "atestiguar__recognition",
+            "task": "recognition",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "atestiguar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to testify\"? Reply with one word only."
+          },
+          "latency_s": 0.355,
+          "raw": "testificar",
+          "parsed_token": "testificar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "atestiguar"
+          ]
+        },
+        {
+          "case": {
+            "id": "atestiguar__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "atestigüé"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"atestiguar\" (meaning: to testify)? Reply with one word only."
+          },
+          "latency_s": 0.474,
+          "raw": "atestigué",
+          "parsed_token": "atestigué",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "atestigüé"
+          ]
+        },
+        {
+          "case": {
+            "id": "menguar__recognition",
+            "task": "recognition",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "menguar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to diminish\"? Reply with one word only."
+          },
+          "latency_s": 0.428,
+          "raw": "disminuir",
+          "parsed_token": "disminuir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "menguar"
+          ]
+        },
+        {
+          "case": {
+            "id": "menguar__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "menguo"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"menguar\" (meaning: to diminish)? Reply with one word only."
+          },
+          "latency_s": 0.425,
+          "raw": "menguo",
+          "parsed_token": "menguo",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "menguo"
+          ]
+        },
+        {
+          "case": {
+            "id": "empalagar__recognition",
+            "task": "recognition",
+            "lemma": "empalagar",
+            "gloss": "to cloy",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "empalagar"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to cloy\"? Reply with one word only."
+          },
+          "latency_s": 0.448,
+          "raw": "cortar",
+          "parsed_token": "cortar",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "empalagar"
+          ]
+        },
+        {
+          "case": {
+            "id": "empalagar__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "empalagar",
+            "gloss": "to cloy",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "empalago"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"empalagar\" (meaning: to cloy)? Reply with one word only."
+          },
+          "latency_s": 0.447,
+          "raw": "empalago",
+          "parsed_token": "empalago",
+          "correct": true,
+          "infinitive_fallback": false,
+          "expected": [
+            "empalago"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__recognition",
+            "task": "recognition",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "blandir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to brandish\"? Reply with one word only."
+          },
+          "latency_s": 0.365,
+          "raw": "brandear",
+          "parsed_token": "brandear",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "blandir"
+          ]
+        },
+        {
+          "case": {
+            "id": "blandir__first_person_singular_preterite_(yo)",
+            "task": "conjugation",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "form_label": "first person singular preterite (yo)",
+            "expected": [
+              "blandí"
+            ],
+            "prompt": "What is the first person singular preterite (yo) of the Spanish verb \"blandir\" (meaning: to brandish)? Reply with one word only."
+          },
+          "latency_s": 0.629,
+          "raw": "blandeí",
+          "parsed_token": "blandeí",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "blandí"
+          ]
+        },
+        {
+          "case": {
+            "id": "proferir__recognition",
+            "task": "recognition",
+            "lemma": "proferir",
+            "gloss": "to utter (threats or insults)",
+            "tier": "rare",
+            "form_label": null,
+            "expected": [
+              "proferir"
+            ],
+            "prompt": "What is the base form (infinitive) of the Spanish verb that means \"to utter (threats or insults)\"? Reply with one word only."
+          },
+          "latency_s": 0.351,
+          "raw": "decir",
+          "parsed_token": "decir",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "proferir"
+          ]
+        },
+        {
+          "case": {
+            "id": "proferir__first_person_singular_present_(yo)",
+            "task": "conjugation",
+            "lemma": "proferir",
+            "gloss": "to utter (threats or insults)",
+            "tier": "rare",
+            "form_label": "first person singular present (yo)",
+            "expected": [
+              "profiero"
+            ],
+            "prompt": "What is the first person singular present (yo) of the Spanish verb \"proferir\" (meaning: to utter (threats or insults))? Reply with one word only."
+          },
+          "latency_s": 0.477,
+          "raw": "profero",
+          "parsed_token": "profero",
+          "correct": false,
+          "infinitive_fallback": false,
+          "expected": [
+            "profiero"
+          ]
+        }
+      ]
+    }
+  },
+  "summary": {
+    "per_model": {
+      "qwen05b": {
+        "overall": {
+          "n": 40,
+          "correct": 3,
+          "pass_rate": 0.075,
+          "wilson_95_ci": [
+            0.0258,
+            0.1986
+          ]
+        },
+        "recognition": {
+          "n": 20,
+          "correct": 0,
+          "pass_rate": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.1611
+          ]
+        },
+        "conjugation": {
+          "n": 20,
+          "correct": 3,
+          "pass_rate": 0.15,
+          "wilson_95_ci": [
+            0.0524,
+            0.3604
+          ]
+        },
+        "conjugation_common_regular": {
+          "n": 5,
+          "correct": 2,
+          "pass_rate": 0.4,
+          "wilson_95_ci": [
+            0.1176,
+            0.7693
+          ]
+        },
+        "conjugation_common_irregular": {
+          "n": 8,
+          "correct": 1,
+          "pass_rate": 0.125,
+          "wilson_95_ci": [
+            0.0224,
+            0.4709
+          ]
+        },
+        "conjugation_rare": {
+          "n": 7,
+          "correct": 0,
+          "pass_rate": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.3543
+          ]
+        },
+        "infinitive_fallback": {
+          "n": 20,
+          "fallback_count": 0,
+          "fallback_rate": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.1611
+          ]
+        },
+        "failures": [
+          {
+            "id": "comer__recognition",
+            "expected": [
+              "comer"
+            ],
+            "got": "eat",
+            "raw": "eat"
+          },
+          {
+            "id": "vivir__recognition",
+            "expected": [
+              "vivir"
+            ],
+            "got": "live",
+            "raw": "live"
+          },
+          {
+            "id": "hablar__recognition",
+            "expected": [
+              "hablar"
+            ],
+            "got": "speak",
+            "raw": "speak"
+          },
+          {
+            "id": "hablar__second_person_singular_present_(tú)",
+            "expected": [
+              "hablas"
+            ],
+            "got": "hace",
+            "raw": "hace"
+          },
+          {
+            "id": "escribir__recognition",
+            "expected": [
+              "escribir"
+            ],
+            "got": "write",
+            "raw": "write"
+          },
+          {
+            "id": "escribir__third_person_plural_preterite_(ellos)",
+            "expected": [
+              "escribieron"
+            ],
+            "got": "escribió",
+            "raw": "escribió"
+          },
+          {
+            "id": "correr__recognition",
+            "expected": [
+              "correr"
+            ],
+            "got": "run",
+            "raw": "run"
+          },
+          {
+            "id": "correr__first_person_singular_present_(yo)",
+            "expected": [
+              "corro"
+            ],
+            "got": "corrotes",
+            "raw": "corrotes"
+          },
+          {
+            "id": "pedir__recognition",
+            "expected": [
+              "pedir"
+            ],
+            "got": "askar",
+            "raw": "askar"
+          },
+          {
+            "id": "pedir__first_person_singular_present_(yo)",
+            "expected": [
+              "pido"
+            ],
+            "got": "pide",
+            "raw": "pide"
+          },
+          {
+            "id": "dormir__recognition",
+            "expected": [
+              "dormir"
+            ],
+            "got": "sleep",
+            "raw": "sleep"
+          },
+          {
+            "id": "dormir__first_person_singular_present_(yo)",
+            "expected": [
+              "duermo"
+            ],
+            "got": "siento",
+            "raw": "siento"
+          },
+          {
+            "id": "decir__recognition",
+            "expected": [
+              "decir"
+            ],
+            "got": "say",
+            "raw": "say"
+          },
+          {
+            "id": "decir__first_person_singular_preterite_(yo)",
+            "expected": [
+              "dije"
+            ],
+            "got": "dice",
+            "raw": "dice"
+          },
+          {
+            "id": "tener__recognition",
+            "expected": [
+              "tener"
+            ],
+            "got": "have",
+            "raw": "have"
+          },
+          {
+            "id": "tener__third_person_plural_preterite_(ellos)",
+            "expected": [
+              "tuvieron"
+            ],
+            "got": "tienes",
+            "raw": "tienes"
+          },
+          {
+            "id": "conducir__recognition",
+            "expected": [
+              "conducir"
+            ],
+            "got": "drive",
+            "raw": "drive"
+          },
+          {
+            "id": "conducir__third_person_plural_preterite_(ellos)",
+            "expected": [
+              "condujeron"
+            ],
+            "got": "conducen",
+            "raw": "conducen"
+          },
+          {
+            "id": "poner__recognition",
+            "expected": [
+              "poner"
+            ],
+            "got": "putear",
+            "raw": "putear"
+          },
+          {
+            "id": "poner__first_person_singular_conditional_(yo)",
+            "expected": [
+              "pondría"
+            ],
+            "got": "deponer",
+            "raw": "deponer"
+          },
+          {
+            "id": "venir__recognition",
+            "expected": [
+              "venir"
+            ],
+            "got": "come",
+            "raw": "come"
+          },
+          {
+            "id": "venir__first_person_singular_conditional_(yo)",
+            "expected": [
+              "vendría"
+            ],
+            "got": "vamos",
+            "raw": "vamos"
+          },
+          {
+            "id": "llegar__recognition",
+            "expected": [
+              "llegar"
+            ],
+            "got": "arriva",
+            "raw": "arriva"
+          },
+          {
+            "id": "henchir__recognition",
+            "expected": [
+              "henchir"
+            ],
+            "got": "fillir",
+            "raw": "fillir"
+          },
+          {
+            "id": "henchir__first_person_singular_preterite_(yo)",
+            "expected": [
+              "henchí"
+            ],
+            "got": "henché",
+            "raw": "henché"
+          },
+          {
+            "id": "argüir__recognition",
+            "expected": [
+              "argüir"
+            ],
+            "got": "argue",
+            "raw": "argue"
+          },
+          {
+            "id": "argüir__first_person_singular_preterite_(yo)",
+            "expected": [
+              "argüí"
+            ],
+            "got": "argué",
+            "raw": "argué"
+          },
+          {
+            "id": "atestiguar__recognition",
+            "expected": [
+              "atestiguar"
+            ],
+            "got": "testar",
+            "raw": "testar"
+          },
+          {
+            "id": "atestiguar__first_person_singular_preterite_(yo)",
+            "expected": [
+              "atestigüé"
+            ],
+            "got": "testiguéstea",
+            "raw": "testiguéstea"
+          },
+          {
+            "id": "menguar__recognition",
+            "expected": [
+              "menguar"
+            ],
+            "got": "diminuir",
+            "raw": "diminuir"
+          },
+          {
+            "id": "menguar__first_person_singular_present_(yo)",
+            "expected": [
+              "menguo"
+            ],
+            "got": "diminuir",
+            "raw": "diminuir"
+          },
+          {
+            "id": "empalagar__recognition",
+            "expected": [
+              "empalagar"
+            ],
+            "got": "cloy",
+            "raw": "cloy"
+          },
+          {
+            "id": "empalagar__first_person_singular_present_(yo)",
+            "expected": [
+              "empalago"
+            ],
+            "got": "cuelga",
+            "raw": "cuelga"
+          },
+          {
+            "id": "blandir__recognition",
+            "expected": [
+              "blandir"
+            ],
+            "got": "brandear",
+            "raw": "brandear"
+          },
+          {
+            "id": "blandir__first_person_singular_preterite_(yo)",
+            "expected": [
+              "blandí"
+            ],
+            "got": "brandeja",
+            "raw": "brandeja"
+          },
+          {
+            "id": "proferir__recognition",
+            "expected": [
+              "proferir"
+            ],
+            "got": "utter",
+            "raw": "utter"
+          },
+          {
+            "id": "proferir__first_person_singular_present_(yo)",
+            "expected": [
+              "profiero"
+            ],
+            "got": "ústran",
+            "raw": "ústran"
+          }
+        ]
+      },
+      "qwen17b": {
+        "overall": {
+          "n": 40,
+          "correct": 19,
+          "pass_rate": 0.475,
+          "wilson_95_ci": [
+            0.3294,
+            0.625
+          ]
+        },
+        "recognition": {
+          "n": 20,
+          "correct": 11,
+          "pass_rate": 0.55,
+          "wilson_95_ci": [
+            0.3421,
+            0.7418
+          ]
+        },
+        "conjugation": {
+          "n": 20,
+          "correct": 8,
+          "pass_rate": 0.4,
+          "wilson_95_ci": [
+            0.2188,
+            0.6134
+          ]
+        },
+        "conjugation_common_regular": {
+          "n": 5,
+          "correct": 3,
+          "pass_rate": 0.6,
+          "wilson_95_ci": [
+            0.2307,
+            0.8824
+          ]
+        },
+        "conjugation_common_irregular": {
+          "n": 8,
+          "correct": 2,
+          "pass_rate": 0.25,
+          "wilson_95_ci": [
+            0.0715,
+            0.5907
+          ]
+        },
+        "conjugation_rare": {
+          "n": 7,
+          "correct": 3,
+          "pass_rate": 0.4286,
+          "wilson_95_ci": [
+            0.1582,
+            0.7495
+          ]
+        },
+        "infinitive_fallback": {
+          "n": 20,
+          "fallback_count": 5,
+          "fallback_rate": 0.25,
+          "wilson_95_ci": [
+            0.1119,
+            0.4687
+          ]
+        },
+        "failures": [
+          {
+            "id": "vivir__third_person_singular_future",
+            "expected": [
+              "vivirá"
+            ],
+            "got": "viviré",
+            "raw": "viviré"
+          },
+          {
+            "id": "correr__first_person_singular_present_(yo)",
+            "expected": [
+              "corro"
+            ],
+            "got": "correr",
+            "raw": "correr"
+          },
+          {
+            "id": "pedir__first_person_singular_present_(yo)",
+            "expected": [
+              "pido"
+            ],
+            "got": "pedir",
+            "raw": "pedir"
+          },
+          {
+            "id": "dormir__recognition",
+            "expected": [
+              "dormir"
+            ],
+            "got": "duerme",
+            "raw": "duerme"
+          },
+          {
+            "id": "dormir__first_person_singular_present_(yo)",
+            "expected": [
+              "duermo"
+            ],
+            "got": "dormir",
+            "raw": "dormir"
+          },
+          {
+            "id": "conducir__recognition",
+            "expected": [
+              "conducir"
+            ],
+            "got": "dirigir",
+            "raw": "dirigir"
+          },
+          {
+            "id": "conducir__third_person_plural_preterite_(ellos)",
+            "expected": [
+              "condujeron"
+            ],
+            "got": "conducían",
+            "raw": "conducían"
+          },
+          {
+            "id": "poner__first_person_singular_conditional_(yo)",
+            "expected": [
+              "pondría"
+            ],
+            "got": "pongo",
+            "raw": "pongo"
+          },
+          {
+            "id": "venir__first_person_singular_conditional_(yo)",
+            "expected": [
+              "vendría"
+            ],
+            "got": "vengo",
+            "raw": "vengo"
+          },
+          {
+            "id": "llegar__first_person_singular_preterite_(yo)",
+            "expected": [
+              "llegué"
+            ],
+            "got": "llegé",
+            "raw": "llegé"
+          },
+          {
+            "id": "henchir__recognition",
+            "expected": [
+              "henchir"
+            ],
+            "got": "llenar",
+            "raw": "llenar"
+          },
+          {
+            "id": "argüir__recognition",
+            "expected": [
+              "argüir"
+            ],
+            "got": "arguir",
+            "raw": "arguir"
+          },
+          {
+            "id": "atestiguar__recognition",
+            "expected": [
+              "atestiguar"
+            ],
+            "got": "testificar",
+            "raw": "testificar"
+          },
+          {
+            "id": "atestiguar__first_person_singular_preterite_(yo)",
+            "expected": [
+              "atestigüé"
+            ],
+            "got": "atestigüe",
+            "raw": "atestigüe"
+          },
+          {
+            "id": "menguar__recognition",
+            "expected": [
+              "menguar"
+            ],
+            "got": "diminuir",
+            "raw": "diminuir"
+          },
+          {
+            "id": "menguar__first_person_singular_present_(yo)",
+            "expected": [
+              "menguo"
+            ],
+            "got": "menguarme",
+            "raw": "menguarme"
+          },
+          {
+            "id": "empalagar__recognition",
+            "expected": [
+              "empalagar"
+            ],
+            "got": "cloy",
+            "raw": "cloy"
+          },
+          {
+            "id": "empalagar__first_person_singular_present_(yo)",
+            "expected": [
+              "empalago"
+            ],
+            "got": "empalagar",
+            "raw": "empalagar"
+          },
+          {
+            "id": "blandir__recognition",
+            "expected": [
+              "blandir"
+            ],
+            "got": "brandir",
+            "raw": "brandir"
+          },
+          {
+            "id": "proferir__recognition",
+            "expected": [
+              "proferir"
+            ],
+            "got": "exclamar",
+            "raw": "exclamar"
+          },
+          {
+            "id": "proferir__first_person_singular_present_(yo)",
+            "expected": [
+              "profiero"
+            ],
+            "got": "proferir",
+            "raw": "proferir"
+          }
+        ]
+      },
+      "qwen4b": {
+        "overall": {
+          "n": 40,
+          "correct": 28,
+          "pass_rate": 0.7,
+          "wilson_95_ci": [
+            0.5457,
+            0.8193
+          ]
+        },
+        "recognition": {
+          "n": 20,
+          "correct": 13,
+          "pass_rate": 0.65,
+          "wilson_95_ci": [
+            0.4329,
+            0.8188
+          ]
+        },
+        "conjugation": {
+          "n": 20,
+          "correct": 15,
+          "pass_rate": 0.75,
+          "wilson_95_ci": [
+            0.5313,
+            0.8881
+          ]
+        },
+        "conjugation_common_regular": {
+          "n": 5,
+          "correct": 4,
+          "pass_rate": 0.8,
+          "wilson_95_ci": [
+            0.3755,
+            0.9638
+          ]
+        },
+        "conjugation_common_irregular": {
+          "n": 8,
+          "correct": 8,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.6756,
+            1.0
+          ]
+        },
+        "conjugation_rare": {
+          "n": 7,
+          "correct": 3,
+          "pass_rate": 0.4286,
+          "wilson_95_ci": [
+            0.1582,
+            0.7495
+          ]
+        },
+        "infinitive_fallback": {
+          "n": 20,
+          "fallback_count": 0,
+          "fallback_rate": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.1611
+          ]
+        },
+        "failures": [
+          {
+            "id": "correr__first_person_singular_present_(yo)",
+            "expected": [
+              "corro"
+            ],
+            "got": "yo",
+            "raw": "yo corro"
+          },
+          {
+            "id": "henchir__recognition",
+            "expected": [
+              "henchir"
+            ],
+            "got": "llenar",
+            "raw": "llenar"
+          },
+          {
+            "id": "henchir__first_person_singular_preterite_(yo)",
+            "expected": [
+              "henchí"
+            ],
+            "got": "hinchí",
+            "raw": "hinchí"
+          },
+          {
+            "id": "argüir__recognition",
+            "expected": [
+              "argüir"
+            ],
+            "got": "argumentar",
+            "raw": "argumentar"
+          },
+          {
+            "id": "atestiguar__recognition",
+            "expected": [
+              "atestiguar"
+            ],
+            "got": "testificar",
+            "raw": "testificar"
+          },
+          {
+            "id": "atestiguar__first_person_singular_preterite_(yo)",
+            "expected": [
+              "atestigüé"
+            ],
+            "got": "atestigué",
+            "raw": "atestigué"
+          },
+          {
+            "id": "menguar__recognition",
+            "expected": [
+              "menguar"
+            ],
+            "got": "disminuir",
+            "raw": "disminuir"
+          },
+          {
+            "id": "empalagar__recognition",
+            "expected": [
+              "empalagar"
+            ],
+            "got": "cortar",
+            "raw": "cortar"
+          },
+          {
+            "id": "blandir__recognition",
+            "expected": [
+              "blandir"
+            ],
+            "got": "brandear",
+            "raw": "brandear"
+          },
+          {
+            "id": "blandir__first_person_singular_preterite_(yo)",
+            "expected": [
+              "blandí"
+            ],
+            "got": "blandeí",
+            "raw": "blandeí"
+          },
+          {
+            "id": "proferir__recognition",
+            "expected": [
+              "proferir"
+            ],
+            "got": "decir",
+            "raw": "decir"
+          },
+          {
+            "id": "proferir__first_person_singular_present_(yo)",
+            "expected": [
+              "profiero"
+            ],
+            "got": "profero",
+            "raw": "profero"
+          }
+        ]
+      }
+    }
+  }
+}
