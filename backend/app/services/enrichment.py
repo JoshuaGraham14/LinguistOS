@@ -6,12 +6,12 @@ import json
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db.backfill_lexemes import is_lexeme_complete, normalize_key_part
-from app.db.models import Lexeme
+from app.db.models import Lexeme, Vocab
 from app.db.schemas import LanguageCode, VocabTag
 
 LANGUAGE_NAMES: dict[str, str] = {
@@ -329,6 +329,56 @@ def find_complete_lexeme_match(db: Session, lexeme: Lexeme) -> Lexeme | None:
             Lexeme.id != lexeme.id,
         )
     )
+
+
+def find_lexeme_with_sense_key(
+    db: Session,
+    *,
+    language: str,
+    lemma: str,
+    pos: str,
+    gloss_primary: str,
+    exclude_id: int | None = None,
+) -> Lexeme | None:
+    query = select(Lexeme).where(
+        Lexeme.language == language,
+        Lexeme.lemma == lemma,
+        Lexeme.pos == pos,
+        Lexeme.gloss_primary == gloss_primary,
+    )
+    if exclude_id is not None:
+        query = query.where(Lexeme.id != exclude_id)
+    return db.scalar(query)
+
+
+def merge_duplicate_lexeme_into(
+    db: Session,
+    duplicate: Lexeme,
+    canonical: Lexeme,
+) -> None:
+    """Point vocab links at the canonical lexeme and drop the empty duplicate."""
+    from app.services.lexeme_resolver import find_vocab_link
+    from app.services.vocab_mapper import sync_legacy_mirrors
+
+    vocabs = db.scalars(
+        select(Vocab).where(Vocab.lexeme_id == duplicate.id)
+    ).all()
+    for vocab in vocabs:
+        existing = find_vocab_link(db, vocab.workspace_id, canonical.id)
+        if existing is not None:
+            db.delete(vocab)
+        else:
+            vocab.lexeme_id = canonical.id
+            sync_legacy_mirrors(vocab, canonical)
+            db.add(vocab)
+    db.flush()
+    remaining = db.scalar(
+        select(func.count())
+        .select_from(Vocab)
+        .where(Vocab.lexeme_id == duplicate.id)
+    )
+    if not remaining:
+        db.delete(duplicate)
 
 
 def copy_lexeme_fields(target: Lexeme, source: Lexeme) -> None:

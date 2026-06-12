@@ -14,10 +14,11 @@ from app.db.database import SessionLocal
 from app.db.models import EnrichmentJob, Lexeme, Vocab
 from app.services.enrichment import (
     apply_enrichment_to_lexeme,
-    copy_lexeme_fields,
     enrich_lexeme_llm,
     find_complete_lexeme_match,
+    find_lexeme_with_sense_key,
     mark_lexeme_enriched,
+    merge_duplicate_lexeme_into,
     missing_lexeme_fields,
     needs_enrichment,
 )
@@ -79,12 +80,11 @@ def process_enrichment_job(db: Session, job_id: int) -> None:
 
     cached = find_complete_lexeme_match(db, lexeme)
     if cached is not None and cached.id != lexeme.id:
-        copy_lexeme_fields(lexeme, cached)
+        merge_duplicate_lexeme_into(db, lexeme, cached)
         job.status = "done"
         job.result = {"source": "cache", "lexeme_id": cached.id}
         job.confidence = 1.0
         job.completed_at = datetime.utcnow()
-        db.add(lexeme)
         db.add(job)
         return
 
@@ -103,6 +103,23 @@ def process_enrichment_job(db: Session, job_id: int) -> None:
     )
 
     apply_enrichment_to_lexeme(lexeme, result)
+    collision = find_lexeme_with_sense_key(
+        db,
+        language=lexeme.language,
+        lemma=lexeme.lemma,
+        pos=lexeme.pos,
+        gloss_primary=lexeme.gloss_primary,
+        exclude_id=lexeme.id,
+    )
+    if collision is not None:
+        merge_duplicate_lexeme_into(db, lexeme, collision)
+        job.status = "done"
+        job.result = {"source": "dedupe", "lexeme_id": collision.id}
+        job.confidence = confidence
+        job.completed_at = datetime.utcnow()
+        db.add(job)
+        return
+
     mark_lexeme_enriched(lexeme)
     job.status = "done"
     job.result = result

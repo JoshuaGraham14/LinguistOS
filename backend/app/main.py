@@ -69,8 +69,9 @@ def _init_db() -> None:
     drop_deprecated_vocab_columns(engine)
     migrate_enrichment_jobs_for_lexeme(engine)
     migrate_complete_to_enriched(engine)
-    run_startup_enrichment()
-    start_enrichment_scheduler()
+    if not settings.linguistos_disable_enrichment:
+        run_startup_enrichment()
+        start_enrichment_scheduler()
 
 
 @app.get("/health")

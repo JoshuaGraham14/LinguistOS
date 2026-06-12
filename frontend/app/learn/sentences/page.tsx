@@ -668,9 +668,9 @@ function SentencePracticeInner() {
           <p className="text-slate-600">
             Add some words on the{" "}
             <Link href="/vocab" className="text-brand-600 underline">
-              Words page
+              Vocabulary
             </Link>{" "}
-            first.
+            page first.
           </p>
         </div>
       ) : filteredVocab.length === 0 ? (

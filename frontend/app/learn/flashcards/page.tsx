@@ -22,6 +22,9 @@ import {
 } from "@/lib/lexicon-query";
 import { useVocab } from "@/lib/storage";
 import type { VocabItem } from "@/lib/types";
+import { applyViewPipeline } from "@/lib/vocab-view";
+
+type ViewLoadState = "idle" | "loading" | "ready" | "error";
 
 function shuffleArray<T>(arr: T[]): T[] {
   const copy = [...arr];
@@ -48,35 +51,39 @@ function FlashcardsInner() {
   const wordParam = searchParams.get("word");
   const filterParam = searchParams.get("filter");
   const viewParam = searchParams.get("view");
-  const [viewFilterReady, setViewFilterReady] = useState(!viewParam);
-  const [viewScopedIds, setViewScopedIds] = useState<Set<number> | null>(null);
+  const [viewLoadState, setViewLoadState] = useState<ViewLoadState>(
+    viewParam ? "loading" : "idle",
+  );
+  const [viewPipelineItems, setViewPipelineItems] = useState<VocabItem[] | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!viewParam) {
-      setViewScopedIds(null);
-      setViewFilterReady(true);
+      setViewPipelineItems(null);
+      setViewLoadState("idle");
       return;
     }
     const viewId = Number(viewParam);
     if (!Number.isFinite(viewId)) {
-      setViewScopedIds(null);
-      setViewFilterReady(true);
+      setViewPipelineItems(null);
+      setViewLoadState("error");
       return;
     }
     let cancelled = false;
-    setViewFilterReady(false);
+    setViewLoadState("loading");
     void api
       .getSavedView(viewId)
       .then((view) => {
         if (cancelled) return;
-        const filtered = applyLexiconQuery(vocab, view.config.query);
-        setViewScopedIds(new Set(filtered.map((v) => v.id)));
-        setViewFilterReady(true);
+        const { items } = applyViewPipeline(vocab, view.config);
+        setViewPipelineItems(items);
+        setViewLoadState("ready");
       })
       .catch(() => {
         if (!cancelled) {
-          setViewScopedIds(null);
-          setViewFilterReady(true);
+          setViewPipelineItems(null);
+          setViewLoadState("error");
         }
       });
     return () => {
@@ -103,8 +110,11 @@ function FlashcardsInner() {
         : undefined;
       return match ? [match] : vocab;
     }
-    if (viewParam && viewScopedIds) {
-      return vocab.filter((v) => viewScopedIds.has(v.id));
+    if (viewParam) {
+      if (viewLoadState === "ready" && viewPipelineItems) {
+        return viewPipelineItems;
+      }
+      return [];
     }
     if (filterParam) {
       const query = parseLexiconQuery(decodeURIComponent(filterParam));
@@ -113,18 +123,20 @@ function FlashcardsInner() {
       }
     }
     return vocab;
-  }, [vocab, wordParam, filterParam, viewParam, viewScopedIds]);
+  }, [vocab, wordParam, filterParam, viewParam, viewLoadState, viewPipelineItems]);
+
+  const viewLoading = Boolean(viewParam && viewLoadState === "loading");
 
   // Build deck whenever vocab/shuffle/scope changes; resets the session.
   useEffect(() => {
-    if (!hydrated || !viewFilterReady) return;
+    if (!hydrated || viewLoading) return;
     setOrder(shuffle ? shuffleArray(scopedVocab) : scopedVocab);
     setIndex(0);
     setRevealed(false);
     setStats({ knew: 0, didnt: 0 });
     setSeconds(0);
     setFinished(false);
-  }, [scopedVocab, hydrated, shuffle, viewFilterReady]);
+  }, [scopedVocab, hydrated, shuffle, viewLoading]);
 
   // Timer ticks while studying; pauses on finish/empty deck.
   useEffect(() => {
@@ -288,7 +300,20 @@ function FlashcardsInner() {
         </div>
       )}
 
-      {!wordParam && viewParam && (
+      {!wordParam && viewParam && viewLoadState === "error" && (
+        <div className="rounded-xl bg-rose-50 border border-rose-100 px-4 py-2 text-sm text-rose-700 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span>Could not load this vocabulary view.</span>
+          <Link href={`/vocab?view=${viewParam}`} className="underline font-medium">
+            Back to vocabulary
+          </Link>
+          <span aria-hidden>·</span>
+          <Link href="/learn/flashcards" className="underline">
+            Use full deck
+          </Link>
+        </div>
+      )}
+
+      {!wordParam && viewParam && viewLoadState === "ready" && (
         <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-100 px-4 py-2 text-sm text-fuchsia-700 flex flex-wrap items-center gap-x-2 gap-y-1">
           <GraduationCap className="h-4 w-4 shrink-0" />
           <span>
@@ -377,9 +402,21 @@ function FlashcardsInner() {
                 </>
               ) : (
                 <div className="text-slate-500 text-center">
-                  {hydrated
-                    ? "No words yet. Add some on the Words page."
-                    : "Loading…"}
+                  {!hydrated || viewLoading
+                    ? "Loading…"
+                    : viewParam && viewLoadState === "error"
+                      ? "This view could not be loaded."
+                      : viewParam && total === 0
+                        ? "No words match this view."
+                        : (
+                          <>
+                            No words yet. Add some on the{" "}
+                            <Link href="/vocab" className="text-brand-600 underline">
+                              Vocabulary
+                            </Link>{" "}
+                            page.
+                          </>
+                        )}
                 </div>
               )}
 

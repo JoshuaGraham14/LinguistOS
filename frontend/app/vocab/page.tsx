@@ -429,8 +429,12 @@ function VocabPageInner() {
           </button>
           <button
             type="button"
+            disabled={views.length <= 1}
+            title={
+              views.length <= 1 ? "Cannot delete the last view" : undefined
+            }
             onClick={() => void handleDeleteView()}
-            className="px-5 py-2 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-700 transition"
+            className="px-5 py-2 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Delete
           </button>

@@ -115,6 +115,10 @@ def get_vocab(vocab_id: int, db: Session = Depends(get_db)) -> VocabOut:
 
 
 def _schedule_enrichment(background_tasks: BackgroundTasks | None, job_id: int | None) -> None:
+    from app.config import settings
+
+    if settings.linguistos_disable_enrichment:
+        return
     if background_tasks is not None and job_id is not None:
         background_tasks.add_task(_run_enrichment_job, job_id)
 
