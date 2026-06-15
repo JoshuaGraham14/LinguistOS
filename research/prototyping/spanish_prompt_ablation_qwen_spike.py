@@ -72,6 +72,8 @@ class ScoredCandidate:
     expected_form: str | None
     corrected: bool = False
     pass_at_2: bool | None = None
+    corrected_sentence: str | None = None
+    corrected_translation: str | None = None
 
 
 def wilson_ci(k: int, n: int, z: float = 1.96) -> tuple[float | None, float | None]:
@@ -158,6 +160,52 @@ def hf_generate_batched(
     return collected[:num_candidates]
 
 
+def parse_single_candidate(raw: str) -> dict[str, str] | None:
+    """Parse one sentence/translation pair from a correction response."""
+    try:
+        data = json.loads(raw)
+        if isinstance(data, dict) and data.get("sentence"):
+            return {
+                "sentence": str(data["sentence"]).strip(),
+                "translation": str(data.get("translation", "")).strip(),
+            }
+    except json.JSONDecodeError:
+        pass
+    cands, _ = parse_candidates_lenient(raw)
+    return cands[0] if cands else None
+
+
+def hf_generate_single(
+    model_id: str,
+    prompt: str,
+    *,
+    temperature: float = 0.7,
+    target_language: str = "es",
+) -> dict[str, str] | None:
+    gen = BaselineHFGenerator(model=model_id, temperature=temperature)
+    raw = gen._call(prompt, _system_message(target_language), max_new_tokens=256)
+    return parse_single_candidate(raw)
+
+
+def build_correction_prompt(case: BenchmarkCase, scored: ScoredCandidate) -> str:
+    c = case.constraints
+    parts: list[str] = []
+    for key in ("tense", "mood", "person", "number"):
+        if key in c:
+            parts.append(f"{key}={c[key]}")
+    spec = ", ".join(parts) if parts else "see constraints"
+    expected = c.get("expected_form", "")
+    return (
+        f'The Spanish sentence below is missing the required verb form "{expected}".\n'
+        f'Lemma: "{case.keyword}" (English: "{case.translation}"). '
+        f"Constraints: {spec}.\n"
+        f'Rewrite the Spanish sentence so it contains "{expected}" naturally.\n'
+        'Reply ONLY as JSON: {"sentence":"...","translation":"..."}\n\n'
+        f"Original sentence: {scored.sentence}\n"
+        f"Original translation: {scored.translation}"
+    )
+
+
 def build_explicit_prompt(
     case: BenchmarkCase,
     *,
@@ -229,14 +277,56 @@ def run_baseline_condition(
     return scored
 
 
-def _rate(scored: list[ScoredCandidate], *, use_pass_at_2: bool = False) -> dict[str, Any]:
+def run_self_correct_condition(
+    model_id: str,
+    case: BenchmarkCase,
+    *,
+    samples: int,
+    temperature: float,
+    sentence_length: str,
+) -> list[ScoredCandidate]:
+    scored = run_baseline_condition(
+        model_id,
+        case,
+        samples=samples,
+        temperature=temperature,
+        sentence_length=sentence_length,
+        prompt_builder=build_baseline_prompt,
+    )
+    for item in scored:
+        item.pass_at_2 = item.ef_pass
+        if item.ef_pass:
+            continue
+        expected = case.constraints.get("expected_form")
+        if not expected:
+            continue
+        correction_prompt = build_correction_prompt(case, item)
+        fixed = hf_generate_single(model_id, correction_prompt, temperature=temperature)
+        if not fixed or not fixed.get("sentence"):
+            continue
+        item.corrected = True
+        item.corrected_sentence = fixed["sentence"]
+        item.corrected_translation = fixed.get("translation") or item.translation
+        if ef_pass(item.corrected_sentence, item.corrected_translation, case.constraints):
+            item.pass_at_2 = True
+    return scored
+
+
+def _candidate_pass(scored: ScoredCandidate | dict[str, Any], *, use_pass_at_2: bool) -> bool:
+    if isinstance(scored, dict):
+        if use_pass_at_2:
+            return bool(scored.get("pass_at_2"))
+        return bool(scored.get("ef_pass"))
+    if use_pass_at_2:
+        return bool(scored.pass_at_2)
+    return scored.ef_pass
+
+
+def _rate(scored: list[ScoredCandidate | dict[str, Any]], *, use_pass_at_2: bool = False) -> dict[str, Any]:
     n = len(scored)
     if n == 0:
         return {"n": 0, "correct": 0, "pass_rate": None, "wilson_95_ci": None}
-    if use_pass_at_2:
-        k = sum(1 for s in scored if (s.pass_at_2 if s.pass_at_2 is not None else s.ef_pass))
-    else:
-        k = sum(1 for s in scored if s.ef_pass)
+    k = sum(1 for s in scored if _candidate_pass(s, use_pass_at_2=use_pass_at_2))
     lo, hi = wilson_ci(k, n)
     return {
         "n": n,
@@ -257,7 +347,7 @@ def summarize_run(
         out["per_model"][model_key] = {"by_condition": {}}
         for cond in conditions:
             cond_rows = [r for r in model_rows if r["condition"] == cond]
-            all_scored: list[ScoredCandidate] = []
+            all_scored: list[dict[str, Any]] = []
             for row in cond_rows:
                 all_scored.extend(row["candidates"])
             use_p2 = cond == "self_correct"
@@ -267,9 +357,9 @@ def summarize_run(
                 "by_benchmark": {},
             }
             if use_p2:
-                attempts = sum(1 for s in all_scored if not s.ef_pass)
+                attempts = sum(1 for s in all_scored if not s.get("ef_pass"))
                 fixed = sum(
-                    1 for s in all_scored if not s.ef_pass and s.pass_at_2
+                    1 for s in all_scored if s.get("corrected") and s.get("pass_at_2")
                 )
                 summary["correction"] = {
                     "failures_at_1": attempts,
@@ -278,13 +368,16 @@ def summarize_run(
                     "correction_yield": round(fixed / attempts, 4) if attempts else None,
                 }
             for bm in _DEFAULT_BENCHMARKS:
-                bm_scored: list[ScoredCandidate] = []
+                bm_scored: list[dict[str, Any]] = []
                 for row in cond_rows:
                     if row["case"]["benchmark"] == bm:
                         bm_scored.extend(row["candidates"])
                 summary["by_benchmark"][bm] = _rate(bm_scored, use_pass_at_2=use_p2)
             out["per_model"][model_key]["by_condition"][cond] = summary
     return out
+
+
+VALID_CONDITIONS = frozenset({"baseline", "explicit", "self_correct"})
 
 
 def run_ablation(
@@ -314,21 +407,30 @@ def run_ablation(
         model_id = QWEN_MODELS[model_key]
         print(f"\n=== {model_key} ({model_id}) ===")
         for condition in conditions:
-            if condition not in prompt_builders:
+            if condition not in VALID_CONDITIONS:
                 raise ValueError(f"Unknown condition: {condition}")
             print(f"  -- {condition} --")
-            builder = prompt_builders[condition]
             for i, case in enumerate(cases, 1):
                 print(f"    [{i}/{len(cases)}] {case.id}...", flush=True)
                 t0 = time.perf_counter()
-                scored = run_baseline_condition(
-                    model_id,
-                    case,
-                    samples=samples,
-                    temperature=temperature,
-                    sentence_length=sentence_length,
-                    prompt_builder=builder,
-                )
+                if condition == "self_correct":
+                    scored = run_self_correct_condition(
+                        model_id,
+                        case,
+                        samples=samples,
+                        temperature=temperature,
+                        sentence_length=sentence_length,
+                    )
+                else:
+                    builder = prompt_builders[condition]
+                    scored = run_baseline_condition(
+                        model_id,
+                        case,
+                        samples=samples,
+                        temperature=temperature,
+                        sentence_length=sentence_length,
+                        prompt_builder=builder,
+                    )
                 row = {
                     "model_key": model_key,
                     "model_id": model_id,
@@ -350,7 +452,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Spanish prompt ablation (Qwen 0.5B / 1.7B)")
     parser.add_argument("--models", nargs="+", choices=list(QWEN_MODELS), default=["qwen05b", "qwen17b"])
     parser.add_argument("--benchmarks", nargs="+", default=list(_DEFAULT_BENCHMARKS))
-    parser.add_argument("--conditions", nargs="+", default=["baseline"])
+    parser.add_argument(
+        "--conditions",
+        nargs="+",
+        default=["baseline", "explicit", "self_correct"],
+    )
     parser.add_argument("--samples", type=int, default=20)
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--sentence-length", default="short", dest="sentence_length")
