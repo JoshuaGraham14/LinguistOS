@@ -76,4 +76,20 @@ def test_cefr_line():
         num_candidates=3,
         cefr_level="B1",
     )
-    assert "CEFR level: B1" in prompt
+    assert "CEFR B1" in prompt
+    assert "intermediate" in prompt
+    assert "inflected" in prompt
+
+
+def test_inflection_line():
+    prompt = build_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "preterite", "person": "1st", "number": "plural"},
+        num_candidates=3,
+    )
+    assert 'target verb "comer"' in prompt
+    assert "tense=preterite" in prompt
+    assert "person=1st" in prompt
+    assert "number=plural" in prompt

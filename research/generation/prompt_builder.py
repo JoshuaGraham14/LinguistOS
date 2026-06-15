@@ -17,6 +17,37 @@ LANGUAGE_NAMES: dict[str, str] = {
     "ar": "Arabic",
 }
 
+# CEFR fluency labels and grammar guidance injected into generation prompts.
+CEFR_FLUENCY: dict[str, str] = {
+    "A1": "beginner",
+    "A2": "elementary",
+    "B1": "intermediate",
+    "B2": "upper-intermediate",
+    "C1": "advanced",
+    "C2": "mastery",
+}
+
+CEFR_GRAMMAR_GUIDANCE: dict[str, str] = {
+    "A1": (
+        "Use only short, simple sentences (subject–verb–object). "
+        "Avoid subordinate clauses (e.g. que, porque, cuando, si), passive voice, "
+        "and any grammar above beginner level."
+    ),
+    "A2": (
+        "Use simple connected sentences with basic conjunctions on familiar topics. "
+        "Avoid complex subordination and advanced constructions."
+    ),
+    "B1": (
+        "Use straightforward connected language; subordinate clauses are allowed "
+        "but keep them simple."
+    ),
+    "B2": (
+        "Use clear, varied structures appropriate for upper-intermediate learners."
+    ),
+    "C1": "Use flexible, precise language including complex structures when natural.",
+    "C2": "Use nuanced, native-like language at full complexity when natural.",
+}
+
 
 def language_display_name(code: str) -> str:
     try:
@@ -42,6 +73,32 @@ def _explicit_subject_line(
     if gender:
         line += f", gender={gender}"
     return line + ".\n"
+
+
+def _cefr_line(cefr_level: str) -> str:
+    level = cefr_level.strip().upper()
+    fluency = CEFR_FLUENCY.get(level, "learner")
+    grammar = CEFR_GRAMMAR_GUIDANCE.get(
+        level,
+        "Use vocabulary and grammar appropriate for this level.",
+    )
+    return (
+        f"Target learner level: CEFR {level} ({fluency}). "
+        f"Vocabulary and grammar must be appropriate for this fluency level. "
+        f"{grammar}\n"
+    )
+
+
+def _inflection_line(keyword: str, constraints: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for key in ("tense", "mood", "person", "number"):
+        if key in constraints:
+            parts.append(f"{key}={constraints[key]}")
+    spec = ", ".join(parts) if parts else "the constraints above"
+    return (
+        f'The target verb "{keyword}" must appear in the sentence inflected to match '
+        f"{spec} — not as the bare infinitive unless the constraints require it.\n"
+    )
 
 
 def _constraint_lines(language: str, constraints: dict[str, Any]) -> list[str]:
@@ -79,12 +136,8 @@ def build_prompt(
     else:
         constraint_block = f"Constraints: length={length_desc}.\n"
 
-    cefr_line = ""
-    if cefr_level:
-        cefr_line = (
-            f"Target CEFR level: {cefr_level}. "
-            "Use vocabulary and grammar appropriate for this level.\n"
-        )
+    cefr_line = _cefr_line(cefr_level) if cefr_level else ""
+    inflection_line = _inflection_line(keyword, constraints)
 
     subject_line = _explicit_subject_line(
         constraints, explicit_subject_required=explicit_subject_required
@@ -96,13 +149,15 @@ def build_prompt(
 
     return (
         f"You generate {lang} example sentences for vocabulary practice.\n"
-        f'Target word: "{keyword}" (English: "{translation}")\n'
+        f'Target word (lemma): "{keyword}" (English: "{translation}")\n'
         f"{constraint_block}"
+        f"{inflection_line}"
         f"{exercise_line}"
         f"{subject_line}"
         f"{cefr_line}"
-        f"Produce {num_candidates} natural {lang} sentences within the length band "
-        "that contain the target word, each with its English translation.\n"
+        f"Produce {num_candidates} natural {lang} sentences within the length band. "
+        f"Each sentence must contain the target verb inflected as specified above, "
+        "with its English translation.\n"
         "Reply ONLY as JSON in this exact shape:\n"
         '{"candidates":[{"sentence":"...","translation":"..."}, ...]}'
     )

@@ -52,7 +52,8 @@ def test_prompt_with_cefr_includes_level():
     prompt = build_prompt(
         "comer", "to eat", _ES_PRETERITE_1PL, 3, cefr_level="B1"
     )
-    assert "CEFR level: B1" in prompt
+    assert "CEFR B1" in prompt
+    assert "intermediate" in prompt
 
 
 def test_prompt_includes_numeric_length_band():

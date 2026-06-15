@@ -11,6 +11,7 @@ constraint_sets:
     tense: preterite
     person: 1st
     number: plural
+    cefr_level: A1
 
   - keyword: vivir
     expected_form: vivirá
@@ -18,6 +19,7 @@ constraint_sets:
     tense: future
     person: 3rd
     number: singular
+    cefr_level: A1
 
   - keyword: hablar
     expected_form: hablas
@@ -25,6 +27,7 @@ constraint_sets:
     tense: present
     person: 2nd
     number: singular
+    cefr_level: A1
 
   - keyword: escribir
     expected_form: escribieron
@@ -32,6 +35,7 @@ constraint_sets:
     tense: preterite
     person: 3rd
     number: plural
+    cefr_level: A1
 
   - keyword: correr
     expected_form: corro
@@ -39,3 +43,4 @@ constraint_sets:
     tense: present
     person: 1st
     number: singular
+    cefr_level: A1
