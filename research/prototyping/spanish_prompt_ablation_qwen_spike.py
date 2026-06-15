@@ -31,7 +31,11 @@ from research.generation.baseline_hf import (
     parse_candidates_lenient,
 )
 from research.generation.languages import extract_constraints
-from research.generation.prompt_builder import build_prompt, language_display_name
+from research.generation.prompt_builder import (
+    build_prompt,
+    build_prompt_explicit,
+    language_display_name,
+)
 
 _BENCHMARKS_DIR = Path(__file__).resolve().parents[1] / "benchmarks"
 _DEFAULT_BENCHMARKS = ("spanish_basic", "spanish_challenging", "spanish_niche")
@@ -152,6 +156,23 @@ def hf_generate_batched(
         )
         collected.extend(cands)
     return collected[:num_candidates]
+
+
+def build_explicit_prompt(
+    case: BenchmarkCase,
+    *,
+    num_candidates: int,
+    sentence_length: str = "short",
+) -> str:
+    return build_prompt_explicit(
+        keyword=case.keyword,
+        translation=case.translation,
+        target_language="es",
+        constraints=case.constraints,
+        num_candidates=num_candidates,
+        sentence_length=sentence_length,
+        cefr_level=case.cefr_level,
+    )
 
 
 def build_baseline_prompt(
@@ -339,6 +360,7 @@ def main() -> None:
 
     builders: dict[str, PromptBuilder] = {
         "baseline": build_baseline_prompt,
+        "explicit": build_explicit_prompt,
     }
 
     if args.dry_run:

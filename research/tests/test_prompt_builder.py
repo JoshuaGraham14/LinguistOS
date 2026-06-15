@@ -92,4 +92,22 @@ def test_inflection_line():
     assert 'target verb "comer"' in prompt
     assert "tense=preterite" in prompt
     assert "person=1st" in prompt
-    assert "number=plural" in prompt
+    assert "infinitive" in prompt.lower()
+
+
+def test_build_prompt_explicit_spanish_overlay():
+    from research.generation.prompt_builder import build_prompt_explicit
+
+    prompt = build_prompt_explicit(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "preterite", "person": "1st", "number": "plural"},
+        num_candidates=3,
+        sentence_length="short",
+    )
+    assert "Additional requirements:" in prompt
+    assert "nosotros" in prompt
+    assert "pretérito indefinido" in prompt
+    assert 'DO NOT use the infinitive "comer"' in prompt
+    assert "expected_form" not in prompt.lower()
