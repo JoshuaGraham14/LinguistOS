@@ -191,9 +191,20 @@ export function applyViewPipeline(
 
 const ALL_PROPERTY_KEYS = VOCAB_PROPERTIES.map((p) => p.key);
 
+function dedupePropertyKeys(keys: string[]): string[] {
+  const seen = new Set<string>();
+  const deduped: string[] = [];
+  for (const key of keys) {
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(key);
+  }
+  return deduped;
+}
+
 export function orderedPropertyKeys(config: VocabViewConfig): string[] {
-  const order = config.propertyOrder.filter((k) =>
-    ALL_PROPERTY_KEYS.includes(k),
+  const order = dedupePropertyKeys(
+    config.propertyOrder.filter((k) => ALL_PROPERTY_KEYS.includes(k)),
   );
   for (const key of ALL_PROPERTY_KEYS) {
     if (!order.includes(key)) order.push(key);

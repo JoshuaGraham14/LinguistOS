@@ -115,6 +115,17 @@ DEFAULT_VIEW_SPECS: list[tuple[str, str | None, SavedViewLayout, dict, int]] = [
 _ALL_WORDS_SORT = [{"field": "createdAt", "direction": "desc"}]
 
 
+def _dedupe_preserve_order(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
 def _is_legacy_all_words_config(config: dict) -> bool:
     sorts = config.get("sorts") or []
     if sorts == [{"field": "word", "direction": "asc"}]:
@@ -190,15 +201,40 @@ def migrate_all_words_view_defaults(db: Session, workspace_id: int) -> int:
         visible = list(config.get("visibleProperties") or _ALL_PROPERTIES)
         order = list(config.get("propertyOrder") or visible)
         if "createdAt" not in visible:
-            insert_at = order.index("box") if "box" in order else len(order)
+            insert_at = visible.index("box") if "box" in visible else len(visible)
             visible.insert(insert_at, "createdAt")
+        if "createdAt" not in order:
+            insert_at = order.index("box") if "box" in order else len(order)
             order.insert(insert_at, "createdAt")
-        config["visibleProperties"] = visible
-        config["propertyOrder"] = order
+        config["visibleProperties"] = _dedupe_preserve_order(visible)
+        config["propertyOrder"] = _dedupe_preserve_order(order)
         config["sorts"] = _ALL_WORDS_SORT
         view.config = config
         db.add(view)
         updated += 1
+    if updated:
+        db.commit()
+    return updated
+
+
+def migrate_dedupe_view_properties(db: Session, workspace_id: int) -> int:
+    """Remove duplicate entries from visibleProperties and propertyOrder."""
+    views = db.scalars(
+        select(SavedView).where(SavedView.workspace_id == workspace_id)
+    ).all()
+    updated = 0
+    for view in views:
+        config = dict(view.config or {})
+        visible = _dedupe_preserve_order(list(config.get("visibleProperties") or []))
+        order = _dedupe_preserve_order(list(config.get("propertyOrder") or []))
+        if visible != config.get("visibleProperties") or order != config.get(
+            "propertyOrder"
+        ):
+            config["visibleProperties"] = visible
+            config["propertyOrder"] = order
+            view.config = config
+            db.add(view)
+            updated += 1
     if updated:
         db.commit()
     return updated
@@ -215,6 +251,7 @@ def ensure_default_saved_views(db: Session, workspace_id: int) -> list[SavedView
         migrate_all_words_view_defaults(db, workspace_id)
         migrate_review_queue_view_defaults(db, workspace_id)
         migrate_gallery_view_name(db, workspace_id)
+        migrate_dedupe_view_properties(db, workspace_id)
         return list(
             db.scalars(
                 select(SavedView)

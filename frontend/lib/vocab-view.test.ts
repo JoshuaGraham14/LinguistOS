@@ -126,6 +126,19 @@ describe("orderedVisibleProperties", () => {
     assert.deepEqual(columns[0], "word");
     assert.ok(columns.includes("translation"));
   });
+
+  it("deduplicates repeated property keys in saved config", () => {
+    const columns = orderedVisibleProperties(
+      viewConfig({
+        visibleProperties: ["word", "translation", "createdAt", "createdAt"],
+        propertyOrder: ["word", "translation", "createdAt", "createdAt"],
+      }),
+    );
+    assert.deepEqual(
+      columns.filter((key) => key === "createdAt").length,
+      1,
+    );
+  });
 });
 
 describe("column menu helpers", () => {
