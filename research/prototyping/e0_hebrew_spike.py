@@ -345,7 +345,7 @@ def main() -> None:
     )
     data = run_spike(samples=args.samples, sentence_length=args.length)
     summary = summarize(data)
-    out_dir = Path(__file__).resolve().parents[2] / "docs"
+    out_dir = Path(__file__).resolve().parents[2] / "docs" / "spike-results"
     json_path = out_dir / f"eval_hebrew_e0_spike_{args.length}_results.json"
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({"data": data, "summary": summary}, f, ensure_ascii=False, indent=2)

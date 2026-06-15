@@ -2,7 +2,7 @@
 
 CLI-driven pipeline for running generation experiments against benchmarks, scoring outputs, and storing results in a local SQLite database (`research.db`). Use [`explore.ipynb`](explore.ipynb) to inspect and compare runs.
 
-Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/api/generate.py) but runs standalone (no FastAPI). See [`docs/research_mode_implementation_plan.md`](../docs/research_mode_implementation_plan.md) for the full design.
+Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/api/generate.py) but runs standalone (no FastAPI). See [`docs/plans/research_mode_implementation_plan.md`](../docs/plans/research_mode_implementation_plan.md) for the full design.
 
 ## Layout
 

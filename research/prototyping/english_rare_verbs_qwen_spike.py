@@ -16,7 +16,7 @@ Models (same ladder as baseline_hf presets):
 Gold forms are standard dictionary entries (OED / Merriam-Webster style);
 alternate spellings are accepted where both are listed.
 
-Results: docs/eval_english_rare_verbs_qwen_spike_results.json
+Results: docs/spike-results/eval_english_rare_verbs_qwen_spike_results.json
 """
 
 from __future__ import annotations
@@ -457,6 +457,7 @@ def main() -> None:
     out_path = (
         Path(__file__).resolve().parents[2]
         / "docs"
+        / "spike-results"
         / "eval_english_rare_verbs_qwen_spike_results.json"
     )
     with open(out_path, "w", encoding="utf-8") as f:

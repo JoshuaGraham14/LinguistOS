@@ -6,7 +6,7 @@ Two modes over one shared pipeline:
 - **Learning Mode** — user-facing vocabulary practice (Next.js)
 - **Research Mode** — evaluation, experimentation, analysis (Streamlit)
 
-See [docs/hybrid_system_spec.md](docs/hybrid_system_spec.md) for the full specification.
+See [docs/specs/hybrid_system_spec.md](docs/specs/hybrid_system_spec.md) for the full specification.
 
 ## Layout
 
@@ -14,7 +14,7 @@ See [docs/hybrid_system_spec.md](docs/hybrid_system_spec.md) for the full specif
 backend/    FastAPI service + core pipeline engine (the heart of the system)
 frontend/   Next.js + TypeScript + Tailwind (Learning Mode UI)
 research/   Streamlit app (Research Mode UI)
-docs/       Specification and design notes
+docs/       Specification, plans, experiment results (see docs/README.md)
 scripts/    Dev/db/setup utilities
 ```
 

@@ -1,0 +1,2051 @@
+{
+  "models": {
+    "qwen17b": "Qwen/Qwen3-1.7B"
+  },
+  "benchmarks": [
+    "spanish_basic"
+  ],
+  "conditions": [
+    "baseline",
+    "explicit",
+    "self_correct"
+  ],
+  "samples_per_case": 10,
+  "temperature": 0.7,
+  "sentence_length": "short",
+  "cases": [
+    {
+      "id": "spanish_basic__comer__preterite_1st_plural__0",
+      "benchmark": "spanish_basic",
+      "tier": "common_regular",
+      "keyword": "comer",
+      "translation": "to eat",
+      "constraints": {
+        "tense": "preterite",
+        "person": "1st",
+        "number": "plural",
+        "expected_form": "comimos"
+      },
+      "cefr_level": "A1"
+    },
+    {
+      "id": "spanish_basic__vivir__future_3rd_singular__1",
+      "benchmark": "spanish_basic",
+      "tier": "common_regular",
+      "keyword": "vivir",
+      "translation": "to live",
+      "constraints": {
+        "tense": "future",
+        "person": "3rd",
+        "number": "singular",
+        "expected_form": "vivirá"
+      },
+      "cefr_level": "A1"
+    },
+    {
+      "id": "spanish_basic__hablar__present_2nd_singular__2",
+      "benchmark": "spanish_basic",
+      "tier": "common_regular",
+      "keyword": "hablar",
+      "translation": "to speak",
+      "constraints": {
+        "tense": "present",
+        "person": "2nd",
+        "number": "singular",
+        "expected_form": "hablas"
+      },
+      "cefr_level": "A1"
+    },
+    {
+      "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+      "benchmark": "spanish_basic",
+      "tier": "common_regular",
+      "keyword": "escribir",
+      "translation": "to write",
+      "constraints": {
+        "tense": "preterite",
+        "person": "3rd",
+        "number": "plural",
+        "expected_form": "escribieron"
+      },
+      "cefr_level": "A1"
+    },
+    {
+      "id": "spanish_basic__correr__present_1st_singular__4",
+      "benchmark": "spanish_basic",
+      "tier": "common_regular",
+      "keyword": "correr",
+      "translation": "to run",
+      "constraints": {
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "corro"
+      },
+      "cefr_level": "A1"
+    }
+  ],
+  "runs": [
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 33.01,
+      "candidates": [
+        {
+          "sentence": "Como comí un sándwich",
+          "translation": "As I ate a sandwich",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comimos un plato del día",
+          "translation": "We ate a meal of the day",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comimos en la cafetería",
+          "translation": "We ate in the cafeteria",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comí un pan con leche",
+          "translation": "I ate bread with milk",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comimos en la mesa",
+          "translation": "We ate at the table",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comí un helado",
+          "translation": "I ate an ice cream",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comimos tres platos",
+          "translation": "We ate three dishes",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comí un café con leche",
+          "translation": "I ate coffee with milk",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comimos en el restaurante",
+          "translation": "We ate in the restaurant",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comí un pastel de chocolate",
+          "translation": "I ate a chocolate cake",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 17.08,
+      "candidates": [
+        {
+          "sentence": "Viviré una nueva vida.",
+          "translation": "I will live a new life.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré en una casa nueva.",
+          "translation": "I will live in a new house.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré con mi familia.",
+          "translation": "I will live with my family.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré en un país nuevo.",
+          "translation": "I will live in a new country.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré en el futuro.",
+          "translation": "I will live in the future.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré después de la enfermedad.",
+          "translation": "I will live after the illness.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré en un trabajo nuevo.",
+          "translation": "I will live in a new job.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré con mis amigos.",
+          "translation": "I will live with my friends.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré en un país diferente.",
+          "translation": "I will live in a different country.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Viviré en un futuro brillante.",
+          "translation": "I will live in a bright future.",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 11.65,
+      "candidates": [
+        {
+          "sentence": "Hablo español.",
+          "translation": "I speak Spanish.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Te hablo.",
+          "translation": "I speak to you.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo con él.",
+          "translation": "I speak to him.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo en español.",
+          "translation": "I speak in Spanish.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo hoy.",
+          "translation": "I speak today.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo de ti.",
+          "translation": "I speak of you.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo en voz alta.",
+          "translation": "I speak out loud.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo de lo que pasó.",
+          "translation": "I speak of what happened.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo con mi madre.",
+          "translation": "I speak with my mother.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Hablo en la clase.",
+          "translation": "I speak in class.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 13.71,
+      "candidates": [
+        {
+          "sentence": "Escribimos un mensaje.",
+          "translation": "We write a message.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos un correo electrónico.",
+          "translation": "We write an email.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos una carta.",
+          "translation": "We write a letter.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos un libro.",
+          "translation": "We write a book.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos un poema.",
+          "translation": "We write a poem.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos un examen.",
+          "translation": "We write an exam.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos un trabajo.",
+          "translation": "We write a job.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos un mensaje de texto.",
+          "translation": "We write a text message.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos una canción.",
+          "translation": "We write a song.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Escribimos un periódico.",
+          "translation": "We write a newspaper.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 12.19,
+      "candidates": [
+        {
+          "sentence": "Corro en la plaza.",
+          "translation": "I run in the plaza.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro rápido.",
+          "translation": "I run fast.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro por la calle.",
+          "translation": "I run along the street.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro con mis amigos.",
+          "translation": "I run with my friends.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro al parque.",
+          "translation": "I run to the park.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro cada día.",
+          "translation": "I run every day.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro para llegar tarde.",
+          "translation": "I run to get there late.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro en bicicleta.",
+          "translation": "I run on a bicycle.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro en el campo.",
+          "translation": "I run in the field.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro con cuidado.",
+          "translation": "I run carefully.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 7.95,
+      "candidates": [
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 28.37,
+      "candidates": [
+        {
+          "sentence": "él vivirá",
+          "translation": "he will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "nosotros viviremos",
+          "translation": "we will live",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "usted vivirá",
+          "translation": "you will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "el niño vivirá",
+          "translation": "the child will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "el perro vivirá",
+          "translation": "the dog will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "el libro vivirá",
+          "translation": "the book will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "el árbol vivirá",
+          "translation": "the tree will live",
+          "ef_pass": true,
+          "expected_form": "vivirá",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 10.59,
+      "candidates": [
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 15.83,
+      "candidates": [
+        {
+          "sentence": "ellos escriben",
+          "translation": "they write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ella escriben",
+          "translation": "she writes",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "nosotros escribimos",
+          "translation": "we write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ustedes escriben",
+          "translation": "you write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ellas escriben",
+          "translation": "they write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "vosotros escribís",
+          "translation": "you (plural) write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ustedes escriben",
+          "translation": "you write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "nosotros escribimos",
+          "translation": "we write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ustedes escriben",
+          "translation": "you write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "ellas escriben",
+          "translation": "they write",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 13.39,
+      "candidates": [
+        {
+          "sentence": "Yo corro en la plaza.",
+          "translation": "I run in the plaza.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro cada día.",
+          "translation": "I run every day.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro rápido.",
+          "translation": "I run quickly.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro por la mañana.",
+          "translation": "I run in the morning.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro con amigos.",
+          "translation": "I run with friends.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro en el parque.",
+          "translation": "I run in the park.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro para mejorar.",
+          "translation": "I run to improve.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro siempre.",
+          "translation": "I run always.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro en la bicicleta.",
+          "translation": "I run on the bicycle.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Yo corro con mi hermano.",
+          "translation": "I run with my brother.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": null,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "self_correct",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 19.04,
+      "candidates": [
+        {
+          "sentence": "Como comí el pan",
+          "translation": "I ate the bread",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Comí el pan",
+          "corrected_translation": "I ate the bread"
+        },
+        {
+          "sentence": "Comimos la pizza",
+          "translation": "We ate the pizza",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comeré el café",
+          "translation": "I will eat the coffee",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Comeré el café",
+          "corrected_translation": "I will eat the coffee"
+        },
+        {
+          "sentence": "Comimos la comida",
+          "translation": "We ate the food",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comimos el pastel",
+          "translation": "We ate the cake",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comí el helado",
+          "translation": "I ate the ice cream",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Comí el helado",
+          "corrected_translation": "I ate the ice cream"
+        },
+        {
+          "sentence": "Comimos la cena",
+          "translation": "We ate dinner",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comimos el pan",
+          "translation": "We ate the bread",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Comí el pan",
+          "translation": "I ate the bread",
+          "ef_pass": false,
+          "expected_form": "comimos",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Comí el pan",
+          "corrected_translation": "I ate the bread"
+        },
+        {
+          "sentence": "Comimos la comida",
+          "translation": "We ate the food",
+          "ef_pass": true,
+          "expected_form": "comimos",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "self_correct",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 46.7,
+      "candidates": [
+        {
+          "sentence": "viviré el verano",
+          "translation": "I will live the summer",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré el verano",
+          "corrected_translation": "I will live the summer"
+        },
+        {
+          "sentence": "viviré en España",
+          "translation": "I will live in Spain",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré en España",
+          "corrected_translation": "Yo viviré en España"
+        },
+        {
+          "sentence": "viviré con mi familia",
+          "translation": "I will live with my family",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré con mi familia",
+          "corrected_translation": "I will live with my family"
+        },
+        {
+          "sentence": "viviré en una casa nueva",
+          "translation": "I will live in a new house",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré en una casa nueva",
+          "corrected_translation": "I will live in a new house"
+        },
+        {
+          "sentence": "viviré en un apartamento",
+          "translation": "I will live in an apartment",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré en un apartamento",
+          "corrected_translation": "I will live in an apartment"
+        },
+        {
+          "sentence": "viviré la vida en la ciudad",
+          "translation": "I will live my life in the city",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré la vida en la ciudad",
+          "corrected_translation": "I will live my life in the city"
+        },
+        {
+          "sentence": "viviré una vida feliz",
+          "translation": "I will live a happy life",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré una vida feliz",
+          "corrected_translation": "I will live a happy life"
+        },
+        {
+          "sentence": "viviré con mi familia",
+          "translation": "I will live with my family",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré con mi familia",
+          "corrected_translation": "I will live with my family"
+        },
+        {
+          "sentence": "viviré en un apartamento pequeño",
+          "translation": "I will live in a small apartment",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré en un apartamento pequeño",
+          "corrected_translation": "I will live in a small apartment"
+        },
+        {
+          "sentence": "viviré en un país nuevo",
+          "translation": "I will live in a new country",
+          "ef_pass": false,
+          "expected_form": "vivirá",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "viviré en un país nuevo",
+          "corrected_translation": "I will live in a new country"
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "self_correct",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 29.49,
+      "candidates": [
+        {
+          "sentence": "Hablo español.",
+          "translation": "I speak Spanish.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Hablo español.",
+          "corrected_translation": "I speak Spanish."
+        },
+        {
+          "sentence": "Ella habla rápido.",
+          "translation": "She speaks quickly.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Ella habla rápido.",
+          "corrected_translation": "She speaks quickly."
+        },
+        {
+          "sentence": "Nosotros hablamos en español.",
+          "translation": "We speak in Spanish.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Nosotros hablamos en español.",
+          "corrected_translation": "We speak in Spanish."
+        },
+        {
+          "sentence": "Él habla con nosotros.",
+          "translation": "He speaks to us.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Él habla con nosotros.",
+          "corrected_translation": "He speaks to us."
+        },
+        {
+          "sentence": "Yo hablo con mi madre.",
+          "translation": "I speak to my mother.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Yo hablo con mi madre.",
+          "corrected_translation": "I speak to my mother."
+        },
+        {
+          "sentence": "Ella habla de su país.",
+          "translation": "She speaks about her country.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Ella habla de su país.",
+          "corrected_translation": "She speaks about her country."
+        },
+        {
+          "sentence": "Tú hablas inglés.",
+          "translation": "You speak English.",
+          "ef_pass": true,
+          "expected_form": "hablas",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Nosotras hablamos en otro idioma.",
+          "translation": "We speak in another language.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Nosotras hablamos en otro idioma.",
+          "corrected_translation": "We speak in another language."
+        },
+        {
+          "sentence": "Él habla con su amigo.",
+          "translation": "He speaks to his friend.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Él habla con su amigo.",
+          "corrected_translation": "He speaks to his friend."
+        },
+        {
+          "sentence": "Yo hablo con mi hermano.",
+          "translation": "I speak to my brother.",
+          "ef_pass": false,
+          "expected_form": "hablas",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Yo hablo con mi hermano.",
+          "corrected_translation": "I speak to my brother."
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "self_correct",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 33.98,
+      "candidates": [
+        {
+          "sentence": "Escribimos un correo electrónico.",
+          "translation": "We write an email.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un correo electrónico.",
+          "corrected_translation": "We write an email."
+        },
+        {
+          "sentence": "Escribimos un libro.",
+          "translation": "We write a book.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un libro.",
+          "corrected_translation": "We wrote a book."
+        },
+        {
+          "sentence": "Escribimos en clase.",
+          "translation": "We write in class.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos en clase.",
+          "corrected_translation": "We write in class."
+        },
+        {
+          "sentence": "Escribimos las palabras.",
+          "translation": "We write the words.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos las palabras.",
+          "corrected_translation": "We wrote the words."
+        },
+        {
+          "sentence": "Escribimos un poema.",
+          "translation": "We write a poem.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un poema.",
+          "corrected_translation": "We wrote a poem."
+        },
+        {
+          "sentence": "Escribimos un mensaje.",
+          "translation": "We write a message.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un mensaje.",
+          "corrected_translation": "We wrote a message."
+        },
+        {
+          "sentence": "Escribimos un periódico.",
+          "translation": "We write a newspaper.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un periódico.",
+          "corrected_translation": "We write a newspaper."
+        },
+        {
+          "sentence": "Escribimos un cuento.",
+          "translation": "We write a story.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un cuento.",
+          "corrected_translation": "We wrote a story."
+        },
+        {
+          "sentence": "Escribimos un examen.",
+          "translation": "We write an exam.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un examen.",
+          "corrected_translation": "We wrote an exam."
+        },
+        {
+          "sentence": "Escribimos un informe.",
+          "translation": "We write a report.",
+          "ef_pass": false,
+          "expected_form": "escribieron",
+          "corrected": true,
+          "pass_at_2": false,
+          "corrected_sentence": "Escribimos un informe.",
+          "corrected_translation": "We wrote a report."
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "self_correct",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "tier": "common_regular",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1"
+      },
+      "latency_s": 13.62,
+      "candidates": [
+        {
+          "sentence": "Corro en la plaza.",
+          "translation": "I run in the square.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro con mis amigos.",
+          "translation": "I run with my friends.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro rápido.",
+          "translation": "I run fast.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro cada día.",
+          "translation": "I run every day.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro por la calle.",
+          "translation": "I run along the street.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro al parque.",
+          "translation": "I run to the park.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro por la mañana.",
+          "translation": "I run in the morning.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro en el campo.",
+          "translation": "I run in the field.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro con la bicicleta.",
+          "translation": "I run with the bicycle.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        },
+        {
+          "sentence": "Corro por la ciudad.",
+          "translation": "I run in the city.",
+          "ef_pass": true,
+          "expected_form": "corro",
+          "corrected": false,
+          "pass_at_2": true,
+          "corrected_sentence": null,
+          "corrected_translation": null
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "per_model": {
+      "qwen17b": {
+        "by_condition": {
+          "baseline": {
+            "overall": {
+              "n": 50,
+              "correct": 15,
+              "pass_rate": 0.3,
+              "wilson_95_ci": [
+                0.191,
+                0.4375
+              ]
+            },
+            "pass_at_1": null,
+            "by_benchmark": {
+              "spanish_basic": {
+                "n": 50,
+                "correct": 15,
+                "pass_rate": 0.3,
+                "wilson_95_ci": [
+                  0.191,
+                  0.4375
+                ]
+              },
+              "spanish_challenging": {
+                "n": 0,
+                "correct": 0,
+                "pass_rate": null,
+                "wilson_95_ci": null
+              },
+              "spanish_niche": {
+                "n": 0,
+                "correct": 0,
+                "pass_rate": null,
+                "wilson_95_ci": null
+              }
+            }
+          },
+          "explicit": {
+            "overall": {
+              "n": 50,
+              "correct": 29,
+              "pass_rate": 0.58,
+              "wilson_95_ci": [
+                0.4423,
+                0.7063
+              ]
+            },
+            "pass_at_1": null,
+            "by_benchmark": {
+              "spanish_basic": {
+                "n": 50,
+                "correct": 29,
+                "pass_rate": 0.58,
+                "wilson_95_ci": [
+                  0.4423,
+                  0.7063
+                ]
+              },
+              "spanish_challenging": {
+                "n": 0,
+                "correct": 0,
+                "pass_rate": null,
+                "wilson_95_ci": null
+              },
+              "spanish_niche": {
+                "n": 0,
+                "correct": 0,
+                "pass_rate": null,
+                "wilson_95_ci": null
+              }
+            }
+          },
+          "self_correct": {
+            "overall": {
+              "n": 50,
+              "correct": 17,
+              "pass_rate": 0.34,
+              "wilson_95_ci": [
+                0.2244,
+                0.4785
+              ]
+            },
+            "pass_at_1": {
+              "n": 50,
+              "correct": 17,
+              "pass_rate": 0.34,
+              "wilson_95_ci": [
+                0.2244,
+                0.4785
+              ]
+            },
+            "by_benchmark": {
+              "spanish_basic": {
+                "n": 50,
+                "correct": 17,
+                "pass_rate": 0.34,
+                "wilson_95_ci": [
+                  0.2244,
+                  0.4785
+                ]
+              },
+              "spanish_challenging": {
+                "n": 0,
+                "correct": 0,
+                "pass_rate": null,
+                "wilson_95_ci": null
+              },
+              "spanish_niche": {
+                "n": 0,
+                "correct": 0,
+                "pass_rate": null,
+                "wilson_95_ci": null
+              }
+            },
+            "correction": {
+              "failures_at_1": 33,
+              "correction_attempts": 33,
+              "corrections_successful": 0,
+              "correction_yield": 0.0
+            }
+          }
+        }
+      }
+    },
+    "prior_reference": {
+      "qwen05b_spanish_basic": 0.06,
+      "qwen17b_spanish_basic": 0.21
+    }
+  }
+}

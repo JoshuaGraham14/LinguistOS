@@ -4,11 +4,11 @@
 Compares sentence-generation EF pass rates under:
   - baseline: current ``build_prompt`` (matches baseline_hf)
   - explicit: ``build_prompt_explicit`` (stronger morphology instructions)
-  - self_correct: baseline pass@1 then one correction call per EF failure
+  - self_correct: baseline pass@1 then one constraint-guided rewrite per EF failure (no gold form in fix prompt)
 
 Benchmarks: spanish_basic, spanish_challenging, spanish_niche.
 
-Results: docs/eval_spanish_prompt_ablation_qwen_results.json
+Results: docs/spike-results/eval_spanish_prompt_ablation_qwen_results.json
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from research.generation.baseline_hf import (
     BaselineHFGenerator,
     parse_candidates_lenient,
 )
-from research.generation.languages import extract_constraints
+from research.generation.languages import extract_constraints, load_language_profile
 from research.generation.prompt_builder import (
     build_prompt,
     build_prompt_explicit,
@@ -187,19 +187,26 @@ def hf_generate_single(
     return parse_single_candidate(raw)
 
 
-def build_correction_prompt(case: BenchmarkCase, scored: ScoredCandidate) -> str:
-    c = case.constraints
+def _constraint_summary(constraints: dict[str, Any]) -> str:
+    profile = load_language_profile("es")
     parts: list[str] = []
-    for key in ("tense", "mood", "person", "number"):
-        if key in c:
-            parts.append(f"{key}={c[key]}")
-    spec = ", ".join(parts) if parts else "see constraints"
-    expected = c.get("expected_form", "")
+    for field in profile.dimension_fields():
+        if field not in constraints:
+            continue
+        label = profile.label_for(field)
+        display = profile.gloss_for(field, str(constraints[field]))
+        parts.append(f"{label}: {display}")
+    return "; ".join(parts) if parts else "see original task constraints"
+
+
+def build_correction_prompt(case: BenchmarkCase, scored: ScoredCandidate) -> str:
+    summary = _constraint_summary(case.constraints)
     return (
-        f'The Spanish sentence below is missing the required verb form "{expected}".\n'
-        f'Lemma: "{case.keyword}" (English: "{case.translation}"). '
-        f"Constraints: {spec}.\n"
-        f'Rewrite the Spanish sentence so it contains "{expected}" naturally.\n'
+        f'The Spanish sentence below may not correctly conjugate the verb '
+        f'"{case.keyword}" (English: "{case.translation}").\n'
+        f"Required morphology: {summary}.\n"
+        f'Do not leave the verb as the infinitive "{case.keyword}".\n'
+        "Review the sentence and rewrite it so the verb form matches the constraints.\n"
         'Reply ONLY as JSON: {"sentence":"...","translation":"..."}\n\n'
         f"Original sentence: {scored.sentence}\n"
         f"Original translation: {scored.translation}"
@@ -492,7 +499,7 @@ def main() -> None:
     )
 
     out_path = args.output or (
-        Path(__file__).resolve().parents[2] / "docs" / "eval_spanish_prompt_ablation_qwen_results.json"
+        Path(__file__).resolve().parents[2] / "docs" / "spike-results" / "eval_spanish_prompt_ablation_qwen_results.json"
     )
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

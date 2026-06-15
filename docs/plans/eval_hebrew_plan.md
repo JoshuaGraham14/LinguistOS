@@ -6,7 +6,7 @@
 >
 > Parent plan: [`evaluation_metrics_implementation_plan.md`](evaluation_metrics_implementation_plan.md) (Phase E).
 > Companion: [`eval_verb_morphology_plan.md`](eval_verb_morphology_plan.md) (parser architecture).
-> Thesis framing: [`eval_thesis_claims.md`](eval_thesis_claims.md).
+> Thesis framing: [`eval_thesis_claims.md`](../thesis/eval_thesis_claims.md).
 
 ---
 
@@ -73,7 +73,7 @@ Run `reset_db()` after schema changes; method YAML loader is insert-only (see ha
 ## Phase E0 — Scoping spike — **DONE** (Round 3, June 2026)
 
 **Status:** Gate passed. 100% EF short + long via `research/languages/he.yaml` glosses.
-Findings: [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md). Script:
+Findings: [`eval_hebrew_e0_spike.md`](../spike-reports/eval_hebrew_e0_spike.md). Script:
 `research/prototyping/e0_hebrew_spike.py`.
 
 **Goal:** Validate that GPT Hebrew generation is good enough to evaluate, and measure clitic
@@ -102,7 +102,7 @@ attachment frequency before writing matchers.
 
 ### Deliverable
 
-`docs/eval_hebrew_e0_spike.md` — table of manual scores, clitic rate, recommended length bands.
+`docs/spike-reports/eval_hebrew_e0_spike.md` — table of manual scores, clitic rate, recommended length bands.
 No code required; informs E1 benchmark design.
 
 ---
@@ -403,7 +403,7 @@ gender_required: true
 
 ### E5.3 — Claim 4 extension
 
-Document in [`eval_thesis_claims.md`](eval_thesis_claims.md) as **Claim 4b**:
+Document in [`eval_thesis_claims.md`](../thesis/eval_thesis_claims.md) as **Claim 4b**:
 
 > Gender-aware prompt anchoring fixes Hebrew present-tense and 2nd/3rd-person failures,
 > paralleling explicit-subject anchoring for Spanish challenging morphology.
@@ -520,7 +520,7 @@ Keep Stanza import lazy inside `verb_morphology.py` (mock-only runs should not r
    - EF pass rate (strict vs clitic-aware)
    - VM pass rate + `parser_disagreement`
    - Explicit-subject/gender anchoring effect (if H5–H6 complete)
-5. [`eval_thesis_claims.md`](eval_thesis_claims.md) updated with Hebrew claim(s).
+5. [`eval_thesis_claims.md`](../thesis/eval_thesis_claims.md) updated with Hebrew claim(s).
 6. All existing Spanish tests still pass (195+); new Hebrew tests added.
 
 ### Tier 2 (full)
@@ -579,8 +579,8 @@ Keep Stanza import lazy inside `verb_morphology.py` (mock-only runs should not r
 
 | Path | Action |
 | --- | --- |
-| `docs/eval_hebrew_plan.md` | This plan |
-| `docs/eval_hebrew_e0_spike.md` | E0 findings (after spike) |
+| `docs/plans/eval_hebrew_plan.md` | This plan |
+| `docs/spike-reports/eval_hebrew_e0_spike.md` | E0 findings (after spike) |
 | `research/benchmarks/hebrew_basic.yaml` | New benchmark |
 | `research/benchmarks/hebrew_morph_probe.yaml` | Mock probe |
 | `research/fixtures/mock_outputs.py` | Hebrew mock sentences |
@@ -598,5 +598,5 @@ Keep Stanza import lazy inside `verb_morphology.py` (mock-only runs should not r
 | `research/tests/test_hebrew_*.py` | Unit tests |
 | `research/requirements.txt` | `stanza` |
 | `research/README.md` | Setup instructions |
-| `docs/eval_thesis_claims.md` | Hebrew claims (after live runs) |
-| `docs/eval_session_handoff.md` | Link to this plan |
+| `docs/thesis/eval_thesis_claims.md` | Hebrew claims (after live runs) |
+| `docs/plans/eval_session_handoff.md` | Link to this plan |

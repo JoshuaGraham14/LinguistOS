@@ -4,8 +4,8 @@
 > vocabulary-in-context sentences that **satisfy explicit morpho-syntactic constraints**,
 > and are those outputs **useful as a batch of practice items**?
 >
-> See also: [`research_mode_implementation_plan.md`](research_mode_implementation_plan.md) for
-> pipeline and database design; [`thesis_description.md`](thesis_description.md) for research goals.
+> See also: [`research_mode_implementation_plan.md`](../plans/research_mode_implementation_plan.md) for
+> pipeline and database design; [`thesis_description.md`](../thesis/thesis_description.md) for research goals.
 
 ---
 
@@ -512,7 +512,7 @@ expected patterns; notebook documents constraint/grammar/diversity trade-offs by
 
 **Done when (Tier 1 MVP):** Same evaluator interfaces, language-specific parser config, comparable
 roll-up columns; `explore_live_hebrew_basic.ipynb` documents EF (strict vs clitic-aware) and VM
-diagnostics; Hebrew claim(s) added to [`eval_thesis_claims.md`](eval_thesis_claims.md).
+diagnostics; Hebrew claim(s) added to [`eval_thesis_claims.md`](../thesis/eval_thesis_claims.md).
 
 ---
 

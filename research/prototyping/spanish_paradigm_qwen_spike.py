@@ -9,7 +9,7 @@ Five verbs × five indicative tenses × six persons = 30 gold forms per verb.
 Scoring: each expected surface form matched anywhere in the model output
 (order-independent; accent-normalised).
 
-Results: docs/eval_spanish_paradigm_qwen_spike_results.json
+Results: docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json
 """
 
 from __future__ import annotations
@@ -363,7 +363,7 @@ def main() -> None:
         "--output",
         type=Path,
         default=None,
-        help="Results JSON path (default: docs/eval_spanish_paradigm_qwen_spike_results.json)",
+        help="Results JSON path (default: docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json)",
     )
     args = parser.parse_args()
 
@@ -381,7 +381,7 @@ def main() -> None:
     data = run_spike(args.models, lemmas=args.verbs, temperature=args.temperature)
 
     out_path = args.output or (
-        Path(__file__).resolve().parents[2] / "docs" / "eval_spanish_paradigm_qwen_spike_results.json"
+        Path(__file__).resolve().parents[2] / "docs" / "spike-results" / "eval_spanish_paradigm_qwen_spike_results.json"
     )
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

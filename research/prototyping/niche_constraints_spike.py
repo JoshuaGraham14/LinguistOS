@@ -3,7 +3,7 @@
 
 Scores single-token expected_form (strict) and optional adjacent phrase sequences.
 Exercise-type lines name the phenomenon under test without giving example sentences.
-Results: docs/eval_niche_constraints_spike_results.json
+Results: docs/spike-results/eval_niche_constraints_spike_results.json
 """
 
 from __future__ import annotations
@@ -427,7 +427,7 @@ def main() -> None:
     data = run_spike(samples=args.samples)
     summary = summarize(data)
     out_path = (
-        Path(__file__).resolve().parents[2] / "docs" / "eval_niche_constraints_spike_results.json"
+        Path(__file__).resolve().parents[2] / "docs" / "spike-results" / "eval_niche_constraints_spike_results.json"
     )
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump({"data": data, "summary": summary}, f, ensure_ascii=False, indent=2)

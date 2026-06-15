@@ -206,7 +206,7 @@ python3 research/prototyping/e0_hebrew_spike.py --length short
 python3 research/prototyping/e0_hebrew_spike.py --length long
 ```
 
-Results: `docs/eval_hebrew_e0_spike_{short,long}_results.json`
+Results: `docs/spike-results/eval_hebrew_e0_spike_{short,long}_results.json`
 
 ---
 

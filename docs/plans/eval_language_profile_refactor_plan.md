@@ -376,8 +376,8 @@ If pass rate ≥ 95%, the examples were unnecessary. If not, document and revisi
 | File | Action |
 |---|---|
 | `research/generation/baseline_gpt.py` | Should be ~80 lines, generic |
-| `docs/eval_hebrew_plan.md` | Update "E1" steps to reflect schema-based design |
-| `docs/eval_session_handoff.md` | Link to this plan |
+| `docs/plans/eval_hebrew_plan.md` | Update "E1" steps to reflect schema-based design |
+| `docs/plans/eval_session_handoff.md` | Link to this plan |
 
 ---
 
@@ -422,7 +422,7 @@ If pass rate ≥ 95%, the examples were unnecessary. If not, document and revisi
 
 | Path | Action |
 |---|---|
-| `docs/eval_language_profile_refactor_plan.md` | This plan |
+| `docs/plans/eval_language_profile_refactor_plan.md` | This plan |
 | `research/languages/_schema.md` | NEW — YAML shape docs |
 | `research/languages/es.yaml` | NEW |
 | `research/languages/he.yaml` | NEW |
@@ -445,8 +445,8 @@ If pass rate ≥ 95%, the examples were unnecessary. If not, document and revisi
 | `research/tests/test_benchmark_loader.py` | Add validation tests |
 | `research/explore_live_spanish_basic.ipynb` | Update `cs.tense` access pattern |
 | `research/explore_live_spanish_challenging.ipynb` | Same |
-| `docs/eval_hebrew_plan.md` | Note schema-based approach replaces tense block |
-| `docs/eval_session_handoff.md` | Link to plan; note `reset_db()` migration |
+| `docs/plans/eval_hebrew_plan.md` | Note schema-based approach replaces tense block |
+| `docs/plans/eval_session_handoff.md` | Link to plan; note `reset_db()` migration |
 
 ---
 
@@ -458,4 +458,4 @@ If pass rate ≥ 95%, the examples were unnecessary. If not, document and revisi
 4. Hebrew E0 short + long ≥ 95% / 90% EF with no Python language code
 5. Benchmark loader rejects invalid constraint values with clear error
 6. All 199 existing tests pass + new tests for languages and prompt builder
-7. `docs/eval_hebrew_e0_spike.md` updated with Round 3 (refactored) results
+7. `docs/spike-reports/eval_hebrew_e0_spike.md` updated with Round 3 (refactored) results

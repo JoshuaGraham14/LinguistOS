@@ -2,7 +2,7 @@
 
 > Evidence from live GPT runs on `spanish_basic` and `spanish_challenging` via the
 > research-mode evaluation pipeline (`research/`). Human ratings deferred.
-> Full session context: [`eval_session_handoff.md`](eval_session_handoff.md).
+> Full session context: [`eval_session_handoff.md`](../plans/eval_session_handoff.md).
 
 ---
 

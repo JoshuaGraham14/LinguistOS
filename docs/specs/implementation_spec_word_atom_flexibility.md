@@ -2,7 +2,7 @@
 
 > Status: Draft v0.1
 > Branch: `feat/word-atom-flexibility-plan`
-> Companion: [docs/product_direction.md](product_direction.md)
+> Companion: [product_direction.md](product_direction.md)
 > Scope: planning-only spec for Notion-style flexibility adapted to LinguistOS domain constraints.
 
 ---

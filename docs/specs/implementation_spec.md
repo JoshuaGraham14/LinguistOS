@@ -2,7 +2,7 @@
 
 > Status: Draft v0.1
 > Branch: `feat/word-first-foundation`
-> Companion: [docs/product_direction.md](product_direction.md)
+> Companion: [product_direction.md](product_direction.md)
 > Scope: detailed engineering plan for the selected LOS tickets only.
 
 ---
@@ -10,7 +10,7 @@
 ## 1. Scope
 
 This spec is **only** for the following tickets from
-[docs/product_direction.md](product_direction.md):
+[product_direction.md](product_direction.md):
 
 | Ticket | Title | Group |
 | --- | --- | --- |

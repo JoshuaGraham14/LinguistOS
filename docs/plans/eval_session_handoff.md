@@ -1,7 +1,7 @@
 # Evaluation work — session handoff (June 2026)
 
 > **For the next chat:** start here for context on research-mode sentence evaluation.
-> Thesis claims (automatic only): [`eval_thesis_claims.md`](eval_thesis_claims.md).
+> Thesis claims (automatic only): [`eval_thesis_claims.md`](../thesis/eval_thesis_claims.md).
 > Detailed plan: [`evaluation_metrics_implementation_plan.md`](evaluation_metrics_implementation_plan.md).
 > spaCy evaluator notes: [`eval_verb_morphology_plan.md`](eval_verb_morphology_plan.md).
 
@@ -160,14 +160,14 @@ Experiment names: `{benchmark}__{preset_name}__{live|mock}` (e.g.
 
 1. **Merge `research/eval-hebrew-e0-spike` → `main`** — language-profile refactor + E0 Round 3
 2. **Phase E — Hebrew E1** — see [`eval_hebrew_plan.md`](eval_hebrew_plan.md) (`hebrew_basic.yaml`, clitic-aware matcher, Stanza morph)
-3. **Dissertation write-up** — use [`eval_thesis_claims.md`](eval_thesis_claims.md)
+3. **Dissertation write-up** — use [`eval_thesis_claims.md`](../thesis/eval_thesis_claims.md)
 4. **Phase D** — human ratings (deferred)
 5. **Shared analysis module** — extract notebook helpers (deferred)
 
 ### Hebrew E0 status
 
 E0 gate **passed** (Round 3): 100% EF short + long via `he.yaml` glosses, no Hebrew patch.
-Findings: [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md)
+Findings: [`eval_hebrew_e0_spike.md`](../spike-reports/eval_hebrew_e0_spike.md)
 
 ---
 
@@ -209,13 +209,13 @@ Extract duplicated notebook logic into `research/analysis/live_experiments.py`.
 
 ## Files to read first in a new chat
 
-- [`eval_thesis_claims.md`](eval_thesis_claims.md) — headline claims + evidence
+- [`eval_thesis_claims.md`](../thesis/eval_thesis_claims.md) — headline claims + evidence
 - [`eval_language_profile_refactor_plan.md`](eval_language_profile_refactor_plan.md) — refactor architecture (complete on branch)
-- [`eval_hebrew_e0_spike.md`](eval_hebrew_e0_spike.md) — E0 spike results (Round 3)
+- [`eval_hebrew_e0_spike.md`](../spike-reports/eval_hebrew_e0_spike.md) — E0 spike results (Round 3)
 - [`eval_hebrew_plan.md`](eval_hebrew_plan.md) — Phase E Hebrew E1+ implementation
 - `research/evaluation/sentence/expected_form.py`
 - `research/evaluation/distribution/__init__.py`
 - `research/explore_live_spanish_basic.ipynb`
 - `research/explore_live_spanish_challenging.ipynb`
 - `research/methods/README.md`
-- `docs/eval_sentence_length_plan.md`
+- `docs/plans/eval_sentence_length_plan.md`
