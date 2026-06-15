@@ -12,6 +12,7 @@ benchmarks, the DB pipeline, or evaluators. Not part of `run_experiment.py`.
 | [`english_rare_verbs_qwen_spike.py`](english_rare_verbs_qwen_spike.py) | English rare-verb recognition + conjugation on Qwen 0.5B / 1.7B / 4B | `docs/eval_english_rare_verbs_qwen_spike_results.json` |
 | [`spanish_verbs_qwen_spike.py`](spanish_verbs_qwen_spike.py) | Spanish common + rare verb recognition + conjugation (same Qwen ladder) | `docs/eval_spanish_verbs_qwen_spike_results.json` |
 | [`spanish_paradigm_qwen_spike.py`](spanish_paradigm_qwen_spike.py) | Full indicative paradigms (5 verbs × 5 tenses, minimal prompt) | `docs/eval_spanish_paradigm_qwen_spike_results.json` |
+| [`spanish_prompt_ablation_qwen_spike.py`](spanish_prompt_ablation_qwen_spike.py) | Sentence-gen EF ablation: baseline vs explicit vs self-correct (Qwen 0.5B / 1.7B) | `docs/eval_spanish_prompt_ablation_qwen_results.json` |
 
 ## Run
 
@@ -25,6 +26,8 @@ python3 research/prototyping/english_rare_verbs_qwen_spike.py --models qwen05b -
 python3 research/prototyping/spanish_verbs_qwen_spike.py
 python3 research/prototyping/spanish_verbs_qwen_spike.py --tasks conjugation
 python3 research/prototyping/spanish_paradigm_qwen_spike.py
+python3 research/prototyping/spanish_prompt_ablation_qwen_spike.py
+python3 research/prototyping/spanish_prompt_ablation_qwen_spike.py --benchmarks spanish_basic --samples 5 --conditions baseline
 ```
 
 ## Notes
