@@ -1,7 +1,12 @@
 # Spanish basic CEFR prompt evaluation
 
-**Date:** June 2026  
+**Experiment:** 4 — CEFR prompt evaluation on `spanish_basic`  
+**Date run:** 2026-06-15 (after prompt commit `5038808`; exact run time not recorded)  
+**Date documented:** 2026-06-15  
+**Track:** Pedagogical control (morphology + grammar + level appropriateness)  
+**Generator:** `baseline_gpt` (`baseline_default`); model `gpt-5.4-nano`  
 **Benchmark:** `spanish_basic` (5 constraint sets, 15 sentences per condition)  
+**Raw results:** Pipeline DB — A1: experiment `spanish_basic__baseline_default__live` (id=12); C2: ad-hoc run (not in DB)  
 **Status:** Exploratory; C2 condition run outside the pipeline DB
 
 ---
