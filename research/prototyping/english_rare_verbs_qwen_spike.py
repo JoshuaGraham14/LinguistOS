@@ -17,6 +17,34 @@ Gold forms are standard dictionary entries (OED / Merriam-Webster style);
 alternate spellings are accepted where both are listed.
 
 Results: docs/spike-results/eval_english_rare_verbs_qwen_spike_results.json
+
+----------------------------------------------------------------------
+REPRODUCIBILITY
+----------------------------------------------------------------------
+Status:      Diagnostic spike (Experiment 1). Not run through
+             ``research.run_experiment`` or the DB pipeline.
+             English has no language profile in this project, so the
+             pipeline framework does not apply; this script is the
+             reproducible artifact.
+
+Run:         python3 -m research.prototyping.english_rare_verbs_qwen_spike
+             (run from repo root; no CLI flags required)
+
+Output:      docs/spike-results/eval_english_rare_verbs_qwen_spike_results.json
+             Writeup: docs/experiment-results/english_rare_verbs_qwen_diagnostic.md
+
+Stimuli:     16 English verbs hard-coded below (6 common irregular,
+             10 rare/archaic). 32 conjugation probes + 16 recognition.
+
+Models:      Qwen/Qwen2.5-0.5B-Instruct, Qwen/Qwen3-1.7B,
+             Qwen/Qwen3-4B-Instruct-2507 (HuggingFace, MPS or CPU).
+
+Decoding:    Greedy (temperature=0, do_sample=False), max_new_tokens=32,
+             one sample per probe. Qwen3 thinking mode disabled.
+             Greedy is deterministic; no seed required.
+
+Original run: 2026-06-12 (results committed in batch ~16:43 GMT+1).
+----------------------------------------------------------------------
 """
 
 from __future__ import annotations
