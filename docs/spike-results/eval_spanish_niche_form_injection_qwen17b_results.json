@@ -1,0 +1,3930 @@
+{
+  "models": {
+    "qwen17b": "Qwen/Qwen3-1.7B"
+  },
+  "benchmarks": [
+    "spanish_niche"
+  ],
+  "conditions": [
+    "baseline",
+    "explicit",
+    "form_injected",
+    "form_injected_explicit"
+  ],
+  "samples_per_case": 10,
+  "temperature": 0.7,
+  "sentence_length": "short",
+  "run_grammar": true,
+  "cases": [
+    {
+      "id": "spanish_niche__henchir__preterite_1st_singular__0",
+      "benchmark": "spanish_niche",
+      "keyword": "henchir",
+      "translation": "to fill (literary)",
+      "constraints": {
+        "tense": "preterite",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "henchí"
+      },
+      "cefr_level": "C1",
+      "expected_form": "henchí"
+    },
+    {
+      "id": "spanish_niche__argüir__preterite_1st_singular__1",
+      "benchmark": "spanish_niche",
+      "keyword": "argüir",
+      "translation": "to argue (formally)",
+      "constraints": {
+        "tense": "preterite",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "argüí"
+      },
+      "cefr_level": "C1",
+      "expected_form": "argüí"
+    },
+    {
+      "id": "spanish_niche__atestiguar__preterite_1st_singular__2",
+      "benchmark": "spanish_niche",
+      "keyword": "atestiguar",
+      "translation": "to testify",
+      "constraints": {
+        "tense": "preterite",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "atestigüé"
+      },
+      "cefr_level": "C1",
+      "expected_form": "atestigüé"
+    },
+    {
+      "id": "spanish_niche__menguar__present_1st_singular__3",
+      "benchmark": "spanish_niche",
+      "keyword": "menguar",
+      "translation": "to diminish",
+      "constraints": {
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "menguo"
+      },
+      "cefr_level": "C1",
+      "expected_form": "menguo"
+    },
+    {
+      "id": "spanish_niche__empalagar__present_1st_singular__4",
+      "benchmark": "spanish_niche",
+      "keyword": "empalagar",
+      "translation": "to cloy",
+      "constraints": {
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "empalago"
+      },
+      "cefr_level": "C1",
+      "expected_form": "empalago"
+    },
+    {
+      "id": "spanish_niche__blandir__preterite_1st_singular__5",
+      "benchmark": "spanish_niche",
+      "keyword": "blandir",
+      "translation": "to brandish",
+      "constraints": {
+        "tense": "preterite",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "blandí"
+      },
+      "cefr_level": "C1",
+      "expected_form": "blandí"
+    },
+    {
+      "id": "spanish_niche__proferir__present_1st_singular__6",
+      "benchmark": "spanish_niche",
+      "keyword": "proferir",
+      "translation": "to utter (threats/insults)",
+      "constraints": {
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "profiero"
+      },
+      "cefr_level": "C1",
+      "expected_form": "profiero"
+    }
+  ],
+  "runs": [
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_niche__henchir__preterite_1st_singular__0",
+        "benchmark": "spanish_niche",
+        "keyword": "henchir",
+        "translation": "to fill (literary)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "henchí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "henchí"
+      },
+      "latency_s": 37.05,
+      "candidates": [
+        {
+          "sentence": "henchí el estanque con agua dulce",
+          "translation": "I filled the pond with sweet water",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí la caja con libros",
+          "translation": "I filled the box with books",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el corazón con lágrimas",
+          "translation": "I filled the heart with tears",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí la tierra con vida",
+          "translation": "I filled the earth with life",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el aire con aroma",
+          "translation": "I filled the air with scent",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el sueño con esperanza",
+          "translation": "I filled the dream with hope",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el tiempo con recuerdos",
+          "translation": "I filled the time with memories",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el mundo con amor",
+          "translation": "I filled the world with love",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí la mente con conocimiento",
+          "translation": "I filled the mind with knowledge",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el corazón con paz",
+          "translation": "I filled the heart with peace",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_niche__argüir__preterite_1st_singular__1",
+        "benchmark": "spanish_niche",
+        "keyword": "argüir",
+        "translation": "to argue (formally)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "argüí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "argüí"
+      },
+      "latency_s": 16.99,
+      "candidates": [
+        {
+          "sentence": "argüí el punto",
+          "translation": "argued the point",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que era necesario",
+          "translation": "argued that it was necessary",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí con firmeza",
+          "translation": "argued with firmness",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí contra la idea",
+          "translation": "argued against the idea",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí en la reunión",
+          "translation": "argued at the meeting",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que debíamos tomar decisiones juntos",
+          "translation": "argued that we should take decisions together",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que no era adecuado",
+          "translation": "argued that it was not appropriate",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí lo que había dicho",
+          "translation": "argued what he had said",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que el error estaba en mí",
+          "translation": "argued that the error was in me",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí con el profesor sobre el tema",
+          "translation": "argued with the teacher about the topic",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_niche__atestiguar__preterite_1st_singular__2",
+        "benchmark": "spanish_niche",
+        "keyword": "atestiguar",
+        "translation": "to testify",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "atestigüé"
+        },
+        "cefr_level": "C1",
+        "expected_form": "atestigüé"
+      },
+      "latency_s": 13.85,
+      "candidates": [
+        {
+          "sentence": "atestigüe la verdad",
+          "translation": "testified the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe la causa",
+          "translation": "testified the cause",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe el hecho",
+          "translation": "testified the fact",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe el testimonio",
+          "translation": "testified the testimony",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe el juicio",
+          "translation": "testified the judgment",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe la decisión",
+          "translation": "testified the decision",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe la evidencia",
+          "translation": "testified the evidence",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe la responsabilidad",
+          "translation": "testified the responsibility",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe el testimonio de Juan",
+          "translation": "testified Juan's testimony",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigüe la veracidad",
+          "translation": "testified the credibility",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_niche__menguar__present_1st_singular__3",
+        "benchmark": "spanish_niche",
+        "keyword": "menguar",
+        "translation": "to diminish",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "menguo"
+        },
+        "cefr_level": "C1",
+        "expected_form": "menguo"
+      },
+      "latency_s": 22.58,
+      "candidates": [
+        {
+          "sentence": "Menguo el tamaño de la habitación.",
+          "translation": "I diminish the size of the room.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo mi peso cada día.",
+          "translation": "I diminish my weight each day.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la cantidad de agua que bebo.",
+          "translation": "I diminish the amount of water I drink.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la temperatura de la casa.",
+          "translation": "I diminish the temperature of the house.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la cantidad de tiempo que paso en casa.",
+          "translation": "I diminish the amount of time I spend at home.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la altura de mi hijo.",
+          "translation": "I diminish the height of my child.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo el volumen de la música que escucho.",
+          "translation": "I diminish the volume of music I listen to.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la cantidad de frutas que compro.",
+          "translation": "I diminish the amount of fruits I buy.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la intensidad de la luz que veo.",
+          "translation": "I diminish the intensity of the light I see.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la cantidad de tiempo que paso en el trabajo.",
+          "translation": "I diminish the amount of time I spend at work.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_niche__empalagar__present_1st_singular__4",
+        "benchmark": "spanish_niche",
+        "keyword": "empalagar",
+        "translation": "to cloy",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "empalago"
+        },
+        "cefr_level": "C1",
+        "expected_form": "empalago"
+      },
+      "latency_s": 41.8,
+      "candidates": [
+        {
+          "sentence": "Empalago el dulce del pastel.",
+          "translation": "I cloy the sweet of the cake.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el sabor de la comida.",
+          "translation": "I cloy the taste of food.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el olor a hierba en el aire.",
+          "translation": "I cloy the smell of grass in the air.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el gusto de la bebida.",
+          "translation": "I cloy the taste of drink.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el sabor de la comida frita.",
+          "translation": "I cloy the taste of fried food.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el aroma del café caliente.",
+          "translation": "I cloy the aroma of hot coffee.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el olor a polvo en el suelo.",
+          "translation": "I cloy the smell of dust on the floor.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el sabor de la leche en la taza.",
+          "translation": "I cloy the taste of milk in the cup.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el gusto de la comida que comí.",
+          "translation": "I cloy the taste of the food I ate.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago el dulce de la fruta.",
+          "translation": "I cloy from the sweet of the fruit.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_niche__blandir__preterite_1st_singular__5",
+        "benchmark": "spanish_niche",
+        "keyword": "blandir",
+        "translation": "to brandish",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "blandí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "blandí"
+      },
+      "latency_s": 37.91,
+      "candidates": [
+        {
+          "sentence": "Blandí la espada con cuidado.",
+          "translation": "I carefully brandished the sword.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la puerta con un golpe fuerte.",
+          "translation": "I forcefully brandished the door.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la mano hacia arriba.",
+          "translation": "I raised my hand.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí el cuchillo con delicadeza.",
+          "translation": "I carefully brandished the knife.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada hacia el enemigo.",
+          "translation": "I brandished the sword toward the enemy.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada con un movimiento rápido.",
+          "translation": "I brandished the sword with a quick movement.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada en la mano izquierda.",
+          "translation": "I brandished the sword with my left hand.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada hacia la derecha.",
+          "translation": "I brandished the sword toward the right.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada con cuidado y suavemente.",
+          "translation": "I carefully and softly brandished the sword.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada con cuidado.",
+          "translation": "I carefully brandished the sword.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_niche__proferir__present_1st_singular__6",
+        "benchmark": "spanish_niche",
+        "keyword": "proferir",
+        "translation": "to utter (threats/insults)",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "profiero"
+        },
+        "cefr_level": "C1",
+        "expected_form": "profiero"
+      },
+      "latency_s": 17.42,
+      "candidates": [
+        {
+          "sentence": "Profono un insulto.",
+          "translation": "I utter an insult.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profero una amenaza.",
+          "translation": "I utter a threat.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profero una palabra cruel.",
+          "translation": "I utter a cruel word.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Proferí un juramento.",
+          "translation": "I made a vow.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Proferí un consejo útil.",
+          "translation": "I gave a useful advice.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Proferí un discurso en público.",
+          "translation": "I gave a public speech.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Proferí un mensaje en la calle.",
+          "translation": "I uttered a message on the street.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Proferí un eco de la voz.",
+          "translation": "I echoed the voice.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Proferí un eco de la voz en la habitación.",
+          "translation": "I echoed the voice in the room.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Proferí un eco de la voz en la habitación.",
+          "translation": "I echoed the voice in the room.",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_niche__henchir__preterite_1st_singular__0",
+        "benchmark": "spanish_niche",
+        "keyword": "henchir",
+        "translation": "to fill (literary)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "henchí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "henchí"
+      },
+      "latency_s": 17.44,
+      "candidates": [
+        {
+          "sentence": "henché el tanque con agua",
+          "translation": "filled the tank with water",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché la caja con libros",
+          "translation": "filled the box with books",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché el pozo con arena",
+          "translation": "filled the well with sand",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché la casa con hierro",
+          "translation": "filled the house with iron",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché el vaso con leche",
+          "translation": "filled the glass with milk",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché el corazón con amor",
+          "translation": "filled the heart with love",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché el tiempo con esperanza",
+          "translation": "filled the time with hope",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché el sueño con ilusión",
+          "translation": "filled the dream with illusion",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché el alma con fe",
+          "translation": "filled the soul with faith",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henché el campo con vida",
+          "translation": "filled the field with life",
+          "expected_form": "henchí",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_niche__argüir__preterite_1st_singular__1",
+        "benchmark": "spanish_niche",
+        "keyword": "argüir",
+        "translation": "to argue (formally)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "argüí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "argüí"
+      },
+      "latency_s": 10.1,
+      "candidates": [
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí yo",
+          "translation": "I argued",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_niche__atestiguar__preterite_1st_singular__2",
+        "benchmark": "spanish_niche",
+        "keyword": "atestiguar",
+        "translation": "to testify",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "atestigüé"
+        },
+        "cefr_level": "C1",
+        "expected_form": "atestigüé"
+      },
+      "latency_s": 13.9,
+      "candidates": [
+        {
+          "sentence": "atestigue la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestiguo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestiguo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestiguo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestiguo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "atestigo la verdad",
+          "translation": "testify to the truth",
+          "expected_form": "atestigüé",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_niche__menguar__present_1st_singular__3",
+        "benchmark": "spanish_niche",
+        "keyword": "menguar",
+        "translation": "to diminish",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "menguo"
+        },
+        "cefr_level": "C1",
+        "expected_form": "menguo"
+      },
+      "latency_s": 13.18,
+      "candidates": [
+        {
+          "sentence": "menguo el peso",
+          "translation": "I diminish the weight",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo mi ansiedad",
+          "translation": "I diminish my anxiety",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo la luz",
+          "translation": "I diminish the light",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo la temperatura",
+          "translation": "I diminish the temperature",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo la presión",
+          "translation": "I diminish the pressure",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo la energía",
+          "translation": "I diminish the energy",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo la confianza",
+          "translation": "I diminish the trust",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo el dolor",
+          "translation": "I diminish the pain",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo el tiempo",
+          "translation": "I diminish the time",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo la salud",
+          "translation": "I diminish the health",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_niche__empalagar__present_1st_singular__4",
+        "benchmark": "spanish_niche",
+        "keyword": "empalagar",
+        "translation": "to cloy",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "empalago"
+        },
+        "cefr_level": "C1",
+        "expected_form": "empalago"
+      },
+      "latency_s": 13.5,
+      "candidates": [
+        {
+          "sentence": "empalago el gusto",
+          "translation": "to cloy the taste",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la vida",
+          "translation": "to cloy the life",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la esperanza",
+          "translation": "to cloy the hope",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la mente",
+          "translation": "to cloy the mind",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el amor",
+          "translation": "to cloy the love",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el miedo",
+          "translation": "to cloy the fear",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el dolor",
+          "translation": "to cloy the pain",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el tiempo",
+          "translation": "to cloy the time",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la verdad",
+          "translation": "to cloy the truth",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la libertad",
+          "translation": "to cloy the freedom",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_niche__blandir__preterite_1st_singular__5",
+        "benchmark": "spanish_niche",
+        "keyword": "blandir",
+        "translation": "to brandish",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "blandí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "blandí"
+      },
+      "latency_s": 22.51,
+      "candidates": [
+        {
+          "sentence": "blandí la espada",
+          "translation": "I brandished the sword",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí el puño",
+          "translation": "I brandished the fist",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada con cuidado",
+          "translation": "I brandished the sword with care",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada hacia adelante",
+          "translation": "I brandished the sword forward",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada en la mano",
+          "translation": "I brandished the sword in my hand",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada para defenderme",
+          "translation": "I brandished the sword to defend myself",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada para mostrar fuerza",
+          "translation": "I brandished the sword to show strength",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada en el aire",
+          "translation": "I brandished the sword in the air",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada con el dedo",
+          "translation": "I brandished the sword with the finger",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "blandí la espada hacia la derecha",
+          "translation": "I brandished the sword to the right",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_niche__proferir__present_1st_singular__6",
+        "benchmark": "spanish_niche",
+        "keyword": "proferir",
+        "translation": "to utter (threats/insults)",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "profiero"
+        },
+        "cefr_level": "C1",
+        "expected_form": "profiero"
+      },
+      "latency_s": 34.04,
+      "candidates": [
+        {
+          "sentence": "proferí una amenaza",
+          "translation": "I uttered a threat",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí una insulto",
+          "translation": "I uttered an insult",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí un consejo",
+          "translation": "I uttered a piece of advice",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí una palabra",
+          "translation": "I uttered a word",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí un mensaje",
+          "translation": "I uttered a message",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí una orden",
+          "translation": "I uttered an order",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí un eco",
+          "translation": "I uttered an echo",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí un eco en la habitación",
+          "translation": "I uttered an echo in the room",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí un grito",
+          "translation": "I uttered a cry",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "proferí un susurro",
+          "translation": "I uttered a whisper",
+          "expected_form": "profiero",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_niche__henchir__preterite_1st_singular__0",
+        "benchmark": "spanish_niche",
+        "keyword": "henchir",
+        "translation": "to fill (literary)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "henchí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "henchí"
+      },
+      "latency_s": 19.33,
+      "candidates": [
+        {
+          "sentence": "El henchí el vaso con leche.",
+          "translation": "I filled the cup with milk.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí la caja con dinero.",
+          "translation": "I filled the box with money.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí la puerta con hierro.",
+          "translation": "I filled the door with iron.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí el corazón con emoción.",
+          "translation": "I filled the heart with emotion.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí el pecho con fuerza.",
+          "translation": "I filled the chest with strength.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí el aire con vida.",
+          "translation": "I filled the air with life.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí el cielo con luz.",
+          "translation": "I filled the sky with light.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí el alma con esperanza.",
+          "translation": "I filled the soul with hope.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí el mundo con amor.",
+          "translation": "I filled the world with love.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El henchí el tiempo con memoria.",
+          "translation": "I filled the time with memory.",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_niche__argüir__preterite_1st_singular__1",
+        "benchmark": "spanish_niche",
+        "keyword": "argüir",
+        "translation": "to argue (formally)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "argüí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "argüí"
+      },
+      "latency_s": 20.33,
+      "candidates": [
+        {
+          "sentence": "argüí que el presidente no debía ser elegido",
+          "translation": "I argued that the president should not be elected",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que la decisión era incorrecta",
+          "translation": "I argued that the decision was incorrect",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que la política era inadecuada",
+          "translation": "I argued that the policy was inadequate",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que la situación era crítica",
+          "translation": "I argued that the situation was critical",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que el gobierno debía tomar más medidas",
+          "translation": "I argued that the government should take more actions",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que la nación debía unirse",
+          "translation": "I argued that the nation should unite",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que el proyecto no era viable",
+          "translation": "I argued that the project was not viable",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que la empresa debía mejorar",
+          "translation": "I argued that the company should improve",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que el país necesitaba reformas",
+          "translation": "I argued that the country needed reforms",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "argüí que la ley debía ser revisada",
+          "translation": "I argued that the law should be reviewed",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_niche__atestiguar__preterite_1st_singular__2",
+        "benchmark": "spanish_niche",
+        "keyword": "atestiguar",
+        "translation": "to testify",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "atestigüé"
+        },
+        "cefr_level": "C1",
+        "expected_form": "atestigüé"
+      },
+      "latency_s": 39.54,
+      "candidates": [
+        {
+          "sentence": "El niño atestigüé la verdad.",
+          "translation": "The child testified the truth.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella atestigüé ante el juez.",
+          "translation": "She testified before the judge.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        },
+        {
+          "sentence": "El profesor atestigüé la conclusión.",
+          "translation": "The teacher testified the conclusion.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros atestigüé el hecho.",
+          "translation": "We testified the fact.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        },
+        {
+          "sentence": "El médico atestigüé la enfermedad.",
+          "translation": "The doctor testified the disease.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ese hombre atestigüé lo que vio.",
+          "translation": "That man testified what he saw.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El niño atestigüé lo que su hermano dijo.",
+          "translation": "The child testified what his brother said.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella atestigüé lo que le dijo el profesor.",
+          "translation": "She testified what the teacher said.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        },
+        {
+          "sentence": "El profesor atestigüé lo que vio en la película.",
+          "translation": "The teacher testified what he saw in the movie.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estando en el lugar, atestigüé la prueba.",
+          "translation": "While in the place, I testified the proof.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_niche__menguar__present_1st_singular__3",
+        "benchmark": "spanish_niche",
+        "keyword": "menguar",
+        "translation": "to diminish",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "menguo"
+        },
+        "cefr_level": "C1",
+        "expected_form": "menguo"
+      },
+      "latency_s": 10.86,
+      "candidates": [
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "menguo",
+          "translation": "to diminish",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_niche__empalagar__present_1st_singular__4",
+        "benchmark": "spanish_niche",
+        "keyword": "empalagar",
+        "translation": "to cloy",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "empalago"
+        },
+        "cefr_level": "C1",
+        "expected_form": "empalago"
+      },
+      "latency_s": 19.61,
+      "candidates": [
+        {
+          "sentence": "Empalago con mi sopa favorita.",
+          "translation": "I cloy with my favorite soup.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago tan dulce que me hace marear.",
+          "translation": "I cloy so sweet that I get dizzy.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago en la boca de mi bebé.",
+          "translation": "I cloy in my baby's mouth.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago con mi té favorito.",
+          "translation": "I cloy with my favorite tea.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago tan pesado que me siente cansado.",
+          "translation": "I cloy so heavy that I feel tired.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago en mi garganta.",
+          "translation": "I cloy in my throat.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago con mi leche materna.",
+          "translation": "I cloy with my mother's milk.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago tan dulce que me hace sonreir.",
+          "translation": "I cloy so sweet that I smile.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago en mi estómago.",
+          "translation": "I cloy in my stomach.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Empalago con mi café favorito.",
+          "translation": "I cloy with my favorite coffee.",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_niche__blandir__preterite_1st_singular__5",
+        "benchmark": "spanish_niche",
+        "keyword": "blandir",
+        "translation": "to brandish",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "blandí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "blandí"
+      },
+      "latency_s": 41.21,
+      "candidates": [
+        {
+          "sentence": "Blandí la espada hacia el enemigo.",
+          "translation": "I brandished the sword toward the enemy.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la mano para mostrar mi amabilidad.",
+          "translation": "I brandished my hand to show my kindness.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la lanza en la batalla.",
+          "translation": "I brandished the spear in the battle.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada en la puerta del castillo.",
+          "translation": "I brandished the sword at the castle gate.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada hacia el rey.",
+          "translation": "I brandished the sword toward the king.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la mano en la mesa para pedir un vino.",
+          "translation": "I brandished my hand at the table to ask for wine.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada en la luna como un saludo.",
+          "translation": "I brandished the sword in the moon as a greeting.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada hacia el enemigo con calma.",
+          "translation": "I brandished the sword toward the enemy calmly.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada en la cima del monte.",
+          "translation": "I brandished the sword at the top of the mountain.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Blandí la espada en la pared.",
+          "translation": "I brandished the sword on the wall.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_niche__proferir__present_1st_singular__6",
+        "benchmark": "spanish_niche",
+        "keyword": "proferir",
+        "translation": "to utter (threats/insults)",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "profiero"
+        },
+        "cefr_level": "C1",
+        "expected_form": "profiero"
+      },
+      "latency_s": 24.34,
+      "candidates": [
+        {
+          "sentence": "Profiero una amenaza en la clase.",
+          "translation": "I utter a threat in class.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero un insulto al verlo.",
+          "translation": "I utter an insult when I see him.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero una palabra cruel en el trabajo.",
+          "translation": "I utter a cruel word at work.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero un consejo en la reunión.",
+          "translation": "I utter a piece of advice at the meeting.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero una palabra en la calle.",
+          "translation": "I utter a word on the street.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero una amenaza en el correo.",
+          "translation": "I utter a threat in the mail.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero una palabra en la conversación.",
+          "translation": "I utter a word in the conversation.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero una palabra en la fiesta.",
+          "translation": "I utter a word at the party.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero una palabra en la vida.",
+          "translation": "I utter a word in life.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Profiero una palabra en la noche.",
+          "translation": "I utter a word at night.",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_niche__henchir__preterite_1st_singular__0",
+        "benchmark": "spanish_niche",
+        "keyword": "henchir",
+        "translation": "to fill (literary)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "henchí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "henchí"
+      },
+      "latency_s": 18.82,
+      "candidates": [
+        {
+          "sentence": "henchí el jardín con flores",
+          "translation": "I filled the garden with flowers",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí la casa con libros",
+          "translation": "I filled the house with books",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el corazón con emoción",
+          "translation": "I filled the heart with emotion",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el vaso con agua",
+          "translation": "I filled the glass with water",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el aire con vida",
+          "translation": "I filled the air with life",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí la mente con sabiduría",
+          "translation": "I filled the mind with wisdom",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el campo con cultivos",
+          "translation": "I filled the field with crops",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el tiempo con esfuerzo",
+          "translation": "I filled the time with effort",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el sueño con ilusión",
+          "translation": "I filled the dream with illusion",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "henchí el corazón con cariño",
+          "translation": "I filled the heart with love",
+          "expected_form": "henchí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_niche__argüir__preterite_1st_singular__1",
+        "benchmark": "spanish_niche",
+        "keyword": "argüir",
+        "translation": "to argue (formally)",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "argüí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "argüí"
+      },
+      "latency_s": 40.89,
+      "candidates": [
+        {
+          "sentence": "Yo arguí que el proyecto era inadecuado.",
+          "translation": "I argued that the project was inadequate.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí con firmeza en el debate.",
+          "translation": "I argued firmly in the debate.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí que debíamos cambiar el plan.",
+          "translation": "I argued that we should change the plan.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí que el gobierno no debía tomar decisiones rápidas.",
+          "translation": "I argued that the government shouldn't take quick decisions.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí que la situación era crítica.",
+          "translation": "I argued that the situation was critical.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí que era necesario actuar inmediatamente.",
+          "translation": "I argued that it was necessary to act immediately.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí que el error fue mio.",
+          "translation": "I argued that the error was mine.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí que el proyecto no cumplía los requisitos.",
+          "translation": "I argued that the project did not meet the requirements.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo arguí que la solución era más eficaz.",
+          "translation": "I argued that the solution was more effective.",
+          "expected_form": "argüí",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo argüí que el partido era injusto.",
+          "translation": "I argued that the match was unfair.",
+          "expected_form": "argüí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_niche__atestiguar__preterite_1st_singular__2",
+        "benchmark": "spanish_niche",
+        "keyword": "atestiguar",
+        "translation": "to testify",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "atestigüé"
+        },
+        "cefr_level": "C1",
+        "expected_form": "atestigüé"
+      },
+      "latency_s": 18.26,
+      "candidates": [
+        {
+          "sentence": "Yo atestigüé la verdad.",
+          "translation": "I testified the truth.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la victoria.",
+          "translation": "I testified the victory.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la evidencia.",
+          "translation": "I testified the evidence.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la veracidad.",
+          "translation": "I testified the credibility.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la responsabilidad.",
+          "translation": "I testified the responsibility.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la confianza.",
+          "translation": "I testified the trust.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la justicia.",
+          "translation": "I testified the justice.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la verdad absoluta.",
+          "translation": "I testified the absolute truth.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la seguridad.",
+          "translation": "I testified the safety.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo atestigüé la integridad.",
+          "translation": "I testified the integrity.",
+          "expected_form": "atestigüé",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_niche__menguar__present_1st_singular__3",
+        "benchmark": "spanish_niche",
+        "keyword": "menguar",
+        "translation": "to diminish",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "menguo"
+        },
+        "cefr_level": "C1",
+        "expected_form": "menguo"
+      },
+      "latency_s": 21.21,
+      "candidates": [
+        {
+          "sentence": "Yo menguo mi peso cada día.",
+          "translation": "I diminish my weight every day.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo mi salud con el tiempo.",
+          "translation": "I diminish my health over time.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo menguo la confianza de mi familia.",
+          "translation": "I diminish my family's trust.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la luz del sol con la distancia.",
+          "translation": "I diminish the sun's light with distance.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo menguo el miedo a los perros.",
+          "translation": "I diminish my fear of dogs.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la energía de mi cuerpo.",
+          "translation": "I diminish my body's energy.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo menguo la ansiedad en el trabajo.",
+          "translation": "I diminish my work anxiety.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la confianza en mí mismo.",
+          "translation": "I diminish my self-trust.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo menguo el dolor con el tiempo.",
+          "translation": "I diminish the pain over time.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Menguo la alegría en mi vida.",
+          "translation": "I diminish my joy in life.",
+          "expected_form": "menguo",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_niche__empalagar__present_1st_singular__4",
+        "benchmark": "spanish_niche",
+        "keyword": "empalagar",
+        "translation": "to cloy",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "empalago"
+        },
+        "cefr_level": "C1",
+        "expected_form": "empalago"
+      },
+      "latency_s": 17.49,
+      "candidates": [
+        {
+          "sentence": "empalago a la comida",
+          "translation": "I cloy the food",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago cuando estoy triste",
+          "translation": "I cloy when I am sad",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la vida",
+          "translation": "I cloy my life",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el gusto",
+          "translation": "I cloy the taste",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la dulzura",
+          "translation": "I cloy the sweetness",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el aburrimiento",
+          "translation": "I cloy the boredom",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago la monotonía",
+          "translation": "I cloy the monotony",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el deseo",
+          "translation": "I cloy the desire",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el desgano",
+          "translation": "I cloy the weariness",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "empalago el cansancio",
+          "translation": "I cloy the exhaustion",
+          "expected_form": "empalago",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_niche__blandir__preterite_1st_singular__5",
+        "benchmark": "spanish_niche",
+        "keyword": "blandir",
+        "translation": "to brandish",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "blandí"
+        },
+        "cefr_level": "C1",
+        "expected_form": "blandí"
+      },
+      "latency_s": 22.91,
+      "candidates": [
+        {
+          "sentence": "Yo blandí la espada.",
+          "translation": "I brandished the sword.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada en la batalla.",
+          "translation": "I brandished the sword in the battle.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada para defenderme.",
+          "translation": "I brandished the sword to defend myself.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada con cuidado.",
+          "translation": "I brandished the sword with care.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada y salí corriendo.",
+          "translation": "I brandished the sword and ran away.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada y me lastimé.",
+          "translation": "I brandished the sword and got injured.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada y el enemigo se alejó.",
+          "translation": "I brandished the sword and the enemy retreated.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada y el jefe se sorprendió.",
+          "translation": "I brandished the sword and the leader was surprised.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada y el bando ganó la batalla.",
+          "translation": "I brandished the sword and the side won the battle.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo blandí la espada y el enemigo se hundió.",
+          "translation": "I brandished the sword and the enemy was sunk.",
+          "expected_form": "blandí",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_niche__proferir__present_1st_singular__6",
+        "benchmark": "spanish_niche",
+        "keyword": "proferir",
+        "translation": "to utter (threats/insults)",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "profiero"
+        },
+        "cefr_level": "C1",
+        "expected_form": "profiero"
+      },
+      "latency_s": 18.17,
+      "candidates": [
+        {
+          "sentence": "profiero una amenaza",
+          "translation": "I utter a threat",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra cruel",
+          "translation": "I utter a cruel word",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desaprobación",
+          "translation": "I utter a word of disapproval",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desconfianza",
+          "translation": "I utter a word of distrust",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desprecio",
+          "translation": "I utter a word of disdain",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desaprobación",
+          "translation": "I utter a word of disapproval",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desconfianza",
+          "translation": "I utter a word of distrust",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desprecio",
+          "translation": "I utter a word of disdain",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desaprobación",
+          "translation": "I utter a word of disapproval",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "profiero una palabra de desconfianza",
+          "translation": "I utter a word of distrust",
+          "expected_form": "profiero",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "per_model": {
+      "qwen17b": {
+        "by_condition": {
+          "baseline": {
+            "expected_form_match": {
+              "n": 70,
+              "correct": 50,
+              "pass_rate": 0.7143,
+              "wilson_95_ci": [
+                0.5995,
+                0.8068
+              ]
+            },
+            "length_in_band": {
+              "n": 70,
+              "correct": 38,
+              "pass_rate": 0.5429,
+              "wilson_95_ci": [
+                0.427,
+                0.6543
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 70,
+              "correct": 70,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.948,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "henchir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "argüir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "atestiguar": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "menguar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "empalagar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "blandir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "proferir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              }
+            }
+          },
+          "explicit": {
+            "expected_form_match": {
+              "n": 70,
+              "correct": 40,
+              "pass_rate": 0.5714,
+              "wilson_95_ci": [
+                0.4548,
+                0.6806
+              ]
+            },
+            "length_in_band": {
+              "n": 70,
+              "correct": 64,
+              "pass_rate": 0.9143,
+              "wilson_95_ci": [
+                0.8253,
+                0.9601
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 70,
+              "correct": 70,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.948,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "henchir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "argüir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "atestiguar": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "menguar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "empalagar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "blandir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "proferir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              }
+            }
+          },
+          "form_injected": {
+            "expected_form_match": {
+              "n": 70,
+              "correct": 70,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.948,
+                1.0
+              ]
+            },
+            "length_in_band": {
+              "n": 70,
+              "correct": 12,
+              "pass_rate": 0.1714,
+              "wilson_95_ci": [
+                0.1009,
+                0.2762
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 70,
+              "correct": 67,
+              "pass_rate": 0.9571,
+              "wilson_95_ci": [
+                0.8814,
+                0.9853
+              ]
+            },
+            "per_verb": {
+              "henchir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "argüir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "atestiguar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "menguar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "empalagar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "blandir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "proferir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              }
+            }
+          },
+          "form_injected_explicit": {
+            "expected_form_match": {
+              "n": 70,
+              "correct": 61,
+              "pass_rate": 0.8714,
+              "wilson_95_ci": [
+                0.7734,
+                0.9309
+              ]
+            },
+            "length_in_band": {
+              "n": 70,
+              "correct": 41,
+              "pass_rate": 0.5857,
+              "wilson_95_ci": [
+                0.4688,
+                0.6937
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 70,
+              "correct": 70,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.948,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "henchir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "argüir": {
+                "n": 10,
+                "correct": 1,
+                "pass_rate": 0.1,
+                "wilson_95_ci": [
+                  0.0179,
+                  0.4042
+                ]
+              },
+              "atestiguar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "menguar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "empalagar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "blandir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "proferir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "prior_reference": {
+      "qwen05b": {
+        "baseline": 0.0,
+        "explicit": 0.049
+      },
+      "qwen17b": {
+        "baseline": 0.3,
+        "explicit": 0.58
+      }
+    }
+  }
+}

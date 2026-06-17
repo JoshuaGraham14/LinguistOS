@@ -1,0 +1,5603 @@
+{
+  "models": {
+    "qwen05b": "Qwen/Qwen2.5-0.5B-Instruct",
+    "qwen17b": "Qwen/Qwen3-1.7B"
+  },
+  "benchmarks": [
+    "spanish_basic"
+  ],
+  "conditions": [
+    "baseline",
+    "explicit",
+    "form_injected",
+    "form_injected_explicit"
+  ],
+  "samples_per_case": 10,
+  "temperature": 0.7,
+  "sentence_length": "short",
+  "run_grammar": true,
+  "cases": [
+    {
+      "id": "spanish_basic__comer__preterite_1st_plural__0",
+      "benchmark": "spanish_basic",
+      "keyword": "comer",
+      "translation": "to eat",
+      "constraints": {
+        "tense": "preterite",
+        "person": "1st",
+        "number": "plural",
+        "expected_form": "comimos"
+      },
+      "cefr_level": "A1",
+      "expected_form": "comimos"
+    },
+    {
+      "id": "spanish_basic__vivir__future_3rd_singular__1",
+      "benchmark": "spanish_basic",
+      "keyword": "vivir",
+      "translation": "to live",
+      "constraints": {
+        "tense": "future",
+        "person": "3rd",
+        "number": "singular",
+        "expected_form": "vivirá"
+      },
+      "cefr_level": "A1",
+      "expected_form": "vivirá"
+    },
+    {
+      "id": "spanish_basic__hablar__present_2nd_singular__2",
+      "benchmark": "spanish_basic",
+      "keyword": "hablar",
+      "translation": "to speak",
+      "constraints": {
+        "tense": "present",
+        "person": "2nd",
+        "number": "singular",
+        "expected_form": "hablas"
+      },
+      "cefr_level": "A1",
+      "expected_form": "hablas"
+    },
+    {
+      "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+      "benchmark": "spanish_basic",
+      "keyword": "escribir",
+      "translation": "to write",
+      "constraints": {
+        "tense": "preterite",
+        "person": "3rd",
+        "number": "plural",
+        "expected_form": "escribieron"
+      },
+      "cefr_level": "A1",
+      "expected_form": "escribieron"
+    },
+    {
+      "id": "spanish_basic__correr__present_1st_singular__4",
+      "benchmark": "spanish_basic",
+      "keyword": "correr",
+      "translation": "to run",
+      "constraints": {
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+        "expected_form": "corro"
+      },
+      "cefr_level": "A1",
+      "expected_form": "corro"
+    }
+  ],
+  "runs": [
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 46.13,
+      "candidates": [
+        {
+          "sentence": "Comí el té.",
+          "translation": "Comi la taza de té.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lo comió mi hermano.",
+          "translation": "El mio hermano me comió.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Llegó la cena en su mesa.",
+          "translation": "La cena llegó en su mesa.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Le di un pastel a la princesa.",
+          "translation": "Le di un plato al rey.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Se acostó con mi amiga.",
+          "translation": "Se acostó con mi amiga.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "¡Comiéndome un libro!, ¡qué bonito!",
+          "translation": "¡Me puse a leer un libro! ¡Qué bonito!",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Le di la comida.",
+          "translation": "Le dio el comedor.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo también comi.",
+          "translation": "Yo también comí.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él comió muy bien.",
+          "translation": "El comió muy bien.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No me comeron.",
+          "translation": "Nunca les comieron.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 32.76,
+      "candidates": [
+        {
+          "sentence": "Voy a comer el lunes.",
+          "translation": "Estoy listo para comer mañana.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Me encanta vivir en el parque.",
+          "translation": "Es un lugar donde me gusta vivir.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Mi hermano está viviendo aquí desde hace años.",
+          "translation": "Mi hermano ha vivido aquí durante años.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No voy a ir a la playa hasta el martes.",
+          "translation": "No voy a ir al mar ni hoy ni mañana.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El libro es muy bueno para leer.",
+          "translation": "Este libro es muy bueno para leer.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "¡Hola! ¿Cómo estás?",
+          "translation": "¡Hola! ¿Cómo estás?",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Quiero que nos vayamos a casa pronto.",
+          "translation": "Quiero que volvamos a casa pronto.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Le dije que volvería el próximo mes.",
+          "translation": "Le dijeron que volvería el mes siguiente.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Soy una persona inteligente y valiosa.",
+          "translation": "soy un individuo inteligente y valioso.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivo hoy en la biblioteca.",
+          "translation": "Hojo hoy en la biblioteca.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 40.39,
+      "candidates": [
+        {
+          "sentence": "Él habla español.",
+          "translation": "El él habla español.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella dice hablar.",
+          "translation": "Ella dice hablar.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros hablamos de él.",
+          "translation": "Nuestros nos hablan de él.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los niños cantan el clásico 'La Habana'.",
+          "translation": "Los niños cantan la clásica 'La Habana'.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Cuando la lluvia llega, las personas pueden hablar.",
+          "translation": "Cuando la lluvia llega, las personas pueden hablar.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "¿Quién se metió en el río?",
+          "translation": "¿ Quién se metió en el rio?",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribiré los proyectos para mañana.",
+          "translation": "Estoy escribiendo los proyectos para mañana.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Le daré el viaje en un coche.",
+          "translation": "Llevaré el viaje en un coche.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Habrá una conferencia de noticias.",
+          "translation": "Hay una conferencia de noticias.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La comida será deliciosa.",
+          "translation": "El comedor será agradable.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 21.04,
+      "candidates": [
+        {
+          "sentence": "Se escribió el libro de ciencia ficción.",
+          "translation": "Se escribió el libro de ciencia ficción.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las personas escriben diarios para comunicarse con sus amigos y familiares.",
+          "translation": "Las personas escriben diarios para comunicarse con sus amigos y familiares.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La escuela se escribe en español por lo que todos pueden entenderlo.",
+          "translation": "La escuela se escribe en español por lo que todos pueden entenderlo.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 12,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Le escribí una carta.",
+          "translation": "Escribió una carta a él.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hemos escrito un libro.",
+          "translation": "Hemos escrito un libro.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nos escribieron una carta de amor.",
+          "translation": "Nos escribieron una carta de amor.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lo escribieron en su casa.",
+          "translation": "Lo escribieron en su casa.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No escribieron nada después de la comida.",
+          "translation": "No escribieron nada después de la comida.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La historia se escribió por ellos.",
+          "translation": "La historia se escribió por ellos.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Amaron escribir las cartas.",
+          "translation": "Amor les escribió cartas.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 22.18,
+      "candidates": [
+        {
+          "sentence": "Me corro al día.",
+          "translation": "A menudo me corro.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corrí con el perro.",
+          "translation": "Fui corriendo con el perro.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No puedo correr hoy.",
+          "translation": "No puedo correr hoy.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La carrera se ha detenido.",
+          "translation": "La carrera ha parado.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vengo de un viaje rápido.",
+          "translation": "Hago una ruta rápida desde casa.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El niño corre muy rápido.",
+          "translation": "El niño corre muy rápido.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lo siento mucho por la multitud.",
+          "translation": "Lo siento mucho por la multitud.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Le dije que corriamos en grupo.",
+          "translation": "Le dije que nos dirigimos juntos en línea.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Tengo que irme de vacaciones.",
+          "translation": "Tengo que irme para las vacaciones.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "...",
+          "translation": "...",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 0,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 70.18,
+      "candidates": [
+        {
+          "sentence": "Ellos comieron todos los platos de la cena.",
+          "translation": "Los estudiantes comieron a todos los platos del desayuno.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Mientras se acercaba el día, se prepararon un menú típico.",
+          "translation": "Aunque estaba el día, se preparaban un menú tradicional.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La casa fue llenada de gente al comienzo de mes.",
+          "translation": "El lugar fue lleno de personas al comienzo de mes.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No había nada para comer en la sala de estar.",
+          "translation": "Ningún plato era para comer en la sala de estar.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Cuando los niños salían de la escuela, se les ofreció comida rápida.",
+          "translation": "Cuando los niños salían de la escuela, se les ofrecieron comida rápida.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 12,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las visitas a la playa no eran una opción para él.",
+          "translation": "No era una opción para él visitar la playa.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Al final del año, todo se repartía entre los compañeros de trabajo.",
+          "translation": "Finalmente, todo se distribuía entre los compañeros de trabajo.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 12,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El club de deportes se abrió a todas las familias.",
+          "translation": "El club de deportes abrió a todas las familias.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las mascotas se acostumbraron rápidamente a los alimentos nuevos.",
+          "translation": "Las mascotas se adaptaron rápidamente a los nuevos alimentos.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Le di un pastel al jefe.",
+          "translation": "Lo di el jefe.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 20.91,
+      "candidates": [
+        {
+          "sentence": "Estoy viviendo en la ciudad.",
+          "translation": "Yo estoy viviendo en la ciudad.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Mi hermano está viendo películas.",
+          "translation": "Mi hermano está viendo películas.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos están trabajando en el laboratorio.",
+          "translation": "Los son trabajando en el laboratorio.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella se ha vuelto muy madura.",
+          "translation": "Ella ha cambiado muy madura.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros estamos planeando un viaje.",
+          "translation": "Nuestros son planeando un viaje.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lo vivirá tu hermano.",
+          "translation": "El hijo de tu hermana vivirá.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá el día de la celebración.",
+          "translation": "Será en ese día su día de vida.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No me imagino viviendo por aquí.",
+          "translation": "No imaginaba vivir aquí.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La ciudad será tan viva como hoy se vive en ella.",
+          "translation": "La ciudad será así como hoy vive en ella.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Mi vida está viviendo en este momento.",
+          "translation": "Mis vidas están viviendo en esta etapa.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 19.7,
+      "candidates": [
+        {
+          "sentence": "¡Hablemos en clase el lunes.",
+          "translation": "Llámame para hablar en clase.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Leí un libro el fin de semana.",
+          "translation": "El libro leía.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él está discutiendo conmigo sobre la nueva película.",
+          "translation": "Él habla conmigo sobre la película nueva.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros comparamos nuestros proyectos.",
+          "translation": "Comparamos nuestros proyectos.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La señora me dice que es muy importante.",
+          "translation": "Me dice la señora que es muy importante.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los niños cantan en su sala.",
+          "translation": "Cantaban los niños en su sala.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estoy trabajando duro para mejorar mi habilidad.",
+          "translation": "Estoy tratando de mejorar mi habilidad trabajando duro.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "¿Cuál es tu nombre?",
+          "translation": "¿Cómo te llamas?",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nos gustaría conocer a esa persona.",
+          "translation": "Nos gustaría conocer a esa persona.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No puedo seguir con esto.",
+          "translation": "No puedo más con esto.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 33.93,
+      "candidates": [
+        {
+          "sentence": "Ella escribió un libro.",
+          "translation": "La mujer escribió un libro.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los niños eran muy buenas escritores.",
+          "translation": "Los niños eran muy buenos escritores.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        },
+        {
+          "sentence": "Las chicas dijeron que eran muy habilidosas en la escritura.",
+          "translation": "Las chicas dijo que eran muy habilidades en la escritura.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos están trabajando en una nueva obra de literatura.",
+          "translation": "Están trabajando en una nueva obra de literatura.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros los hemos convertido en expertos en la escritura.",
+          "translation": "Nosotros hemos convertido en expertos en la escritura.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hemos escrito un poema para su cumpleaños.",
+          "translation": "Nous avons écrit un poème pour sa fête.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Su hermana le escribió una carta sobre sus vacaciones.",
+          "translation": "Sa sœur lui a écris une lettre sur ses vacances.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los libros de la biblioteca se han llenado de contenido escritoril.",
+          "translation": "Los libros de la biblioteca ont été remplus de contenu écriturier.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La empresa ha contrat a una nueva escritora para su nuevo proyecto.",
+          "translation": "La entreprise a reçu une nouvelle dessinateur pour son nouveau projet.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 12,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        },
+        {
+          "sentence": "Ellos escriben regularmente.",
+          "translation": "Los estudiantes escriben regularmente.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 28.46,
+      "candidates": [
+        {
+          "sentence": "Yo corro al jardín.",
+          "translation": "Yo corro al jardín.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El coche va a la universidad.",
+          "translation": "El coche va a la universidad.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las pelotas son muy fáciles de jugar.",
+          "translation": "Las pelotas son muy fáciles de jugar.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lo hago con frecuencia en mi vida.",
+          "translation": "Lo hago con frecuencia en mi vida.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La casa está llena de animales.",
+          "translation": "La casa está llena de animales.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "yo corro en el jardín.",
+          "translation": "Yo camino en el jardín.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "el coche se acerca a la ciudad.",
+          "translation": "El coche va a la ciudad.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "la lluvia se vuelve más fría.",
+          "translation": "La lluvia hace que se vuelva más fría.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "los niños se apoyan en las sillas del cuarto.",
+          "translation": "Los niños se sentan en las sillas del cuarto.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "no puedo parar de correr.",
+          "translation": "No puedo parar de correr.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 40.1,
+      "candidates": [
+        {
+          "sentence": "Comemos todos los días.",
+          "translation": "Todos comemos cada día.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos comieron una taza de café.",
+          "translation": "Estos dioses comieron una taza de café.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La casa tenía un pequeño patio donde comían los niños.",
+          "translation": "La vivienda tenía un pequeño parque donde los niños comían.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Su madre les decía que comeran por la tarde.",
+          "translation": "Sus padres le pedían que comieran en la tarde.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las aves se alimentaban de la tierra y del aire para sobrevivir.",
+          "translation": "Los pájaros se alimentaban de la tierra y del aire para sobrevivir.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 12,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No era fácil encontrar comida en el bosque cerrado.",
+          "translation": "No es fácil encontrar comida en el bosque cerrado.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Cuando se acercaba el sol, los árboles comenzaron a comer.",
+          "translation": "A medida que llega el sol, los árboles comienzan a comer.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lo que más les gustaba era comer helados con leche en la parrilla.",
+          "translation": "Lo que más les gustaba eran comer heladas con leche en la parrilla.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 13,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "En su casa siempre había una cesta de plátanos para las vacaciones.",
+          "translation": "En su casa siempre había una cesta de plátanos para las vacaciones.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 12,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comemos el pan.",
+          "translation": "Eso era lo que comí.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 34.54,
+      "candidates": [
+        {
+          "sentence": "Vivrá siempre su hermano.",
+          "translation": "Vivirá siempre su hermano.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá en un lugar cercano.",
+          "translation": "Vivirá en un lugar cercano.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá hasta que sea tiempo.",
+          "translation": "Vivirá hasta que sea tiempo.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá mañana con su familia.",
+          "translation": "Vivirá mañana con su familia.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá hoy mismo a sus padres.",
+          "translation": "Vivirá hoy mismo a sus padres.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá el día de hoy en casa.",
+          "translation": "Vivirá el día de hoy en casa.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá este año la elección del futuro.",
+          "translation": "Vivirá este año la elección del futuro.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá esta noche en una playa tranquila.",
+          "translation": "Vivirá esta noche en una playa tranquila.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá el tiempo.",
+          "translation": "El tiempo vivirá.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vivirá mañana.",
+          "translation": "Hoy mañana vivirá.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 29.54,
+      "candidates": [
+        {
+          "sentence": "Es importante hablar en español.",
+          "translation": "Es importante hablarte en español.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No puedo hablar inglés",
+          "translation": "No puedo hablar inglés",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablaré mañana con ustedes.",
+          "translation": "Hablo mañana con ustedes.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Habla mucho sobre este tema.",
+          "translation": "Ha habido mucho sobre este tema.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "¡Me hablo muy bien de esto!",
+          "translation": "¡Me hablo muy bien de esto!",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "¿Cómo habláis hoy?",
+          "translation": "¿Cómo habéis venido hoy?",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Habla bien el lenguaje.",
+          "translation": "Soy muy bueno en hablar español.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Habla mucho de su experiencia en la universidad.",
+          "translation": "Explica mucho sobre sus experiencias en la universidad.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Habla regularmente con los amigos.",
+          "translation": "Le hablo constantemente con sus amigos.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Habla por teléfono en un lugar cercano.",
+          "translation": "Llama por teléfono al lugar cerca.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 33.32,
+      "candidates": [
+        {
+          "sentence": "La escritura es una habilidad compleja.",
+          "translation": "Escribir es una habilidad compleja.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las personas escriben constantemente para mantenerse al día con las últimas noticias.",
+          "translation": "Las personas escriben constantemente para mantenerse al día con las últimas noticias.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 12,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El escritor le dio a su novia un libro de poesía.",
+          "translation": "El escritor le dio a su novia un libro de poesía.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Todos los estudiantes se dedican a escribir sus diarios diarios.",
+          "translation": "Todas las estudiante escriben sus diarios diarios.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El libro fue escrito por mi hermano.",
+          "translation": "Se escribió el libro por mí hermano.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las cartas fueron escritas con mucho cuidado.",
+          "translation": "Las cartas fueron escritas con mucha delicadeza.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los libros son escritos de manera manual.",
+          "translation": "Los libros se escriben de manera manual.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La publicación de los trabajos fue realizada en varias fases.",
+          "translation": "La publicación de los trabajos fue realizada en varias fases.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El borrador del proyecto fue escrito durante la noche.",
+          "translation": "El borrador del proyecto fue escrito durante la noche.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las letras fueron escritas con un papel de madera y una copia de papel.",
+          "translation": "Las letras fueron escritas con un papel de madera y una copia de papel.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 14,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 28.37,
+      "candidates": [
+        {
+          "sentence": "Eso es lo que quiero hacer hoy.",
+          "translation": "Ese es lo que quiero hacer hoy.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estoy trabajando en una nueva aplicación de software para mi empresa.",
+          "translation": "Estoy trabajando en una nueva aplicación de software para mi empresa.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Vamos al parque a jugar a la pelota después del partido.",
+          "translation": "Vamos al parque a jugar a la pelota después del partido.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No puedo esperar más tiempo para comer y descansar.",
+          "translation": "No puedo esperar más tiempo para comer y descansar.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El niño está corriendo por el jardín mientras su madre le dice algo sobre el tema.",
+          "translation": "El niño está corriendo por el jardín mientras su madre le dice algo sobre el tema.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 16,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corre cada día.",
+          "translation": "Corro cada día.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El niño corrió en el jardín.",
+          "translation": "El niño corrió en el jardín.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Me gusta correr por la ciudad.",
+          "translation": "Me gusta correr por la ciudad.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La carrera de correr comenzó hace una hora.",
+          "translation": "La carrera de correr comenzó hace una hora.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estoy trabajando duro para correr mejor.",
+          "translation": "Estoy trabajando duro para correr mejor.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 28.13,
+      "candidates": [
+        {
+          "sentence": "Nosotros comemos la comida.",
+          "translation": "Nosotros comemos la comida.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Tu eres muy común en casa.",
+          "translation": "Tu eres muy común en casa.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él comió su comida después de la reunión.",
+          "translation": "Él comió su comida después de la reunión.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella sabía mucho sobre cocina.",
+          "translation": "Ella sabía mucho sobre cocina.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lo siento mucho por el desorden.",
+          "translation": "Lo siento mucho por el desorden.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comemos las verduras.",
+          "translation": "Nosotros comemos los verduras.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La comida era muy saborosa.",
+          "translation": "Las comida eran muy saborosas.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El desayuno es una rutina diaria.",
+          "translation": "El desayuno es un hábito diario.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No podemos seguir viviendo sin comer.",
+          "translation": "No podemos seguir viva sin comer.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estamos preparando la cena.",
+          "translation": "Estamos preparando la cena.",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 20.37,
+      "candidates": [
+        {
+          "sentence": "Vivirá mañana.",
+          "translation": "Ellos vivirán mañana.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Habrá un jardín en la ciudad.",
+          "translation": "Hay una plaza de juegos en la ciudad.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La niña va a jugar al fútbol.",
+          "translation": "La niña va a jugar el fútbol.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "No hay nadie en el parque.",
+          "translation": "Ninguno está en el parque.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estoy esperando para ir al trabajo.",
+          "translation": "Estoy esperándome para trabajar.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos están empezando a comer.",
+          "translation": "Los niños comen ahora.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella se levantará por la mañana.",
+          "translation": "Se levanta ella por la mañana.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "¡Qué calor! ¿De qué hablan?",
+          "translation": "¡Cállate! ¿Dónde estás?",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Mi hermana va a visitar a su abuela.",
+          "translation": "Mi hermana va a visitarla a su abuela.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las personas son serias y respetuosas.",
+          "translation": "Las personas son severas y respetuosas.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 28.02,
+      "candidates": [
+        {
+          "sentence": "Escribir es algo que puedo hacer hoy.",
+          "translation": "Tú puedes escribir algo hoy.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Lidiar con los problemas es algo que necesitas hacer constantemente.",
+          "translation": "Tú debes lidiar con los problemas constantemente.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 10,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comer es una parte integral de tu vida.",
+          "translation": "Tu comida es una parte integral de tu vida.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estudiar es un proceso importante para mejorar tus habilidades.",
+          "translation": "El estudio es un proceso importante para mejorar tus habilidades.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ver películas es algo que disfrutas mucho.",
+          "translation": "¡Te gustaría ver películas!",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Jugar es una actividad divertida y benefica.",
+          "translation": "Jugar es una actividad divertida y benefica.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Dormir siempre me da tiempo para descansar.",
+          "translation": "Tienes tiempo para dormir siempre.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escuchar música es algo que disfruta mucho.",
+          "translation": "¡Te gustaría escuchar música!",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Estar en casa es algo que te apasiona.",
+          "translation": "¡Se te apasiona estar en casa!",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Tú hablas ala vez.",
+          "translation": "Tu hablas simultáneamente.",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 27.28,
+      "candidates": [
+        {
+          "sentence": "Ella escribió los libros en casa.",
+          "translation": "Ellos escribieron los libros en casa.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los estudiantes se escribieron un libro en la escuela.",
+          "translation": "Las chicas se escribieron un libro en la escuela.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La niña escribió un cuento en el bolso de su padre.",
+          "translation": "El niño escribió un cuento en el bolso de su padre.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 11,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los niños escribieron una canción al piano.",
+          "translation": "Los niños escribieron una canción al piano.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Se escribieron las letras en el libro.",
+          "translation": "Se escribieron las letras en el libro.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un párrafo sobre los estudios.",
+          "translation": "Las chicas escribieron un párrafo sobre los estudios.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella escribió una historia sobre sus amigos.",
+          "translation": "Ellos escribieron una historia sobre sus amigos.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Todos los niños escritos estaban muy contentos.",
+          "translation": "Todos los niños escritos estaban muy contentos.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron los libros.",
+          "translation": "Los estudiantes escriben las obras.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Se escribieron todos los libros.",
+          "translation": "Todos los estudiantes se escriben las obras.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen05b",
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 17.6,
+      "candidates": [
+        {
+          "sentence": "Yo corro el libro.",
+          "translation": "Yo corro el libro.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Mi hermano corre a la escuela.",
+          "translation": "Mi hermano corre a la escuela.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "La chica camina por el jardín.",
+          "translation": "La chica camina por el jardín.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "El niño corre con su amigo.",
+          "translation": "El niño corre con su amigo.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros corremos por la ciudad.",
+          "translation": "Nosotros corrimos por la ciudad.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Las personas son capaces de correr.",
+          "translation": "Las personas son capaces de correr.",
+          "expected_form": "corro",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro el libro.",
+          "translation": "Leí el libro.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro los párpados.",
+          "translation": "Miro los párpados.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro la casa.",
+          "translation": "Llegué al jardín.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro las manos.",
+          "translation": "Corte mis manos.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 48.68,
+      "candidates": [
+        {
+          "sentence": "Como comí un sándwich",
+          "translation": "As I ate a sandwich",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comimos un plátano",
+          "translation": "We ate an apple",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Como comen los niños",
+          "translation": "As the children eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comimos en la cafeteria",
+          "translation": "We ate in the cafeteria",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comimos en la cafetería",
+          "translation": "We ate in the café",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comimos en la mesa",
+          "translation": "We ate at the table",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comimos en la mesa de la sala",
+          "translation": "We ate at the room table",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comimos en la mesa de la habitación",
+          "translation": "We ate at the room table",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Comimos en la mesa de la cocina",
+          "translation": "We ate in the kitchen table",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Como comí un pan",
+          "translation": "As I ate a bread",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 25.04,
+      "candidates": [
+        {
+          "sentence": "Viviré una vacación en España.",
+          "translation": "I will live a vacation in Spain.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré con mi familia este año.",
+          "translation": "I will live with my family this year.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en un apartamento en Madrid.",
+          "translation": "I will live in an apartment in Madrid.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en la ciudad más grande de España.",
+          "translation": "I will live in the largest city in Spain.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en una casa en el campo.",
+          "translation": "I will live in a house in the countryside.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en casa con mi madre y mi hermano.",
+          "translation": "I will live at home with my mother and brother.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en el centro de la ciudad.",
+          "translation": "I will live in the center of the city.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en un apartamento en el centro de Madrid.",
+          "translation": "I will live in an apartment in the center of Madrid.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 9,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en una casa en la montaña.",
+          "translation": "I will live in a house in the mountains.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en una casa con mi familia.",
+          "translation": "I will live in a house with my family.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 14.76,
+      "candidates": [
+        {
+          "sentence": "Hablo español.",
+          "translation": "I speak Spanish.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella habla rápido.",
+          "translation": "She speaks quickly.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros hablamos en español.",
+          "translation": "We speak in Spanish.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él habla inglés.",
+          "translation": "He speaks English.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Usted habla bien.",
+          "translation": "You speak well.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo hablo con él.",
+          "translation": "I speak to him.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ella habla con su madre.",
+          "translation": "She speaks to her mother.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Nosotros hablamos de la fiesta.",
+          "translation": "We speak about the party.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él habla con su hermano.",
+          "translation": "He speaks to his brother.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Usted habla con su profesor.",
+          "translation": "You speak to your teacher.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 34.99,
+      "candidates": [
+        {
+          "sentence": "Escribimos un correo electrónico.",
+          "translation": "We write an email.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos los informes semanales.",
+          "translation": "We write the weekly reports.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos un poema en la clase de literatura.",
+          "translation": "We write a poem in literature class.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos un libro de cuentos.",
+          "translation": "We write a book of stories.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos las cartas a nuestros amigos.",
+          "translation": "We write the letters to our friends.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos un examen de español.",
+          "translation": "We write a Spanish test.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos un informe para el director.",
+          "translation": "We write a report for the director.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos un cuento en el club de lectura.",
+          "translation": "We write a story in the reading club.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 8,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos un mensaje en el teléfono.",
+          "translation": "We write a message on the phone.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Escribimos un correo electrónico.",
+          "translation": "We write an email.",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "baseline",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 13.7,
+      "candidates": [
+        {
+          "sentence": "Corro en la plaza.",
+          "translation": "I run in the square.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro rápido.",
+          "translation": "I run fast.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro por la calle.",
+          "translation": "I run along the street.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro con mis amigos.",
+          "translation": "I run with my friends.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro al parque.",
+          "translation": "I run to the park.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro cada día.",
+          "translation": "I run every day.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro por la mañana.",
+          "translation": "I run in the morning.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro en bicicleta.",
+          "translation": "I run on a bike.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro para llegar tarde.",
+          "translation": "I run to get there late.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro con mi hermano.",
+          "translation": "I run with my brother.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 9.51,
+      "candidates": [
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comemos",
+          "translation": "we eat",
+          "expected_form": "comimos",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 1,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 11.77,
+      "candidates": [
+        {
+          "sentence": "él vivirá",
+          "translation": "he will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "el vivirá",
+          "translation": "he will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "el vivirá",
+          "translation": "he will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "el vivirá",
+          "translation": "he will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "el vivirá",
+          "translation": "he will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ella vivirá",
+          "translation": "she will live",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 11.7,
+      "candidates": [
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "tú hablas",
+          "translation": "you speak",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 11.58,
+      "candidates": [
+        {
+          "sentence": "ellos escriben",
+          "translation": "they write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ellas escriben",
+          "translation": "they write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "nosotros escribimos",
+          "translation": "we write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "vosotros escribís",
+          "translation": "you all write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ustedes escriben",
+          "translation": "you write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ellos escribimos",
+          "translation": "we write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        },
+        {
+          "sentence": "ellas escribimos",
+          "translation": "we write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": false,
+          "grammar_match_count": 1
+        },
+        {
+          "sentence": "nosotros escribimos",
+          "translation": "we write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "vosotros escribís",
+          "translation": "you all write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "ustedes escriben",
+          "translation": "you write",
+          "expected_form": "escribieron",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "explicit",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 8.49,
+      "candidates": [
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Yo corro",
+          "translation": "I run",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 13.56,
+      "candidates": [
+        {
+          "sentence": "comimos la pizza",
+          "translation": "we ate the pizza",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos en la cafeteria",
+          "translation": "we ate in the cafeteria",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos frutas",
+          "translation": "we ate fruits",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos comida rápida",
+          "translation": "we ate fast food",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos con amigos",
+          "translation": "we ate with friends",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos en un restaurante",
+          "translation": "we ate in a restaurant",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos un helado",
+          "translation": "we ate an ice cream",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos un sándwich",
+          "translation": "we ate a sandwich",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos un pastel",
+          "translation": "we ate a cake",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos un plátano",
+          "translation": "we ate an apple",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 35.32,
+      "candidates": [
+        {
+          "sentence": "Viviré una vacación en España.",
+          "translation": "I will have a vacation in Spain.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré la vida con mis amigos.",
+          "translation": "I will live my life with my friends.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré el próximo año en otra ciudad.",
+          "translation": "I will live next year in another city.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré una vida feliz.",
+          "translation": "I will live a happy life.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré el domingo con mi familia.",
+          "translation": "I will live the Sunday with my family.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en casa con mi madre.",
+          "translation": "I will live at home with my mother.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en un apartamento en Madrid.",
+          "translation": "I will live in an apartment in Madrid.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré mi vida con mi novio.",
+          "translation": "I will live my life with my boyfriend.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré en el futuro con mi pareja.",
+          "translation": "I will live in the future with my partner.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 7,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Viviré la vida en el futuro.",
+          "translation": "I will live my life in the future.",
+          "expected_form": "vivirá",
+          "ef_pass": false,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 14.92,
+      "candidates": [
+        {
+          "sentence": "Hablo con María.",
+          "translation": "I speak to María.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo en español.",
+          "translation": "I speak in Spanish.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo de la fiesta.",
+          "translation": "I speak about the party.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo con mi hermano.",
+          "translation": "I speak to my brother.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo de los libros.",
+          "translation": "I speak about the books.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo con el profesor.",
+          "translation": "I speak to the teacher.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo de la vida.",
+          "translation": "I speak about life.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo con el niño.",
+          "translation": "I speak to the child.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo de la música.",
+          "translation": "I speak about the music.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablo con la madre.",
+          "translation": "I speak to the mother.",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 17.72,
+      "candidates": [
+        {
+          "sentence": "Los estudiantes escribieron un mensaje",
+          "translation": "The students wrote a message",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los niños escribieron un libro",
+          "translation": "The children wrote a book",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los profesores escribieron un informe",
+          "translation": "The teachers wrote a report",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los alumnos escribieron un examen",
+          "translation": "The students wrote an exam",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los chicos escribieron una carta",
+          "translation": "The boys wrote a letter",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los niños escribieron un cuento",
+          "translation": "The children wrote a story",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los estudiantes escribieron un proyecto",
+          "translation": "The students wrote a project",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los profesores escribieron un libro",
+          "translation": "The teachers wrote a book",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los chicos escribieron un ensayo",
+          "translation": "The boys wrote an essay",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Los niños escribieron un dibujo",
+          "translation": "The children wrote a drawing",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 13.83,
+      "candidates": [
+        {
+          "sentence": "Corro por la plaza.",
+          "translation": "I run by the square.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro rápido.",
+          "translation": "I run fast.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro al parque.",
+          "translation": "I run to the park.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro con mi hermano.",
+          "translation": "I run with my brother.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro al gimnasio.",
+          "translation": "I run to the gym.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro en bicicleta.",
+          "translation": "I run on a bicycle.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro en el parque.",
+          "translation": "I run in the park.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro al trabajo.",
+          "translation": "I run to work.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro con mis amigos.",
+          "translation": "I run with my friends.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Corro en el centro.",
+          "translation": "I run in the center.",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__comer__preterite_1st_plural__0",
+        "benchmark": "spanish_basic",
+        "keyword": "comer",
+        "translation": "to eat",
+        "constraints": {
+          "tense": "preterite",
+          "person": "1st",
+          "number": "plural",
+          "expected_form": "comimos"
+        },
+        "cefr_level": "A1",
+        "expected_form": "comimos"
+      },
+      "latency_s": 14.53,
+      "candidates": [
+        {
+          "sentence": "comimos la pizza",
+          "translation": "we ate the pizza",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos la ensalada",
+          "translation": "we ate the salad",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos la tarta",
+          "translation": "we ate the cake",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos el pan",
+          "translation": "we ate the bread",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos el helado",
+          "translation": "we ate the ice cream",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos el postre",
+          "translation": "we ate the dessert",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos la comida",
+          "translation": "we ate the food",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos la torta",
+          "translation": "we ate the tart",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos el pastel",
+          "translation": "we ate the pastry",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "comimos la galleta",
+          "translation": "we ate the cookie",
+          "expected_form": "comimos",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__vivir__future_3rd_singular__1",
+        "benchmark": "spanish_basic",
+        "keyword": "vivir",
+        "translation": "to live",
+        "constraints": {
+          "tense": "future",
+          "person": "3rd",
+          "number": "singular",
+          "expected_form": "vivirá"
+        },
+        "cefr_level": "A1",
+        "expected_form": "vivirá"
+      },
+      "latency_s": 17.52,
+      "candidates": [
+        {
+          "sentence": "Él vivirá en Madrid.",
+          "translation": "He will live in Madrid.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá en la ciudad.",
+          "translation": "He will live in the city.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá hoy.",
+          "translation": "He will live today.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá con su familia.",
+          "translation": "He will live with his family.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá en un apartamento.",
+          "translation": "He will live in an apartment.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá en el futuro.",
+          "translation": "He will live in the future.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá en una casa.",
+          "translation": "He will live in a house.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá en el campo.",
+          "translation": "He will live in the countryside.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá en una ciudad grande.",
+          "translation": "He will live in a big city.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Él vivirá en una nueva ciudad.",
+          "translation": "He will live in a new city.",
+          "expected_form": "vivirá",
+          "ef_pass": true,
+          "length_in_band": false,
+          "token_count": 6,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__hablar__present_2nd_singular__2",
+        "benchmark": "spanish_basic",
+        "keyword": "hablar",
+        "translation": "to speak",
+        "constraints": {
+          "tense": "present",
+          "person": "2nd",
+          "number": "singular",
+          "expected_form": "hablas"
+        },
+        "cefr_level": "A1",
+        "expected_form": "hablas"
+      },
+      "latency_s": 11.25,
+      "candidates": [
+        {
+          "sentence": "Hablo tú",
+          "translation": "I speak you",
+          "expected_form": "hablas",
+          "ef_pass": false,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas yo",
+          "translation": "You speak me",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas tú",
+          "translation": "You speak you",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas yo",
+          "translation": "You speak me",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas tú",
+          "translation": "You speak you",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas yo",
+          "translation": "You speak me",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas tú",
+          "translation": "You speak you",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas tú",
+          "translation": "You speak you",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas tú",
+          "translation": "You speak you",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Hablas tú",
+          "translation": "You speak you",
+          "expected_form": "hablas",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__escribir__preterite_3rd_plural__3",
+        "benchmark": "spanish_basic",
+        "keyword": "escribir",
+        "translation": "to write",
+        "constraints": {
+          "tense": "preterite",
+          "person": "3rd",
+          "number": "plural",
+          "expected_form": "escribieron"
+        },
+        "cefr_level": "A1",
+        "expected_form": "escribieron"
+      },
+      "latency_s": 16.12,
+      "candidates": [
+        {
+          "sentence": "Ellos escribieron un correo electrónico.",
+          "translation": "They wrote an email.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 5,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un libro.",
+          "translation": "They wrote a book.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron una carta.",
+          "translation": "They wrote a letter.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un poemario.",
+          "translation": "They wrote a poetry collection.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un video.",
+          "translation": "They wrote a video.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un informe.",
+          "translation": "They wrote a report.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un blog.",
+          "translation": "They wrote a blog.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un mensaje.",
+          "translation": "They wrote a message.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un examen.",
+          "translation": "They wrote an exam.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "Ellos escribieron un videojuego.",
+          "translation": "They wrote a video game.",
+          "expected_form": "escribieron",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    },
+    {
+      "model_key": "qwen17b",
+      "model_id": "Qwen/Qwen3-1.7B",
+      "condition": "form_injected_explicit",
+      "case": {
+        "id": "spanish_basic__correr__present_1st_singular__4",
+        "benchmark": "spanish_basic",
+        "keyword": "correr",
+        "translation": "to run",
+        "constraints": {
+          "tense": "present",
+          "person": "1st",
+          "number": "singular",
+          "expected_form": "corro"
+        },
+        "cefr_level": "A1",
+        "expected_form": "corro"
+      },
+      "latency_s": 13.28,
+      "candidates": [
+        {
+          "sentence": "corro a la escuela",
+          "translation": "I run to school",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro rápido",
+          "translation": "I run fast",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 2,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro por la mañana",
+          "translation": "I run in the morning",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro con amigos",
+          "translation": "I run with friends",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro en la ciudad",
+          "translation": "I run in the city",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro cada día",
+          "translation": "I run every day",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 3,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro por el parque",
+          "translation": "I run in the park",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro con mi hermano",
+          "translation": "I run with my brother",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro en la noche",
+          "translation": "I run at night",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        },
+        {
+          "sentence": "corro para llegar tarde",
+          "translation": "I run to be late",
+          "expected_form": "corro",
+          "ef_pass": true,
+          "length_in_band": true,
+          "token_count": 4,
+          "grammar_pass": true,
+          "grammar_match_count": 0
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "per_model": {
+      "qwen05b": {
+        "by_condition": {
+          "baseline": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 4,
+              "pass_rate": 0.08,
+              "wilson_95_ci": [
+                0.0315,
+                0.1884
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 28,
+              "pass_rate": 0.56,
+              "wilson_95_ci": [
+                0.4231,
+                0.6884
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 50,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.9286,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 3,
+                "pass_rate": 0.3,
+                "wilson_95_ci": [
+                  0.1078,
+                  0.6032
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 1,
+                "pass_rate": 0.1,
+                "wilson_95_ci": [
+                  0.0179,
+                  0.4042
+                ]
+              }
+            }
+          },
+          "explicit": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 4,
+              "pass_rate": 0.08,
+              "wilson_95_ci": [
+                0.0315,
+                0.1884
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 13,
+              "pass_rate": 0.26,
+              "wilson_95_ci": [
+                0.1587,
+                0.3955
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 48,
+              "pass_rate": 0.96,
+              "wilson_95_ci": [
+                0.8654,
+                0.989
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 2,
+                "pass_rate": 0.2,
+                "wilson_95_ci": [
+                  0.0567,
+                  0.5098
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 2,
+                "pass_rate": 0.2,
+                "wilson_95_ci": [
+                  0.0567,
+                  0.5098
+                ]
+              }
+            }
+          },
+          "form_injected": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 9,
+              "pass_rate": 0.18,
+              "wilson_95_ci": [
+                0.0977,
+                0.308
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 16,
+              "pass_rate": 0.32,
+              "wilson_95_ci": [
+                0.2076,
+                0.4581
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 50,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.9286,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 9,
+                "pass_rate": 0.9,
+                "wilson_95_ci": [
+                  0.5958,
+                  0.9821
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              }
+            }
+          },
+          "form_injected_explicit": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 13,
+              "pass_rate": 0.26,
+              "wilson_95_ci": [
+                0.1587,
+                0.3955
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 17,
+              "pass_rate": 0.34,
+              "wilson_95_ci": [
+                0.2244,
+                0.4785
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 49,
+              "pass_rate": 0.98,
+              "wilson_95_ci": [
+                0.895,
+                0.9965
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 1,
+                "pass_rate": 0.1,
+                "wilson_95_ci": [
+                  0.0179,
+                  0.4042
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 1,
+                "pass_rate": 0.1,
+                "wilson_95_ci": [
+                  0.0179,
+                  0.4042
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 6,
+                "pass_rate": 0.6,
+                "wilson_95_ci": [
+                  0.3127,
+                  0.8318
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 5,
+                "pass_rate": 0.5,
+                "wilson_95_ci": [
+                  0.2366,
+                  0.7634
+                ]
+              }
+            }
+          }
+        }
+      },
+      "qwen17b": {
+        "by_condition": {
+          "baseline": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 17,
+              "pass_rate": 0.34,
+              "wilson_95_ci": [
+                0.2244,
+                0.4785
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 33,
+              "pass_rate": 0.66,
+              "wilson_95_ci": [
+                0.5215,
+                0.7756
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 50,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.9286,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 7,
+                "pass_rate": 0.7,
+                "wilson_95_ci": [
+                  0.3968,
+                  0.8922
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              }
+            }
+          },
+          "explicit": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 30,
+              "pass_rate": 0.6,
+              "wilson_95_ci": [
+                0.4618,
+                0.7239
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 40,
+              "pass_rate": 0.8,
+              "wilson_95_ci": [
+                0.6696,
+                0.8876
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 48,
+              "pass_rate": 0.96,
+              "wilson_95_ci": [
+                0.8654,
+                0.989
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              }
+            }
+          },
+          "form_injected": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 30,
+              "pass_rate": 0.6,
+              "wilson_95_ci": [
+                0.4618,
+                0.7239
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 42,
+              "pass_rate": 0.84,
+              "wilson_95_ci": [
+                0.7149,
+                0.9166
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 50,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.9286,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 0,
+                "pass_rate": 0.0,
+                "wilson_95_ci": [
+                  0.0,
+                  0.2775
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              }
+            }
+          },
+          "form_injected_explicit": {
+            "expected_form_match": {
+              "n": 50,
+              "correct": 49,
+              "pass_rate": 0.98,
+              "wilson_95_ci": [
+                0.895,
+                0.9965
+              ]
+            },
+            "length_in_band": {
+              "n": 50,
+              "correct": 48,
+              "pass_rate": 0.96,
+              "wilson_95_ci": [
+                0.8654,
+                0.989
+              ]
+            },
+            "grammar_languagetool": {
+              "n": 50,
+              "correct": 50,
+              "pass_rate": 1.0,
+              "wilson_95_ci": [
+                0.9286,
+                1.0
+              ]
+            },
+            "per_verb": {
+              "comer": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "vivir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "hablar": {
+                "n": 10,
+                "correct": 9,
+                "pass_rate": 0.9,
+                "wilson_95_ci": [
+                  0.5958,
+                  0.9821
+                ]
+              },
+              "escribir": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              },
+              "correr": {
+                "n": 10,
+                "correct": 10,
+                "pass_rate": 1.0,
+                "wilson_95_ci": [
+                  0.7225,
+                  1.0
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "prior_reference": {
+      "qwen05b": {
+        "baseline": 0.0,
+        "explicit": 0.049
+      },
+      "qwen17b": {
+        "baseline": 0.3,
+        "explicit": 0.58
+      }
+    }
+  }
+}

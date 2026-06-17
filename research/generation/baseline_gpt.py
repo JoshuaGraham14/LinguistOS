@@ -28,6 +28,7 @@ def build_prompt(
     cefr_level: str | None = None,
     explicit_subject_required: bool = False,
     exercise_type: str | None = None,
+    inject_expected_form: str | None = None,
 ) -> str:
     """Build the prompt for unconstrained sentence generation."""
     return _build_prompt(
@@ -40,6 +41,7 @@ def build_prompt(
         cefr_level=cefr_level,
         explicit_subject_required=explicit_subject_required,
         exercise_type=exercise_type,
+        inject_expected_form=inject_expected_form,
     )
 
 
@@ -72,6 +74,7 @@ def generate(
     model: str = "gpt-5.4-nano",
     temperature: float = 0.7,
     api_key: str | None = None,
+    inject_expected_form: str | None = None,
 ) -> list[dict[str, str]]:
     """Call OpenAI and return parsed candidates.
 
@@ -95,6 +98,7 @@ def generate(
         sentence_length=sentence_length,
         explicit_subject_required=explicit_subject_required,
         exercise_type=exercise_type,
+        inject_expected_form=inject_expected_form,
     )
 
     completion = client.chat.completions.create(
@@ -150,4 +154,39 @@ class BaselineGPTGenerator(BaseGenerator):
             explicit_subject_required=explicit_subject_required,
             model=self._model,
             temperature=self._temperature,
+        )
+
+
+class FormInjectedGPTGenerator(BaselineGPTGenerator):
+    """Baseline GPT prompt with the benchmark gold surface form injected."""
+
+    @property
+    def name(self) -> str:
+        return "baseline_gpt_form_injected"
+
+    def generate(
+        self,
+        keyword: str,
+        translation: str,
+        constraints: dict[str, Any],
+        num_candidates: int,
+        *,
+        target_language: str = "es",
+        cefr_level: str | None = None,
+        sentence_length: str = "short",
+        explicit_subject_required: bool = False,
+    ) -> list[dict[str, str]]:
+        expected_form = constraints.get("expected_form")
+        return generate(
+            keyword=keyword,
+            translation=translation,
+            constraints=constraints,
+            num_candidates=num_candidates,
+            target_language=target_language,
+            cefr_level=cefr_level,
+            sentence_length=sentence_length,
+            explicit_subject_required=explicit_subject_required,
+            model=self._model,
+            temperature=self._temperature,
+            inject_expected_form=str(expected_form) if expected_form else None,
         )

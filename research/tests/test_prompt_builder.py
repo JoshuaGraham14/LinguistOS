@@ -111,3 +111,46 @@ def test_build_prompt_explicit_spanish_overlay():
     assert "pretérito indefinido" in prompt
     assert 'DO NOT use the infinitive "comer"' in prompt
     assert "expected_form" not in prompt.lower()
+
+
+def test_inject_expected_form_off_by_default():
+    prompt = build_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "preterite", "person": "1st", "number": "plural"},
+        num_candidates=3,
+        sentence_length="short",
+    )
+    assert "Required surface form" not in prompt
+    assert "comimos" not in prompt
+
+
+def test_inject_expected_form_when_provided():
+    prompt = build_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "preterite", "person": "1st", "number": "plural"},
+        num_candidates=3,
+        sentence_length="short",
+        inject_expected_form="comimos",
+    )
+    assert "Required surface form" in prompt
+    assert '"comimos"' in prompt
+
+
+def test_inject_expected_form_byte_identical_when_none():
+    """Sanity: with the parameter absent the prompt is unchanged from baseline."""
+    common_kwargs = dict(
+        keyword="vivir",
+        translation="to live",
+        target_language="es",
+        constraints={"tense": "future", "person": "3rd", "number": "singular"},
+        num_candidates=10,
+        sentence_length="short",
+        cefr_level="A1",
+    )
+    p_default = build_prompt(**common_kwargs)
+    p_explicit_none = build_prompt(**common_kwargs, inject_expected_form=None)
+    assert p_default == p_explicit_none
