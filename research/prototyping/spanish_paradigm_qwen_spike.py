@@ -1,15 +1,78 @@
 #!/usr/bin/env python3
 """Spanish full-paradigm spike — Qwen ladder (prototyping; not the pipeline).
 
-Minimal prompts, one verb × one tense per call. Checks whether models can
-*produce* full conjugation paradigms (knowledge / capacity) vs failing only
-when forms must appear inside generated sentences (CTG / binding).
+One verb × one tense per call. Checks whether models can *produce* full
+conjugation paradigms (knowledge / capacity) vs failing only when forms
+must appear inside generated sentences (CTG / binding).
 
 Five verbs × five indicative tenses × six persons = 30 gold forms per verb.
 Scoring: each expected surface form matched anywhere in the model output
 (order-independent; accent-normalised).
 
 Results: docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json
+
+----------------------------------------------------------------------
+REPRODUCIBILITY
+----------------------------------------------------------------------
+Status:      Diagnostic spike (Experiment 3). Intentionally standalone:
+             this probes paradigm knowledge (free-form list of six forms
+             per tense), not sentence generation under ortho-syntactic
+             constraints — so it does not fit the sentence-level
+             ``expected_form_match`` / LanguageTool / length-band stack
+             that the rest of the framework is built around. The script
+             itself is the reproducible artifact.
+
+Run:         python3 -m research.prototyping.spanish_paradigm_qwen_spike
+             (run from repo root; no CLI flags required)
+
+Output:      docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json
+             Headline writeup (explicit_v1):
+               docs/experiment-results/spanish_paradigm_qwen_explicit_prompt_evaluation.md
+
+Stimuli:     5 verbs × 5 indicative tenses × 6 persons = 150 gold slots
+             per model. Verb mix: 2 common regular (comer, hablar),
+             1 common irregular (tener), 2 rare (blandir, argüir).
+
+Models:      Qwen/Qwen2.5-0.5B-Instruct, Qwen/Qwen3-1.7B,
+             Qwen/Qwen3-4B-Instruct-2507 (HuggingFace, MPS or CPU).
+             4B was NOT re-run under explicit_v1: at the time of the
+             explicit re-run, 4B common-paradigm recall was already
+             at ceiling under the minimal prompt and a re-run would not
+             have moved the headline. This means the 0.5B / 1.7B and
+             4B numbers in the writeup come from DIFFERENT prompt
+             versions, by design. Do not cite the three together as
+             a single ladder without flagging this.
+
+Decoding:    Greedy (temperature=0, do_sample=False), max_new_tokens=256,
+             one sample per call. Qwen3 thinking mode disabled.
+             Deterministic; no seed required.
+
+Scoring:     Each gold surface form matched anywhere in the output
+             (Unicode NFC + casefold). This is INTENTIONALLY lenient,
+             order-independent substring matching: the purpose is to
+             ask 'can the model produce these forms at all when not
+             constrained?', not to test exact slot binding. A known
+             consequence is that surface-form collisions across
+             persons (e.g. ``comía`` is both yo and él/ella imperfect)
+             can be credited to both slots from a single mention. The
+             slot-by-slot exact-binding probe lives in
+             ``cross_language_morphology_qwen_spike.py`` (Exp 1B/2B).
+
+Prompt:     ``explicit_v1`` (PROMPT_VERSION constant at top of file).
+             A prior ``minimal`` prompt ("{lemma}, {tense} tense.") was
+             tested first and performed much worse, especially on 1.7B
+             (25% recall vs 73% under explicit_v1). The switch was
+             deliberate — the original prompt was failing to convey
+             the task at small model scales, which is itself a
+             diagnostic finding documented in the writeup. To
+             reproduce the minimal-prompt baseline, see the archived
+             results at
+             ``docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json``
+             (look for ``prompt_version`` field).
+
+Original run: 2026-06-12 (explicit_v1 results committed in batch
+              ~16:43 GMT+1).
+----------------------------------------------------------------------
 """
 
 from __future__ import annotations
