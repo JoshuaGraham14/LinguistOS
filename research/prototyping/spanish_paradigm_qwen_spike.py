@@ -189,7 +189,88 @@ PARADIGMS: dict[str, dict[str, Any]] = {
             ],
         },
     },
+    # Verbs added 2026-06-18 to cover the full spanish_basic constraint set
+    # for paired paradigm-vs-sentence-EF comparison against DB experiment id=9
+    # (spanish_basic__baseline_hf_qwen3_17b_n20__live). Not part of the
+    # original Exp 3 default verb set — selected via --verbs flag.
+    "vivir": {
+        "tier": "common_regular",
+        "tenses": {
+            "present": ["vivo", "vives", "vive", "vivimos", "vivís", "viven"],
+            "preterite": ["viví", "viviste", "vivió", "vivimos", "vivisteis", "vivieron"],
+            "imperfect": ["vivía", "vivías", "vivía", "vivíamos", "vivíais", "vivían"],
+            "future": ["viviré", "vivirás", "vivirá", "viviremos", "viviréis", "vivirán"],
+            "conditional": [
+                "viviría",
+                "vivirías",
+                "viviría",
+                "viviríamos",
+                "viviríais",
+                "vivirían",
+            ],
+        },
+    },
+    "escribir": {
+        "tier": "common_regular",
+        "tenses": {
+            "present": ["escribo", "escribes", "escribe", "escribimos", "escribís", "escriben"],
+            "preterite": [
+                "escribí",
+                "escribiste",
+                "escribió",
+                "escribimos",
+                "escribisteis",
+                "escribieron",
+            ],
+            "imperfect": [
+                "escribía",
+                "escribías",
+                "escribía",
+                "escribíamos",
+                "escribíais",
+                "escribían",
+            ],
+            "future": [
+                "escribiré",
+                "escribirás",
+                "escribirá",
+                "escribiremos",
+                "escribiréis",
+                "escribirán",
+            ],
+            "conditional": [
+                "escribiría",
+                "escribirías",
+                "escribiría",
+                "escribiríamos",
+                "escribiríais",
+                "escribirían",
+            ],
+        },
+    },
+    "correr": {
+        "tier": "common_regular",
+        "tenses": {
+            "present": ["corro", "corres", "corre", "corremos", "corréis", "corren"],
+            "preterite": ["corrí", "corriste", "corrió", "corrimos", "corristeis", "corrieron"],
+            "imperfect": ["corría", "corrías", "corría", "corríamos", "corríais", "corrían"],
+            "future": ["correré", "correrás", "correrá", "correremos", "correréis", "correrán"],
+            "conditional": [
+                "correría",
+                "correrías",
+                "correría",
+                "correríamos",
+                "correríais",
+                "correrían",
+            ],
+        },
+    },
 }
+
+# Default verb set for ``--verbs`` (preserves the original Exp 3 headline run
+# when the script is invoked with no flags). vivir/escribir/correr are
+# available but opt-in via ``--verbs``.
+DEFAULT_VERBS: tuple[str, ...] = ("comer", "hablar", "tener", "blandir", "argüir")
 
 
 @dataclass(frozen=True)
@@ -419,7 +500,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="Spanish paradigm spike (minimal prompt, Qwen ladder)")
     parser.add_argument("--models", nargs="+", choices=list(QWEN_MODELS), default=list(QWEN_MODELS))
-    parser.add_argument("--verbs", nargs="+", choices=list(PARADIGMS), default=list(PARADIGMS))
+    parser.add_argument("--verbs", nargs="+", choices=list(PARADIGMS), default=list(DEFAULT_VERBS))
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
