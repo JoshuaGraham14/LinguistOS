@@ -1,0 +1,414 @@
+name: spanish_basic_grid
+language: es
+description: >
+  spanish_basic verbs (comer, vivir, hablar, escribir, correr) crossed with a
+  10-cell balanced morphological grid: 3 present, 3 future, 2 preterite,
+  1 imperfect, 1 conditional. All six (person, number) combinations are
+  covered. 5 verbs × 10 cells = 50 constraint sets, all CEFR A1, for paired
+  baseline / form-injected evaluation on the small-model ladder.
+
+constraint_sets:
+  # ───────────────────── comer ──────────────────────
+  - keyword: comer
+    expected_form: como
+    translation: to eat
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comes
+    translation: to eat
+    tense: present
+    person: 2nd
+    number: singular
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comen
+    translation: to eat
+    tense: present
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comimos
+    translation: to eat
+    tense: preterite
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comieron
+    translation: to eat
+    tense: preterite
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comeré
+    translation: to eat
+    tense: future
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comerá
+    translation: to eat
+    tense: future
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comeréis
+    translation: to eat
+    tense: future
+    person: 2nd
+    number: plural
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comíamos
+    translation: to eat
+    tense: imperfect
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: comer
+    expected_form: comería
+    translation: to eat
+    tense: conditional
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  # ───────────────────── vivir ──────────────────────
+  - keyword: vivir
+    expected_form: vivo
+    translation: to live
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: vives
+    translation: to live
+    tense: present
+    person: 2nd
+    number: singular
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: viven
+    translation: to live
+    tense: present
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: vivimos
+    translation: to live
+    tense: preterite
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: vivieron
+    translation: to live
+    tense: preterite
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: viviré
+    translation: to live
+    tense: future
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: vivirá
+    translation: to live
+    tense: future
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: viviréis
+    translation: to live
+    tense: future
+    person: 2nd
+    number: plural
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: vivíamos
+    translation: to live
+    tense: imperfect
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: vivir
+    expected_form: viviría
+    translation: to live
+    tense: conditional
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  # ───────────────────── hablar ──────────────────────
+  - keyword: hablar
+    expected_form: hablo
+    translation: to speak
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablas
+    translation: to speak
+    tense: present
+    person: 2nd
+    number: singular
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablan
+    translation: to speak
+    tense: present
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablamos
+    translation: to speak
+    tense: preterite
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablaron
+    translation: to speak
+    tense: preterite
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablaré
+    translation: to speak
+    tense: future
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablará
+    translation: to speak
+    tense: future
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablaréis
+    translation: to speak
+    tense: future
+    person: 2nd
+    number: plural
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablábamos
+    translation: to speak
+    tense: imperfect
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: hablar
+    expected_form: hablaría
+    translation: to speak
+    tense: conditional
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  # ───────────────────── escribir ──────────────────────
+  - keyword: escribir
+    expected_form: escribo
+    translation: to write
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribes
+    translation: to write
+    tense: present
+    person: 2nd
+    number: singular
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escriben
+    translation: to write
+    tense: present
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribimos
+    translation: to write
+    tense: preterite
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribieron
+    translation: to write
+    tense: preterite
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribiré
+    translation: to write
+    tense: future
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribirá
+    translation: to write
+    tense: future
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribiréis
+    translation: to write
+    tense: future
+    person: 2nd
+    number: plural
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribíamos
+    translation: to write
+    tense: imperfect
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: escribir
+    expected_form: escribiría
+    translation: to write
+    tense: conditional
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  # ───────────────────── correr ──────────────────────
+  - keyword: correr
+    expected_form: corro
+    translation: to run
+    tense: present
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: corres
+    translation: to run
+    tense: present
+    person: 2nd
+    number: singular
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: corren
+    translation: to run
+    tense: present
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: corrimos
+    translation: to run
+    tense: preterite
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: corrieron
+    translation: to run
+    tense: preterite
+    person: 3rd
+    number: plural
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: correré
+    translation: to run
+    tense: future
+    person: 1st
+    number: singular
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: correrá
+    translation: to run
+    tense: future
+    person: 3rd
+    number: singular
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: correréis
+    translation: to run
+    tense: future
+    person: 2nd
+    number: plural
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: corríamos
+    translation: to run
+    tense: imperfect
+    person: 1st
+    number: plural
+    cefr_level: A1
+
+  - keyword: correr
+    expected_form: correría
+    translation: to run
+    tense: conditional
+    person: 3rd
+    number: singular
+    cefr_level: A1
