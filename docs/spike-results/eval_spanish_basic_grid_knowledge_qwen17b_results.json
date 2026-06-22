@@ -1,0 +1,2030 @@
+{
+  "prompt_version": "explicit_single_slot_v1",
+  "benchmark": "spanish_basic_grid",
+  "temperature": 0.0,
+  "sentence_baseline_experiment_id": 15,
+  "sentence_form_injected_experiment_id": 16,
+  "by_model": {
+    "qwen17b": {
+      "model_id": "Qwen/Qwen3-1.7B",
+      "elapsed_s": 34.9,
+      "summary": {
+        "cells_total": 50,
+        "knowledge_hits": 31,
+        "knowledge_rate": 0.62,
+        "knowledge_wilson_95_ci": [
+          0.4815,
+          0.7414
+        ],
+        "mean_sentence_baseline_ef": 0.31,
+        "mean_sentence_form_injected_ef": 0.95,
+        "dissociation_count": 16,
+        "dissociation_rate": 0.32,
+        "both_pass_count": 10,
+        "knowledge_fail_count": 19
+      },
+      "cells": [
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__present_1st_singular__0",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "como",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the present indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "como"
+          },
+          "latency_s": 17.288,
+          "raw": "comer",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "comer"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 21,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 21,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__present_2nd_singular__1",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "present",
+            "person": "2nd",
+            "number": "singular",
+            "expected_form": "comes",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the present indicative tense.\nGive the form for (2nd person, singular) — this is the tú form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comes"
+          },
+          "latency_s": 0.233,
+          "raw": "comer",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "comer"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 22,
+            "n": 10,
+            "ef_pass": 7,
+            "ef_rate": 0.7
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 22,
+            "n": 10,
+            "ef_pass": 5,
+            "ef_rate": 0.5
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__present_3rd_plural__2",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "present",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "comen",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the present indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comen"
+          },
+          "latency_s": 0.385,
+          "raw": "comen",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "comen"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 23,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 23,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__preterite_1st_plural__3",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "preterite",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "comimos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comimos"
+          },
+          "latency_s": 0.437,
+          "raw": "comemos",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "comemos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 24,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 24,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__preterite_3rd_plural__4",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "preterite",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "comieron",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comieron"
+          },
+          "latency_s": 0.407,
+          "raw": "comieron",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "comieron"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 25,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 25,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__future_1st_singular__5",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "future",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "comeré",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the simple future indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comeré"
+          },
+          "latency_s": 0.363,
+          "raw": "comer",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "comer"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 26,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 26,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__future_3rd_singular__6",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "future",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "comerá",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the simple future indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comerá"
+          },
+          "latency_s": 0.393,
+          "raw": "comer",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "comer"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 27,
+            "n": 10,
+            "ef_pass": 5,
+            "ef_rate": 0.5
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 27,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__future_2nd_plural__7",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "future",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "comeréis",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the simple future indicative tense.\nGive the form for (2nd person, plural) — this is the vosotros/vosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comeréis"
+          },
+          "latency_s": 0.538,
+          "raw": "comeréis",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "comeréis"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 28,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 28,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__imperfect_1st_plural__8",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "imperfect",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "comíamos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the imperfect indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comíamos"
+          },
+          "latency_s": 0.36,
+          "raw": "comemos",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "comemos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 29,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 29,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__comer__conditional_3rd_singular__9",
+            "keyword": "comer",
+            "translation": "to eat",
+            "tense": "conditional",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "comería",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"comer\" in the conditional indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "comería"
+          },
+          "latency_s": 0.208,
+          "raw": "come",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "come"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 30,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 30,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__present_1st_singular__10",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "vivo",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the present indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "vivo"
+          },
+          "latency_s": 0.264,
+          "raw": "vivo",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "vivo"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 31,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 31,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__present_2nd_singular__11",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "present",
+            "person": "2nd",
+            "number": "singular",
+            "expected_form": "vives",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the present indicative tense.\nGive the form for (2nd person, singular) — this is the tú form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "vives"
+          },
+          "latency_s": 0.311,
+          "raw": "vivir",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "vivir"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 32,
+            "n": 10,
+            "ef_pass": 5,
+            "ef_rate": 0.5
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 32,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__present_3rd_plural__12",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "present",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "viven",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the present indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "viven"
+          },
+          "latency_s": 0.314,
+          "raw": "viven",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "viven"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 33,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 33,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__preterite_1st_plural__13",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "preterite",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "vivimos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "vivimos"
+          },
+          "latency_s": 0.536,
+          "raw": "vivimos",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "vivimos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 34,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 34,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__preterite_3rd_plural__14",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "preterite",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "vivieron",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "vivieron"
+          },
+          "latency_s": 0.714,
+          "raw": "vivieron",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "vivieron"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 35,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 35,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__future_1st_singular__15",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "future",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "viviré",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the simple future indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "viviré"
+          },
+          "latency_s": 0.407,
+          "raw": "viviré",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "viviré"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 36,
+            "n": 10,
+            "ef_pass": 8,
+            "ef_rate": 0.8
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 36,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__future_3rd_singular__16",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "future",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "vivirá",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the simple future indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "vivirá"
+          },
+          "latency_s": 0.327,
+          "raw": "vivirá",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "vivirá"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 37,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 37,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__future_2nd_plural__17",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "future",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "viviréis",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the simple future indicative tense.\nGive the form for (2nd person, plural) — this is the vosotros/vosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "viviréis"
+          },
+          "latency_s": 0.559,
+          "raw": "viviréis",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "viviréis"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 38,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 38,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__imperfect_1st_plural__18",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "imperfect",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "vivíamos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the imperfect indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "vivíamos"
+          },
+          "latency_s": 0.584,
+          "raw": "vivimos",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "vivimos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 39,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 39,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__vivir__conditional_3rd_singular__19",
+            "keyword": "vivir",
+            "translation": "to live",
+            "tense": "conditional",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "viviría",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the conditional indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "viviría"
+          },
+          "latency_s": 0.285,
+          "raw": "vive",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "vive"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 40,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 40,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__present_1st_singular__20",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "hablo",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the present indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablo"
+          },
+          "latency_s": 0.288,
+          "raw": "hablo",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "hablo"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 41,
+            "n": 10,
+            "ef_pass": 9,
+            "ef_rate": 0.9
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 41,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__present_2nd_singular__21",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "present",
+            "person": "2nd",
+            "number": "singular",
+            "expected_form": "hablas",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the present indicative tense.\nGive the form for (2nd person, singular) — this is the tú form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablas"
+          },
+          "latency_s": 0.234,
+          "raw": "habla",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "habla"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 42,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 42,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__present_3rd_plural__22",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "present",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "hablan",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the present indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablan"
+          },
+          "latency_s": 0.275,
+          "raw": "hablan",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "hablan"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 43,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 43,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__preterite_1st_plural__23",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "preterite",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "hablamos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablamos"
+          },
+          "latency_s": 0.361,
+          "raw": "hablamos",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "hablamos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 44,
+            "n": 10,
+            "ef_pass": 3,
+            "ef_rate": 0.3
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 44,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__preterite_3rd_plural__24",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "preterite",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "hablaron",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablaron"
+          },
+          "latency_s": 0.346,
+          "raw": "hablaron",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "hablaron"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 45,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 45,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__future_1st_singular__25",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "future",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "hablaré",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the simple future indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablaré"
+          },
+          "latency_s": 0.341,
+          "raw": "hablaré",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "hablaré"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 46,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 46,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__future_3rd_singular__26",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "future",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "hablará",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the simple future indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablará"
+          },
+          "latency_s": 0.344,
+          "raw": "hablará",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "hablará"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 47,
+            "n": 10,
+            "ef_pass": 3,
+            "ef_rate": 0.3
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 47,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__future_2nd_plural__27",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "future",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "hablaréis",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the simple future indicative tense.\nGive the form for (2nd person, plural) — this is the vosotros/vosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablaréis"
+          },
+          "latency_s": 0.366,
+          "raw": "hablaréis",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "hablaréis"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 48,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 48,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__imperfect_1st_plural__28",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "imperfect",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "hablábamos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the imperfect indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablábamos"
+          },
+          "latency_s": 0.363,
+          "raw": "hablamos",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "hablamos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 49,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 49,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__hablar__conditional_3rd_singular__29",
+            "keyword": "hablar",
+            "translation": "to speak",
+            "tense": "conditional",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "hablaría",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the conditional indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "hablaría"
+          },
+          "latency_s": 0.272,
+          "raw": "habla",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "habla"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 50,
+            "n": 10,
+            "ef_pass": 9,
+            "ef_rate": 0.9
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 50,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__present_1st_singular__30",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "escribo",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the present indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribo"
+          },
+          "latency_s": 0.432,
+          "raw": "escribo",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "escribo"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 51,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 51,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__present_2nd_singular__31",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "present",
+            "person": "2nd",
+            "number": "singular",
+            "expected_form": "escribes",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the present indicative tense.\nGive the form for (2nd person, singular) — this is the tú form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribes"
+          },
+          "latency_s": 0.296,
+          "raw": "escribes",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "escribes"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 52,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 52,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__present_3rd_plural__32",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "present",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "escriben",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the present indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escriben"
+          },
+          "latency_s": 0.343,
+          "raw": "escriben",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "escriben"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 53,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 53,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__preterite_1st_plural__33",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "preterite",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "escribimos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribimos"
+          },
+          "latency_s": 0.452,
+          "raw": "escribimos",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "escribimos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 54,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 54,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__preterite_3rd_plural__34",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "preterite",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "escribieron",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribieron"
+          },
+          "latency_s": 0.411,
+          "raw": "escribieron",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "escribieron"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 55,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 55,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__future_1st_singular__35",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "future",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "escribiré",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the simple future indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribiré"
+          },
+          "latency_s": 0.409,
+          "raw": "escribiré",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "escribiré"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 56,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 56,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__future_3rd_singular__36",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "future",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "escribirá",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the simple future indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribirá"
+          },
+          "latency_s": 0.396,
+          "raw": "escribirá",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "escribirá"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 57,
+            "n": 10,
+            "ef_pass": 3,
+            "ef_rate": 0.3
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 57,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__future_2nd_plural__37",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "future",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "escribiréis",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the simple future indicative tense.\nGive the form for (2nd person, plural) — this is the vosotros/vosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribiréis"
+          },
+          "latency_s": 0.268,
+          "raw": "escribes",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "escribes"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 58,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 58,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__imperfect_1st_plural__38",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "imperfect",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "escribíamos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the imperfect indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribíamos"
+          },
+          "latency_s": 0.386,
+          "raw": "escribimos",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "escribimos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 59,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 59,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__escribir__conditional_3rd_singular__39",
+            "keyword": "escribir",
+            "translation": "to write",
+            "tense": "conditional",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "escribiría",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the conditional indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "escribiría"
+          },
+          "latency_s": 0.277,
+          "raw": "escribe",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "escribe"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 60,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 60,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__present_1st_singular__40",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "corro",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the present indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "corro"
+          },
+          "latency_s": 0.279,
+          "raw": "corro",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "corro"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 61,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 61,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__present_2nd_singular__41",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "present",
+            "person": "2nd",
+            "number": "singular",
+            "expected_form": "corres",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the present indicative tense.\nGive the form for (2nd person, singular) — this is the tú form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "corres"
+          },
+          "latency_s": 0.245,
+          "raw": "corres",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "corres"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 62,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 62,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__present_3rd_plural__42",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "present",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "corren",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the present indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "corren"
+          },
+          "latency_s": 0.297,
+          "raw": "corren",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "corren"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 63,
+            "n": 10,
+            "ef_pass": 8,
+            "ef_rate": 0.8
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 63,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__preterite_1st_plural__43",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "preterite",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "corrimos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "corrimos"
+          },
+          "latency_s": 0.374,
+          "raw": "corremos",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "corremos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 64,
+            "n": 10,
+            "ef_pass": 3,
+            "ef_rate": 0.3
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 64,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__preterite_3rd_plural__44",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "preterite",
+            "person": "3rd",
+            "number": "plural",
+            "expected_form": "corrieron",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the preterite (pretérito indefinido) indicative tense.\nGive the form for (3rd person, plural) — this is the ellos/ellas form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "corrieron"
+          },
+          "latency_s": 0.336,
+          "raw": "corrieron",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "corrieron"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 65,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 65,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__future_1st_singular__45",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "future",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "correré",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the simple future indicative tense.\nGive the form for (1st person, singular) — this is the yo form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "correré"
+          },
+          "latency_s": 0.333,
+          "raw": "correré",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "correré"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 66,
+            "n": 10,
+            "ef_pass": 6,
+            "ef_rate": 0.6
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 66,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__future_3rd_singular__46",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "future",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "correrá",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the simple future indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "correrá"
+          },
+          "latency_s": 0.331,
+          "raw": "correrá",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "correrá"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 67,
+            "n": 10,
+            "ef_pass": 6,
+            "ef_rate": 0.6
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 67,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__future_2nd_plural__47",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "future",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "correréis",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the simple future indicative tense.\nGive the form for (2nd person, plural) — this is the vosotros/vosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "correréis"
+          },
+          "latency_s": 0.353,
+          "raw": "correréis",
+          "exact_match": true,
+          "token_match": true,
+          "only_token_match": true,
+          "knowledge_hit": true,
+          "parsed_tokens": [
+            "correréis"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 68,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 68,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": true
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__imperfect_1st_plural__48",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "imperfect",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "corríamos",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the imperfect indicative tense.\nGive the form for (1st person, plural) — this is the nosotros/nosotras form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "corríamos"
+          },
+          "latency_s": 0.327,
+          "raw": "corremos",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "corremos"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 69,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 69,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        },
+        {
+          "cell": {
+            "id": "spanish_basic_grid__correr__conditional_3rd_singular__49",
+            "keyword": "correr",
+            "translation": "to run",
+            "tense": "conditional",
+            "person": "3rd",
+            "number": "singular",
+            "expected_form": "correría",
+            "cefr_level": "A1",
+            "prompt": "Conjugate the Spanish verb \"correr\" in the conditional indicative tense.\nGive the form for (3rd person, singular) — this is the él/ella form.\nReply with only that one conjugated verb in that specific tense and form — one word, no sentence, no infinitive, no explanation.",
+            "paradigm_gold": "correría"
+          },
+          "latency_s": 0.275,
+          "raw": "corre",
+          "exact_match": false,
+          "token_match": false,
+          "only_token_match": false,
+          "knowledge_hit": false,
+          "parsed_tokens": [
+            "corre"
+          ],
+          "sentence_baseline": {
+            "experiment_id": 15,
+            "experiment_name": "spanish_basic_grid__baseline_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 70,
+            "n": 10,
+            "ef_pass": 0,
+            "ef_rate": 0.0
+          },
+          "sentence_form_injected": {
+            "experiment_id": 16,
+            "experiment_name": "spanish_basic_grid__form_injected_hf_qwen3_17b_n10__live",
+            "constraint_set_id": 70,
+            "n": 10,
+            "ef_pass": 10,
+            "ef_rate": 1.0
+          },
+          "dissociation": false
+        }
+      ]
+    }
+  }
+}
