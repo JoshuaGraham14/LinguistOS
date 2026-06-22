@@ -1,0 +1,680 @@
+{
+  "model_id": "Qwen/Qwen3-1.7B",
+  "method": "form_injection_only_exp9_style",
+  "samples": 50,
+  "batch_size": 5,
+  "temperature": 0.7,
+  "sentence_length": "short",
+  "cell": {
+    "keyword": "comprar",
+    "translation": "to buy",
+    "tense": "imperfect",
+    "person": "1st",
+    "number": "plural",
+    "expected_form": "comprábamos",
+    "note": "comprábamos is the 1st-person plural imperfect form (nosotros/nosotras), not the singular yo form."
+  },
+  "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"comprar\" (English: \"to buy\")\nConstraints:\n  Tense: Imperfect\n  Person: 1st\n  Number: Plural\n  length: short (2–5 tokens).\nThe target verb \"comprar\" must appear in the sentence inflected to match tense=imperfect, person=1st, number=plural — not as the bare infinitive unless the constraints require it.\nTarget learner level: CEFR A1 (beginner). Vocabulary and grammar must be appropriate for this fluency level. Use only short, simple sentences (subject–verb–object). Avoid subordinate clauses (e.g. que, porque, cuando, si), passive voice, and any grammar above beginner level.\nRequired surface form: the verb \"comprar\" must appear in each sentence exactly as \"comprábamos\" — use this conjugated surface form verbatim (one token, no infinitive, no other conjugation).\nProduce 5 natural Spanish sentences within the length band. Each sentence must contain the target verb inflected as specified above, with its English translation.\nReply ONLY as JSON in this exact shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+  "summary": {
+    "parsed_candidates": 50,
+    "elapsed_s": 107.97,
+    "expected_form_match": {
+      "correct": 50,
+      "n": 50,
+      "pass_rate": 1.0
+    },
+    "grammar_languagetool": {
+      "correct": 50,
+      "n": 50,
+      "pass_rate": 1.0
+    },
+    "length_in_band": {
+      "correct": 48,
+      "n": 50,
+      "pass_rate": 0.96
+    },
+    "diversity": {
+      "uniqueness_ratio": {
+        "value": 0.76,
+        "details": {
+          "unique": 38,
+          "n": 50
+        }
+      },
+      "self_bleu": {
+        "value": 0.6875,
+        "details": {
+          "n": 50,
+          "mean": 0.6875
+        }
+      },
+      "template_rate": {
+        "value": 0.56,
+        "details": {
+          "n": 50,
+          "k": 3,
+          "templated": 28
+        }
+      },
+      "distinct_1": {
+        "value": 0.2516,
+        "details": {
+          "n": 50,
+          "unique": 39,
+          "total": 155,
+          "ngram_n": 1
+        }
+      },
+      "distinct_2": {
+        "value": 0.5619,
+        "details": {
+          "n": 50,
+          "unique": 59,
+          "total": 105,
+          "ngram_n": 2
+        }
+      }
+    },
+    "structure_counts": {
+      "null_subject_verb_initial": 50
+    },
+    "top_opening_3grams": {
+      "comprábamos frutas": 4,
+      "comprábamos el pan": 4,
+      "comprábamos nosotros": 3,
+      "comprábamos un libro": 3,
+      "comprábamos pan": 2,
+      "comprábamos comida": 2,
+      "comprábamos verduras": 2,
+      "comprábamos manzanas": 2,
+      "comprábamos la comida": 2,
+      "comprábamos el carro": 2
+    },
+    "repeated_sentences": [
+      {
+        "sentence": "comprábamos el pan",
+        "count": 4
+      },
+      {
+        "sentence": "comprábamos frutas",
+        "count": 3
+      },
+      {
+        "sentence": "comprábamos nosotros",
+        "count": 3
+      },
+      {
+        "sentence": "comprábamos pan",
+        "count": 2
+      },
+      {
+        "sentence": "comprábamos comida",
+        "count": 2
+      },
+      {
+        "sentence": "comprábamos verduras",
+        "count": 2
+      },
+      {
+        "sentence": "comprábamos la comida",
+        "count": 2
+      },
+      {
+        "sentence": "comprábamos el carro",
+        "count": 2
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "sentence": "comprábamos pan",
+      "translation": "we bought bread",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos pan"
+    },
+    {
+      "sentence": "comprábamos frutas",
+      "translation": "we bought fruits",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos frutas"
+    },
+    {
+      "sentence": "comprábamos comida",
+      "translation": "we bought food",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos comida"
+    },
+    {
+      "sentence": "comprábamos verduras",
+      "translation": "we bought vegetables",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos verduras"
+    },
+    {
+      "sentence": "comprábamos hortalizas",
+      "translation": "we bought vegetables",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos hortalizas"
+    },
+    {
+      "sentence": "Comprábamos lápices.",
+      "translation": "We bought pencils.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos lápices"
+    },
+    {
+      "sentence": "Comprábamos manzanas.",
+      "translation": "We bought apples.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos manzanas"
+    },
+    {
+      "sentence": "Comprábamos juguetes.",
+      "translation": "We bought toys.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos juguetes"
+    },
+    {
+      "sentence": "Comprábamos libros.",
+      "translation": "We bought books.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos libros"
+    },
+    {
+      "sentence": "Comprábamos frutas.",
+      "translation": "We bought fruits.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos frutas"
+    },
+    {
+      "sentence": "comprábamos nosotros",
+      "translation": "we were buying",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos nosotros"
+    },
+    {
+      "sentence": "comprábamos el pan",
+      "translation": "we were buying the bread",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el pan"
+    },
+    {
+      "sentence": "comprábamos la comida",
+      "translation": "we were buying the food",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos la comida"
+    },
+    {
+      "sentence": "comprábamos el carro",
+      "translation": "we were buying the car",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el carro"
+    },
+    {
+      "sentence": "comprábamos el libro",
+      "translation": "we were buying the book",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el libro"
+    },
+    {
+      "sentence": "Comprábamos periódicos en la librería.",
+      "translation": "We bought newspapers in the bookstore.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos periódicos en"
+    },
+    {
+      "sentence": "Comprábamos frutas en el mercado.",
+      "translation": "We bought fruits in the market.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos frutas en"
+    },
+    {
+      "sentence": "Comprábamos lápices para el colegio.",
+      "translation": "We bought pencils for school.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos lápices para"
+    },
+    {
+      "sentence": "Comprábamos helado en la cafetería.",
+      "translation": "We bought ice cream in the cafeteria.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos helado en"
+    },
+    {
+      "sentence": "Comprábamos manzanas en la tienda.",
+      "translation": "We bought apples in the store.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos manzanas en"
+    },
+    {
+      "sentence": "comprábamos los alimentos",
+      "translation": "we bought the food",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos los alimentos"
+    },
+    {
+      "sentence": "comprábamos frutas y verduras",
+      "translation": "we bought fruits and vegetables",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 4,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos frutas y"
+    },
+    {
+      "sentence": "comprábamos pan y leche",
+      "translation": "we bought bread and milk",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 4,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos pan y"
+    },
+    {
+      "sentence": "comprábamos un libro y un regalo",
+      "translation": "we bought a book and a gift",
+      "ef_pass": true,
+      "length_in_band": false,
+      "token_count": 6,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos un libro"
+    },
+    {
+      "sentence": "comprábamos ropa y ropa",
+      "translation": "we bought clothes and clothes",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 4,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos ropa y"
+    },
+    {
+      "sentence": "comprábamos los libros",
+      "translation": "we bought the books",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos los libros"
+    },
+    {
+      "sentence": "comprábamos el pan",
+      "translation": "we bought the bread",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el pan"
+    },
+    {
+      "sentence": "comprábamos el carro",
+      "translation": "we bought the car",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el carro"
+    },
+    {
+      "sentence": "comprábamos el vestido",
+      "translation": "we bought the dress",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el vestido"
+    },
+    {
+      "sentence": "comprábamos la casa",
+      "translation": "we bought the house",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos la casa"
+    },
+    {
+      "sentence": "comprábamos nosotros",
+      "translation": "we were buying",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos nosotros"
+    },
+    {
+      "sentence": "comprábamos el pan",
+      "translation": "we were buying the bread",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el pan"
+    },
+    {
+      "sentence": "comprábamos la comida",
+      "translation": "we were buying the food",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos la comida"
+    },
+    {
+      "sentence": "comprábamos algo",
+      "translation": "we were buying something",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos algo"
+    },
+    {
+      "sentence": "comprábamos cosas",
+      "translation": "we were buying things",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos cosas"
+    },
+    {
+      "sentence": "comprábamos frutas",
+      "translation": "we bought fruits",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos frutas"
+    },
+    {
+      "sentence": "comprábamos manzanas",
+      "translation": "we bought apples",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos manzanas"
+    },
+    {
+      "sentence": "comprábamos verduras",
+      "translation": "we bought vegetables",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos verduras"
+    },
+    {
+      "sentence": "comprábamos pan",
+      "translation": "we bought bread",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos pan"
+    },
+    {
+      "sentence": "comprábamos leche",
+      "translation": "we bought milk",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos leche"
+    },
+    {
+      "sentence": "comprábamos nosotros",
+      "translation": "we were buying",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos nosotros"
+    },
+    {
+      "sentence": "comprábamos el pan",
+      "translation": "we were buying the bread",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos el pan"
+    },
+    {
+      "sentence": "comprábamos frutas",
+      "translation": "we were buying fruits",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos frutas"
+    },
+    {
+      "sentence": "comprábamos un libro",
+      "translation": "we were buying a book",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 3,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos un libro"
+    },
+    {
+      "sentence": "comprábamos comida",
+      "translation": "we were buying food",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 2,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos comida"
+    },
+    {
+      "sentence": "Comprábamos pan todos los días.",
+      "translation": "We bought bread every day.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos pan todos"
+    },
+    {
+      "sentence": "Comprábamos un libro en la librería.",
+      "translation": "We bought a book in the bookstore.",
+      "ef_pass": true,
+      "length_in_band": false,
+      "token_count": 6,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos un libro"
+    },
+    {
+      "sentence": "Comprábamos frutas en la mercadería.",
+      "translation": "We bought fruits at the market.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos frutas en"
+    },
+    {
+      "sentence": "Comprábamos comida en el supermercado.",
+      "translation": "We bought food at the supermarket.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos comida en"
+    },
+    {
+      "sentence": "Comprábamos verduras en el mercado.",
+      "translation": "We bought vegetables at the market.",
+      "ef_pass": true,
+      "length_in_band": true,
+      "token_count": 5,
+      "grammar_pass": true,
+      "grammar_match_count": 0,
+      "structure": "null_subject_verb_initial",
+      "opening_3gram": "comprábamos verduras en"
+    }
+  ]
+}
