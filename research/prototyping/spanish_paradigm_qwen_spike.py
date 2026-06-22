@@ -1,15 +1,78 @@
 #!/usr/bin/env python3
 """Spanish full-paradigm spike — Qwen ladder (prototyping; not the pipeline).
 
-Minimal prompts, one verb × one tense per call. Checks whether models can
-*produce* full conjugation paradigms (knowledge / capacity) vs failing only
-when forms must appear inside generated sentences (CTG / binding).
+One verb × one tense per call. Checks whether models can *produce* full
+conjugation paradigms (knowledge / capacity) vs failing only when forms
+must appear inside generated sentences (CTG / binding).
 
 Five verbs × five indicative tenses × six persons = 30 gold forms per verb.
 Scoring: each expected surface form matched anywhere in the model output
 (order-independent; accent-normalised).
 
 Results: docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json
+
+----------------------------------------------------------------------
+REPRODUCIBILITY
+----------------------------------------------------------------------
+Status:      Diagnostic spike (Experiment 3). Intentionally standalone:
+             this probes paradigm knowledge (free-form list of six forms
+             per tense), not sentence generation under ortho-syntactic
+             constraints — so it does not fit the sentence-level
+             ``expected_form_match`` / LanguageTool / length-band stack
+             that the rest of the framework is built around. The script
+             itself is the reproducible artifact.
+
+Run:         python3 -m research.prototyping.spanish_paradigm_qwen_spike
+             (run from repo root; no CLI flags required)
+
+Output:      docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json
+             Headline writeup (explicit_v1):
+               docs/experiment-results/spanish_paradigm_qwen_explicit_prompt_evaluation.md
+
+Stimuli:     5 verbs × 5 indicative tenses × 6 persons = 150 gold slots
+             per model. Verb mix: 2 common regular (comer, hablar),
+             1 common irregular (tener), 2 rare (blandir, argüir).
+
+Models:      Qwen/Qwen2.5-0.5B-Instruct, Qwen/Qwen3-1.7B,
+             Qwen/Qwen3-4B-Instruct-2507 (HuggingFace, MPS or CPU).
+             4B was NOT re-run under explicit_v1: at the time of the
+             explicit re-run, 4B common-paradigm recall was already
+             at ceiling under the minimal prompt and a re-run would not
+             have moved the headline. This means the 0.5B / 1.7B and
+             4B numbers in the writeup come from DIFFERENT prompt
+             versions, by design. Do not cite the three together as
+             a single ladder without flagging this.
+
+Decoding:    Greedy (temperature=0, do_sample=False), max_new_tokens=256,
+             one sample per call. Qwen3 thinking mode disabled.
+             Deterministic; no seed required.
+
+Scoring:     Each gold surface form matched anywhere in the output
+             (Unicode NFC + casefold). This is INTENTIONALLY lenient,
+             order-independent substring matching: the purpose is to
+             ask 'can the model produce these forms at all when not
+             constrained?', not to test exact slot binding. A known
+             consequence is that surface-form collisions across
+             persons (e.g. ``comía`` is both yo and él/ella imperfect)
+             can be credited to both slots from a single mention. The
+             slot-by-slot exact-binding probe lives in
+             ``cross_language_morphology_qwen_spike.py`` (Exp 1B/2B).
+
+Prompt:     ``explicit_v1`` (PROMPT_VERSION constant at top of file).
+             A prior ``minimal`` prompt ("{lemma}, {tense} tense.") was
+             tested first and performed much worse, especially on 1.7B
+             (25% recall vs 73% under explicit_v1). The switch was
+             deliberate — the original prompt was failing to convey
+             the task at small model scales, which is itself a
+             diagnostic finding documented in the writeup. To
+             reproduce the minimal-prompt baseline, see the archived
+             results at
+             ``docs/spike-results/eval_spanish_paradigm_qwen_spike_results.json``
+             (look for ``prompt_version`` field).
+
+Original run: 2026-06-12 (explicit_v1 results committed in batch
+              ~16:43 GMT+1).
+----------------------------------------------------------------------
 """
 
 from __future__ import annotations
@@ -126,7 +189,88 @@ PARADIGMS: dict[str, dict[str, Any]] = {
             ],
         },
     },
+    # Verbs added 2026-06-18 to cover the full spanish_basic constraint set
+    # for paired paradigm-vs-sentence-EF comparison against DB experiment id=9
+    # (spanish_basic__baseline_hf_qwen3_17b_n20__live). Not part of the
+    # original Exp 3 default verb set — selected via --verbs flag.
+    "vivir": {
+        "tier": "common_regular",
+        "tenses": {
+            "present": ["vivo", "vives", "vive", "vivimos", "vivís", "viven"],
+            "preterite": ["viví", "viviste", "vivió", "vivimos", "vivisteis", "vivieron"],
+            "imperfect": ["vivía", "vivías", "vivía", "vivíamos", "vivíais", "vivían"],
+            "future": ["viviré", "vivirás", "vivirá", "viviremos", "viviréis", "vivirán"],
+            "conditional": [
+                "viviría",
+                "vivirías",
+                "viviría",
+                "viviríamos",
+                "viviríais",
+                "vivirían",
+            ],
+        },
+    },
+    "escribir": {
+        "tier": "common_regular",
+        "tenses": {
+            "present": ["escribo", "escribes", "escribe", "escribimos", "escribís", "escriben"],
+            "preterite": [
+                "escribí",
+                "escribiste",
+                "escribió",
+                "escribimos",
+                "escribisteis",
+                "escribieron",
+            ],
+            "imperfect": [
+                "escribía",
+                "escribías",
+                "escribía",
+                "escribíamos",
+                "escribíais",
+                "escribían",
+            ],
+            "future": [
+                "escribiré",
+                "escribirás",
+                "escribirá",
+                "escribiremos",
+                "escribiréis",
+                "escribirán",
+            ],
+            "conditional": [
+                "escribiría",
+                "escribirías",
+                "escribiría",
+                "escribiríamos",
+                "escribiríais",
+                "escribirían",
+            ],
+        },
+    },
+    "correr": {
+        "tier": "common_regular",
+        "tenses": {
+            "present": ["corro", "corres", "corre", "corremos", "corréis", "corren"],
+            "preterite": ["corrí", "corriste", "corrió", "corrimos", "corristeis", "corrieron"],
+            "imperfect": ["corría", "corrías", "corría", "corríamos", "corríais", "corrían"],
+            "future": ["correré", "correrás", "correrá", "correremos", "correréis", "correrán"],
+            "conditional": [
+                "correría",
+                "correrías",
+                "correría",
+                "correríamos",
+                "correríais",
+                "correrían",
+            ],
+        },
+    },
 }
+
+# Default verb set for ``--verbs`` (preserves the original Exp 3 headline run
+# when the script is invoked with no flags). vivir/escribir/correr are
+# available but opt-in via ``--verbs``.
+DEFAULT_VERBS: tuple[str, ...] = ("comer", "hablar", "tener", "blandir", "argüir")
 
 
 @dataclass(frozen=True)
@@ -356,7 +500,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="Spanish paradigm spike (minimal prompt, Qwen ladder)")
     parser.add_argument("--models", nargs="+", choices=list(QWEN_MODELS), default=list(QWEN_MODELS))
-    parser.add_argument("--verbs", nargs="+", choices=list(PARADIGMS), default=list(PARADIGMS))
+    parser.add_argument("--verbs", nargs="+", choices=list(PARADIGMS), default=list(DEFAULT_VERBS))
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(

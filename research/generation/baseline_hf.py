@@ -156,6 +156,16 @@ class BaselineHFGenerator(BaseGenerator):
         raw = tokenizer.decode(output[0][prompt_len:], skip_special_tokens=True)
         return _strip_thinking(raw)
 
+    # Subclasses can override to inject the gold ``expected_form`` into the
+    # prompt; ``None`` keeps the prompt byte-identical to the baseline.
+    _INJECT_EXPECTED_FORM: bool = False
+
+    def _resolve_inject_expected_form(self, constraints: dict[str, Any]) -> str | None:
+        if not self._INJECT_EXPECTED_FORM:
+            return None
+        expected = constraints.get("expected_form")
+        return str(expected) if expected else None
+
     def generate(
         self,
         keyword: str,
@@ -173,6 +183,7 @@ class BaselineHFGenerator(BaseGenerator):
             f"You are a helpful {lang} language tutor. "
             "Always respond with valid JSON."
         )
+        inject_expected_form = self._resolve_inject_expected_form(constraints)
 
         collected: list[dict[str, str]] = []
         for call_idx in range(self.MAX_CALLS):
@@ -188,6 +199,7 @@ class BaselineHFGenerator(BaseGenerator):
                 sentence_length=sentence_length,
                 cefr_level=cefr_level,
                 explicit_subject_required=explicit_subject_required,
+                inject_expected_form=inject_expected_form,
             )
             # ~60 tokens per candidate pair, plus JSON scaffolding headroom.
             max_new_tokens = min(80 * remaining + 200, 3072)
@@ -200,3 +212,13 @@ class BaselineHFGenerator(BaseGenerator):
             collected.extend(cands)
 
         return collected[:num_candidates]
+
+
+class FormInjectedHFGenerator(BaselineHFGenerator):
+    """``baseline_hf`` with the gold ``expected_form`` injected into the prompt."""
+
+    _INJECT_EXPECTED_FORM = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_form_injected"

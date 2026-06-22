@@ -101,6 +101,15 @@ def _inflection_line(keyword: str, constraints: dict[str, Any]) -> str:
     )
 
 
+def _form_injection_line(keyword: str, expected_form: str) -> str:
+    """Tell the model the exact gold surface form to bind in each sentence."""
+    return (
+        f'Required surface form: the verb "{keyword}" must appear in each sentence '
+        f'exactly as "{expected_form}" — use this conjugated surface form verbatim '
+        "(one token, no infinitive, no other conjugation).\n"
+    )
+
+
 def _constraint_lines(language: str, constraints: dict[str, Any]) -> list[str]:
     profile = load_language_profile(language)
     lines: list[str] = []
@@ -125,8 +134,15 @@ def build_prompt(
     cefr_level: str | None = None,
     explicit_subject_required: bool = False,
     exercise_type: str | None = None,
+    inject_expected_form: str | None = None,
 ) -> str:
-    """Build a generation prompt from a language profile and constraint values."""
+    """Build a generation prompt from a language profile and constraint values.
+
+    When ``inject_expected_form`` is provided, an extra line is appended that
+    tells the model the exact gold surface form to bind in every sentence. When
+    it is ``None`` (the default), the prompt body is byte-identical to the
+    previous behaviour so existing baselines remain reproducible.
+    """
     lang = language_display_name(target_language)
     length_desc = band_label(sentence_length)
 
@@ -147,6 +163,12 @@ def build_prompt(
     if exercise_type:
         exercise_line = f"Exercise type: {exercise_type}.\n"
 
+    form_line = (
+        _form_injection_line(keyword, inject_expected_form)
+        if inject_expected_form
+        else ""
+    )
+
     return (
         f"You generate {lang} example sentences for vocabulary practice.\n"
         f'Target word (lemma): "{keyword}" (English: "{translation}")\n'
@@ -155,6 +177,7 @@ def build_prompt(
         f"{exercise_line}"
         f"{subject_line}"
         f"{cefr_line}"
+        f"{form_line}"
         f"Produce {num_candidates} natural {lang} sentences within the length band. "
         f"Each sentence must contain the target verb inflected as specified above, "
         "with its English translation.\n"
@@ -236,8 +259,15 @@ def build_prompt_explicit(
     cefr_level: str | None = None,
     explicit_subject_required: bool = False,
     exercise_type: str | None = None,
+    inject_expected_form: str | None = None,
 ) -> str:
-    """Stronger prompt for morphology binding; does not leak expected_form."""
+    """Stronger prompt for morphology binding.
+
+    By default this does **not** leak ``expected_form``. When
+    ``inject_expected_form`` is provided, the gold surface form is appended via
+    the same opt-in line used by :func:`build_prompt`; this is the
+    form-injection ablation condition.
+    """
     base = build_prompt(
         keyword=keyword,
         translation=translation,
@@ -248,6 +278,7 @@ def build_prompt_explicit(
         cefr_level=cefr_level,
         explicit_subject_required=explicit_subject_required,
         exercise_type=exercise_type,
+        inject_expected_form=inject_expected_form,
     )
     if target_language != "es":
         return base

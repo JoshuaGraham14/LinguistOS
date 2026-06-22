@@ -1,0 +1,1780 @@
+{
+  "model_id": "Qwen/Qwen3-1.7B",
+  "temperature": 0.7,
+  "n_per_cell": 5,
+  "system": "You are a Spanish language tutor generating example sentences for beginners. Each sentence must be complete and grammatical, with correct gender and number agreement throughout. Sentences should read naturally (roughly 5–12 words, but write what is most natural — do not pad). Always respond with valid JSON.",
+  "elapsed_s": 245.4,
+  "results": [
+    {
+      "cell": {
+        "id": "noun_casa_fs",
+        "pos": "noun",
+        "lemma": "casa",
+        "expected_form": "casa",
+        "translation": "house",
+        "gender": "feminine",
+        "number": "singular",
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"casa\" (English: \"house\") — Spanish noun, feminine, singular.\n\nConstraints:\n  - The noun must appear in the form \"casa\" (singular).\n  - It must appear with its correct determiner (el/la/los/las or un/una/unos/unas or a demonstrative/possessive) matching its gender (feminine) and number (singular).\n  - The noun must be embedded in a natural sentence with at least a verb and a modifier or short clause — do not return a bare noun phrase.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"La casa está en la calle.\",\"translation\":\"The house is on the street.\"},{\"sentence\":\"Ella vive en la casa.\",\"translation\":\"She lives in the house.\"},{\"sentence\":\"La casa es grande.\",\"translation\":\"The house is big.\"},{\"sentence\":\"La casa de María es cerca.\",\"translation\":\"Maria's house is near.\"},{\"sentence\":\"Quiero ir a la casa.\",\"translation\"I want to go to the house.\"}]}>",
+      "parse_mode": "regex",
+      "latency_s": 20.71,
+      "n_candidates": 4,
+      "candidates": [
+        {
+          "sentence": "La casa está en la calle.",
+          "translation": "The house is on the street.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Ella vive en la casa.",
+          "translation": "She lives in the house.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa es grande.",
+          "translation": "The house is big.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa de María es cerca.",
+          "translation": "Maria's house is near.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": 1.0
+    },
+    {
+      "cell": {
+        "id": "noun_casas_fp",
+        "pos": "noun",
+        "lemma": "casa",
+        "expected_form": "casas",
+        "translation": "house",
+        "gender": "feminine",
+        "number": "plural",
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"casa\" (English: \"house\") — Spanish noun, feminine, plural.\n\nConstraints:\n  - The noun must appear in the form \"casas\" (plural).\n  - It must appear with its correct determiner (el/la/los/las or un/una/unos/unas or a demonstrative/possessive) matching its gender (feminine) and number (plural).\n  - The noun must be embedded in a natural sentence with at least a verb and a modifier or short clause — do not return a bare noun phrase.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Las casas de la calle Principal son grandes.\",\"translation\":\"The houses on Main Street are big.\"},{\"sentence\":\"Las casas de mi madre son modernas.\",\"translation\":\"My mother's houses are modern.\"},{\"sentence\":\"Las casas son habitaciones para dormir.\",\"translation\":\"Houses are rooms for sleeping.\"},{\"sentence\":\"Las casas de aquel hombre son antiguas.\",\"translation\":\"The houses of that man are old.\"},{\"sentence\":\"Las casas están en un barrio tranquilo.\",\"translation\":\"The houses are in a quiet neighborhood.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.76,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Las casas de la calle Principal son grandes.",
+          "translation": "The houses on Main Street are big.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las casas de mi madre son modernas.",
+          "translation": "My mother's houses are modern.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las casas son habitaciones para dormir.",
+          "translation": "Houses are rooms for sleeping.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las casas de aquel hombre son antiguas.",
+          "translation": "The houses of that man are old.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las casas están en un barrio tranquilo.",
+          "translation": "The houses are in a quiet neighborhood.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": 1.0
+    },
+    {
+      "cell": {
+        "id": "noun_libro_ms",
+        "pos": "noun",
+        "lemma": "libro",
+        "expected_form": "libro",
+        "translation": "book",
+        "gender": "masculine",
+        "number": "singular",
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"libro\" (English: \"book\") — Spanish noun, masculine, singular.\n\nConstraints:\n  - The noun must appear in the form \"libro\" (singular).\n  - It must appear with its correct determiner (el/la/los/las or un/una/unos/unas or a demonstrative/possessive) matching its gender (masculine) and number (singular).\n  - The noun must be embedded in a natural sentence with at least a verb and a modifier or short clause — do not return a bare noun phrase.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\": [{\"sentence\":\"El libro está en la mesa.\",\"translation\":\"The book is on the table.\"}, {\"sentence\":\"Un libro es un objeto común.\",\"translation\":\"A book is a common object.\"}, {\"sentence\":\"El libro de Juan es interesante.\",\"translation\":\"Juan's book is interesting.\"}, {\"sentence\":\"Los libros de historia son fascinantes.\",\"translation\":\"History books are fascinating.\"}, {\"sentence\":\"El libro que me regalaste es muy antiguo.\",\"translation\":\"The book you gave me is very old.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 8.62,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "El libro está en la mesa.",
+          "translation": "The book is on the table.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Un libro es un objeto común.",
+          "translation": "A book is a common object.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El libro de Juan es interesante.",
+          "translation": "Juan's book is interesting.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los libros de historia son fascinantes.",
+          "translation": "History books are fascinating.",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El libro que me regalaste es muy antiguo.",
+          "translation": "The book you gave me is very old.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 0.8,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": 0.8
+    },
+    {
+      "cell": {
+        "id": "noun_libros_mp",
+        "pos": "noun",
+        "lemma": "libro",
+        "expected_form": "libros",
+        "translation": "book",
+        "gender": "masculine",
+        "number": "plural",
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"libro\" (English: \"book\") — Spanish noun, masculine, plural.\n\nConstraints:\n  - The noun must appear in the form \"libros\" (plural).\n  - It must appear with its correct determiner (el/la/los/las or un/una/unos/unas or a demonstrative/possessive) matching its gender (masculine) and number (plural).\n  - The noun must be embedded in a natural sentence with at least a verb and a modifier or short clause — do not return a bare noun phrase.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"El libro de María es muy interesante.\",\"translation\":\"Maria's book is very interesting.\"},{\"sentence\":\"Los libros de historia son muy populares.\",\"translation\":\"History books are very popular.\"},{\"sentence\":\"Compré un libro nuevo esta semana.\",\"translation\":\"I bought a new book this week.\"},{\"sentence\":\"Las libros de ciencia son fascinantes.\",\"translation\":\"Science books are fascinating.\"},{\"sentence\":\"El libro de José es sobre la tecnología.\",\"translation\":\"José's book is about technology.\"}]}\n\n```json\n{\"candidates\":[{\"sentence\":\"El libro de María es muy interesante.\",\"translation\":\"Maria's book is very interesting.\"},{\"sentence\":\"Los libros de historia son muy populares.\",\"translation\":\"History books are very popular.\"},{\"sentence\":\"Compré un libro nuevo esta semana.\",\"translation\":\"I bought a new book this week.\"},{\"sentence\":\"Las libros de ciencia son fascinantes.\",\"translation\":\"Science books are fascinating.\"},{\"sentence\":\"El libro de José es sobre la tecnología.\",\"translation\":\"José's book is about technology.\"}]\n```",
+      "parse_mode": "regex",
+      "latency_s": 19.6,
+      "n_candidates": 10,
+      "candidates": [
+        {
+          "sentence": "El libro de María es muy interesante.",
+          "translation": "Maria's book is very interesting.",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los libros de historia son muy populares.",
+          "translation": "History books are very popular.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Compré un libro nuevo esta semana.",
+          "translation": "I bought a new book this week.",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las libros de ciencia son fascinantes.",
+          "translation": "Science books are fascinating.",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": false,
+          "grammar_matches": [
+            {
+              "rule": "AGREEMENT_DET_NOUN",
+              "category": "AGREEMENT_NOUNS",
+              "message": "Error de concordancia.",
+              "offset": 0,
+              "error_length": 10,
+              "replacements": [
+                "El libro",
+                "Los libros"
+              ]
+            }
+          ]
+        },
+        {
+          "sentence": "El libro de José es sobre la tecnología.",
+          "translation": "José's book is about technology.",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El libro de María es muy interesante.",
+          "translation": "Maria's book is very interesting.",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los libros de historia son muy populares.",
+          "translation": "History books are very popular.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Compré un libro nuevo esta semana.",
+          "translation": "I bought a new book this week.",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las libros de ciencia son fascinantes.",
+          "translation": "Science books are fascinating.",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": false,
+          "grammar_matches": [
+            {
+              "rule": "AGREEMENT_DET_NOUN",
+              "category": "AGREEMENT_NOUNS",
+              "message": "Error de concordancia.",
+              "offset": 0,
+              "error_length": 10,
+              "replacements": [
+                "El libro",
+                "Los libros"
+              ]
+            }
+          ]
+        },
+        {
+          "sentence": "El libro de José es sobre la tecnología.",
+          "translation": "José's book is about technology.",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 0.4,
+      "grammar_rate": 0.8,
+      "article_agreement_rate": 0.2
+    },
+    {
+      "cell": {
+        "id": "noun_problema_ms",
+        "pos": "noun",
+        "lemma": "problema",
+        "expected_form": "problema",
+        "translation": "problem",
+        "gender": "masculine",
+        "number": "singular",
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": "deceptive: ends in -a but masculine"
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"problema\" (English: \"problem\") — Spanish noun, masculine, singular.\n\nConstraints:\n  - The noun must appear in the form \"problema\" (singular).\n  - It must appear with its correct determiner (el/la/los/las or un/una/unos/unas or a demonstrative/possessive) matching its gender (masculine) and number (singular).\n  - The noun must be embedded in a natural sentence with at least a verb and a modifier or short clause — do not return a bare noun phrase.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"El problema es difícil de resolver.\",\"translation\":\"The problem is difficult to solve.\"},{\"sentence\":\"Necesito un problema para estudiar.\",\"translation\":\"I need a problem to study.\"},{\"sentence\":\"El problema está en la computadora.\",\"translation\":\"The problem is on the computer.\"},{\"sentence\":\"No hay un problema en este apartamento.\",\"translation\":\"There is no problem in this apartment.\"},{\"sentence\":\"El problema lo resolví con ayuda de un experto.\",\"translation\":\"I solved the problem with the help of an expert.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.29,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "El problema es difícil de resolver.",
+          "translation": "The problem is difficult to solve.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Necesito un problema para estudiar.",
+          "translation": "I need a problem to study.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El problema está en la computadora.",
+          "translation": "The problem is on the computer.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "No hay un problema en este apartamento.",
+          "translation": "There is no problem in this apartment.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El problema lo resolví con ayuda de un experto.",
+          "translation": "I solved the problem with the help of an expert.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": 1.0
+    },
+    {
+      "cell": {
+        "id": "noun_mano_fs",
+        "pos": "noun",
+        "lemma": "mano",
+        "expected_form": "mano",
+        "translation": "hand",
+        "gender": "feminine",
+        "number": "singular",
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": "deceptive: ends in -o but feminine"
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"mano\" (English: \"hand\") — Spanish noun, feminine, singular.\n\nConstraints:\n  - The noun must appear in the form \"mano\" (singular).\n  - It must appear with its correct determiner (el/la/los/las or un/una/unos/unas or a demonstrative/possessive) matching its gender (feminine) and number (singular).\n  - The noun must be embedded in a natural sentence with at least a verb and a modifier or short clause — do not return a bare noun phrase.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"La mano es una parte importante del cuerpo.\",\"translation\":\"The hand is an important part of the body.\"}, {\"sentence\":\"Ella usó su mano para escribir.\",\"translation\":\"She used her hand to write.\"}, {\"sentence\":\"La mano derecha es más fuerte que la izquierda.\",\"translation\":\"The right hand is stronger than the left.\"}, {\"sentence\":\"Necesitamos una mano para cerrar la puerta.\",\"translation\":\"We need a hand to close the door.\"}, {\"sentence\":\"El niño tenía una mano enferma.\",\"translation\":\"The child had a sick hand.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.87,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "La mano es una parte importante del cuerpo.",
+          "translation": "The hand is an important part of the body.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Ella usó su mano para escribir.",
+          "translation": "She used her hand to write.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La mano derecha es más fuerte que la izquierda.",
+          "translation": "The right hand is stronger than the left.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Necesitamos una mano para cerrar la puerta.",
+          "translation": "We need a hand to close the door.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El niño tenía una mano enferma.",
+          "translation": "The child had a sick hand.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": 1.0
+    },
+    {
+      "cell": {
+        "id": "adj_rojo_ms",
+        "pos": "adjective",
+        "lemma": "rojo",
+        "expected_form": "rojo",
+        "translation": "red",
+        "gender": "masculine",
+        "number": "singular",
+        "example_noun": "libro",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"rojo\" (English: \"red\") — Spanish adjective, masculine, singular.\n\nConstraints:\n  - The adjective must appear in the form \"rojo\" in the sentence.\n  - It must modify a noun and agree with it in gender (masculine) and number (singular).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"libro\" or any other appropriate masculine singular noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"El libro es rojo.\",\"translation\":\"The book is red.\"},{\"sentence\":\"La ropa es roja.\",\"translation\":\"The clothes are red.\"},{\"sentence\":\"El coche es rojo.\",\"translation\":\"The car is red.\"},{\"sentence\":\"La pelota es roja.\",\"translation\":\"The ball is red.\"},{\"sentence\":\"El sol es rojo.\",\"translation\":\"The sun is red.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 7.31,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "El libro es rojo.",
+          "translation": "The book is red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La ropa es roja.",
+          "translation": "The clothes are red.",
+          "ef_pass": false,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El coche es rojo.",
+          "translation": "The car is red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La pelota es roja.",
+          "translation": "The ball is red.",
+          "ef_pass": false,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El sol es rojo.",
+          "translation": "The sun is red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 0.6,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_roja_fs",
+        "pos": "adjective",
+        "lemma": "rojo",
+        "expected_form": "roja",
+        "translation": "red",
+        "gender": "feminine",
+        "number": "singular",
+        "example_noun": "casa",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"rojo\" (English: \"red\") — Spanish adjective, feminine, singular.\n\nConstraints:\n  - The adjective must appear in the form \"roja\" in the sentence.\n  - It must modify a noun and agree with it in gender (feminine) and number (singular).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"casa\" or any other appropriate feminine singular noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"La ropa es roja.\",\"translation\":\"The clothes are red.\"},{\"sentence\":\"La casa es roja.\",\"translation\":\"The house is red.\"},{\"sentence\":\"La pelota es roja.\",\"translation\":\"The ball is red.\"},{\"sentence\":\"La ropa roja es bonita.\",\"translation\":\"Red clothes are nice.\"},{\"sentence\":\"La pelota roja es mia.\",\"translation\":\"The red ball is mine.\"}]}\n\n```json\n{\"candidates\":[{\"sentence\":\"La ropa es roja.\",\"translation\":\"The clothes are red.\"},{\"sentence\":\"La casa es roja.\",\"translation\":\"The house is red.\"},{\"sentence\":\"La pelota es roja.\",\"translation\":\"The ball is red.\"},{\"sentence\":\"La ropa roja es bonita.\",\"translation\":\"Red clothes are nice.\"},{\"sentence\":\"La pelota roja es mia.\",\"translation\":\"The red ball is mine.\"}]\n```",
+      "parse_mode": "regex",
+      "latency_s": 14.66,
+      "n_candidates": 10,
+      "candidates": [
+        {
+          "sentence": "La ropa es roja.",
+          "translation": "The clothes are red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa es roja.",
+          "translation": "The house is red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La pelota es roja.",
+          "translation": "The ball is red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La ropa roja es bonita.",
+          "translation": "Red clothes are nice.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La pelota roja es mia.",
+          "translation": "The red ball is mine.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La ropa es roja.",
+          "translation": "The clothes are red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa es roja.",
+          "translation": "The house is red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La pelota es roja.",
+          "translation": "The ball is red.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La ropa roja es bonita.",
+          "translation": "Red clothes are nice.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La pelota roja es mia.",
+          "translation": "The red ball is mine.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_rojos_mp",
+        "pos": "adjective",
+        "lemma": "rojo",
+        "expected_form": "rojos",
+        "translation": "red",
+        "gender": "masculine",
+        "number": "plural",
+        "example_noun": "libros",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"rojo\" (English: \"red\") — Spanish adjective, masculine, plural.\n\nConstraints:\n  - The adjective must appear in the form \"rojos\" in the sentence.\n  - It must modify a noun and agree with it in gender (masculine) and number (plural).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"libros\" or any other appropriate masculine plural noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Los rojos son una color popular.\",\"translation\":\"The reds are a popular color.\"},{\"sentence\":\"Los rojos del equipo son muy valientes.\",\"translation\":\"The team's reds are very brave.\"},{\"sentence\":\"Los rojos de los libros son interesantes.\",\"translation\":\"The red books are interesting.\"},{\"sentence\":\"Los rojos del vestido son elegantes.\",\"translation\":\"The red dress is elegant.\"},{\"sentence\":\"Los rojos de la fiesta son divertidos.\",\"translation\":\"The red of the party are fun.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.07,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Los rojos son una color popular.",
+          "translation": "The reds are a popular color.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": false,
+          "grammar_matches": [
+            {
+              "rule": "AGREEMENT_DET_NOUN",
+              "category": "AGREEMENT_NOUNS",
+              "message": "Error de concordancia.",
+              "offset": 14,
+              "error_length": 9,
+              "replacements": [
+                "un color",
+                "unos colores"
+              ]
+            }
+          ]
+        },
+        {
+          "sentence": "Los rojos del equipo son muy valientes.",
+          "translation": "The team's reds are very brave.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los rojos de los libros son interesantes.",
+          "translation": "The red books are interesting.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los rojos del vestido son elegantes.",
+          "translation": "The red dress is elegant.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los rojos de la fiesta son divertidos.",
+          "translation": "The red of the party are fun.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 0.8,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_rojas_fp",
+        "pos": "adjective",
+        "lemma": "rojo",
+        "expected_form": "rojas",
+        "translation": "red",
+        "gender": "feminine",
+        "number": "plural",
+        "example_noun": "manzanas",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"rojo\" (English: \"red\") — Spanish adjective, feminine, plural.\n\nConstraints:\n  - The adjective must appear in the form \"rojas\" in the sentence.\n  - It must modify a noun and agree with it in gender (feminine) and number (plural).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"manzanas\" or any other appropriate feminine plural noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Las manzanas rojas están en la mesa.\",\"translation\":\"The red apples are on the table.\"},{\"sentence\":\"Son rojas las flores de la jardinera.\",\"translation\":\"They are red the flowers in the garden bed.\"},{\"sentence\":\"Las camisas rojas son favoritas de los niños.\",\"translation\":\"The red shirts are favorites of the children.\"},{\"sentence\":\"Las uvas rojas son sabrosas.\",\"translation\":\"The red grapes are delicious.\"},{\"sentence\":\"Las paredes rojas están pintadas de azul.\",\"translation\":\"The red walls are painted blue.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.73,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Las manzanas rojas están en la mesa.",
+          "translation": "The red apples are on the table.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Son rojas las flores de la jardinera.",
+          "translation": "They are red the flowers in the garden bed.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las camisas rojas son favoritas de los niños.",
+          "translation": "The red shirts are favorites of the children.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las uvas rojas son sabrosas.",
+          "translation": "The red grapes are delicious.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las paredes rojas están pintadas de azul.",
+          "translation": "The red walls are painted blue.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_pequeno_ms",
+        "pos": "adjective",
+        "lemma": "pequeño",
+        "expected_form": "pequeño",
+        "translation": "small",
+        "gender": "masculine",
+        "number": "singular",
+        "example_noun": "perro",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"pequeño\" (English: \"small\") — Spanish adjective, masculine, singular.\n\nConstraints:\n  - The adjective must appear in the form \"pequeño\" in the sentence.\n  - It must modify a noun and agree with it in gender (masculine) and number (singular).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"perro\" or any other appropriate masculine singular noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"El perro es pequeño.\",\"translation\":\"The dog is small.\"},{\"sentence\":\"La mesa es pequeña.\",\"translation\":\"The table is small.\"},{\"sentence\":\"El libro es pequeño.\",\"translation\":\"The book is small.\"},{\"sentence\":\"El niño es pequeño.\",\"translation\":\"The child is small.\"},{\"sentence\":\"El coche es pequeño.\",\"translation\":\"The car is small.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 7.0,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "El perro es pequeño.",
+          "translation": "The dog is small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La mesa es pequeña.",
+          "translation": "The table is small.",
+          "ef_pass": false,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El libro es pequeño.",
+          "translation": "The book is small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El niño es pequeño.",
+          "translation": "The child is small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El coche es pequeño.",
+          "translation": "The car is small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 0.8,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_pequena_fs",
+        "pos": "adjective",
+        "lemma": "pequeño",
+        "expected_form": "pequeña",
+        "translation": "small",
+        "gender": "feminine",
+        "number": "singular",
+        "example_noun": "mesa",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"pequeño\" (English: \"small\") — Spanish adjective, feminine, singular.\n\nConstraints:\n  - The adjective must appear in the form \"pequeña\" in the sentence.\n  - It must modify a noun and agree with it in gender (feminine) and number (singular).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"mesa\" or any other appropriate feminine singular noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"La mesa pequeña está en la cocina.\",\"translation\":\"The small table is in the kitchen.\"},{\"sentence\":\"La chica pequeña camina rápido.\",\"translation\":\"The small girl walks quickly.\"},{\"sentence\":\"La puerta pequeña se abre con el llavero.\",\"translation\":\"The small door opens with the key.\"},{\"sentence\":\"La casa pequeña tiene un cuarto nuevo.\",\"translation\":\"The small house has a new room.\"},{\"sentence\":\"La caja pequeña contiene una bolita de plastilina.\",\"translation\":\"The small box contains a plastic ball.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.04,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "La mesa pequeña está en la cocina.",
+          "translation": "The small table is in the kitchen.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La chica pequeña camina rápido.",
+          "translation": "The small girl walks quickly.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La puerta pequeña se abre con el llavero.",
+          "translation": "The small door opens with the key.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa pequeña tiene un cuarto nuevo.",
+          "translation": "The small house has a new room.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La caja pequeña contiene una bolita de plastilina.",
+          "translation": "The small box contains a plastic ball.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_pequenos_mp",
+        "pos": "adjective",
+        "lemma": "pequeño",
+        "expected_form": "pequeños",
+        "translation": "small",
+        "gender": "masculine",
+        "number": "plural",
+        "example_noun": "niños",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"pequeño\" (English: \"small\") — Spanish adjective, masculine, plural.\n\nConstraints:\n  - The adjective must appear in the form \"pequeños\" in the sentence.\n  - It must modify a noun and agree with it in gender (masculine) and number (plural).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"niños\" or any other appropriate masculine plural noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Los niños son pequeños.\",\"translation\":\"The children are small.\"},{\"sentence\":\"Los perros son pequeños.\",\"translation\":\"The dogs are small.\"},{\"sentence\":\"Las coches son pequeños.\",\"translation\":\"The cars are small.\"},{\"sentence\":\"Los estudiantes son pequeños.\",\"translation\":\"The students are small.\"},{\"sentence\":\"Las ballenas son pequeñas.\",\"translation\":\"The whales are small.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 6.81,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Los niños son pequeños.",
+          "translation": "The children are small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los perros son pequeños.",
+          "translation": "The dogs are small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las coches son pequeños.",
+          "translation": "The cars are small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": false,
+          "grammar_matches": [
+            {
+              "rule": "AGREEMENT_DET_NOUN",
+              "category": "AGREEMENT_NOUNS",
+              "message": "Error de concordancia.",
+              "offset": 0,
+              "error_length": 10,
+              "replacements": [
+                "El coche",
+                "Los coches"
+              ]
+            }
+          ]
+        },
+        {
+          "sentence": "Los estudiantes son pequeños.",
+          "translation": "The students are small.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las ballenas son pequeñas.",
+          "translation": "The whales are small.",
+          "ef_pass": false,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 0.8,
+      "grammar_rate": 0.8,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_pequenas_fp",
+        "pos": "adjective",
+        "lemma": "pequeño",
+        "expected_form": "pequeñas",
+        "translation": "small",
+        "gender": "feminine",
+        "number": "plural",
+        "example_noun": "flores",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"pequeño\" (English: \"small\") — Spanish adjective, feminine, plural.\n\nConstraints:\n  - The adjective must appear in the form \"pequeñas\" in the sentence.\n  - It must modify a noun and agree with it in gender (feminine) and number (plural).\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n  - You may use a noun like \"flores\" or any other appropriate feminine plural noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Las flores pequeñas están en el jardín.\",\"translation\":\"The small flowers are in the garden.\"},{\"sentence\":\"Las pequeñas flores son del jardinero.\",\"translation\":\"The small flowers are from the gardener.\"},{\"sentence\":\"Las pequeñas flores brillan en la ventana.\",\"translation\":\"The small flowers shine in the window.\"},{\"sentence\":\"Las pequeñas flores no son grandes.\",\"translation\":\"The small flowers are not big.\"},{\"sentence\":\"Las pequeñas flores son deliciosas.\",\"translation\":\"The small flowers are delicious.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.38,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Las flores pequeñas están en el jardín.",
+          "translation": "The small flowers are in the garden.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las pequeñas flores son del jardinero.",
+          "translation": "The small flowers are from the gardener.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las pequeñas flores brillan en la ventana.",
+          "translation": "The small flowers shine in the window.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las pequeñas flores no son grandes.",
+          "translation": "The small flowers are not big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las pequeñas flores son deliciosas.",
+          "translation": "The small flowers are delicious.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_grande_s",
+        "pos": "adjective",
+        "lemma": "grande",
+        "expected_form": "grande",
+        "translation": "big",
+        "gender": null,
+        "number": "singular",
+        "example_noun": null,
+        "invariant_gender": true,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"grande\" (English: \"big\") — Spanish adjective, singular (this adjective has the same form for masculine and feminine).\n\nConstraints:\n  - The adjective must appear in the form \"grande\" in the sentence.\n  - It must modify a noun and agree with it in number (singular). The adjective form is the same for masculine and feminine nouns.\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"El libro es grande.\",\"translation\":\"The book is big.\"},{\"sentence\":\"La casa es grande.\",\"translation\":\"The house is big.\"},{\"sentence\":\"El perro es grande.\",\"translation\":\"The dog is big.\"},{\"sentence\":\"La pelota es grande.\",\"translation\":\"The ball is big.\"},{\"sentence\":\"El cielo es grande.\",\"translation\":\"The sky is big.\"}]}\n\n```json\n{\"candidates\":[{\"sentence\":\"El libro es grande.\",\"translation\":\"The book is big.\"},{\"sentence\":\"La casa es grande.\",\"translation\":\"The house is big.\"},{\"sentence\":\"El perro es grande.\",\"translation\":\"The dog is big.\"},{\"sentence\":\"La pelota es grande.\",\"translation\":\"The ball is big.\"},{\"sentence\":\"El cielo es grande.\",\"translation\":\"The sky is big.\"}]\n```",
+      "parse_mode": "regex",
+      "latency_s": 13.41,
+      "n_candidates": 10,
+      "candidates": [
+        {
+          "sentence": "El libro es grande.",
+          "translation": "The book is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa es grande.",
+          "translation": "The house is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El perro es grande.",
+          "translation": "The dog is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La pelota es grande.",
+          "translation": "The ball is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El cielo es grande.",
+          "translation": "The sky is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El libro es grande.",
+          "translation": "The book is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa es grande.",
+          "translation": "The house is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El perro es grande.",
+          "translation": "The dog is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La pelota es grande.",
+          "translation": "The ball is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El cielo es grande.",
+          "translation": "The sky is big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_grandes_p",
+        "pos": "adjective",
+        "lemma": "grande",
+        "expected_form": "grandes",
+        "translation": "big",
+        "gender": null,
+        "number": "plural",
+        "example_noun": null,
+        "invariant_gender": true,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"grande\" (English: \"big\") — Spanish adjective, plural (this adjective has the same form for masculine and feminine).\n\nConstraints:\n  - The adjective must appear in the form \"grandes\" in the sentence.\n  - It must modify a noun and agree with it in number (plural). The adjective form is the same for masculine and feminine nouns.\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Los niños son grandes.\",\"translation\":\"The children are big.\"},{\"sentence\":\"Las flores son grandes.\",\"translation\":\"The flowers are big.\"},{\"sentence\":\"Los perros son grandes.\",\"translation\":\"The dogs are big.\"},{\"sentence\":\"Las estrellas son grandes.\",\"translation\":\"The stars are big.\"},{\"sentence\":\"Los animales son grandes.\",\"translation\":\"The animals are big.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 6.27,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Los niños son grandes.",
+          "translation": "The children are big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las flores son grandes.",
+          "translation": "The flowers are big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los perros son grandes.",
+          "translation": "The dogs are big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las estrellas son grandes.",
+          "translation": "The stars are big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los animales son grandes.",
+          "translation": "The animals are big.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_feliz_s",
+        "pos": "adjective",
+        "lemma": "feliz",
+        "expected_form": "feliz",
+        "translation": "happy",
+        "gender": null,
+        "number": "singular",
+        "example_noun": null,
+        "invariant_gender": true,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"feliz\" (English: \"happy\") — Spanish adjective, singular (this adjective has the same form for masculine and feminine).\n\nConstraints:\n  - The adjective must appear in the form \"feliz\" in the sentence.\n  - It must modify a noun and agree with it in number (singular). The adjective form is the same for masculine and feminine nouns.\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\": [{\"sentence\":\"Ana es feliz.\",\"translation\":\"Ana is happy.\"}, {\"sentence\":\"La chica es feliz.\",\"translation\":\"The girl is happy.\"}, {\"sentence\":\"El perro es feliz.\",\"translation\":\"The dog is happy.\"}, {\"sentence\":\"La casa es feliz.\",\"translation\":\"The house is happy.\"}, {\"sentence\":\"El libro es feliz.\",\"translation\":\"The book is happy.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 6.25,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Ana es feliz.",
+          "translation": "Ana is happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La chica es feliz.",
+          "translation": "The girl is happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El perro es feliz.",
+          "translation": "The dog is happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa es feliz.",
+          "translation": "The house is happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El libro es feliz.",
+          "translation": "The book is happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adj_felices_p",
+        "pos": "adjective",
+        "lemma": "feliz",
+        "expected_form": "felices",
+        "translation": "happy",
+        "gender": null,
+        "number": "plural",
+        "example_noun": null,
+        "invariant_gender": true,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word (lemma): \"feliz\" (English: \"happy\") — Spanish adjective, plural (this adjective has the same form for masculine and feminine).\n\nConstraints:\n  - The adjective must appear in the form \"felices\" in the sentence.\n  - It must modify a noun and agree with it in number (plural). The adjective form is the same for masculine and feminine nouns.\n  - The noun being modified must be explicitly written in the sentence (with its determiner). Do not drop the noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Las chicas son felices.\",\"translation\":\"The girls are happy.\"},{\"sentence\":\"Los niños son felices.\",\"translation\":\"The children are happy.\"},{\"sentence\":\"Las estudiantes son felices.\",\"translation\":\"The students are happy.\"},{\"sentence\":\"Los alumnos son felices.\",\"translation\":\"The students are happy.\"},{\"sentence\":\"Las personas son felices.\",\"translation\":\"The people are happy.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 6.5,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Las chicas son felices.",
+          "translation": "The girls are happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los niños son felices.",
+          "translation": "The children are happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las estudiantes son felices.",
+          "translation": "The students are happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Los alumnos son felices.",
+          "translation": "The students are happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las personas son felices.",
+          "translation": "The people are happy.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adv_rapidamente",
+        "pos": "adverb",
+        "lemma": "rápidamente",
+        "expected_form": "rápidamente",
+        "translation": "quickly",
+        "gender": null,
+        "number": null,
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"rápidamente\" (English: \"quickly\") — Spanish adverb (invariant; same form everywhere).\n\nConstraints:\n  - The adverb \"rápidamente\" must appear in the sentence.\n  - It must modify a verb (or the whole clause). It should not stand alone or be used as an interjection.\n  - The sentence must contain a subject and a finite verb.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Él corre rápidamente.\",\"translation\":\"He runs quickly.\"},{\"sentence\":\"La niña se acuesta rápidamente.\",\"translation\":\"The girl sleeps quickly.\"},{\"sentence\":\"El perro ladró rápidamente.\",\"translation\":\"The dog barked quickly.\"},{\"sentence\":\"El coche se detuvo rápidamente.\",\"translation\":\"The car stopped quickly.\"},{\"sentence\":\"Ella habla rápidamente.\",\"translation\":\"She speaks quickly.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 8.46,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Él corre rápidamente.",
+          "translation": "He runs quickly.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La niña se acuesta rápidamente.",
+          "translation": "The girl sleeps quickly.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El perro ladró rápidamente.",
+          "translation": "The dog barked quickly.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El coche se detuvo rápidamente.",
+          "translation": "The car stopped quickly.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Ella habla rápidamente.",
+          "translation": "She speaks quickly.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adv_lentamente",
+        "pos": "adverb",
+        "lemma": "lentamente",
+        "expected_form": "lentamente",
+        "translation": "slowly",
+        "gender": null,
+        "number": null,
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"lentamente\" (English: \"slowly\") — Spanish adverb (invariant; same form everywhere).\n\nConstraints:\n  - The adverb \"lentamente\" must appear in the sentence.\n  - It must modify a verb (or the whole clause). It should not stand alone or be used as an interjection.\n  - The sentence must contain a subject and a finite verb.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Ella caminaba lentamente por el parque.\",\"translation\":\"She walked slowly through the park.\"},{\"sentence\":\"El perro latió lentamente en la puerta.\",\"translation\":\"The dog knocked slowly on the door.\"},{\"sentence\":\"El sol se levantó lentamente al amanecer.\",\"translation\":\"The sun rose slowly in the morning.\"},{\"sentence\":\"El niño se sentó lentamente en el banco.\",\"translation\":\"The child sat slowly on the bench.\"},{\"sentence\":\"El viento sopló lentamente por la ventana.\",\"translation\":\"The wind blew slowly through the window.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.7,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Ella caminaba lentamente por el parque.",
+          "translation": "She walked slowly through the park.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El perro latió lentamente en la puerta.",
+          "translation": "The dog knocked slowly on the door.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El sol se levantó lentamente al amanecer.",
+          "translation": "The sun rose slowly in the morning.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El niño se sentó lentamente en el banco.",
+          "translation": "The child sat slowly on the bench.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El viento sopló lentamente por la ventana.",
+          "translation": "The wind blew slowly through the window.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adv_ayer",
+        "pos": "adverb",
+        "lemma": "ayer",
+        "expected_form": "ayer",
+        "translation": "yesterday",
+        "gender": null,
+        "number": null,
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"ayer\" (English: \"yesterday\") — Spanish adverb (invariant; same form everywhere).\n\nConstraints:\n  - The adverb \"ayer\" must appear in the sentence.\n  - It must modify a verb (or the whole clause). It should not stand alone or be used as an interjection.\n  - The sentence must contain a subject and a finite verb.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"El niño comió un sandwich ayer.\",\"translation\":\"The child ate a sandwich yesterday.\"},{\"sentence\":\"Ella visitó la playa ayer.\",\"translation\":\"She visited the beach yesterday.\"},{\"sentence\":\"El profesor explicó la tarea ayer.\",\"translation\":\"The teacher explained the homework yesterday.\"},{\"sentence\":\"Nosotros fuimos al cine ayer.\",\"translation\":\"We went to the cinema yesterday.\"},{\"sentence\":\"El sol brilló ayer en la plaza.\",\"translation\":\"The sun shone yesterday in the square.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.14,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "El niño comió un sandwich ayer.",
+          "translation": "The child ate a sandwich yesterday.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Ella visitó la playa ayer.",
+          "translation": "She visited the beach yesterday.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El profesor explicó la tarea ayer.",
+          "translation": "The teacher explained the homework yesterday.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Nosotros fuimos al cine ayer.",
+          "translation": "We went to the cinema yesterday.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El sol brilló ayer en la plaza.",
+          "translation": "The sun shone yesterday in the square.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "adv_siempre",
+        "pos": "adverb",
+        "lemma": "siempre",
+        "expected_form": "siempre",
+        "translation": "always",
+        "gender": null,
+        "number": null,
+        "example_noun": null,
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"siempre\" (English: \"always\") — Spanish adverb (invariant; same form everywhere).\n\nConstraints:\n  - The adverb \"siempre\" must appear in the sentence.\n  - It must modify a verb (or the whole clause). It should not stand alone or be used as an interjection.\n  - The sentence must contain a subject and a finite verb.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Él siempre come comida saludable.\",\"translation\":\"He always eats healthy food.\"},{\"sentence\":\"Nosotros siempre nos despedimos con un abrazo.\",\"translation\":\"We always say goodbye with a hug.\"},{\"sentence\":\"La casa siempre está limpia.\",\"translation\":\"The house always stays clean.\"},{\"sentence\":\"Ella siempre habla español con sus amigos.\",\"translation\":\"She always speaks Spanish with her friends.\"},{\"sentence\":\"El sol siempre brilla en el cielo.\",\"translation\":\"The sun always shines in the sky.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 9.11,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Él siempre come comida saludable.",
+          "translation": "He always eats healthy food.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Nosotros siempre nos despedimos con un abrazo.",
+          "translation": "We always say goodbye with a hug.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "La casa siempre está limpia.",
+          "translation": "The house always stays clean.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Ella siempre habla español con sus amigos.",
+          "translation": "She always speaks Spanish with her friends.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "El sol siempre brilla en el cielo.",
+          "translation": "The sun always shines in the sky.",
+          "ef_pass": true,
+          "article_agreement_pass": null,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": null
+    },
+    {
+      "cell": {
+        "id": "part_cerrada_fs",
+        "pos": "participle",
+        "lemma": "cerrar",
+        "expected_form": "cerrada",
+        "translation": "closed",
+        "gender": "feminine",
+        "number": "singular",
+        "example_noun": "puerta",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"cerrada\" (English: \"closed\") — Spanish past participle of \"cerrar\" used as an adjective, feminine, singular.\n\nConstraints:\n  - The past participle must appear in the form \"cerrada\".\n  - It must agree in gender (feminine) and number (singular) with the noun it modifies or is linked to (via 'ser' or 'estar').\n  - The noun must be explicitly written in the sentence with its determiner.\n  - You may use a noun like \"puerta\" or another appropriate feminine singular noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"la puerta cerrada\",\"translation\":\"the closed door\"},{\"sentence\":\"la ventana cerrada\",\"translation\":\"the closed window\"},{\"sentence\":\"la habitación cerrada\",\"translation\":\"the closed room\"},{\"sentence\":\"la puerta de atrás cerrada\",\"translation\":\"the back door closed\"},{\"sentence\":\"la nevera cerrada\",\"translation\":\"the closed fridge\"}]}",
+      "parse_mode": "json",
+      "latency_s": 6.09,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "la puerta cerrada",
+          "translation": "the closed door",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "la ventana cerrada",
+          "translation": "the closed window",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "la habitación cerrada",
+          "translation": "the closed room",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "la puerta de atrás cerrada",
+          "translation": "the back door closed",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "la nevera cerrada",
+          "translation": "the closed fridge",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": 0.4
+    },
+    {
+      "cell": {
+        "id": "part_abiertas_fp",
+        "pos": "participle",
+        "lemma": "abrir",
+        "expected_form": "abiertas",
+        "translation": "open",
+        "gender": "feminine",
+        "number": "plural",
+        "example_noun": "ventanas",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"abiertas\" (English: \"open\") — Spanish past participle of \"abrir\" used as an adjective, feminine, plural.\n\nConstraints:\n  - The past participle must appear in the form \"abiertas\".\n  - It must agree in gender (feminine) and number (plural) with the noun it modifies or is linked to (via 'ser' or 'estar').\n  - The noun must be explicitly written in the sentence with its determiner.\n  - You may use a noun like \"ventanas\" or another appropriate feminine plural noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"Las ventanas abiertas están en la casa.\",\"translation\":\"The open windows are in the house.\"},{\"sentence\":\"Las puertas abiertas se encuentran en el salón.\",\"translation\":\"The open doors are in the living room.\"},{\"sentence\":\"Las ventanas abiertas no se cierran.\",\"translation\":\"The open windows do not close.\"},{\"sentence\":\"Las ventanas abiertas son favoritas de los niños.\",\"translation\":\"The open windows are favorites of the children.\"},{\"sentence\":\"Las ventanas abiertas se usan para la ventilación.\",\"translation\":\"The open windows are used for ventilation.\"}]}",
+      "parse_mode": "json",
+      "latency_s": 10.36,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "Las ventanas abiertas están en la casa.",
+          "translation": "The open windows are in the house.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las puertas abiertas se encuentran en el salón.",
+          "translation": "The open doors are in the living room.",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las ventanas abiertas no se cierran.",
+          "translation": "The open windows do not close.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las ventanas abiertas son favoritas de los niños.",
+          "translation": "The open windows are favorites of the children.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "Las ventanas abiertas se usan para la ventilación.",
+          "translation": "The open windows are used for ventilation.",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 1.0,
+      "grammar_rate": 1.0,
+      "article_agreement_rate": 0.8
+    },
+    {
+      "cell": {
+        "id": "part_roto_ms",
+        "pos": "participle",
+        "lemma": "romper",
+        "expected_form": "roto",
+        "translation": "broken",
+        "gender": "masculine",
+        "number": "singular",
+        "example_noun": "vaso",
+        "invariant_gender": false,
+        "notes": ""
+      },
+      "prompt": "You generate Spanish example sentences for vocabulary practice.\nTarget word: \"roto\" (English: \"broken\") — Spanish past participle of \"romper\" used as an adjective, masculine, singular.\n\nConstraints:\n  - The past participle must appear in the form \"roto\".\n  - It must agree in gender (masculine) and number (singular) with the noun it modifies or is linked to (via 'ser' or 'estar').\n  - The noun must be explicitly written in the sentence with its determiner.\n  - You may use a noun like \"vaso\" or another appropriate masculine singular noun.\n\nProduce 5 complete, natural Spanish sentences with English translations. Reply ONLY as JSON in this shape:\n{\"candidates\":[{\"sentence\":\"...\",\"translation\":\"...\"}, ...]}",
+      "raw": "{\"candidates\":[{\"sentence\":\"el vaso roto\",\"translation\":\"the broken glass\"},{\"sentence\":\"la mesa rota\",\"translation\":\"the broken table\"},{\"sentence\":\"el coche roto\",\"translation\":\"the broken car\"},{\"sentence\":\"las paredes rota\",\"translation\":\"the broken walls\"},{\"sentence\":\"el libro roto\",\"translation\":\"the broken book\"}]}",
+      "parse_mode": "json",
+      "latency_s": 5.73,
+      "n_candidates": 5,
+      "candidates": [
+        {
+          "sentence": "el vaso roto",
+          "translation": "the broken glass",
+          "ef_pass": true,
+          "article_agreement_pass": true,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "la mesa rota",
+          "translation": "the broken table",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "el coche roto",
+          "translation": "the broken car",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        },
+        {
+          "sentence": "las paredes rota",
+          "translation": "the broken walls",
+          "ef_pass": false,
+          "article_agreement_pass": false,
+          "grammar_pass": false,
+          "grammar_matches": [
+            {
+              "rule": "AGREEMENT_POSTPONED_ADJ",
+              "category": "AGREEMENT_NOUNS",
+              "message": "Revise la concordancia de «rota» con los nombres precedentes o revise la puntuación.",
+              "offset": 12,
+              "error_length": 4,
+              "replacements": [
+                "rotas"
+              ]
+            }
+          ]
+        },
+        {
+          "sentence": "el libro roto",
+          "translation": "the broken book",
+          "ef_pass": true,
+          "article_agreement_pass": false,
+          "grammar_pass": true,
+          "grammar_matches": []
+        }
+      ],
+      "ef_rate": 0.6,
+      "grammar_rate": 0.8,
+      "article_agreement_rate": 0.2
+    }
+  ]
+}

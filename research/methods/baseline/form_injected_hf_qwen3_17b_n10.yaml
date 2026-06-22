@@ -1,0 +1,7 @@
+name: form_injected_hf_qwen3_17b_n10
+method: baseline_hf_form_injected
+samples_per_case: 10
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0.7
+  sentence_length: short

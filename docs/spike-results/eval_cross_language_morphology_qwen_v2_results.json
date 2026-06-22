@@ -1,0 +1,4767 @@
+{
+  "models": {
+    "qwen05b": "Qwen/Qwen2.5-0.5B-Instruct",
+    "qwen17b": "Qwen/Qwen3-1.7B",
+    "qwen4b": "Qwen/Qwen3-4B-Instruct-2507"
+  },
+  "temperature": 0.0,
+  "probes": [
+    "past_tense_1sg",
+    "past_participle"
+  ],
+  "form_labels": {
+    "English": {
+      "past_tense_1sg": "simple past tense (first person singular, 'I')",
+      "past_participle": "past participle"
+    },
+    "Spanish": {
+      "past_tense_1sg": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+      "past_participle": "past participle (participio pasado)"
+    }
+  },
+  "user_template": "What is the {form_label} of the {language} verb \"{lemma}\" (meaning: \"{gloss}\")? Reply with one word only.",
+  "verb_entries": {
+    "English": [
+      {
+        "lemma": "go",
+        "gloss": "to move from one place to another",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "went"
+          ],
+          "past_participle": [
+            "gone"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "see",
+        "gloss": "to perceive with the eyes",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "saw"
+          ],
+          "past_participle": [
+            "seen"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "come",
+        "gloss": "to move toward the speaker",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "came"
+          ],
+          "past_participle": [
+            "come"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "take",
+        "gloss": "to lay hold of with the hand",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "took"
+          ],
+          "past_participle": [
+            "taken"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "give",
+        "gloss": "to hand over to someone",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "gave"
+          ],
+          "past_participle": [
+            "given"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "know",
+        "gloss": "to be aware of through observation",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "knew"
+          ],
+          "past_participle": [
+            "known"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "write",
+        "gloss": "to mark letters or symbols on a surface",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "wrote"
+          ],
+          "past_participle": [
+            "written"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "gainsay",
+        "gloss": "to deny or contradict",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "gainsaid"
+          ],
+          "past_participle": [
+            "gainsaid"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "beseech",
+        "gloss": "to implore or beg earnestly",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "besought",
+            "beseeched"
+          ],
+          "past_participle": [
+            "besought",
+            "beseeched"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "smite",
+        "gloss": "to strike heavily",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "smote"
+          ],
+          "past_participle": [
+            "smitten",
+            "smote"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "shrive",
+        "gloss": "to hear confession and grant absolution",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "shrove",
+            "shrived"
+          ],
+          "past_participle": [
+            "shriven",
+            "shrived"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "gird",
+        "gloss": "to encircle or prepare oneself",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "girt",
+            "girded"
+          ],
+          "past_participle": [
+            "girt",
+            "girded"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "forswear",
+        "gloss": "to renounce or perjure oneself",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "forswore"
+          ],
+          "past_participle": [
+            "forsworn"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "clothe",
+        "gloss": "to dress or provide with clothing",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "clad",
+            "clothed"
+          ],
+          "past_participle": [
+            "clad",
+            "clothed"
+          ]
+        },
+        "notes": ""
+      }
+    ],
+    "Spanish": [
+      {
+        "lemma": "hablar",
+        "gloss": "to speak",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "hablé"
+          ],
+          "past_participle": [
+            "hablado"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "comer",
+        "gloss": "to eat",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "comí"
+          ],
+          "past_participle": [
+            "comido"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "vivir",
+        "gloss": "to live",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "viví"
+          ],
+          "past_participle": [
+            "vivido"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "correr",
+        "gloss": "to run",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "corrí"
+          ],
+          "past_participle": [
+            "corrido"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "escribir",
+        "gloss": "to write",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "escribí"
+          ],
+          "past_participle": [
+            "escrito"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "tener",
+        "gloss": "to have",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "tuve"
+          ],
+          "past_participle": [
+            "tenido"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "hacer",
+        "gloss": "to do; to make",
+        "tier": "common",
+        "forms": {
+          "past_tense_1sg": [
+            "hice"
+          ],
+          "past_participle": [
+            "hecho"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "henchir",
+        "gloss": "to fill (literary)",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "henchí"
+          ],
+          "past_participle": [
+            "henchido"
+          ]
+        },
+        "notes": "1st sg preterite is henchí; present 1st sg is hincho (e->i)."
+      },
+      {
+        "lemma": "argüir",
+        "gloss": "to argue (formally)",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "argüí"
+          ],
+          "past_participle": [
+            "argüido"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "atestiguar",
+        "gloss": "to testify",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "atestigüé"
+          ],
+          "past_participle": [
+            "atestiguado"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "menguar",
+        "gloss": "to diminish",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "mengüé"
+          ],
+          "past_participle": [
+            "menguado"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "empalagar",
+        "gloss": "to cloy; to sicken",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "empalagué"
+          ],
+          "past_participle": [
+            "empalagado"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "blandir",
+        "gloss": "to brandish",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "blandí"
+          ],
+          "past_participle": [
+            "blandido"
+          ]
+        },
+        "notes": ""
+      },
+      {
+        "lemma": "proferir",
+        "gloss": "to utter (threats/insults)",
+        "tier": "rare",
+        "forms": {
+          "past_tense_1sg": [
+            "proferí"
+          ],
+          "past_participle": [
+            "proferido"
+          ]
+        },
+        "notes": ""
+      }
+    ]
+  },
+  "by_model": {
+    "qwen05b": {
+      "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "elapsed_s": 21.5,
+      "results": [
+        {
+          "case": {
+            "id": "english__go__past_tense_1sg",
+            "language": "English",
+            "lemma": "go",
+            "gloss": "to move from one place to another",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "went"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"go\" (meaning: \"to move from one place to another\")? Reply with one word only."
+          },
+          "latency_s": 9.726,
+          "raw": "went",
+          "parsed_token": "went",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__go__past_participle",
+            "language": "English",
+            "lemma": "go",
+            "gloss": "to move from one place to another",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "gone"
+            ],
+            "prompt": "What is the past participle of the English verb \"go\" (meaning: \"to move from one place to another\")? Reply with one word only."
+          },
+          "latency_s": 0.237,
+          "raw": "moved",
+          "parsed_token": "moved",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__see__past_tense_1sg",
+            "language": "English",
+            "lemma": "see",
+            "gloss": "to perceive with the eyes",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "saw"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"see\" (meaning: \"to perceive with the eyes\")? Reply with one word only."
+          },
+          "latency_s": 0.288,
+          "raw": "saw",
+          "parsed_token": "saw",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__see__past_participle",
+            "language": "English",
+            "lemma": "see",
+            "gloss": "to perceive with the eyes",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "seen"
+            ],
+            "prompt": "What is the past participle of the English verb \"see\" (meaning: \"to perceive with the eyes\")? Reply with one word only."
+          },
+          "latency_s": 0.315,
+          "raw": "seen",
+          "parsed_token": "seen",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__come__past_tense_1sg",
+            "language": "English",
+            "lemma": "come",
+            "gloss": "to move toward the speaker",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "came"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"come\" (meaning: \"to move toward the speaker\")? Reply with one word only."
+          },
+          "latency_s": 0.096,
+          "raw": "came",
+          "parsed_token": "came",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__come__past_participle",
+            "language": "English",
+            "lemma": "come",
+            "gloss": "to move toward the speaker",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "come"
+            ],
+            "prompt": "What is the past participle of the English verb \"come\" (meaning: \"to move toward the speaker\")? Reply with one word only."
+          },
+          "latency_s": 0.085,
+          "raw": "moved",
+          "parsed_token": "moved",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__take__past_tense_1sg",
+            "language": "English",
+            "lemma": "take",
+            "gloss": "to lay hold of with the hand",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "took"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"take\" (meaning: \"to lay hold of with the hand\")? Reply with one word only."
+          },
+          "latency_s": 0.101,
+          "raw": "took",
+          "parsed_token": "took",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__take__past_participle",
+            "language": "English",
+            "lemma": "take",
+            "gloss": "to lay hold of with the hand",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "taken"
+            ],
+            "prompt": "What is the past participle of the English verb \"take\" (meaning: \"to lay hold of with the hand\")? Reply with one word only."
+          },
+          "latency_s": 0.094,
+          "raw": "held",
+          "parsed_token": "held",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__give__past_tense_1sg",
+            "language": "English",
+            "lemma": "give",
+            "gloss": "to hand over to someone",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "gave"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"give\" (meaning: \"to hand over to someone\")? Reply with one word only."
+          },
+          "latency_s": 0.094,
+          "raw": "given",
+          "parsed_token": "given",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__give__past_participle",
+            "language": "English",
+            "lemma": "give",
+            "gloss": "to hand over to someone",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "given"
+            ],
+            "prompt": "What is the past participle of the English verb \"give\" (meaning: \"to hand over to someone\")? Reply with one word only."
+          },
+          "latency_s": 0.092,
+          "raw": "given",
+          "parsed_token": "given",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__know__past_tense_1sg",
+            "language": "English",
+            "lemma": "know",
+            "gloss": "to be aware of through observation",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "knew"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"know\" (meaning: \"to be aware of through observation\")? Reply with one word only."
+          },
+          "latency_s": 0.209,
+          "raw": "knew",
+          "parsed_token": "knew",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__know__past_participle",
+            "language": "English",
+            "lemma": "know",
+            "gloss": "to be aware of through observation",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "known"
+            ],
+            "prompt": "What is the past participle of the English verb \"know\" (meaning: \"to be aware of through observation\")? Reply with one word only."
+          },
+          "latency_s": 0.189,
+          "raw": "known",
+          "parsed_token": "known",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__write__past_tense_1sg",
+            "language": "English",
+            "lemma": "write",
+            "gloss": "to mark letters or symbols on a surface",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "wrote"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"write\" (meaning: \"to mark letters or symbols on a surface\")? Reply with one word only."
+          },
+          "latency_s": 0.303,
+          "raw": "wrote",
+          "parsed_token": "wrote",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__write__past_participle",
+            "language": "English",
+            "lemma": "write",
+            "gloss": "to mark letters or symbols on a surface",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "written"
+            ],
+            "prompt": "What is the past participle of the English verb \"write\" (meaning: \"to mark letters or symbols on a surface\")? Reply with one word only."
+          },
+          "latency_s": 0.222,
+          "raw": "written",
+          "parsed_token": "written",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gainsay__past_tense_1sg",
+            "language": "English",
+            "lemma": "gainsay",
+            "gloss": "to deny or contradict",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "gainsaid"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"gainsay\" (meaning: \"to deny or contradict\")? Reply with one word only."
+          },
+          "latency_s": 0.145,
+          "raw": "denies",
+          "parsed_token": "denies",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gainsay__past_participle",
+            "language": "English",
+            "lemma": "gainsay",
+            "gloss": "to deny or contradict",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "gainsaid"
+            ],
+            "prompt": "What is the past participle of the English verb \"gainsay\" (meaning: \"to deny or contradict\")? Reply with one word only."
+          },
+          "latency_s": 0.145,
+          "raw": "denies",
+          "parsed_token": "denies",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__beseech__past_tense_1sg",
+            "language": "English",
+            "lemma": "beseech",
+            "gloss": "to implore or beg earnestly",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"beseech\" (meaning: \"to implore or beg earnestly\")? Reply with one word only."
+          },
+          "latency_s": 0.322,
+          "raw": "begged",
+          "parsed_token": "begged",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__beseech__past_participle",
+            "language": "English",
+            "lemma": "beseech",
+            "gloss": "to implore or beg earnestly",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "prompt": "What is the past participle of the English verb \"beseech\" (meaning: \"to implore or beg earnestly\")? Reply with one word only."
+          },
+          "latency_s": 0.299,
+          "raw": "begged",
+          "parsed_token": "begged",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__smite__past_tense_1sg",
+            "language": "English",
+            "lemma": "smite",
+            "gloss": "to strike heavily",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "smote"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"smite\" (meaning: \"to strike heavily\")? Reply with one word only."
+          },
+          "latency_s": 0.258,
+          "raw": "stamped",
+          "parsed_token": "stamped",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__smite__past_participle",
+            "language": "English",
+            "lemma": "smite",
+            "gloss": "to strike heavily",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "smitten",
+              "smote"
+            ],
+            "prompt": "What is the past participle of the English verb \"smite\" (meaning: \"to strike heavily\")? Reply with one word only."
+          },
+          "latency_s": 0.268,
+          "raw": "stamped",
+          "parsed_token": "stamped",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__shrive__past_tense_1sg",
+            "language": "English",
+            "lemma": "shrive",
+            "gloss": "to hear confession and grant absolution",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "shrove",
+              "shrived"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"shrive\" (meaning: \"to hear confession and grant absolution\")? Reply with one word only."
+          },
+          "latency_s": 0.365,
+          "raw": "heard confess granted absolution",
+          "parsed_token": "heard",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__shrive__past_participle",
+            "language": "English",
+            "lemma": "shrive",
+            "gloss": "to hear confession and grant absolution",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "shriven",
+              "shrived"
+            ],
+            "prompt": "What is the past participle of the English verb \"shrive\" (meaning: \"to hear confession and grant absolution\")? Reply with one word only."
+          },
+          "latency_s": 0.152,
+          "raw": "granted",
+          "parsed_token": "granted",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gird__past_tense_1sg",
+            "language": "English",
+            "lemma": "gird",
+            "gloss": "to encircle or prepare oneself",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "girt",
+              "girded"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"gird\" (meaning: \"to encircle or prepare oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.198,
+          "raw": "girded",
+          "parsed_token": "girded",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gird__past_participle",
+            "language": "English",
+            "lemma": "gird",
+            "gloss": "to encircle or prepare oneself",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "girt",
+              "girded"
+            ],
+            "prompt": "What is the past participle of the English verb \"gird\" (meaning: \"to encircle or prepare oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.193,
+          "raw": "girdled",
+          "parsed_token": "girdled",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__forswear__past_tense_1sg",
+            "language": "English",
+            "lemma": "forswear",
+            "gloss": "to renounce or perjure oneself",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "forswore"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"forswear\" (meaning: \"to renounce or perjure oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.147,
+          "raw": "forseen",
+          "parsed_token": "forseen",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__forswear__past_participle",
+            "language": "English",
+            "lemma": "forswear",
+            "gloss": "to renounce or perjure oneself",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "forsworn"
+            ],
+            "prompt": "What is the past participle of the English verb \"forswear\" (meaning: \"to renounce or perjure oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.146,
+          "raw": "perjured",
+          "parsed_token": "perjured",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__clothe__past_tense_1sg",
+            "language": "English",
+            "lemma": "clothe",
+            "gloss": "to dress or provide with clothing",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"clothe\" (meaning: \"to dress or provide with clothing\")? Reply with one word only."
+          },
+          "latency_s": 0.144,
+          "raw": "wore",
+          "parsed_token": "wore",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__clothe__past_participle",
+            "language": "English",
+            "lemma": "clothe",
+            "gloss": "to dress or provide with clothing",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "prompt": "What is the past participle of the English verb \"clothe\" (meaning: \"to dress or provide with clothing\")? Reply with one word only."
+          },
+          "latency_s": 0.144,
+          "raw": "dressed",
+          "parsed_token": "dressed",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hablar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "hablé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"hablar\" (meaning: \"to speak\")? Reply with one word only."
+          },
+          "latency_s": 0.358,
+          "raw": "hace",
+          "parsed_token": "hace",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hablar__past_participle",
+            "language": "Spanish",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "hablado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"hablar\" (meaning: \"to speak\")? Reply with one word only."
+          },
+          "latency_s": 0.198,
+          "raw": "luchó",
+          "parsed_token": "luchó",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__comer__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "comí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"comer\" (meaning: \"to eat\")? Reply with one word only."
+          },
+          "latency_s": 0.124,
+          "raw": "comía",
+          "parsed_token": "comía",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__comer__past_participle",
+            "language": "Spanish",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "comido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"comer\" (meaning: \"to eat\")? Reply with one word only."
+          },
+          "latency_s": 0.122,
+          "raw": "comido",
+          "parsed_token": "comido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__vivir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "viví"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"vivir\" (meaning: \"to live\")? Reply with one word only."
+          },
+          "latency_s": 0.285,
+          "raw": "vivo",
+          "parsed_token": "vivo",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__vivir__past_participle",
+            "language": "Spanish",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "vivido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"vivir\" (meaning: \"to live\")? Reply with one word only."
+          },
+          "latency_s": 0.211,
+          "raw": "vivo",
+          "parsed_token": "vivo",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__correr__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "corrí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"correr\" (meaning: \"to run\")? Reply with one word only."
+          },
+          "latency_s": 0.143,
+          "raw": "corre",
+          "parsed_token": "corre",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__correr__past_participle",
+            "language": "Spanish",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "corrido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"correr\" (meaning: \"to run\")? Reply with one word only."
+          },
+          "latency_s": 0.152,
+          "raw": "corrido",
+          "parsed_token": "corrido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__escribir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "escribí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"escribir\" (meaning: \"to write\")? Reply with one word only."
+          },
+          "latency_s": 0.142,
+          "raw": "escribe",
+          "parsed_token": "escribe",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__escribir__past_participle",
+            "language": "Spanish",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "escrito"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"escribir\" (meaning: \"to write\")? Reply with one word only."
+          },
+          "latency_s": 0.137,
+          "raw": "escrito",
+          "parsed_token": "escrito",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__tener__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "tuve"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"tener\" (meaning: \"to have\")? Reply with one word only."
+          },
+          "latency_s": 0.238,
+          "raw": "tengo",
+          "parsed_token": "tengo",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__tener__past_participle",
+            "language": "Spanish",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "tenido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"tener\" (meaning: \"to have\")? Reply with one word only."
+          },
+          "latency_s": 0.169,
+          "raw": "tomo",
+          "parsed_token": "tomo",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hacer__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "hacer",
+            "gloss": "to do; to make",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "hice"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"hacer\" (meaning: \"to do; to make\")? Reply with one word only."
+          },
+          "latency_s": 0.315,
+          "raw": "hace",
+          "parsed_token": "hace",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hacer__past_participle",
+            "language": "Spanish",
+            "lemma": "hacer",
+            "gloss": "to do; to make",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "hecho"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"hacer\" (meaning: \"to do; to make\")? Reply with one word only."
+          },
+          "latency_s": 0.163,
+          "raw": "hecho",
+          "parsed_token": "hecho",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__henchir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "henchí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"henchir\" (meaning: \"to fill (literary)\")? Reply with one word only."
+          },
+          "latency_s": 0.348,
+          "raw": "henchó",
+          "parsed_token": "henchó",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__henchir__past_participle",
+            "language": "Spanish",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "henchido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"henchir\" (meaning: \"to fill (literary)\")? Reply with one word only."
+          },
+          "latency_s": 0.199,
+          "raw": "henchido",
+          "parsed_token": "henchido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__argüir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "argüí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"argüir\" (meaning: \"to argue (formally)\")? Reply with one word only."
+          },
+          "latency_s": 0.165,
+          "raw": "argué",
+          "parsed_token": "argué",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__argüir__past_participle",
+            "language": "Spanish",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "argüido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"argüir\" (meaning: \"to argue (formally)\")? Reply with one word only."
+          },
+          "latency_s": 0.131,
+          "raw": "argumentado",
+          "parsed_token": "argumentado",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__atestiguar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "atestigüé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"atestiguar\" (meaning: \"to testify\")? Reply with one word only."
+          },
+          "latency_s": 0.206,
+          "raw": "testiguó",
+          "parsed_token": "testiguó",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__atestiguar__past_participle",
+            "language": "Spanish",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "atestiguado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"atestiguar\" (meaning: \"to testify\")? Reply with one word only."
+          },
+          "latency_s": 0.223,
+          "raw": "testificado",
+          "parsed_token": "testificado",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__menguar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "mengüé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"menguar\" (meaning: \"to diminish\")? Reply with one word only."
+          },
+          "latency_s": 0.168,
+          "raw": "mengué",
+          "parsed_token": "mengué",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__menguar__past_participle",
+            "language": "Spanish",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "menguado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"menguar\" (meaning: \"to diminish\")? Reply with one word only."
+          },
+          "latency_s": 0.215,
+          "raw": "diminuído",
+          "parsed_token": "diminuído",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__empalagar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "empalagar",
+            "gloss": "to cloy; to sicken",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "empalagué"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"empalagar\" (meaning: \"to cloy; to sicken\")? Reply with one word only."
+          },
+          "latency_s": 0.276,
+          "raw": "cloy",
+          "parsed_token": "cloy",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__empalagar__past_participle",
+            "language": "Spanish",
+            "lemma": "empalagar",
+            "gloss": "to cloy; to sicken",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "empalagado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"empalagar\" (meaning: \"to cloy; to sicken\")? Reply with one word only."
+          },
+          "latency_s": 0.213,
+          "raw": "cloyed",
+          "parsed_token": "cloyed",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__blandir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "blandí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"blandir\" (meaning: \"to brandish\")? Reply with one word only."
+          },
+          "latency_s": 0.636,
+          "raw": "blandió",
+          "parsed_token": "blandió",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__blandir__past_participle",
+            "language": "Spanish",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "blandido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"blandir\" (meaning: \"to brandish\")? Reply with one word only."
+          },
+          "latency_s": 0.299,
+          "raw": "brindado",
+          "parsed_token": "brindado",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__proferir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "proferir",
+            "gloss": "to utter (threats/insults)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "proferí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"proferir\" (meaning: \"to utter (threats/insults)\")? Reply with one word only."
+          },
+          "latency_s": 0.438,
+          "raw": "proveye",
+          "parsed_token": "proveye",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__proferir__past_participle",
+            "language": "Spanish",
+            "lemma": "proferir",
+            "gloss": "to utter (threats/insults)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "proferido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"proferir\" (meaning: \"to utter (threats/insults)\")? Reply with one word only."
+          },
+          "latency_s": 0.209,
+          "raw": "pronunciado",
+          "parsed_token": "pronunciado",
+          "correct": false,
+          "infinitive_fallback": false
+        }
+      ]
+    },
+    "qwen17b": {
+      "model_id": "Qwen/Qwen3-1.7B",
+      "elapsed_s": 29.4,
+      "results": [
+        {
+          "case": {
+            "id": "english__go__past_tense_1sg",
+            "language": "English",
+            "lemma": "go",
+            "gloss": "to move from one place to another",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "went"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"go\" (meaning: \"to move from one place to another\")? Reply with one word only."
+          },
+          "latency_s": 11.39,
+          "raw": "went",
+          "parsed_token": "went",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__go__past_participle",
+            "language": "English",
+            "lemma": "go",
+            "gloss": "to move from one place to another",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "gone"
+            ],
+            "prompt": "What is the past participle of the English verb \"go\" (meaning: \"to move from one place to another\")? Reply with one word only."
+          },
+          "latency_s": 0.285,
+          "raw": "gone",
+          "parsed_token": "gone",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__see__past_tense_1sg",
+            "language": "English",
+            "lemma": "see",
+            "gloss": "to perceive with the eyes",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "saw"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"see\" (meaning: \"to perceive with the eyes\")? Reply with one word only."
+          },
+          "latency_s": 0.398,
+          "raw": "saw",
+          "parsed_token": "saw",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__see__past_participle",
+            "language": "English",
+            "lemma": "see",
+            "gloss": "to perceive with the eyes",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "seen"
+            ],
+            "prompt": "What is the past participle of the English verb \"see\" (meaning: \"to perceive with the eyes\")? Reply with one word only."
+          },
+          "latency_s": 0.298,
+          "raw": "seen",
+          "parsed_token": "seen",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__come__past_tense_1sg",
+            "language": "English",
+            "lemma": "come",
+            "gloss": "to move toward the speaker",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "came"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"come\" (meaning: \"to move toward the speaker\")? Reply with one word only."
+          },
+          "latency_s": 0.18,
+          "raw": "came",
+          "parsed_token": "came",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__come__past_participle",
+            "language": "English",
+            "lemma": "come",
+            "gloss": "to move toward the speaker",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "come"
+            ],
+            "prompt": "What is the past participle of the English verb \"come\" (meaning: \"to move toward the speaker\")? Reply with one word only."
+          },
+          "latency_s": 0.157,
+          "raw": "come",
+          "parsed_token": "come",
+          "correct": true,
+          "infinitive_fallback": true
+        },
+        {
+          "case": {
+            "id": "english__take__past_tense_1sg",
+            "language": "English",
+            "lemma": "take",
+            "gloss": "to lay hold of with the hand",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "took"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"take\" (meaning: \"to lay hold of with the hand\")? Reply with one word only."
+          },
+          "latency_s": 0.18,
+          "raw": "took",
+          "parsed_token": "took",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__take__past_participle",
+            "language": "English",
+            "lemma": "take",
+            "gloss": "to lay hold of with the hand",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "taken"
+            ],
+            "prompt": "What is the past participle of the English verb \"take\" (meaning: \"to lay hold of with the hand\")? Reply with one word only."
+          },
+          "latency_s": 0.265,
+          "raw": "taken",
+          "parsed_token": "taken",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__give__past_tense_1sg",
+            "language": "English",
+            "lemma": "give",
+            "gloss": "to hand over to someone",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "gave"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"give\" (meaning: \"to hand over to someone\")? Reply with one word only."
+          },
+          "latency_s": 0.245,
+          "raw": "gave",
+          "parsed_token": "gave",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__give__past_participle",
+            "language": "English",
+            "lemma": "give",
+            "gloss": "to hand over to someone",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "given"
+            ],
+            "prompt": "What is the past participle of the English verb \"give\" (meaning: \"to hand over to someone\")? Reply with one word only."
+          },
+          "latency_s": 0.177,
+          "raw": "given",
+          "parsed_token": "given",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__know__past_tense_1sg",
+            "language": "English",
+            "lemma": "know",
+            "gloss": "to be aware of through observation",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "knew"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"know\" (meaning: \"to be aware of through observation\")? Reply with one word only."
+          },
+          "latency_s": 0.342,
+          "raw": "knew",
+          "parsed_token": "knew",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__know__past_participle",
+            "language": "English",
+            "lemma": "know",
+            "gloss": "to be aware of through observation",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "known"
+            ],
+            "prompt": "What is the past participle of the English verb \"know\" (meaning: \"to be aware of through observation\")? Reply with one word only."
+          },
+          "latency_s": 0.271,
+          "raw": "known",
+          "parsed_token": "known",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__write__past_tense_1sg",
+            "language": "English",
+            "lemma": "write",
+            "gloss": "to mark letters or symbols on a surface",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "wrote"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"write\" (meaning: \"to mark letters or symbols on a surface\")? Reply with one word only."
+          },
+          "latency_s": 0.389,
+          "raw": "wrote",
+          "parsed_token": "wrote",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__write__past_participle",
+            "language": "English",
+            "lemma": "write",
+            "gloss": "to mark letters or symbols on a surface",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "written"
+            ],
+            "prompt": "What is the past participle of the English verb \"write\" (meaning: \"to mark letters or symbols on a surface\")? Reply with one word only."
+          },
+          "latency_s": 0.273,
+          "raw": "written",
+          "parsed_token": "written",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gainsay__past_tense_1sg",
+            "language": "English",
+            "lemma": "gainsay",
+            "gloss": "to deny or contradict",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "gainsaid"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"gainsay\" (meaning: \"to deny or contradict\")? Reply with one word only."
+          },
+          "latency_s": 0.251,
+          "raw": "gained",
+          "parsed_token": "gained",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gainsay__past_participle",
+            "language": "English",
+            "lemma": "gainsay",
+            "gloss": "to deny or contradict",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "gainsaid"
+            ],
+            "prompt": "What is the past participle of the English verb \"gainsay\" (meaning: \"to deny or contradict\")? Reply with one word only."
+          },
+          "latency_s": 0.24,
+          "raw": "gained",
+          "parsed_token": "gained",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__beseech__past_tense_1sg",
+            "language": "English",
+            "lemma": "beseech",
+            "gloss": "to implore or beg earnestly",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"beseech\" (meaning: \"to implore or beg earnestly\")? Reply with one word only."
+          },
+          "latency_s": 0.417,
+          "raw": "beseech",
+          "parsed_token": "beseech",
+          "correct": false,
+          "infinitive_fallback": true
+        },
+        {
+          "case": {
+            "id": "english__beseech__past_participle",
+            "language": "English",
+            "lemma": "beseech",
+            "gloss": "to implore or beg earnestly",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "prompt": "What is the past participle of the English verb \"beseech\" (meaning: \"to implore or beg earnestly\")? Reply with one word only."
+          },
+          "latency_s": 0.413,
+          "raw": "beseeched",
+          "parsed_token": "beseeched",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__smite__past_tense_1sg",
+            "language": "English",
+            "lemma": "smite",
+            "gloss": "to strike heavily",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "smote"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"smite\" (meaning: \"to strike heavily\")? Reply with one word only."
+          },
+          "latency_s": 0.342,
+          "raw": "smote",
+          "parsed_token": "smote",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__smite__past_participle",
+            "language": "English",
+            "lemma": "smite",
+            "gloss": "to strike heavily",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "smitten",
+              "smote"
+            ],
+            "prompt": "What is the past participle of the English verb \"smite\" (meaning: \"to strike heavily\")? Reply with one word only."
+          },
+          "latency_s": 0.33,
+          "raw": "smitten",
+          "parsed_token": "smitten",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__shrive__past_tense_1sg",
+            "language": "English",
+            "lemma": "shrive",
+            "gloss": "to hear confession and grant absolution",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "shrove",
+              "shrived"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"shrive\" (meaning: \"to hear confession and grant absolution\")? Reply with one word only."
+          },
+          "latency_s": 0.271,
+          "raw": "shrive",
+          "parsed_token": "shrive",
+          "correct": false,
+          "infinitive_fallback": true
+        },
+        {
+          "case": {
+            "id": "english__shrive__past_participle",
+            "language": "English",
+            "lemma": "shrive",
+            "gloss": "to hear confession and grant absolution",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "shriven",
+              "shrived"
+            ],
+            "prompt": "What is the past participle of the English verb \"shrive\" (meaning: \"to hear confession and grant absolution\")? Reply with one word only."
+          },
+          "latency_s": 0.234,
+          "raw": "shrive",
+          "parsed_token": "shrive",
+          "correct": false,
+          "infinitive_fallback": true
+        },
+        {
+          "case": {
+            "id": "english__gird__past_tense_1sg",
+            "language": "English",
+            "lemma": "gird",
+            "gloss": "to encircle or prepare oneself",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "girt",
+              "girded"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"gird\" (meaning: \"to encircle or prepare oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.312,
+          "raw": "girded",
+          "parsed_token": "girded",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gird__past_participle",
+            "language": "English",
+            "lemma": "gird",
+            "gloss": "to encircle or prepare oneself",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "girt",
+              "girded"
+            ],
+            "prompt": "What is the past participle of the English verb \"gird\" (meaning: \"to encircle or prepare oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.245,
+          "raw": "girt",
+          "parsed_token": "girt",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__forswear__past_tense_1sg",
+            "language": "English",
+            "lemma": "forswear",
+            "gloss": "to renounce or perjure oneself",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "forswore"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"forswear\" (meaning: \"to renounce or perjure oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.396,
+          "raw": "forswore",
+          "parsed_token": "forswore",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__forswear__past_participle",
+            "language": "English",
+            "lemma": "forswear",
+            "gloss": "to renounce or perjure oneself",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "forsworn"
+            ],
+            "prompt": "What is the past participle of the English verb \"forswear\" (meaning: \"to renounce or perjure oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.376,
+          "raw": "forsworn",
+          "parsed_token": "forsworn",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__clothe__past_tense_1sg",
+            "language": "English",
+            "lemma": "clothe",
+            "gloss": "to dress or provide with clothing",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"clothe\" (meaning: \"to dress or provide with clothing\")? Reply with one word only."
+          },
+          "latency_s": 0.243,
+          "raw": "clothed",
+          "parsed_token": "clothed",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__clothe__past_participle",
+            "language": "English",
+            "lemma": "clothe",
+            "gloss": "to dress or provide with clothing",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "prompt": "What is the past participle of the English verb \"clothe\" (meaning: \"to dress or provide with clothing\")? Reply with one word only."
+          },
+          "latency_s": 0.237,
+          "raw": "clothed",
+          "parsed_token": "clothed",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hablar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "hablé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"hablar\" (meaning: \"to speak\")? Reply with one word only."
+          },
+          "latency_s": 0.362,
+          "raw": "hablé",
+          "parsed_token": "hablé",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hablar__past_participle",
+            "language": "Spanish",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "hablado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"hablar\" (meaning: \"to speak\")? Reply with one word only."
+          },
+          "latency_s": 0.306,
+          "raw": "hablado",
+          "parsed_token": "hablado",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__comer__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "comí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"comer\" (meaning: \"to eat\")? Reply with one word only."
+          },
+          "latency_s": 0.248,
+          "raw": "comí",
+          "parsed_token": "comí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__comer__past_participle",
+            "language": "Spanish",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "comido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"comer\" (meaning: \"to eat\")? Reply with one word only."
+          },
+          "latency_s": 0.235,
+          "raw": "comido",
+          "parsed_token": "comido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__vivir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "viví"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"vivir\" (meaning: \"to live\")? Reply with one word only."
+          },
+          "latency_s": 0.44,
+          "raw": "viví",
+          "parsed_token": "viví",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__vivir__past_participle",
+            "language": "Spanish",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "vivido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"vivir\" (meaning: \"to live\")? Reply with one word only."
+          },
+          "latency_s": 0.4,
+          "raw": "vivido",
+          "parsed_token": "vivido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__correr__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "corrí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"correr\" (meaning: \"to run\")? Reply with one word only."
+          },
+          "latency_s": 0.306,
+          "raw": "corri",
+          "parsed_token": "corri",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__correr__past_participle",
+            "language": "Spanish",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "corrido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"correr\" (meaning: \"to run\")? Reply with one word only."
+          },
+          "latency_s": 0.252,
+          "raw": "corrido",
+          "parsed_token": "corrido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__escribir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "escribí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"escribir\" (meaning: \"to write\")? Reply with one word only."
+          },
+          "latency_s": 0.423,
+          "raw": "escribí",
+          "parsed_token": "escribí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__escribir__past_participle",
+            "language": "Spanish",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "escrito"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"escribir\" (meaning: \"to write\")? Reply with one word only."
+          },
+          "latency_s": 0.382,
+          "raw": "escribido",
+          "parsed_token": "escribido",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__tener__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "tuve"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"tener\" (meaning: \"to have\")? Reply with one word only."
+          },
+          "latency_s": 0.359,
+          "raw": "tengo",
+          "parsed_token": "tengo",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__tener__past_participle",
+            "language": "Spanish",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "tenido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"tener\" (meaning: \"to have\")? Reply with one word only."
+          },
+          "latency_s": 0.255,
+          "raw": "tenido",
+          "parsed_token": "tenido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hacer__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "hacer",
+            "gloss": "to do; to make",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "hice"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"hacer\" (meaning: \"to do; to make\")? Reply with one word only."
+          },
+          "latency_s": 0.368,
+          "raw": "hice",
+          "parsed_token": "hice",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hacer__past_participle",
+            "language": "Spanish",
+            "lemma": "hacer",
+            "gloss": "to do; to make",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "hecho"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"hacer\" (meaning: \"to do; to make\")? Reply with one word only."
+          },
+          "latency_s": 0.327,
+          "raw": "hacido",
+          "parsed_token": "hacido",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__henchir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "henchí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"henchir\" (meaning: \"to fill (literary)\")? Reply with one word only."
+          },
+          "latency_s": 0.457,
+          "raw": "henchí",
+          "parsed_token": "henchí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__henchir__past_participle",
+            "language": "Spanish",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "henchido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"henchir\" (meaning: \"to fill (literary)\")? Reply with one word only."
+          },
+          "latency_s": 0.364,
+          "raw": "henchido",
+          "parsed_token": "henchido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__argüir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "argüí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"argüir\" (meaning: \"to argue (formally)\")? Reply with one word only."
+          },
+          "latency_s": 0.315,
+          "raw": "argüí",
+          "parsed_token": "argüí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__argüir__past_participle",
+            "language": "Spanish",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "argüido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"argüir\" (meaning: \"to argue (formally)\")? Reply with one word only."
+          },
+          "latency_s": 0.245,
+          "raw": "arguido",
+          "parsed_token": "arguido",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__atestiguar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "atestigüé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"atestiguar\" (meaning: \"to testify\")? Reply with one word only."
+          },
+          "latency_s": 0.321,
+          "raw": "atestigue",
+          "parsed_token": "atestigue",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__atestiguar__past_participle",
+            "language": "Spanish",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "atestiguado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"atestiguar\" (meaning: \"to testify\")? Reply with one word only."
+          },
+          "latency_s": 0.408,
+          "raw": "atestigüo",
+          "parsed_token": "atestigüo",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__menguar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "mengüé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"menguar\" (meaning: \"to diminish\")? Reply with one word only."
+          },
+          "latency_s": 0.4,
+          "raw": "mengué",
+          "parsed_token": "mengué",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__menguar__past_participle",
+            "language": "Spanish",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "menguado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"menguar\" (meaning: \"to diminish\")? Reply with one word only."
+          },
+          "latency_s": 0.379,
+          "raw": "menguado",
+          "parsed_token": "menguado",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__empalagar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "empalagar",
+            "gloss": "to cloy; to sicken",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "empalagué"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"empalagar\" (meaning: \"to cloy; to sicken\")? Reply with one word only."
+          },
+          "latency_s": 0.592,
+          "raw": "empalagé",
+          "parsed_token": "empalagé",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__empalagar__past_participle",
+            "language": "Spanish",
+            "lemma": "empalagar",
+            "gloss": "to cloy; to sicken",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "empalagado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"empalagar\" (meaning: \"to cloy; to sicken\")? Reply with one word only."
+          },
+          "latency_s": 0.406,
+          "raw": "empalagado",
+          "parsed_token": "empalagado",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__blandir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "blandí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"blandir\" (meaning: \"to brandish\")? Reply with one word only."
+          },
+          "latency_s": 0.453,
+          "raw": "blandí",
+          "parsed_token": "blandí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__blandir__past_participle",
+            "language": "Spanish",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "blandido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"blandir\" (meaning: \"to brandish\")? Reply with one word only."
+          },
+          "latency_s": 0.43,
+          "raw": "blandido",
+          "parsed_token": "blandido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__proferir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "proferir",
+            "gloss": "to utter (threats/insults)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "proferí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"proferir\" (meaning: \"to utter (threats/insults)\")? Reply with one word only."
+          },
+          "latency_s": 0.467,
+          "raw": "proferí",
+          "parsed_token": "proferí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__proferir__past_participle",
+            "language": "Spanish",
+            "lemma": "proferir",
+            "gloss": "to utter (threats/insults)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "proferido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"proferir\" (meaning: \"to utter (threats/insults)\")? Reply with one word only."
+          },
+          "latency_s": 0.332,
+          "raw": "proferido",
+          "parsed_token": "proferido",
+          "correct": true,
+          "infinitive_fallback": false
+        }
+      ]
+    },
+    "qwen4b": {
+      "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+      "elapsed_s": 106.8,
+      "results": [
+        {
+          "case": {
+            "id": "english__go__past_tense_1sg",
+            "language": "English",
+            "lemma": "go",
+            "gloss": "to move from one place to another",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "went"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"go\" (meaning: \"to move from one place to another\")? Reply with one word only."
+          },
+          "latency_s": 76.497,
+          "raw": "went",
+          "parsed_token": "went",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__go__past_participle",
+            "language": "English",
+            "lemma": "go",
+            "gloss": "to move from one place to another",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "gone"
+            ],
+            "prompt": "What is the past participle of the English verb \"go\" (meaning: \"to move from one place to another\")? Reply with one word only."
+          },
+          "latency_s": 0.624,
+          "raw": "gone",
+          "parsed_token": "gone",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__see__past_tense_1sg",
+            "language": "English",
+            "lemma": "see",
+            "gloss": "to perceive with the eyes",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "saw"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"see\" (meaning: \"to perceive with the eyes\")? Reply with one word only."
+          },
+          "latency_s": 0.605,
+          "raw": "saw",
+          "parsed_token": "saw",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__see__past_participle",
+            "language": "English",
+            "lemma": "see",
+            "gloss": "to perceive with the eyes",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "seen"
+            ],
+            "prompt": "What is the past participle of the English verb \"see\" (meaning: \"to perceive with the eyes\")? Reply with one word only."
+          },
+          "latency_s": 0.517,
+          "raw": "seen",
+          "parsed_token": "seen",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__come__past_tense_1sg",
+            "language": "English",
+            "lemma": "come",
+            "gloss": "to move toward the speaker",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "came"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"come\" (meaning: \"to move toward the speaker\")? Reply with one word only."
+          },
+          "latency_s": 0.448,
+          "raw": "I came",
+          "parsed_token": "I",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__come__past_participle",
+            "language": "English",
+            "lemma": "come",
+            "gloss": "to move toward the speaker",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "come"
+            ],
+            "prompt": "What is the past participle of the English verb \"come\" (meaning: \"to move toward the speaker\")? Reply with one word only."
+          },
+          "latency_s": 0.253,
+          "raw": "come",
+          "parsed_token": "come",
+          "correct": true,
+          "infinitive_fallback": true
+        },
+        {
+          "case": {
+            "id": "english__take__past_tense_1sg",
+            "language": "English",
+            "lemma": "take",
+            "gloss": "to lay hold of with the hand",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "took"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"take\" (meaning: \"to lay hold of with the hand\")? Reply with one word only."
+          },
+          "latency_s": 0.319,
+          "raw": "took",
+          "parsed_token": "took",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__take__past_participle",
+            "language": "English",
+            "lemma": "take",
+            "gloss": "to lay hold of with the hand",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "taken"
+            ],
+            "prompt": "What is the past participle of the English verb \"take\" (meaning: \"to lay hold of with the hand\")? Reply with one word only."
+          },
+          "latency_s": 0.265,
+          "raw": "taken",
+          "parsed_token": "taken",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__give__past_tense_1sg",
+            "language": "English",
+            "lemma": "give",
+            "gloss": "to hand over to someone",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "gave"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"give\" (meaning: \"to hand over to someone\")? Reply with one word only."
+          },
+          "latency_s": 0.399,
+          "raw": "gave",
+          "parsed_token": "gave",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__give__past_participle",
+            "language": "English",
+            "lemma": "give",
+            "gloss": "to hand over to someone",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "given"
+            ],
+            "prompt": "What is the past participle of the English verb \"give\" (meaning: \"to hand over to someone\")? Reply with one word only."
+          },
+          "latency_s": 0.267,
+          "raw": "given",
+          "parsed_token": "given",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__know__past_tense_1sg",
+            "language": "English",
+            "lemma": "know",
+            "gloss": "to be aware of through observation",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "knew"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"know\" (meaning: \"to be aware of through observation\")? Reply with one word only."
+          },
+          "latency_s": 0.532,
+          "raw": "knew",
+          "parsed_token": "knew",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__know__past_participle",
+            "language": "English",
+            "lemma": "know",
+            "gloss": "to be aware of through observation",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "known"
+            ],
+            "prompt": "What is the past participle of the English verb \"know\" (meaning: \"to be aware of through observation\")? Reply with one word only."
+          },
+          "latency_s": 0.445,
+          "raw": "known",
+          "parsed_token": "known",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__write__past_tense_1sg",
+            "language": "English",
+            "lemma": "write",
+            "gloss": "to mark letters or symbols on a surface",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "wrote"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"write\" (meaning: \"to mark letters or symbols on a surface\")? Reply with one word only."
+          },
+          "latency_s": 0.554,
+          "raw": "wrote",
+          "parsed_token": "wrote",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__write__past_participle",
+            "language": "English",
+            "lemma": "write",
+            "gloss": "to mark letters or symbols on a surface",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "written"
+            ],
+            "prompt": "What is the past participle of the English verb \"write\" (meaning: \"to mark letters or symbols on a surface\")? Reply with one word only."
+          },
+          "latency_s": 0.482,
+          "raw": "written",
+          "parsed_token": "written",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gainsay__past_tense_1sg",
+            "language": "English",
+            "lemma": "gainsay",
+            "gloss": "to deny or contradict",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "gainsaid"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"gainsay\" (meaning: \"to deny or contradict\")? Reply with one word only."
+          },
+          "latency_s": 0.508,
+          "raw": "gainsaid",
+          "parsed_token": "gainsaid",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gainsay__past_participle",
+            "language": "English",
+            "lemma": "gainsay",
+            "gloss": "to deny or contradict",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "gainsaid"
+            ],
+            "prompt": "What is the past participle of the English verb \"gainsay\" (meaning: \"to deny or contradict\")? Reply with one word only."
+          },
+          "latency_s": 0.433,
+          "raw": "gainsaid",
+          "parsed_token": "gainsaid",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__beseech__past_tense_1sg",
+            "language": "English",
+            "lemma": "beseech",
+            "gloss": "to implore or beg earnestly",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"beseech\" (meaning: \"to implore or beg earnestly\")? Reply with one word only."
+          },
+          "latency_s": 0.633,
+          "raw": "beseeched",
+          "parsed_token": "beseeched",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__beseech__past_participle",
+            "language": "English",
+            "lemma": "beseech",
+            "gloss": "to implore or beg earnestly",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "prompt": "What is the past participle of the English verb \"beseech\" (meaning: \"to implore or beg earnestly\")? Reply with one word only."
+          },
+          "latency_s": 0.657,
+          "raw": "beseeched",
+          "parsed_token": "beseeched",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__smite__past_tense_1sg",
+            "language": "English",
+            "lemma": "smite",
+            "gloss": "to strike heavily",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "smote"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"smite\" (meaning: \"to strike heavily\")? Reply with one word only."
+          },
+          "latency_s": 0.572,
+          "raw": "smote",
+          "parsed_token": "smote",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__smite__past_participle",
+            "language": "English",
+            "lemma": "smite",
+            "gloss": "to strike heavily",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "smitten",
+              "smote"
+            ],
+            "prompt": "What is the past participle of the English verb \"smite\" (meaning: \"to strike heavily\")? Reply with one word only."
+          },
+          "latency_s": 0.537,
+          "raw": "smitten",
+          "parsed_token": "smitten",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__shrive__past_tense_1sg",
+            "language": "English",
+            "lemma": "shrive",
+            "gloss": "to hear confession and grant absolution",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "shrove",
+              "shrived"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"shrive\" (meaning: \"to hear confession and grant absolution\")? Reply with one word only."
+          },
+          "latency_s": 0.521,
+          "raw": "shrive'd",
+          "parsed_token": "shrive'd",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__shrive__past_participle",
+            "language": "English",
+            "lemma": "shrive",
+            "gloss": "to hear confession and grant absolution",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "shriven",
+              "shrived"
+            ],
+            "prompt": "What is the past participle of the English verb \"shrive\" (meaning: \"to hear confession and grant absolution\")? Reply with one word only."
+          },
+          "latency_s": 0.427,
+          "raw": "shriven",
+          "parsed_token": "shriven",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gird__past_tense_1sg",
+            "language": "English",
+            "lemma": "gird",
+            "gloss": "to encircle or prepare oneself",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "girt",
+              "girded"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"gird\" (meaning: \"to encircle or prepare oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.512,
+          "raw": "girded",
+          "parsed_token": "girded",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__gird__past_participle",
+            "language": "English",
+            "lemma": "gird",
+            "gloss": "to encircle or prepare oneself",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "girt",
+              "girded"
+            ],
+            "prompt": "What is the past participle of the English verb \"gird\" (meaning: \"to encircle or prepare oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.467,
+          "raw": "girded",
+          "parsed_token": "girded",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__forswear__past_tense_1sg",
+            "language": "English",
+            "lemma": "forswear",
+            "gloss": "to renounce or perjure oneself",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "forswore"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"forswear\" (meaning: \"to renounce or perjure oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.647,
+          "raw": "forswore",
+          "parsed_token": "forswore",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__forswear__past_participle",
+            "language": "English",
+            "lemma": "forswear",
+            "gloss": "to renounce or perjure oneself",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "forsworn"
+            ],
+            "prompt": "What is the past participle of the English verb \"forswear\" (meaning: \"to renounce or perjure oneself\")? Reply with one word only."
+          },
+          "latency_s": 0.623,
+          "raw": "forsworn",
+          "parsed_token": "forsworn",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__clothe__past_tense_1sg",
+            "language": "English",
+            "lemma": "clothe",
+            "gloss": "to dress or provide with clothing",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense (first person singular, 'I')",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "prompt": "What is the simple past tense (first person singular, 'I') of the English verb \"clothe\" (meaning: \"to dress or provide with clothing\")? Reply with one word only."
+          },
+          "latency_s": 0.622,
+          "raw": "I clothed",
+          "parsed_token": "I",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "english__clothe__past_participle",
+            "language": "English",
+            "lemma": "clothe",
+            "gloss": "to dress or provide with clothing",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "prompt": "What is the past participle of the English verb \"clothe\" (meaning: \"to dress or provide with clothing\")? Reply with one word only."
+          },
+          "latency_s": 0.354,
+          "raw": "clothed",
+          "parsed_token": "clothed",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hablar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "hablé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"hablar\" (meaning: \"to speak\")? Reply with one word only."
+          },
+          "latency_s": 0.627,
+          "raw": "hablé",
+          "parsed_token": "hablé",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hablar__past_participle",
+            "language": "Spanish",
+            "lemma": "hablar",
+            "gloss": "to speak",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "hablado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"hablar\" (meaning: \"to speak\")? Reply with one word only."
+          },
+          "latency_s": 0.492,
+          "raw": "hablado",
+          "parsed_token": "hablado",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__comer__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "comí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"comer\" (meaning: \"to eat\")? Reply with one word only."
+          },
+          "latency_s": 0.39,
+          "raw": "comí",
+          "parsed_token": "comí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__comer__past_participle",
+            "language": "Spanish",
+            "lemma": "comer",
+            "gloss": "to eat",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "comido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"comer\" (meaning: \"to eat\")? Reply with one word only."
+          },
+          "latency_s": 0.393,
+          "raw": "comido",
+          "parsed_token": "comido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__vivir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "viví"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"vivir\" (meaning: \"to live\")? Reply with one word only."
+          },
+          "latency_s": 0.67,
+          "raw": "viví",
+          "parsed_token": "viví",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__vivir__past_participle",
+            "language": "Spanish",
+            "lemma": "vivir",
+            "gloss": "to live",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "vivido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"vivir\" (meaning: \"to live\")? Reply with one word only."
+          },
+          "latency_s": 0.597,
+          "raw": "vivido",
+          "parsed_token": "vivido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__correr__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "corrí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"correr\" (meaning: \"to run\")? Reply with one word only."
+          },
+          "latency_s": 0.517,
+          "raw": "corrí",
+          "parsed_token": "corrí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__correr__past_participle",
+            "language": "Spanish",
+            "lemma": "correr",
+            "gloss": "to run",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "corrido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"correr\" (meaning: \"to run\")? Reply with one word only."
+          },
+          "latency_s": 0.511,
+          "raw": "corrido",
+          "parsed_token": "corrido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__escribir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "escribí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"escribir\" (meaning: \"to write\")? Reply with one word only."
+          },
+          "latency_s": 0.93,
+          "raw": "escribí",
+          "parsed_token": "escribí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__escribir__past_participle",
+            "language": "Spanish",
+            "lemma": "escribir",
+            "gloss": "to write",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "escrito"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"escribir\" (meaning: \"to write\")? Reply with one word only."
+          },
+          "latency_s": 0.412,
+          "raw": "escrito",
+          "parsed_token": "escrito",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__tener__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "tuve"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"tener\" (meaning: \"to have\")? Reply with one word only."
+          },
+          "latency_s": 0.909,
+          "raw": "tuve",
+          "parsed_token": "tuve",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__tener__past_participle",
+            "language": "Spanish",
+            "lemma": "tener",
+            "gloss": "to have",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "tenido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"tener\" (meaning: \"to have\")? Reply with one word only."
+          },
+          "latency_s": 0.552,
+          "raw": "tenido",
+          "parsed_token": "tenido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hacer__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "hacer",
+            "gloss": "to do; to make",
+            "tier": "common",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "hice"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"hacer\" (meaning: \"to do; to make\")? Reply with one word only."
+          },
+          "latency_s": 0.699,
+          "raw": "hice",
+          "parsed_token": "hice",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__hacer__past_participle",
+            "language": "Spanish",
+            "lemma": "hacer",
+            "gloss": "to do; to make",
+            "tier": "common",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "hecho"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"hacer\" (meaning: \"to do; to make\")? Reply with one word only."
+          },
+          "latency_s": 0.572,
+          "raw": "hecho",
+          "parsed_token": "hecho",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__henchir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "henchí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"henchir\" (meaning: \"to fill (literary)\")? Reply with one word only."
+          },
+          "latency_s": 0.919,
+          "raw": "enchufé",
+          "parsed_token": "enchufé",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__henchir__past_participle",
+            "language": "Spanish",
+            "lemma": "henchir",
+            "gloss": "to fill (literary)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "henchido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"henchir\" (meaning: \"to fill (literary)\")? Reply with one word only."
+          },
+          "latency_s": 0.58,
+          "raw": "henchido",
+          "parsed_token": "henchido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__argüir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "argüí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"argüir\" (meaning: \"to argue (formally)\")? Reply with one word only."
+          },
+          "latency_s": 0.551,
+          "raw": "argüí",
+          "parsed_token": "argüí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__argüir__past_participle",
+            "language": "Spanish",
+            "lemma": "argüir",
+            "gloss": "to argue (formally)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "argüido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"argüir\" (meaning: \"to argue (formally)\")? Reply with one word only."
+          },
+          "latency_s": 0.54,
+          "raw": "argüido",
+          "parsed_token": "argüido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__atestiguar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "atestigüé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"atestiguar\" (meaning: \"to testify\")? Reply with one word only."
+          },
+          "latency_s": 0.514,
+          "raw": "testigué",
+          "parsed_token": "testigué",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__atestiguar__past_participle",
+            "language": "Spanish",
+            "lemma": "atestiguar",
+            "gloss": "to testify",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "atestiguado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"atestiguar\" (meaning: \"to testify\")? Reply with one word only."
+          },
+          "latency_s": 0.616,
+          "raw": "atestiguado",
+          "parsed_token": "atestiguado",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__menguar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "mengüé"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"menguar\" (meaning: \"to diminish\")? Reply with one word only."
+          },
+          "latency_s": 0.521,
+          "raw": "mengué",
+          "parsed_token": "mengué",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__menguar__past_participle",
+            "language": "Spanish",
+            "lemma": "menguar",
+            "gloss": "to diminish",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "menguado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"menguar\" (meaning: \"to diminish\")? Reply with one word only."
+          },
+          "latency_s": 0.406,
+          "raw": "menor",
+          "parsed_token": "menor",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__empalagar__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "empalagar",
+            "gloss": "to cloy; to sicken",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "empalagué"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"empalagar\" (meaning: \"to cloy; to sicken\")? Reply with one word only."
+          },
+          "latency_s": 0.821,
+          "raw": "empalagué",
+          "parsed_token": "empalagué",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__empalagar__past_participle",
+            "language": "Spanish",
+            "lemma": "empalagar",
+            "gloss": "to cloy; to sicken",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "empalagado"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"empalagar\" (meaning: \"to cloy; to sicken\")? Reply with one word only."
+          },
+          "latency_s": 0.597,
+          "raw": "empalagado",
+          "parsed_token": "empalagado",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__blandir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "blandí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"blandir\" (meaning: \"to brandish\")? Reply with one word only."
+          },
+          "latency_s": 0.947,
+          "raw": "blanqué",
+          "parsed_token": "blanqué",
+          "correct": false,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__blandir__past_participle",
+            "language": "Spanish",
+            "lemma": "blandir",
+            "gloss": "to brandish",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "blandido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"blandir\" (meaning: \"to brandish\")? Reply with one word only."
+          },
+          "latency_s": 0.647,
+          "raw": "blandido",
+          "parsed_token": "blandido",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__proferir__past_tense_1sg",
+            "language": "Spanish",
+            "lemma": "proferir",
+            "gloss": "to utter (threats/insults)",
+            "tier": "rare",
+            "probe": "past_tense_1sg",
+            "form_label": "simple past tense, preterite (pretérito indefinido), first person singular ('yo')",
+            "expected": [
+              "proferí"
+            ],
+            "prompt": "What is the simple past tense, preterite (pretérito indefinido), first person singular ('yo') of the Spanish verb \"proferir\" (meaning: \"to utter (threats/insults)\")? Reply with one word only."
+          },
+          "latency_s": 0.656,
+          "raw": "proferí",
+          "parsed_token": "proferí",
+          "correct": true,
+          "infinitive_fallback": false
+        },
+        {
+          "case": {
+            "id": "spanish__proferir__past_participle",
+            "language": "Spanish",
+            "lemma": "proferir",
+            "gloss": "to utter (threats/insults)",
+            "tier": "rare",
+            "probe": "past_participle",
+            "form_label": "past participle (participio pasado)",
+            "expected": [
+              "proferido"
+            ],
+            "prompt": "What is the past participle (participio pasado) of the Spanish verb \"proferir\" (meaning: \"to utter (threats/insults)\")? Reply with one word only."
+          },
+          "latency_s": 0.529,
+          "raw": "proferido",
+          "parsed_token": "proferido",
+          "correct": true,
+          "infinitive_fallback": false
+        }
+      ]
+    }
+  },
+  "summary": {
+    "per_model": {
+      "qwen05b": {
+        "overall": {
+          "n": 56,
+          "correct": 16,
+          "pass_rate": 0.2857,
+          "wilson_95_ci": [
+            0.1842,
+            0.4148
+          ]
+        },
+        "english_overall": {
+          "n": 28,
+          "correct": 11,
+          "pass_rate": 0.3929,
+          "wilson_95_ci": [
+            0.2357,
+            0.5759
+          ]
+        },
+        "english_common": {
+          "n": 14,
+          "correct": 10,
+          "pass_rate": 0.7143,
+          "wilson_95_ci": [
+            0.4535,
+            0.8828
+          ]
+        },
+        "english_common_past_tense_1sg": {
+          "n": 7,
+          "correct": 6,
+          "pass_rate": 0.8571,
+          "wilson_95_ci": [
+            0.4869,
+            0.9743
+          ]
+        },
+        "english_common_past_participle": {
+          "n": 7,
+          "correct": 4,
+          "pass_rate": 0.5714,
+          "wilson_95_ci": [
+            0.2505,
+            0.8418
+          ]
+        },
+        "english_rare": {
+          "n": 14,
+          "correct": 1,
+          "pass_rate": 0.0714,
+          "wilson_95_ci": [
+            0.0127,
+            0.3147
+          ]
+        },
+        "english_rare_past_tense_1sg": {
+          "n": 7,
+          "correct": 1,
+          "pass_rate": 0.1429,
+          "wilson_95_ci": [
+            0.0257,
+            0.5131
+          ]
+        },
+        "english_rare_past_participle": {
+          "n": 7,
+          "correct": 0,
+          "pass_rate": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.3543
+          ]
+        },
+        "spanish_overall": {
+          "n": 28,
+          "correct": 5,
+          "pass_rate": 0.1786,
+          "wilson_95_ci": [
+            0.0788,
+            0.3559
+          ]
+        },
+        "spanish_common": {
+          "n": 14,
+          "correct": 4,
+          "pass_rate": 0.2857,
+          "wilson_95_ci": [
+            0.1172,
+            0.5465
+          ]
+        },
+        "spanish_common_past_tense_1sg": {
+          "n": 7,
+          "correct": 0,
+          "pass_rate": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.3543
+          ]
+        },
+        "spanish_common_past_participle": {
+          "n": 7,
+          "correct": 4,
+          "pass_rate": 0.5714,
+          "wilson_95_ci": [
+            0.2505,
+            0.8418
+          ]
+        },
+        "spanish_rare": {
+          "n": 14,
+          "correct": 1,
+          "pass_rate": 0.0714,
+          "wilson_95_ci": [
+            0.0127,
+            0.3147
+          ]
+        },
+        "spanish_rare_past_tense_1sg": {
+          "n": 7,
+          "correct": 0,
+          "pass_rate": 0.0,
+          "wilson_95_ci": [
+            0.0,
+            0.3543
+          ]
+        },
+        "spanish_rare_past_participle": {
+          "n": 7,
+          "correct": 1,
+          "pass_rate": 0.1429,
+          "wilson_95_ci": [
+            0.0257,
+            0.5131
+          ]
+        },
+        "failures": [
+          {
+            "id": "english__go__past_participle",
+            "expected": [
+              "gone"
+            ],
+            "got": "moved",
+            "raw": "moved"
+          },
+          {
+            "id": "english__come__past_participle",
+            "expected": [
+              "come"
+            ],
+            "got": "moved",
+            "raw": "moved"
+          },
+          {
+            "id": "english__take__past_participle",
+            "expected": [
+              "taken"
+            ],
+            "got": "held",
+            "raw": "held"
+          },
+          {
+            "id": "english__give__past_tense_1sg",
+            "expected": [
+              "gave"
+            ],
+            "got": "given",
+            "raw": "given"
+          },
+          {
+            "id": "english__gainsay__past_tense_1sg",
+            "expected": [
+              "gainsaid"
+            ],
+            "got": "denies",
+            "raw": "denies"
+          },
+          {
+            "id": "english__gainsay__past_participle",
+            "expected": [
+              "gainsaid"
+            ],
+            "got": "denies",
+            "raw": "denies"
+          },
+          {
+            "id": "english__beseech__past_tense_1sg",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "got": "begged",
+            "raw": "begged"
+          },
+          {
+            "id": "english__beseech__past_participle",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "got": "begged",
+            "raw": "begged"
+          },
+          {
+            "id": "english__smite__past_tense_1sg",
+            "expected": [
+              "smote"
+            ],
+            "got": "stamped",
+            "raw": "stamped"
+          },
+          {
+            "id": "english__smite__past_participle",
+            "expected": [
+              "smitten",
+              "smote"
+            ],
+            "got": "stamped",
+            "raw": "stamped"
+          },
+          {
+            "id": "english__shrive__past_tense_1sg",
+            "expected": [
+              "shrove",
+              "shrived"
+            ],
+            "got": "heard",
+            "raw": "heard confess granted absolution"
+          },
+          {
+            "id": "english__shrive__past_participle",
+            "expected": [
+              "shriven",
+              "shrived"
+            ],
+            "got": "granted",
+            "raw": "granted"
+          },
+          {
+            "id": "english__gird__past_participle",
+            "expected": [
+              "girt",
+              "girded"
+            ],
+            "got": "girdled",
+            "raw": "girdled"
+          },
+          {
+            "id": "english__forswear__past_tense_1sg",
+            "expected": [
+              "forswore"
+            ],
+            "got": "forseen",
+            "raw": "forseen"
+          },
+          {
+            "id": "english__forswear__past_participle",
+            "expected": [
+              "forsworn"
+            ],
+            "got": "perjured",
+            "raw": "perjured"
+          },
+          {
+            "id": "english__clothe__past_tense_1sg",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "got": "wore",
+            "raw": "wore"
+          },
+          {
+            "id": "english__clothe__past_participle",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "got": "dressed",
+            "raw": "dressed"
+          },
+          {
+            "id": "spanish__hablar__past_tense_1sg",
+            "expected": [
+              "hablé"
+            ],
+            "got": "hace",
+            "raw": "hace"
+          },
+          {
+            "id": "spanish__hablar__past_participle",
+            "expected": [
+              "hablado"
+            ],
+            "got": "luchó",
+            "raw": "luchó"
+          },
+          {
+            "id": "spanish__comer__past_tense_1sg",
+            "expected": [
+              "comí"
+            ],
+            "got": "comía",
+            "raw": "comía"
+          },
+          {
+            "id": "spanish__vivir__past_tense_1sg",
+            "expected": [
+              "viví"
+            ],
+            "got": "vivo",
+            "raw": "vivo"
+          },
+          {
+            "id": "spanish__vivir__past_participle",
+            "expected": [
+              "vivido"
+            ],
+            "got": "vivo",
+            "raw": "vivo"
+          },
+          {
+            "id": "spanish__correr__past_tense_1sg",
+            "expected": [
+              "corrí"
+            ],
+            "got": "corre",
+            "raw": "corre"
+          },
+          {
+            "id": "spanish__escribir__past_tense_1sg",
+            "expected": [
+              "escribí"
+            ],
+            "got": "escribe",
+            "raw": "escribe"
+          },
+          {
+            "id": "spanish__tener__past_tense_1sg",
+            "expected": [
+              "tuve"
+            ],
+            "got": "tengo",
+            "raw": "tengo"
+          },
+          {
+            "id": "spanish__tener__past_participle",
+            "expected": [
+              "tenido"
+            ],
+            "got": "tomo",
+            "raw": "tomo"
+          },
+          {
+            "id": "spanish__hacer__past_tense_1sg",
+            "expected": [
+              "hice"
+            ],
+            "got": "hace",
+            "raw": "hace"
+          },
+          {
+            "id": "spanish__henchir__past_tense_1sg",
+            "expected": [
+              "henchí"
+            ],
+            "got": "henchó",
+            "raw": "henchó"
+          },
+          {
+            "id": "spanish__argüir__past_tense_1sg",
+            "expected": [
+              "argüí"
+            ],
+            "got": "argué",
+            "raw": "argué"
+          },
+          {
+            "id": "spanish__argüir__past_participle",
+            "expected": [
+              "argüido"
+            ],
+            "got": "argumentado",
+            "raw": "argumentado"
+          },
+          {
+            "id": "spanish__atestiguar__past_tense_1sg",
+            "expected": [
+              "atestigüé"
+            ],
+            "got": "testiguó",
+            "raw": "testiguó"
+          },
+          {
+            "id": "spanish__atestiguar__past_participle",
+            "expected": [
+              "atestiguado"
+            ],
+            "got": "testificado",
+            "raw": "testificado"
+          },
+          {
+            "id": "spanish__menguar__past_tense_1sg",
+            "expected": [
+              "mengüé"
+            ],
+            "got": "mengué",
+            "raw": "mengué"
+          },
+          {
+            "id": "spanish__menguar__past_participle",
+            "expected": [
+              "menguado"
+            ],
+            "got": "diminuído",
+            "raw": "diminuído"
+          },
+          {
+            "id": "spanish__empalagar__past_tense_1sg",
+            "expected": [
+              "empalagué"
+            ],
+            "got": "cloy",
+            "raw": "cloy"
+          },
+          {
+            "id": "spanish__empalagar__past_participle",
+            "expected": [
+              "empalagado"
+            ],
+            "got": "cloyed",
+            "raw": "cloyed"
+          },
+          {
+            "id": "spanish__blandir__past_tense_1sg",
+            "expected": [
+              "blandí"
+            ],
+            "got": "blandió",
+            "raw": "blandió"
+          },
+          {
+            "id": "spanish__blandir__past_participle",
+            "expected": [
+              "blandido"
+            ],
+            "got": "brindado",
+            "raw": "brindado"
+          },
+          {
+            "id": "spanish__proferir__past_tense_1sg",
+            "expected": [
+              "proferí"
+            ],
+            "got": "proveye",
+            "raw": "proveye"
+          },
+          {
+            "id": "spanish__proferir__past_participle",
+            "expected": [
+              "proferido"
+            ],
+            "got": "pronunciado",
+            "raw": "pronunciado"
+          }
+        ]
+      },
+      "qwen17b": {
+        "overall": {
+          "n": 56,
+          "correct": 42,
+          "pass_rate": 0.75,
+          "wilson_95_ci": [
+            0.6231,
+            0.8448
+          ]
+        },
+        "english_overall": {
+          "n": 28,
+          "correct": 23,
+          "pass_rate": 0.8214,
+          "wilson_95_ci": [
+            0.6441,
+            0.9212
+          ]
+        },
+        "english_common": {
+          "n": 14,
+          "correct": 14,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.7847,
+            1.0
+          ]
+        },
+        "english_common_past_tense_1sg": {
+          "n": 7,
+          "correct": 7,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.6457,
+            1.0
+          ]
+        },
+        "english_common_past_participle": {
+          "n": 7,
+          "correct": 7,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.6457,
+            1.0
+          ]
+        },
+        "english_rare": {
+          "n": 14,
+          "correct": 9,
+          "pass_rate": 0.6429,
+          "wilson_95_ci": [
+            0.3876,
+            0.8366
+          ]
+        },
+        "english_rare_past_tense_1sg": {
+          "n": 7,
+          "correct": 4,
+          "pass_rate": 0.5714,
+          "wilson_95_ci": [
+            0.2505,
+            0.8418
+          ]
+        },
+        "english_rare_past_participle": {
+          "n": 7,
+          "correct": 5,
+          "pass_rate": 0.7143,
+          "wilson_95_ci": [
+            0.3589,
+            0.9178
+          ]
+        },
+        "spanish_overall": {
+          "n": 28,
+          "correct": 19,
+          "pass_rate": 0.6786,
+          "wilson_95_ci": [
+            0.4934,
+            0.8207
+          ]
+        },
+        "spanish_common": {
+          "n": 14,
+          "correct": 10,
+          "pass_rate": 0.7143,
+          "wilson_95_ci": [
+            0.4535,
+            0.8828
+          ]
+        },
+        "spanish_common_past_tense_1sg": {
+          "n": 7,
+          "correct": 5,
+          "pass_rate": 0.7143,
+          "wilson_95_ci": [
+            0.3589,
+            0.9178
+          ]
+        },
+        "spanish_common_past_participle": {
+          "n": 7,
+          "correct": 5,
+          "pass_rate": 0.7143,
+          "wilson_95_ci": [
+            0.3589,
+            0.9178
+          ]
+        },
+        "spanish_rare": {
+          "n": 14,
+          "correct": 9,
+          "pass_rate": 0.6429,
+          "wilson_95_ci": [
+            0.3876,
+            0.8366
+          ]
+        },
+        "spanish_rare_past_tense_1sg": {
+          "n": 7,
+          "correct": 4,
+          "pass_rate": 0.5714,
+          "wilson_95_ci": [
+            0.2505,
+            0.8418
+          ]
+        },
+        "spanish_rare_past_participle": {
+          "n": 7,
+          "correct": 5,
+          "pass_rate": 0.7143,
+          "wilson_95_ci": [
+            0.3589,
+            0.9178
+          ]
+        },
+        "failures": [
+          {
+            "id": "english__gainsay__past_tense_1sg",
+            "expected": [
+              "gainsaid"
+            ],
+            "got": "gained",
+            "raw": "gained"
+          },
+          {
+            "id": "english__gainsay__past_participle",
+            "expected": [
+              "gainsaid"
+            ],
+            "got": "gained",
+            "raw": "gained"
+          },
+          {
+            "id": "english__beseech__past_tense_1sg",
+            "expected": [
+              "besought",
+              "beseeched"
+            ],
+            "got": "beseech",
+            "raw": "beseech"
+          },
+          {
+            "id": "english__shrive__past_tense_1sg",
+            "expected": [
+              "shrove",
+              "shrived"
+            ],
+            "got": "shrive",
+            "raw": "shrive"
+          },
+          {
+            "id": "english__shrive__past_participle",
+            "expected": [
+              "shriven",
+              "shrived"
+            ],
+            "got": "shrive",
+            "raw": "shrive"
+          },
+          {
+            "id": "spanish__correr__past_tense_1sg",
+            "expected": [
+              "corrí"
+            ],
+            "got": "corri",
+            "raw": "corri"
+          },
+          {
+            "id": "spanish__escribir__past_participle",
+            "expected": [
+              "escrito"
+            ],
+            "got": "escribido",
+            "raw": "escribido"
+          },
+          {
+            "id": "spanish__tener__past_tense_1sg",
+            "expected": [
+              "tuve"
+            ],
+            "got": "tengo",
+            "raw": "tengo"
+          },
+          {
+            "id": "spanish__hacer__past_participle",
+            "expected": [
+              "hecho"
+            ],
+            "got": "hacido",
+            "raw": "hacido"
+          },
+          {
+            "id": "spanish__argüir__past_participle",
+            "expected": [
+              "argüido"
+            ],
+            "got": "arguido",
+            "raw": "arguido"
+          },
+          {
+            "id": "spanish__atestiguar__past_tense_1sg",
+            "expected": [
+              "atestigüé"
+            ],
+            "got": "atestigue",
+            "raw": "atestigue"
+          },
+          {
+            "id": "spanish__atestiguar__past_participle",
+            "expected": [
+              "atestiguado"
+            ],
+            "got": "atestigüo",
+            "raw": "atestigüo"
+          },
+          {
+            "id": "spanish__menguar__past_tense_1sg",
+            "expected": [
+              "mengüé"
+            ],
+            "got": "mengué",
+            "raw": "mengué"
+          },
+          {
+            "id": "spanish__empalagar__past_tense_1sg",
+            "expected": [
+              "empalagué"
+            ],
+            "got": "empalagé",
+            "raw": "empalagé"
+          }
+        ]
+      },
+      "qwen4b": {
+        "overall": {
+          "n": 56,
+          "correct": 48,
+          "pass_rate": 0.8571,
+          "wilson_95_ci": [
+            0.7426,
+            0.9258
+          ]
+        },
+        "english_overall": {
+          "n": 28,
+          "correct": 25,
+          "pass_rate": 0.8929,
+          "wilson_95_ci": [
+            0.728,
+            0.9629
+          ]
+        },
+        "english_common": {
+          "n": 14,
+          "correct": 13,
+          "pass_rate": 0.9286,
+          "wilson_95_ci": [
+            0.6853,
+            0.9873
+          ]
+        },
+        "english_common_past_tense_1sg": {
+          "n": 7,
+          "correct": 6,
+          "pass_rate": 0.8571,
+          "wilson_95_ci": [
+            0.4869,
+            0.9743
+          ]
+        },
+        "english_common_past_participle": {
+          "n": 7,
+          "correct": 7,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.6457,
+            1.0
+          ]
+        },
+        "english_rare": {
+          "n": 14,
+          "correct": 12,
+          "pass_rate": 0.8571,
+          "wilson_95_ci": [
+            0.6006,
+            0.9599
+          ]
+        },
+        "english_rare_past_tense_1sg": {
+          "n": 7,
+          "correct": 5,
+          "pass_rate": 0.7143,
+          "wilson_95_ci": [
+            0.3589,
+            0.9178
+          ]
+        },
+        "english_rare_past_participle": {
+          "n": 7,
+          "correct": 7,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.6457,
+            1.0
+          ]
+        },
+        "spanish_overall": {
+          "n": 28,
+          "correct": 23,
+          "pass_rate": 0.8214,
+          "wilson_95_ci": [
+            0.6441,
+            0.9212
+          ]
+        },
+        "spanish_common": {
+          "n": 14,
+          "correct": 14,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.7847,
+            1.0
+          ]
+        },
+        "spanish_common_past_tense_1sg": {
+          "n": 7,
+          "correct": 7,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.6457,
+            1.0
+          ]
+        },
+        "spanish_common_past_participle": {
+          "n": 7,
+          "correct": 7,
+          "pass_rate": 1.0,
+          "wilson_95_ci": [
+            0.6457,
+            1.0
+          ]
+        },
+        "spanish_rare": {
+          "n": 14,
+          "correct": 9,
+          "pass_rate": 0.6429,
+          "wilson_95_ci": [
+            0.3876,
+            0.8366
+          ]
+        },
+        "spanish_rare_past_tense_1sg": {
+          "n": 7,
+          "correct": 3,
+          "pass_rate": 0.4286,
+          "wilson_95_ci": [
+            0.1582,
+            0.7495
+          ]
+        },
+        "spanish_rare_past_participle": {
+          "n": 7,
+          "correct": 6,
+          "pass_rate": 0.8571,
+          "wilson_95_ci": [
+            0.4869,
+            0.9743
+          ]
+        },
+        "failures": [
+          {
+            "id": "english__come__past_tense_1sg",
+            "expected": [
+              "came"
+            ],
+            "got": "I",
+            "raw": "I came"
+          },
+          {
+            "id": "english__shrive__past_tense_1sg",
+            "expected": [
+              "shrove",
+              "shrived"
+            ],
+            "got": "shrive'd",
+            "raw": "shrive'd"
+          },
+          {
+            "id": "english__clothe__past_tense_1sg",
+            "expected": [
+              "clad",
+              "clothed"
+            ],
+            "got": "I",
+            "raw": "I clothed"
+          },
+          {
+            "id": "spanish__henchir__past_tense_1sg",
+            "expected": [
+              "henchí"
+            ],
+            "got": "enchufé",
+            "raw": "enchufé"
+          },
+          {
+            "id": "spanish__atestiguar__past_tense_1sg",
+            "expected": [
+              "atestigüé"
+            ],
+            "got": "testigué",
+            "raw": "testigué"
+          },
+          {
+            "id": "spanish__menguar__past_tense_1sg",
+            "expected": [
+              "mengüé"
+            ],
+            "got": "mengué",
+            "raw": "mengué"
+          },
+          {
+            "id": "spanish__menguar__past_participle",
+            "expected": [
+              "menguado"
+            ],
+            "got": "menor",
+            "raw": "menor"
+          },
+          {
+            "id": "spanish__blandir__past_tense_1sg",
+            "expected": [
+              "blandí"
+            ],
+            "got": "blanqué",
+            "raw": "blanqué"
+          }
+        ]
+      }
+    }
+  }
+}

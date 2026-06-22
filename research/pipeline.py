@@ -220,10 +220,14 @@ def _generate_live_candidates(
     rng: random.Random,
 ) -> list[tuple[dict[str, str], str]]:
     """Return (candidate, resolved_sentence_length) pairs for one constraint set."""
+    constraints = dict(cs.constraints)
+    if cs.expected_form is not None:
+        constraints["expected_form"] = cs.expected_form
+
     common = dict(
         keyword=cs.keyword,
         translation=cs.translation,
-        constraints=dict(cs.constraints),
+        constraints=constraints,
         target_language=cs.target_language,
         cefr_level=cs.cefr_level,
         explicit_subject_required=run_config.explicit_subject_required,

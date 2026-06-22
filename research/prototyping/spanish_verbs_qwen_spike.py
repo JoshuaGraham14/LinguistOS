@@ -13,6 +13,37 @@ Pair with the English spike to separate multilingual-data gaps from capacity gap
 at the same model size.
 
 Results: docs/spike-results/eval_spanish_verbs_qwen_spike_results.json
+
+----------------------------------------------------------------------
+REPRODUCIBILITY
+----------------------------------------------------------------------
+Status:      Diagnostic spike (Experiment 2). Not run through
+             ``research.run_experiment`` or the DB pipeline. This is a
+             one-word isolation probe (no sentence generation), so the
+             sentence-level evaluator stack does not apply; this script
+             is the reproducible artifact.
+
+Run:         python3 -m research.prototyping.spanish_verbs_qwen_spike
+             (run from repo root; no CLI flags required)
+
+Output:      docs/spike-results/eval_spanish_verbs_qwen_spike_results.json
+             Writeup: docs/experiment-results/english_spanish_verb_isolation_qwen_spike.md
+
+Stimuli:     20 Spanish verbs across three tiers (5 common regular,
+             8 common irregular, 7 rare), drawn from the spanish_basic,
+             spanish_challenging, and spanish_niche benchmark YAMLs.
+
+Models:      Qwen/Qwen2.5-0.5B-Instruct, Qwen/Qwen3-1.7B,
+             Qwen/Qwen3-4B-Instruct-2507 (HuggingFace, MPS or CPU).
+
+Decoding:    Greedy (temperature=0, do_sample=False), max_new_tokens=32,
+             one sample per probe. Qwen3 thinking mode disabled.
+             Greedy is deterministic; no seed required.
+
+Scoring:     Unicode NFC + casefold exact-match against the gold form.
+
+Original run: 2026-06-12 (results committed in batch ~16:43 GMT+1).
+----------------------------------------------------------------------
 """
 
 from __future__ import annotations

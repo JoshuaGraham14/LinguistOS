@@ -1,0 +1,1974 @@
+{
+  "models": {
+    "qwen17b": "Qwen/Qwen3-1.7B"
+  },
+  "temperature": 0.0,
+  "prompt_version": "explicit_v1",
+  "prompt_template": "Conjugate \"{lemma}\" in {tense} indicative; list yo/tú/él/nosotros/vosotros/ellos forms, one per line.",
+  "verbs": [
+    "comer",
+    "vivir",
+    "hablar",
+    "escribir",
+    "correr"
+  ],
+  "tenses": [
+    "present",
+    "preterite",
+    "imperfect",
+    "future",
+    "conditional"
+  ],
+  "paradigms": {
+    "comer": {
+      "tier": "common_regular",
+      "tenses": {
+        "present": [
+          "como",
+          "comes",
+          "come",
+          "comemos",
+          "coméis",
+          "comen"
+        ],
+        "preterite": [
+          "comí",
+          "comiste",
+          "comió",
+          "comimos",
+          "comisteis",
+          "comieron"
+        ],
+        "imperfect": [
+          "comía",
+          "comías",
+          "comía",
+          "comíamos",
+          "comíais",
+          "comían"
+        ],
+        "future": [
+          "comeré",
+          "comerás",
+          "comerá",
+          "comeremos",
+          "comeréis",
+          "comerán"
+        ],
+        "conditional": [
+          "comería",
+          "comerías",
+          "comería",
+          "comeríamos",
+          "comeríais",
+          "comerían"
+        ]
+      }
+    },
+    "hablar": {
+      "tier": "common_regular",
+      "tenses": {
+        "present": [
+          "hablo",
+          "hablas",
+          "habla",
+          "hablamos",
+          "habláis",
+          "hablan"
+        ],
+        "preterite": [
+          "hablé",
+          "hablaste",
+          "habló",
+          "hablamos",
+          "hablasteis",
+          "hablaron"
+        ],
+        "imperfect": [
+          "hablaba",
+          "hablabas",
+          "hablaba",
+          "hablábamos",
+          "hablabais",
+          "hablaban"
+        ],
+        "future": [
+          "hablaré",
+          "hablarás",
+          "hablará",
+          "hablaremos",
+          "hablaréis",
+          "hablarán"
+        ],
+        "conditional": [
+          "hablaría",
+          "hablarías",
+          "hablaría",
+          "hablaríamos",
+          "hablaríais",
+          "hablarían"
+        ]
+      }
+    },
+    "tener": {
+      "tier": "common_irregular",
+      "tenses": {
+        "present": [
+          "tengo",
+          "tienes",
+          "tiene",
+          "tenemos",
+          "tenéis",
+          "tienen"
+        ],
+        "preterite": [
+          "tuve",
+          "tuviste",
+          "tuvo",
+          "tuvimos",
+          "tuvisteis",
+          "tuvieron"
+        ],
+        "imperfect": [
+          "tenía",
+          "tenías",
+          "tenía",
+          "teníamos",
+          "teníais",
+          "tenían"
+        ],
+        "future": [
+          "tendré",
+          "tendrás",
+          "tendrá",
+          "tendremos",
+          "tendréis",
+          "tendrán"
+        ],
+        "conditional": [
+          "tendría",
+          "tendrías",
+          "tendría",
+          "tendríamos",
+          "tendríais",
+          "tendrían"
+        ]
+      }
+    },
+    "blandir": {
+      "tier": "rare",
+      "tenses": {
+        "present": [
+          "blando",
+          "blandes",
+          "blande",
+          "blandimos",
+          "blandís",
+          "blanden"
+        ],
+        "preterite": [
+          "blandí",
+          "blandiste",
+          "blandió",
+          "blandimos",
+          "blandisteis",
+          "blandieron"
+        ],
+        "imperfect": [
+          "blandía",
+          "blandías",
+          "blandía",
+          "blandíamos",
+          "blandíais",
+          "blandían"
+        ],
+        "future": [
+          "blandiré",
+          "blandirás",
+          "blandirá",
+          "blandiremos",
+          "blandiréis",
+          "blandirán"
+        ],
+        "conditional": [
+          "blandiría",
+          "blandirías",
+          "blandiría",
+          "blandiríamos",
+          "blandiríais",
+          "blandirían"
+        ]
+      }
+    },
+    "argüir": {
+      "tier": "rare",
+      "tenses": {
+        "present": [
+          "arguyo",
+          "arguyes",
+          "arguye",
+          "arguimos",
+          "arguís",
+          "arguyen"
+        ],
+        "preterite": [
+          "argüí",
+          "argüiste",
+          "arguyó",
+          "arguimos",
+          "argüisteis",
+          "arguyeron"
+        ],
+        "imperfect": [
+          "argüía",
+          "argüías",
+          "argüía",
+          "arguíamos",
+          "argüíais",
+          "argüían"
+        ],
+        "future": [
+          "argüiré",
+          "argüirás",
+          "argüirá",
+          "argüiremos",
+          "argüiréis",
+          "argüirán"
+        ],
+        "conditional": [
+          "argüiría",
+          "argüirías",
+          "argüiría",
+          "argüiríamos",
+          "argüiríais",
+          "argüirían"
+        ]
+      }
+    },
+    "vivir": {
+      "tier": "common_regular",
+      "tenses": {
+        "present": [
+          "vivo",
+          "vives",
+          "vive",
+          "vivimos",
+          "vivís",
+          "viven"
+        ],
+        "preterite": [
+          "viví",
+          "viviste",
+          "vivió",
+          "vivimos",
+          "vivisteis",
+          "vivieron"
+        ],
+        "imperfect": [
+          "vivía",
+          "vivías",
+          "vivía",
+          "vivíamos",
+          "vivíais",
+          "vivían"
+        ],
+        "future": [
+          "viviré",
+          "vivirás",
+          "vivirá",
+          "viviremos",
+          "viviréis",
+          "vivirán"
+        ],
+        "conditional": [
+          "viviría",
+          "vivirías",
+          "viviría",
+          "viviríamos",
+          "viviríais",
+          "vivirían"
+        ]
+      }
+    },
+    "escribir": {
+      "tier": "common_regular",
+      "tenses": {
+        "present": [
+          "escribo",
+          "escribes",
+          "escribe",
+          "escribimos",
+          "escribís",
+          "escriben"
+        ],
+        "preterite": [
+          "escribí",
+          "escribiste",
+          "escribió",
+          "escribimos",
+          "escribisteis",
+          "escribieron"
+        ],
+        "imperfect": [
+          "escribía",
+          "escribías",
+          "escribía",
+          "escribíamos",
+          "escribíais",
+          "escribían"
+        ],
+        "future": [
+          "escribiré",
+          "escribirás",
+          "escribirá",
+          "escribiremos",
+          "escribiréis",
+          "escribirán"
+        ],
+        "conditional": [
+          "escribiría",
+          "escribirías",
+          "escribiría",
+          "escribiríamos",
+          "escribiríais",
+          "escribirían"
+        ]
+      }
+    },
+    "correr": {
+      "tier": "common_regular",
+      "tenses": {
+        "present": [
+          "corro",
+          "corres",
+          "corre",
+          "corremos",
+          "corréis",
+          "corren"
+        ],
+        "preterite": [
+          "corrí",
+          "corriste",
+          "corrió",
+          "corrimos",
+          "corristeis",
+          "corrieron"
+        ],
+        "imperfect": [
+          "corría",
+          "corrías",
+          "corría",
+          "corríamos",
+          "corríais",
+          "corrían"
+        ],
+        "future": [
+          "correré",
+          "correrás",
+          "correrá",
+          "correremos",
+          "correréis",
+          "correrán"
+        ],
+        "conditional": [
+          "correría",
+          "correrías",
+          "correría",
+          "correríamos",
+          "correríais",
+          "correrían"
+        ]
+      }
+    }
+  },
+  "by_model": {
+    "qwen17b": {
+      "model_id": "Qwen/Qwen3-1.7B",
+      "elapsed_s": 84.2,
+      "results": [
+        {
+          "case": {
+            "id": "comer__present",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "como",
+              "comes",
+              "come",
+              "comemos",
+              "coméis",
+              "comen"
+            ],
+            "prompt": "Conjugate the Spanish verb \"comer\" in the present indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 22.899,
+          "raw": "yo comío  \ntú comiste  \nél/ella comió  \nnosotros comimos  \nvosotros comisteis  \nellos comieron",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "como",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "comes",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "come",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "comemos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "coméis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "comen",
+              "found": false
+            }
+          ],
+          "missing": [
+            "como",
+            "comes",
+            "come",
+            "comemos",
+            "coméis",
+            "comen"
+          ]
+        },
+        {
+          "case": {
+            "id": "comer__preterite",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "comí",
+              "comiste",
+              "comió",
+              "comimos",
+              "comisteis",
+              "comieron"
+            ],
+            "prompt": "Conjugate the Spanish verb \"comer\" in the preterite (pretérito indefinido) indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.588,
+          "raw": "yo comí  \ntú comiste  \nél/ella comió  \nnosotros comimos  \nvosotros comisteis  \nellos comieron",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comí",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comiste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comió",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comisteis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comieron",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "comer__imperfect",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "comía",
+              "comías",
+              "comía",
+              "comíamos",
+              "comíais",
+              "comían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"comer\" in the imperfect indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.292,
+          "raw": "yo comía  \ntú comías  \nél/ella comía  \nnosotros comíamos  \nvosotros comíais  \nellos comían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comíamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comíais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "comer__future",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "comeré",
+              "comerás",
+              "comerá",
+              "comeremos",
+              "comeréis",
+              "comerán"
+            ],
+            "prompt": "Conjugate the Spanish verb \"comer\" in the simple future indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.267,
+          "raw": "yo comeré  \ntú comerás  \nél/ella comerá  \nnosotros comeremos  \nvosotros comeréis  \nellos comerán",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comeré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comerás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comerá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comerán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "comer__conditional",
+            "lemma": "comer",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "comería",
+              "comerías",
+              "comería",
+              "comeríamos",
+              "comeríais",
+              "comerían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"comer\" in the conditional indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.28,
+          "raw": "yo comería  \ntú comerías  \nél/ella comería  \nnosotros comeríamos  \nvosotros comeríais  \nellos comerían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "comería",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "comerías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "comería",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "comeríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "comeríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "comerían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "vivir__present",
+            "lemma": "vivir",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "vivo",
+              "vives",
+              "vive",
+              "vivimos",
+              "vivís",
+              "viven"
+            ],
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the present indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.01,
+          "raw": "yo vivo  \ntú vives  \nél/ella vive  \nnosotros vivimos  \nvosotros vivís  \nellos viven",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "vivo",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "vives",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "vive",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "vivimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "vivís",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "viven",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "vivir__preterite",
+            "lemma": "vivir",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "viví",
+              "viviste",
+              "vivió",
+              "vivimos",
+              "vivisteis",
+              "vivieron"
+            ],
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the preterite (pretérito indefinido) indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.349,
+          "raw": "yo viví  \ntú viviste  \nél/ella vivió  \nnosotros vivimos  \nvosotros vivisteis  \nellos vivieron",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "viví",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "viviste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "vivió",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "vivimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "vivisteis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "vivieron",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "vivir__imperfect",
+            "lemma": "vivir",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "vivía",
+              "vivías",
+              "vivía",
+              "vivíamos",
+              "vivíais",
+              "vivían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the imperfect indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.269,
+          "raw": "yo vivía  \ntú vivías  \nél/ella vivía  \nnosotros vivíamos  \nvosotros vivíais  \nellos vivían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "vivía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "vivías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "vivía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "vivíamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "vivíais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "vivían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "vivir__future",
+            "lemma": "vivir",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "viviré",
+              "vivirás",
+              "vivirá",
+              "viviremos",
+              "viviréis",
+              "vivirán"
+            ],
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the simple future indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.603,
+          "raw": "yo viviré  \ntú vivirás  \nél/ella vivirá  \nnosotros viviremos  \nvosotros viviréis  \nellos vivirán",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "viviré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "vivirás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "vivirá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "viviremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "viviréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "vivirán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "vivir__conditional",
+            "lemma": "vivir",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "viviría",
+              "vivirías",
+              "viviría",
+              "viviríamos",
+              "viviríais",
+              "vivirían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"vivir\" in the conditional indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.732,
+          "raw": "yo viviría  \ntú vivirías  \nél/ella viviría  \nnosotros viviríamos  \nvosotros viviríais  \nellos vivirían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "viviría",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "vivirías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "viviría",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "viviríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "viviríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "vivirían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "hablar__present",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "hablo",
+              "hablas",
+              "habla",
+              "hablamos",
+              "habláis",
+              "hablan"
+            ],
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the present indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.288,
+          "raw": "yo hablo  \ntú hablas  \nél/ella habla  \nnosotros hablamos  \nvosotros habláis  \nellos hablan",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablo",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablas",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "habla",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "habláis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablan",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "hablar__preterite",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "hablé",
+              "hablaste",
+              "habló",
+              "hablamos",
+              "hablasteis",
+              "hablaron"
+            ],
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the preterite (pretérito indefinido) indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.632,
+          "raw": "yo hablé  \ntú hablaste  \nél/ella habló  \nnosotros hablamos  \nvosotros hablaron  \nellos hablaron",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablé",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablaste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "habló",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablasteis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaron",
+              "found": true
+            }
+          ],
+          "missing": [
+            "hablasteis"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__imperfect",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "hablaba",
+              "hablabas",
+              "hablaba",
+              "hablábamos",
+              "hablabais",
+              "hablaban"
+            ],
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the imperfect indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.666,
+          "raw": "yo hablaba  \ntú hablabas  \nél/ella hablaba  \nnosotros hablábamos  \nvosotros hablabais  \nellos hablaban",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaba",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablabas",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "hablaba",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablábamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablabais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablaban",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "hablar__future",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "hablaré",
+              "hablarás",
+              "hablará",
+              "hablaremos",
+              "hablaréis",
+              "hablarán"
+            ],
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the simple future indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.17,
+          "raw": "yo hablaré  \ntú hablarás  \nél/ella hablará  \nnosotros hablararemos  \nvosotros hablaréis  \nellos hablarán",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablarás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "hablará",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaremos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarán",
+              "found": true
+            }
+          ],
+          "missing": [
+            "hablaremos"
+          ]
+        },
+        {
+          "case": {
+            "id": "hablar__conditional",
+            "lemma": "hablar",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "hablaría",
+              "hablarías",
+              "hablaría",
+              "hablaríamos",
+              "hablaríais",
+              "hablarían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"hablar\" in the conditional indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.401,
+          "raw": "yo hablaría  \ntú hablarías  \nél/ella hablaría  \nnosotros hablaríamos  \nvosotros hablaríais  \nellos hablarían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "hablaría",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "hablarías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "hablaría",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "hablaríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "hablaríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "hablarían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "escribir__present",
+            "lemma": "escribir",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "escribo",
+              "escribes",
+              "escribe",
+              "escribimos",
+              "escribís",
+              "escriben"
+            ],
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the present indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.574,
+          "raw": "yo escribo  \ntú escribes  \nél/ella escrib-e  \nnosotros escribemos  \nvosotros escribís  \nellos escriben",
+          "forms_found": 4,
+          "forms_total": 6,
+          "form_recall": 0.6667,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "escribo",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "escribes",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "escribe",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "escribimos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "escribís",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "escriben",
+              "found": true
+            }
+          ],
+          "missing": [
+            "escribe",
+            "escribimos"
+          ]
+        },
+        {
+          "case": {
+            "id": "escribir__preterite",
+            "lemma": "escribir",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "escribí",
+              "escribiste",
+              "escribió",
+              "escribimos",
+              "escribisteis",
+              "escribieron"
+            ],
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the preterite (pretérito indefinido) indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.788,
+          "raw": "yo escribí  \ntú escribiste  \nél/ella escribió  \nnosotros escribimos  \nvosotros escribisteis  \nellos escribieron",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "escribí",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "escribiste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "escribió",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "escribimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "escribisteis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "escribieron",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "escribir__imperfect",
+            "lemma": "escribir",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "escribía",
+              "escribías",
+              "escribía",
+              "escribíamos",
+              "escribíais",
+              "escribían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the imperfect indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 3.024,
+          "raw": "yo escribía  \ntú escribías  \nél/ella escribía  \nnosotros escribíamos  \nvosotros escribíais  \nellos escribían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "escribía",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "escribías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "escribía",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "escribíamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "escribíais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "escribían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "escribir__future",
+            "lemma": "escribir",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "escribiré",
+              "escribirás",
+              "escribirá",
+              "escribiremos",
+              "escribiréis",
+              "escribirán"
+            ],
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the simple future indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.76,
+          "raw": "yo escribiré  \ntú escribirás  \nél/ella escribirá  \nnosotros escribiremos  \nvosotros escribiréis  \nellos escribirán",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "escribiré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "escribirás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "escribirá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "escribiremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "escribiréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "escribirán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "escribir__conditional",
+            "lemma": "escribir",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "escribiría",
+              "escribirías",
+              "escribiría",
+              "escribiríamos",
+              "escribiríais",
+              "escribirían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"escribir\" in the conditional indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.894,
+          "raw": "yo escribiría  \ntú escribirías  \nél/ella escribiría  \nnosotros escribiríamos  \nvosotros escribiríais  \nellos escribirían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "escribiría",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "escribirías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "escribiría",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "escribiríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "escribiríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "escribirían",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "correr__present",
+            "lemma": "correr",
+            "tier": "common_regular",
+            "tense": "present",
+            "expected": [
+              "corro",
+              "corres",
+              "corre",
+              "corremos",
+              "corréis",
+              "corren"
+            ],
+            "prompt": "Conjugate the Spanish verb \"correr\" in the present indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.25,
+          "raw": "yo corro  \ntú corres  \nél/ella corre  \nnosotros corremos  \nvosotros corremos  \nellos corren",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "corro",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "corres",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "corre",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "corremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "corréis",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "corren",
+              "found": true
+            }
+          ],
+          "missing": [
+            "corréis"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__preterite",
+            "lemma": "correr",
+            "tier": "common_regular",
+            "tense": "preterite",
+            "expected": [
+              "corrí",
+              "corriste",
+              "corrió",
+              "corrimos",
+              "corristeis",
+              "corrieron"
+            ],
+            "prompt": "Conjugate the Spanish verb \"correr\" in the preterite (pretérito indefinido) indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.746,
+          "raw": "yo corri  \ntú corriste  \nél/ella corrió  \nnosotros corrimos  \nvosotros corristeis  \nellos corrieron",
+          "forms_found": 5,
+          "forms_total": 6,
+          "form_recall": 0.8333,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "corrí",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "corriste",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "corrió",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "corrimos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "corristeis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "corrieron",
+              "found": true
+            }
+          ],
+          "missing": [
+            "corrí"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__imperfect",
+            "lemma": "correr",
+            "tier": "common_regular",
+            "tense": "imperfect",
+            "expected": [
+              "corría",
+              "corrías",
+              "corría",
+              "corríamos",
+              "corríais",
+              "corrían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"correr\" in the imperfect indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 2.452,
+          "raw": "yo corro  \ntú corras  \nél/ella corre  \nnosotros corremos  \nvosotros corremos  \nellos corren",
+          "forms_found": 0,
+          "forms_total": 6,
+          "form_recall": 0.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "corría",
+              "found": false
+            },
+            {
+              "person": "tú",
+              "expected": "corrías",
+              "found": false
+            },
+            {
+              "person": "él",
+              "expected": "corría",
+              "found": false
+            },
+            {
+              "person": "nosotros",
+              "expected": "corríamos",
+              "found": false
+            },
+            {
+              "person": "vosotros",
+              "expected": "corríais",
+              "found": false
+            },
+            {
+              "person": "ellos",
+              "expected": "corrían",
+              "found": false
+            }
+          ],
+          "missing": [
+            "corría",
+            "corrías",
+            "corría",
+            "corríamos",
+            "corríais",
+            "corrían"
+          ]
+        },
+        {
+          "case": {
+            "id": "correr__future",
+            "lemma": "correr",
+            "tier": "common_regular",
+            "tense": "future",
+            "expected": [
+              "correré",
+              "correrás",
+              "correrá",
+              "correremos",
+              "correréis",
+              "correrán"
+            ],
+            "prompt": "Conjugate the Spanish verb \"correr\" in the simple future indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 3.132,
+          "raw": "yo correré  \ntú correrás  \nél/ella correrá  \nnosotros correremos  \nvosotros correréis  \nellos correrán",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "correré",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "correrás",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "correrá",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "correremos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "correréis",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "correrán",
+              "found": true
+            }
+          ],
+          "missing": []
+        },
+        {
+          "case": {
+            "id": "correr__conditional",
+            "lemma": "correr",
+            "tier": "common_regular",
+            "tense": "conditional",
+            "expected": [
+              "correría",
+              "correrías",
+              "correría",
+              "correríamos",
+              "correríais",
+              "correrían"
+            ],
+            "prompt": "Conjugate the Spanish verb \"correr\" in the conditional indicative.\nList all six forms for: yo, tú, él/ella, nosotros, vosotros, ellos.\nReply with only the six conjugated verb forms, one per line."
+          },
+          "latency_s": 3.122,
+          "raw": "yo correría  \ntú correrías  \nél/ella correría  \nnosotros correríamos  \nvosotros correríais  \nellos correrían",
+          "forms_found": 6,
+          "forms_total": 6,
+          "form_recall": 1.0,
+          "per_person": [
+            {
+              "person": "yo",
+              "expected": "correría",
+              "found": true
+            },
+            {
+              "person": "tú",
+              "expected": "correrías",
+              "found": true
+            },
+            {
+              "person": "él",
+              "expected": "correría",
+              "found": true
+            },
+            {
+              "person": "nosotros",
+              "expected": "correríamos",
+              "found": true
+            },
+            {
+              "person": "vosotros",
+              "expected": "correríais",
+              "found": true
+            },
+            {
+              "person": "ellos",
+              "expected": "correrían",
+              "found": true
+            }
+          ],
+          "missing": []
+        }
+      ]
+    }
+  },
+  "summary": {
+    "per_model": {
+      "qwen17b": {
+        "overall": {
+          "cases": 25,
+          "forms_correct": 132,
+          "forms_total": 150,
+          "form_recall": 0.88,
+          "wilson_95_ci": [
+            0.8183,
+            0.9227
+          ],
+          "mean_recall_per_case": 0.88
+        },
+        "common_regular": {
+          "cases": 25,
+          "forms_correct": 132,
+          "forms_total": 150,
+          "form_recall": 0.88,
+          "wilson_95_ci": [
+            0.8183,
+            0.9227
+          ],
+          "mean_recall_per_case": 0.88
+        },
+        "common_irregular": {
+          "cases": 0,
+          "forms_correct": 0,
+          "forms_total": 0,
+          "form_recall": null,
+          "wilson_95_ci": null,
+          "mean_recall_per_case": null
+        },
+        "rare": {
+          "cases": 0,
+          "forms_correct": 0,
+          "forms_total": 0,
+          "form_recall": null,
+          "wilson_95_ci": null,
+          "mean_recall_per_case": null
+        },
+        "by_verb": {
+          "comer": {
+            "cases": 5,
+            "forms_correct": 24,
+            "forms_total": 30,
+            "form_recall": 0.8,
+            "wilson_95_ci": [
+              0.6269,
+              0.905
+            ],
+            "mean_recall_per_case": 0.8
+          },
+          "hablar": {
+            "cases": 5,
+            "forms_correct": 28,
+            "forms_total": 30,
+            "form_recall": 0.9333,
+            "wilson_95_ci": [
+              0.7868,
+              0.9815
+            ],
+            "mean_recall_per_case": 0.9333
+          },
+          "tener": {
+            "cases": 0,
+            "forms_correct": 0,
+            "forms_total": 0,
+            "form_recall": null,
+            "wilson_95_ci": null,
+            "mean_recall_per_case": null
+          },
+          "blandir": {
+            "cases": 0,
+            "forms_correct": 0,
+            "forms_total": 0,
+            "form_recall": null,
+            "wilson_95_ci": null,
+            "mean_recall_per_case": null
+          },
+          "argüir": {
+            "cases": 0,
+            "forms_correct": 0,
+            "forms_total": 0,
+            "form_recall": null,
+            "wilson_95_ci": null,
+            "mean_recall_per_case": null
+          },
+          "vivir": {
+            "cases": 5,
+            "forms_correct": 30,
+            "forms_total": 30,
+            "form_recall": 1.0,
+            "wilson_95_ci": [
+              0.8865,
+              1.0
+            ],
+            "mean_recall_per_case": 1.0
+          },
+          "escribir": {
+            "cases": 5,
+            "forms_correct": 28,
+            "forms_total": 30,
+            "form_recall": 0.9333,
+            "wilson_95_ci": [
+              0.7868,
+              0.9815
+            ],
+            "mean_recall_per_case": 0.9333
+          },
+          "correr": {
+            "cases": 5,
+            "forms_correct": 22,
+            "forms_total": 30,
+            "form_recall": 0.7333,
+            "wilson_95_ci": [
+              0.5555,
+              0.8582
+            ],
+            "mean_recall_per_case": 0.7333
+          }
+        },
+        "by_tense": {
+          "present": {
+            "cases": 5,
+            "forms_correct": 21,
+            "forms_total": 30,
+            "form_recall": 0.7,
+            "wilson_95_ci": [
+              0.5212,
+              0.8334
+            ],
+            "mean_recall_per_case": 0.7
+          },
+          "preterite": {
+            "cases": 5,
+            "forms_correct": 28,
+            "forms_total": 30,
+            "form_recall": 0.9333,
+            "wilson_95_ci": [
+              0.7868,
+              0.9815
+            ],
+            "mean_recall_per_case": 0.9333
+          },
+          "imperfect": {
+            "cases": 5,
+            "forms_correct": 24,
+            "forms_total": 30,
+            "form_recall": 0.8,
+            "wilson_95_ci": [
+              0.6269,
+              0.905
+            ],
+            "mean_recall_per_case": 0.8
+          },
+          "future": {
+            "cases": 5,
+            "forms_correct": 29,
+            "forms_total": 30,
+            "form_recall": 0.9667,
+            "wilson_95_ci": [
+              0.8333,
+              0.9941
+            ],
+            "mean_recall_per_case": 0.9667
+          },
+          "conditional": {
+            "cases": 5,
+            "forms_correct": 30,
+            "forms_total": 30,
+            "form_recall": 1.0,
+            "wilson_95_ci": [
+              0.8865,
+              1.0
+            ],
+            "mean_recall_per_case": 1.0
+          }
+        }
+      }
+    }
+  }
+}

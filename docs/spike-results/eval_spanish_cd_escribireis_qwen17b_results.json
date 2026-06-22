@@ -1,0 +1,143 @@
+{
+  "model_id": "Qwen/Qwen3-1.7B",
+  "cell": {
+    "keyword": "escribir",
+    "tense": "future",
+    "person": "2nd",
+    "number": "plural",
+    "expected_form": "escribiréis"
+  },
+  "method": "constrained_beam_search_force_words_ids",
+  "num_beams": 4,
+  "max_new_tokens": 40,
+  "n_samples": 10,
+  "system": "You are a Spanish language tutor. Reply with exactly one Spanish sentence.",
+  "token_id_variants": [
+    [
+      288,
+      740,
+      43855,
+      87018
+    ],
+    [
+      65771,
+      43855,
+      87018
+    ]
+  ],
+  "elapsed_s": 51.8,
+  "ef_pass": 7,
+  "grammar_pass": 10,
+  "results": [
+    {
+      "sample": 1,
+      "scene": "about writing a letter",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing a letter.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "Vescribiremos una carta hoy.</think>\n\nVosotros escribiréis una carta hoy.</think>\n\nVosotros escribiréis una carta hoy.",
+      "latency_s": 8.86,
+      "sentence": "Vescribiremos una carta hoy.</think>",
+      "ef_pass": false,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 2,
+      "scene": "about writing a report at work",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing a report at work.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribiréis un informe en el trabajo mañana",
+      "latency_s": 2.91,
+      "sentence": "escribiréis un informe en el trabajo mañana",
+      "ef_pass": true,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 3,
+      "scene": "about writing emails together",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing emails together.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "Vescribiremos un correo electrónico juntos.</think>\n\nVosotros escribiréis un correo electrónico juntos.</think>\n\nVosotros escribiréis un correo electrónico juntos.",
+      "latency_s": 6.54,
+      "sentence": "Vescribiremos un correo electrónico juntos.</think>",
+      "ef_pass": false,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 4,
+      "scene": "about writing exam answers",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing exam answers.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribiréis las respuestas del examen en el momento adecuado",
+      "latency_s": 3.23,
+      "sentence": "escribiréis las respuestas del examen en el momento adecuado",
+      "ef_pass": true,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 5,
+      "scene": "about writing a story for class",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing a story for class.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribirás una historia para clase escribiréis una historia para clase",
+      "latency_s": 3.29,
+      "sentence": "escribirás una historia para clase escribiréis una historia para clase",
+      "ef_pass": true,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 6,
+      "scene": "about writing notes in a meeting",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing notes in a meeting.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribiréis las notas en la reunión después de la meeting.</think>\n\nescribiréis las notas en la reunión después de la meeting.",
+      "latency_s": 5.72,
+      "sentence": "escribiréis las notas en la reunión después de la meeting.</think>",
+      "ef_pass": true,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 7,
+      "scene": "about writing a postcard from a trip",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing a postcard from a trip.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribiréis una carta después de tu viaje",
+      "latency_s": 2.95,
+      "sentence": "escribiréis una carta después de tu viaje",
+      "ef_pass": true,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 8,
+      "scene": "about writing the homework tonight",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing the homework tonight.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribiréis la tarea esta noche.</think>\n\nescribiréis la tarea esta noche.</think>\n\nescribiréis la tarea esta noche.",
+      "latency_s": 5.61,
+      "sentence": "escribiréis la tarea esta noche.</think>",
+      "ef_pass": true,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 9,
+      "scene": "about writing an article for the school magazine",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing an article for the school magazine.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribiréis un artículo para la revista escolar en el futuro",
+      "latency_s": 3.1,
+      "sentence": "escribiréis un artículo para la revista escolar en el futuro",
+      "ef_pass": true,
+      "grammar_pass": true,
+      "grammar_matches": []
+    },
+    {
+      "sample": 10,
+      "scene": "about writing a list of names",
+      "prompt": "Write one short Spanish sentence (5–12 words) for a CEFR A1 learner using the verb 'escribir' in the **simple future** tense, **2nd person plural** (vosotros/vosotras). The subject of the sentence should be 'vosotros' or 'vosotras'. Topic: about writing a list of names.\n\nReply with ONLY the Spanish sentence on a single line, no JSON, no translation, no quotes, no extra commentary.",
+      "raw": "escribirá una lista de nombres en vosotros escribirá una lista de nombres en vosotros.</think>\n\nescribiréis una lista de nombres en vosotras.",
+      "latency_s": 6.84,
+      "sentence": "escribirá una lista de nombres en vosotros escribirá una lista de nombres en vosotros.</think>",
+      "ef_pass": false,
+      "grammar_pass": true,
+      "grammar_matches": []
+    }
+  ]
+}
