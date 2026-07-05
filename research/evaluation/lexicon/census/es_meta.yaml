@@ -1,0 +1,13 @@
+lang: es
+n_verbs: 1180
+search_top_n: 30000
+zipf_min: 3.219
+zipf_max: 7.213
+zipf_mean: 4.456
+zipf_median: 4.427
+tier_cutoffs:
+  low_upper: 4.131
+  high_lower: 4.693
+tier_interpretation: low = Zipf below 33rd percentile of this census; high = Zipf
+  at/above 67th percentile; mid = between. Verbs outside the census are scored via
+  the same Zipf function and compared against these frozen boundaries.
