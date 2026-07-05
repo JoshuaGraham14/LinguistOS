@@ -1,14 +1,21 @@
 """Build the full verb census used to define frequency tiers.
 
-Scans wordfreq's top-N tokens per language, keeps validated verb infinitives,
-scores each with lemma-summed Zipf, and writes:
+Scans the **full wordfreq dictionary** per language, keeps validated verb
+lemmas, scores each with parallel lemma-summed Zipf, and writes:
 
 - ``research/evaluation/lexicon/census/{lang}.csv``  (verb, zipf)
 - ``research/evaluation/lexicon/census/{lang}_meta.yaml`` (stats + cutoffs)
 
-Spanish: all non-predicted verbecc verbs in wordfreq top-30k (~1,180).
-English: seed-list verbs appearing in wordfreq top-30k, plus regular-verb
-heuristic matches (token where both ``{token}ing`` and ``{token}ed`` appear).
+Spanish
+    wordfreq ``get_frequency_dict('es')`` tokens ending in ``-ar/-er/-ir``,
+    validated as non-predicted dictionary verbs by verbecc.
+
+English
+    WordNet verb lemmas (single-token) intersected with the wordfreq dictionary.
+
+Tier cutoffs are the 33rd / 67th percentiles of Zipf-lemma scores within each
+census (high / mid / low). Verbs outside the census are still scored via
+``verb_zipf()`` and compared against the same frozen boundaries.
 
 Usage::
 
@@ -23,49 +30,11 @@ import statistics
 from pathlib import Path
 
 import yaml
-from wordfreq import top_n_list, word_frequency
+from wordfreq import get_frequency_dict
 
 logging.getLogger("verbecc").setLevel(logging.WARNING)
 
 OUT_DIR = Path(__file__).resolve().parents[1] / "evaluation" / "lexicon" / "census"
-
-SEARCH_TOP_N = 30_000
-
-# Same seed as before, used as a filter/heuristic for English verbiness.
-_EN_VERB_SEED: frozenset[str] = frozenset("""
-    be have do say make go take come see get know think want give use find
-    tell ask work seem feel try leave call keep let begin help talk turn start
-    show hear play run move like live believe hold bring happen write provide
-    sit stand lose pay meet include continue set learn change lead understand
-    watch follow stop create speak read allow add spend grow open walk win
-    offer remember love consider appear buy wait serve die send expect build
-    stay fall cut reach kill remain suggest raise pass sell require report
-    decide pull carry break receive agree support hit produce eat cover catch
-    draw choose cause point describe reflect return determine identify treat
-    reduce establish involve compare consist relate depend deal recognise
-    represent contain remove attend achieve arrange perform prepare protect
-    reveal search share suffer travel wonder answer arrive assume care
-    complete concern connect contact defend design divide encourage engage
-    ensure enter examine exchange exist explain expose face fail favour fear
-    fight finish force gather generate handle imagine improve indicate insist
-    intend introduce invite join lay lie listen manage mark mention notice
-    observe obtain occur order pick plan please prove publish push realise
-    refer reflect refuse regard release repeat replace reply rest result rise
-    save seek separate settle share shoot sign sing smile solve sort speak
-    spread stare step store stretch strike struggle succeed suffer suggest
-    supply survive teach tend test threaten throw touch train trust turn
-    understand use vote wait wake walk want warn wash waste watch wave wear
-    weigh welcome win wonder work worry write yield knock swing shake
-    seek escape climb press swim sleep dream dance cook drive fly float sink
-    ride cross march wander crawl creep leap dive borrow lend earn spend
-    complain apologise argue debate discuss negotiate whisper shout scream
-    cry laugh nod smile grin frown blink wink sneeze cough sigh yawn
-    gainsay beseech smite shrive
-""".split())
-
-_EN_NOUN_SUFFIXES = (
-    "tion", "sion", "ness", "ment", "ity", "ism", "ist", "ship", "hood", "ance", "ence",
-)
 
 
 def _quantile(sorted_values: list[float], q: float) -> float:
@@ -80,16 +49,12 @@ def _quantile(sorted_values: list[float], q: float) -> float:
     return sorted_values[lo] + frac * (sorted_values[hi] - sorted_values[lo])
 
 
-def _looks_like_english_verb(token: str) -> bool:
-    if token in _EN_VERB_SEED:
-        return True
-    if len(token) < 3 or not token.isalpha():
-        return False
-    if any(token.endswith(s) for s in _EN_NOUN_SUFFIXES):
-        return False
+def _is_spanish_verb_candidate(token: str) -> bool:
     return (
-        word_frequency(f"{token}ing", "en") > 0
-        and word_frequency(f"{token}ed", "en") > 0
+        " " not in token
+        and len(token) >= 4
+        and (token.endswith("ar") or token.endswith("er") or token.endswith("ir"))
+        and token.isalpha()
     )
 
 
@@ -98,15 +63,15 @@ def _build_spanish() -> list[tuple[str, float]]:
 
     from research.evaluation.lexicon.frequency import verb_zipf
 
-    conjugator = CompleteConjugator(lang="es")
-    seen: set[str] = set()
-    rows: list[tuple[str, float]] = []
+    freq_dict = get_frequency_dict("es", "best")
+    candidates = [t for t in freq_dict if _is_spanish_verb_candidate(t)]
+    print(f"  Spanish: {len(freq_dict):,} wordfreq tokens, {len(candidates):,} verb-shaped")
 
-    for token in top_n_list("es", SEARCH_TOP_N):
-        if token in seen or " " in token:
-            continue
-        if not (token.endswith("ar") or token.endswith("er") or token.endswith("ir")):
-            continue
+    conjugator = CompleteConjugator(lang="es")
+    rows: list[tuple[str, float]] = []
+    for i, token in enumerate(candidates):
+        if i and i % 2000 == 0:
+            print(f"    verbecc validated {i:,}/{len(candidates):,}...")
         try:
             data = conjugator.conjugate(token).get_data()
         except Exception:
@@ -116,7 +81,6 @@ def _build_spanish() -> list[tuple[str, float]]:
             continue
         if verb_info.get("infinitive") != token:
             continue
-        seen.add(token)
         rows.append((token, round(verb_zipf(token, "es"), 3)))
 
     rows.sort(key=lambda r: -r[1])
@@ -125,23 +89,20 @@ def _build_spanish() -> list[tuple[str, float]]:
 
 def _build_english() -> list[tuple[str, float]]:
     from research.evaluation.lexicon.frequency import verb_zipf
+    from research.evaluation.lexicon.wordnet_verbs import wordnet_verb_lemmas
 
-    seen: set[str] = set()
-    rows: list[tuple[str, float]] = []
+    freq_dict = get_frequency_dict("en", "best")
+    wn_verbs = wordnet_verb_lemmas()
+    lemmas = sorted(wn_verbs & set(freq_dict.keys()))
+    print(f"  English: {len(freq_dict):,} wordfreq tokens, {len(wn_verbs):,} WordNet verb lemmas")
+    print(f"           {len(lemmas):,} lemmas in both")
 
-    for token in top_n_list("en", SEARCH_TOP_N):
-        if token in seen or " " in token:
-            continue
-        if not _looks_like_english_verb(token):
-            continue
-        seen.add(token)
-        rows.append((token, round(verb_zipf(token, "en"), 3)))
-
+    rows = [(verb, round(verb_zipf(verb, "en"), 3)) for verb in lemmas]
     rows.sort(key=lambda r: -r[1])
     return rows
 
 
-def _write_lang(lang: str, rows: list[tuple[str, float]]) -> None:
+def _write_lang(lang: str, rows: list[tuple[str, float]], *, verb_source: str) -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = OUT_DIR / f"{lang}.csv"
     with open(csv_path, "w", encoding="utf-8", newline="") as f:
@@ -152,10 +113,16 @@ def _write_lang(lang: str, rows: list[tuple[str, float]]) -> None:
     scores = sorted(z for _, z in rows)
     p33 = _quantile(scores, 1 / 3)
     p67 = _quantile(scores, 2 / 3)
+    freq_dict = get_frequency_dict(lang, "best")
     meta = {
         "lang": lang,
         "n_verbs": len(rows),
-        "search_top_n": SEARCH_TOP_N,
+        "n_wordfreq_tokens": len(freq_dict),
+        "verb_source": verb_source,
+        "lemma_scoring": (
+            "lemma-summed Zipf: Spanish via verbecc present+infinitive+gerund+participle; "
+            "English via regular -s/-ed/-ing plus en_irregular.py table"
+        ),
         "zipf_min": round(min(scores), 3),
         "zipf_max": round(max(scores), 3),
         "zipf_mean": round(statistics.fmean(scores), 3),
@@ -167,8 +134,9 @@ def _write_lang(lang: str, rows: list[tuple[str, float]]) -> None:
         "tier_interpretation": (
             "low = Zipf below 33rd percentile of this census; "
             "high = Zipf at/above 67th percentile; mid = between. "
-            "Verbs outside the census are scored via the same Zipf function "
-            "and compared against these frozen boundaries."
+            "Tiers are for stratified verb selection; Zipf is the continuous "
+            "analysis variable. Verbs outside the census use the same Zipf "
+            "function and frozen boundaries."
         ),
     }
     meta_path = OUT_DIR / f"{lang}_meta.yaml"
@@ -180,8 +148,21 @@ def _write_lang(lang: str, rows: list[tuple[str, float]]) -> None:
 
 
 def main() -> None:
-    _write_lang("es", _build_spanish())
-    _write_lang("en", _build_english())
+    print("Building Spanish census...")
+    es_rows = _build_spanish()
+    _write_lang(
+        "es",
+        es_rows,
+        verb_source="wordfreq full dictionary + verbecc-validated -ar/-er/-ir verbs",
+    )
+
+    print("\nBuilding English census...")
+    en_rows = _build_english()
+    _write_lang(
+        "en",
+        en_rows,
+        verb_source="wordfreq full dictionary ∩ WordNet verb lemmas",
+    )
 
 
 if __name__ == "__main__":

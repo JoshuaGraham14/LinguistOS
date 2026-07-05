@@ -21,18 +21,16 @@ Design decisions
 2. **Score axis**: Zipf (log10 of per-billion frequency). Standard in
    psycholinguistics; human-readable.
 
-3. **Lemma frequency, not surface form**: raw `word_frequency` is computed
-   over a canonical inflected-form set (infinitive, present indicative x6,
-   gerund, past participle) and summed *before* Zipf-transform. Fixes a real
-   issue for Spanish: the infinitive is often not the most-used form of the
-   verb (e.g. 'habla' >> 'hablar').
+3. **Lemma frequency, not surface form**: raw `word_frequency` is summed over
+   a language-specific inflected-form set before Zipf-transform. Spanish uses
+   verbecc (present indicative, infinitive, gerund, participle). English uses
+   regular ``-s/-ed/-ing`` plus a curated irregular-verb table. WordNet defines
+   the English verb universe for the census.
 
-4. **Tier cutoffs**: per-language 33rd/67th percentile of the Zipf-lemma
-   distribution over a **full verb census** (~1,180 Spanish verbs from
-   wordfreq top-30k, validated by verbecc). Values are computed once by
-   `research/scripts/build_verb_census.py` and frozen in `TIER_CUTOFFS`.
-   Tiers are named high / mid / low (not common/rare) to avoid implying
-   absolute rarity for verbs inside the census. Freezing = pre-registration.
+4. **Tier cutoffs**: per-language 33rd/67th percentile of Zipf-lemma scores
+   over the full verb census (Spanish: wordfreq dictionary ∩ verbecc; English:
+   wordfreq dictionary ∩ WordNet verb lemmas). Frozen in ``TIER_CUTOFFS``.
+   Tiers: high / mid / low. Zipf remains the continuous analysis variable.
 
 5. **Irregularity is tense-specific**: `is_irregular(verb, tense)` compares
    verbecc's actual conjugation against the regular-paradigm form derived
@@ -72,13 +70,13 @@ CENSUS_DIR = Path(__file__).resolve().parent / "census"
 #   Zipf >= high_lower -> high-frequency tier
 #   otherwise -> mid
 #
-# Verbs outside the census (e.g. literary lemmas below wordfreq top-30k)
-# are scored via verb_zipf() and compared against these same boundaries.
+# Verbs outside the census (e.g. below WordNet/wordfreq coverage) are scored
+# via verb_zipf() and compared against these same boundaries.
 #
 # Regenerate census + cutoffs: python -m research.scripts.build_verb_census
 TIER_CUTOFFS: dict[str, tuple[float, float]] = {
-    "es": (4.131, 4.693),  # n=1180, min=3.219, max=7.213, mean=4.456
-    "en": (3.915, 4.656),  # n=2265, min=3.004, max=6.799, mean=4.287
+    "es": (2.858, 3.822),  # n=4044, min=1.009, max=6.925, mean=3.339
+    "en": (2.995, 3.911),  # n=7007, min=1.009, max=7.551, mean=3.453
 }
 
 # Canonical forms summed for lemma frequency. Kept small (~9 forms) to
@@ -168,14 +166,10 @@ def _es_canonical_forms(verb: str) -> list[str]:
     return forms
 
 
-def _en_canonical_forms(verb: str) -> list[str]:
-    """Minimal English form set: infinitive plus regular -s / -ed / -ing.
-
-    English is peripheral to this project; we don't try to handle strong
-    verbs. This is enough for the cross-lingual comparison to be sensible.
-    """
-    stem = verb
-    forms = [verb]
+def _en_regular_forms(verb: str) -> list[str]:
+    """Regular English inflections: base, -s, -ed, -ing (with minor spelling rules)."""
+    stem = verb.lower()
+    forms = [stem]
     if stem.endswith("e"):
         forms += [f"{stem}s", f"{stem}d", f"{stem[:-1]}ing"]
     elif stem.endswith("y") and len(stem) >= 2 and stem[-2] not in "aeiou":
@@ -183,6 +177,18 @@ def _en_canonical_forms(verb: str) -> list[str]:
     else:
         forms += [f"{stem}s", f"{stem}ed", f"{stem}ing"]
     return forms
+
+
+def _en_canonical_forms(verb: str) -> list[str]:
+    """Lemma-level English form set: irregular table or regular paradigm."""
+    from research.evaluation.lexicon.en_irregular import EN_IRREGULAR_FORMS
+
+    stem = verb.lower()
+    if stem in EN_IRREGULAR_FORMS:
+        candidates = (stem, *EN_IRREGULAR_FORMS[stem])
+    else:
+        candidates = tuple(_en_regular_forms(stem))
+    return list(dict.fromkeys(candidates))
 
 
 def _zipf(freq_per_word: float) -> float:
