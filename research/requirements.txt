@@ -6,6 +6,8 @@ pyyaml>=6.0
 # nlp (verb_morphology evaluator + future per-language parsers)
 spacy>=3.7
 language-tool-python>=2.8  # grammar_languagetool (requires Java for local server)
+wordfreq>=3.1  # Zipf-scale verb frequency for objective rarity tiers
+verbecc>=1.10  # Spanish verb conjugation for lemma-summed frequency and irregularity flags
 
 # dev / testing
 pytest>=8.0
