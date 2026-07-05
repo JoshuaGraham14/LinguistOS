@@ -59,13 +59,17 @@ Tier = Literal["common", "mid", "rare"]
 #
 # Provenance: computed once by `research/scripts/compute_tier_cutoffs.py`
 # over the reference verb-lemma lists in
-# `research/evaluation/lexicon/reference_lemmas/{lang}.txt`.
+# `research/evaluation/lexicon/reference_lemmas/{lang}.txt` (500 Spanish and
+# 290 English verb infinitives, drawn from wordfreq's top-30k tokens).
 #
-# Placeholder pre-freeze values; overwritten by `compute_tier_cutoffs.py`
-# in the same commit that generates the reference lemma lists.
+# Interpretation: a verb is 'rare' relative to the reference distribution of
+# already-common verbs, i.e. bottom-tercile among top-500 Spanish verbs. Verbs
+# outside the reference list therefore score as 'rare' by construction.
+#
+# Regenerate with: python -m research.scripts.compute_tier_cutoffs
 TIER_CUTOFFS: dict[str, tuple[float, float]] = {
-    "es": (0.0, 0.0),
-    "en": (0.0, 0.0),
+    "es": (4.665, 5.048),  # n=500, mean=4.93, median=4.83, min=4.04, max=7.21
+    "en": (4.999, 5.382),  # n=290, mean=5.17, median=5.17, min=3.47, max=6.80
 }
 
 # Canonical forms summed for lemma frequency. Kept small (~9 forms) to
