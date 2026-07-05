@@ -28,9 +28,11 @@ Design decisions
    verb (e.g. 'habla' >> 'hablar').
 
 4. **Tier cutoffs**: per-language 33rd/67th percentile of the Zipf-lemma
-   distribution over a fixed reference verb list per language. Values are
-   computed once by `research/scripts/compute_tier_cutoffs.py` and frozen
-   in `TIER_CUTOFFS` below. Freezing = pre-registration.
+   distribution over a **full verb census** (~1,180 Spanish verbs from
+   wordfreq top-30k, validated by verbecc). Values are computed once by
+   `research/scripts/build_verb_census.py` and frozen in `TIER_CUTOFFS`.
+   Tiers are named high / mid / low (not common/rare) to avoid implying
+   absolute rarity for verbs inside the census. Freezing = pre-registration.
 
 5. **Irregularity is tense-specific**: `is_irregular(verb, tense)` compares
    verbecc's actual conjugation against the regular-paradigm form derived
@@ -44,32 +46,39 @@ English handling is minimal: `verb_zipf` and `tier` work, but
 
 from __future__ import annotations
 
+import csv
 import logging
 import math
+import random
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from wordfreq import word_frequency
 
 logging.getLogger("verbecc").setLevel(logging.WARNING)
 
-Tier = Literal["common", "mid", "rare"]
+Tier = Literal["high", "mid", "low"]
+
+CENSUS_DIR = Path(__file__).resolve().parent / "census"
 
 # Frozen 33rd / 67th percentile Zipf-lemma cutoffs per language.
 #
-# Provenance: computed once by `research/scripts/compute_tier_cutoffs.py`
-# over the reference verb-lemma lists in
-# `research/evaluation/lexicon/reference_lemmas/{lang}.txt` (500 Spanish and
-# 290 English verb infinitives, drawn from wordfreq's top-30k tokens).
+# Provenance: `research/scripts/build_verb_census.py` over the full verb
+# census in `research/evaluation/lexicon/census/{lang}.csv`.
 #
-# Interpretation: a verb is 'rare' relative to the reference distribution of
-# already-common verbs, i.e. bottom-tercile among top-500 Spanish verbs. Verbs
-# outside the reference list therefore score as 'rare' by construction.
+# Tuple is (low_upper, high_lower):
+#   Zipf < low_upper  -> low-frequency tier
+#   Zipf >= high_lower -> high-frequency tier
+#   otherwise -> mid
 #
-# Regenerate with: python -m research.scripts.compute_tier_cutoffs
+# Verbs outside the census (e.g. literary lemmas below wordfreq top-30k)
+# are scored via verb_zipf() and compared against these same boundaries.
+#
+# Regenerate census + cutoffs: python -m research.scripts.build_verb_census
 TIER_CUTOFFS: dict[str, tuple[float, float]] = {
-    "es": (4.665, 5.048),  # n=500, mean=4.93, median=4.83, min=4.04, max=7.21
-    "en": (4.999, 5.382),  # n=290, mean=5.17, median=5.17, min=3.47, max=6.80
+    "es": (4.131, 4.693),  # n=1180, min=3.219, max=7.213, mean=4.456
+    "en": (3.915, 4.656),  # n=2265, min=3.004, max=6.799, mean=4.287
 }
 
 # Canonical forms summed for lemma frequency. Kept small (~9 forms) to
@@ -204,19 +213,99 @@ def verb_zipf(verb: str, lang: str) -> float:
     return _zipf(total)
 
 
+def tier_from_zipf(z: float, lang: str) -> Tier:
+    """Map a Zipf-lemma score to high / mid / low using frozen cutoffs."""
+    low_upper, high_lower = TIER_CUTOFFS.get(lang, (0.0, 0.0))
+    if z < low_upper:
+        return "low"
+    if z >= high_lower:
+        return "high"
+    return "mid"
+
+
 def tier(verb: str, lang: str) -> Tier:
     """Return the frequency tier for *verb* in *lang*.
 
-    Cutoffs come from `TIER_CUTOFFS[lang]` (33rd / 67th Zipf percentiles over
-    a reference verb list, frozen at module load time).
+    Census verbs use the Zipf score committed in ``census/{lang}.csv`` so
+    tier boundaries stay consistent with the pre-registered cutoffs. Verbs
+    outside the census (e.g. niche literary lemmas) are scored live via
+    ``verb_zipf()``.
     """
-    z = verb_zipf(verb, lang)
-    rare_upper, common_lower = TIER_CUTOFFS.get(lang, (0.0, 0.0))
-    if z < rare_upper:
-        return "rare"
-    if z >= common_lower:
-        return "common"
-    return "mid"
+    for v, z in _load_census(lang):
+        if v == verb:
+            return tier_from_zipf(z, lang)
+    return tier_from_zipf(verb_zipf(verb, lang), lang)
+
+
+@lru_cache(maxsize=4)
+def _load_census(lang: str) -> tuple[tuple[str, float], ...]:
+    """Return (verb, zipf) rows from the committed census CSV."""
+    path = CENSUS_DIR / f"{lang}.csv"
+    if not path.exists():
+        return ()
+    rows: list[tuple[str, float]] = []
+    with open(path, encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append((row["verb"], float(row["zipf"])))
+    return tuple(rows)
+
+
+def in_census(verb: str, lang: str) -> bool:
+    """Whether *verb* appears in the committed corpus census for *lang*."""
+    return any(v == verb for v, _ in _load_census(lang))
+
+
+def verbs_in_tier(tier_name: Tier, lang: str) -> list[str]:
+    """All census verbs in *tier_name*, sorted by Zipf descending."""
+    matched = [
+        (verb, z) for verb, z in _load_census(lang)
+        if tier_from_zipf(z, lang) == tier_name
+    ]
+    matched.sort(key=lambda row: -row[1])
+    return [verb for verb, _ in matched]
+
+
+def filter_by_tier(candidates: list[str], tier_name: Tier, lang: str) -> list[str]:
+    """Filter an arbitrary candidate list to verbs in *tier_name*."""
+    return [v for v in candidates if tier(v, lang) == tier_name]
+
+
+def sample_verbs(
+    tier_name: Tier,
+    lang: str,
+    n: int = 5,
+    *,
+    exclude: frozenset[str] | set[str] | None = None,
+    irregular: bool | None = None,
+    tense: str = "present",
+    person: str = "1st",
+    number: str = "singular",
+    rng: random.Random | None = None,
+) -> list[str]:
+    """Sample *n* census verbs from *tier_name*.
+
+    Parameters
+    ----------
+    exclude:
+        Verbs to skip (e.g. ones already used in a benchmark).
+    irregular:
+        If set and lang is Spanish, keep only verbs where
+        ``is_irregular(verb, tense, ...)`` matches this value.
+    """
+    if n <= 0:
+        return []
+    excluded = exclude or set()
+    candidates = [v for v in verbs_in_tier(tier_name, lang) if v not in excluded]
+    if irregular is not None and lang == "es":
+        candidates = [
+            v for v in candidates
+            if is_irregular(v, tense, lang, person, number) is irregular
+        ]
+    if len(candidates) <= n:
+        return candidates
+    picker = rng or random.Random()
+    return picker.sample(candidates, n)
 
 
 # Regular Spanish endings for tenses used by our benchmarks. Keys match
@@ -364,18 +453,14 @@ def score_verb(verb: str, lang: str,
             'verb': ...,
             'lang': ...,
             'zipf': float,
-            'tier': 'common' | 'mid' | 'rare',
+            'tier': 'high' | 'mid' | 'low',
+            'in_census': bool,
             'tenses_irregular': [tense, ...],  # empty for English (not implemented)
         }
     """
     z = verb_zipf(verb, lang)
-    rare_upper, common_lower = TIER_CUTOFFS.get(lang, (0.0, 0.0))
-    if z < rare_upper:
-        t: Tier = "rare"
-    elif z >= common_lower:
-        t = "common"
-    else:
-        t = "mid"
+    t = tier_from_zipf(z, lang)
+    census_member = in_census(verb, lang)
 
     if lang == "es":
         irregular = [tn for tn in tenses if is_irregular(verb, tn, lang, person, number)]
@@ -387,5 +472,6 @@ def score_verb(verb: str, lang: str,
         "lang": lang,
         "zipf": round(z, 3),
         "tier": t,
+        "in_census": census_member,
         "tenses_irregular": irregular,
     }

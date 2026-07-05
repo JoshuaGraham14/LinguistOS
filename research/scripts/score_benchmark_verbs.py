@@ -27,6 +27,7 @@ import yaml
 
 from research.evaluation.lexicon.frequency import (
     TIER_CUTOFFS,
+    in_census,
     is_irregular,
     tier,
     verb_zipf,
@@ -46,6 +47,7 @@ def _row(benchmark: str, cs: dict[str, Any], lang: str) -> dict[str, Any]:
 
     z = verb_zipf(verb, lang)
     t = tier(verb, lang)
+    in_census_flag = in_census(verb, lang)
 
     if lang == "es" and tense and person and number:
         try:
@@ -66,6 +68,7 @@ def _row(benchmark: str, cs: dict[str, Any], lang: str) -> dict[str, Any]:
         "cefr_level": cs.get("cefr_level", ""),
         "zipf": round(z, 3),
         "tier": t,
+        "in_census": "yes" if in_census_flag else "no",
         "irregular": "" if irregular is None else ("yes" if irregular else "no"),
     }
 
@@ -106,21 +109,23 @@ def _write_markdown(rows: list[dict[str, Any]], path: Path) -> None:
         "Zipf-lemma scores are the log10 of per-billion frequency, summed over a "
         "canonical inflected-form set (infinitive + present indicative x6 + "
         "gerund + past participle) using `wordfreq` (Wikipedia + OpenSubtitles + "
-        "news + web). Tiers are the 33rd / 67th percentiles of the Zipf-lemma "
-        "distribution over a reference list of common verb infinitives per "
-        "language (n=500 for Spanish, n=290 for English). Irregularity is "
-        "tense-specific: `yes` means the verbecc conjugation of "
+        "news + web). Tier boundaries (high / mid / low) are the 33rd and 67th "
+        "percentiles of the Zipf-lemma distribution over a full verb census per "
+        "language (n=1,180 Spanish verbs from wordfreq top-30k, validated by "
+        "verbecc; n=2,265 English). Verbs outside the census are scored with the "
+        "same Zipf function and compared against the frozen boundaries. "
+        "Irregularity is tense-specific: `yes` means the verbecc conjugation of "
         "(verb, tense, person, number) differs from the regular-paradigm form."
     )
     lines.append("")
     lines.append("**Frozen cutoffs (Zipf-lemma):**")
     lines.append("")
-    lines.append("| Language | rare < | mid | common >= |")
+    lines.append("| Language | low < | mid | high >= |")
     lines.append("|---|---|---|---|")
-    for lang, (rare_upper, common_lower) in TIER_CUTOFFS.items():
-        lines.append(f"| {lang} | {_fmt_zipf(rare_upper)} | "
-                     f"[{_fmt_zipf(rare_upper)}, {_fmt_zipf(common_lower)}) | "
-                     f"{_fmt_zipf(common_lower)} |")
+    for lang, (low_upper, high_lower) in TIER_CUTOFFS.items():
+        lines.append(f"| {lang} | {_fmt_zipf(low_upper)} | "
+                     f"[{_fmt_zipf(low_upper)}, {_fmt_zipf(high_lower)}) | "
+                     f"{_fmt_zipf(high_lower)} |")
     lines.append("")
 
     by_bench: dict[str, list[dict[str, Any]]] = {}
@@ -132,15 +137,15 @@ def _write_markdown(rows: list[dict[str, Any]], path: Path) -> None:
         lines.append(f"## `{bench}`")
         lines.append("")
         lines.append(
-            "| Verb | Tense | Person/Number | Expected form | CEFR | Zipf | Tier | Irregular |"
+            "| Verb | Tense | Person/Number | Expected form | CEFR | Zipf | Tier | In census | Irregular |"
         )
-        lines.append("|---|---|---|---|---|---|---|---|")
+        lines.append("|---|---|---|---|---|---|---|---|---|")
         for r in bench_rows:
             pn = f"{r['person']} {r['number']}".strip() if r["person"] or r["number"] else ""
             lines.append(
                 f"| {r['verb']} | {r['tense']} | {pn} | {r['expected_form']} | "
                 f"{r['cefr_level']} | {_fmt_zipf(r['zipf'])} | {r['tier']} | "
-                f"{r['irregular']} |"
+                f"{r['in_census']} | {r['irregular']} |"
             )
         lines.append("")
 
@@ -155,12 +160,12 @@ def _summarise(rows: list[dict[str, Any]]) -> None:
         ) + 1
 
     benches = sorted({r["benchmark"] for r in rows})
-    print(f"{'benchmark':30s} common  mid  rare")
+    print(f"{'benchmark':30s} high   mid  low")
     for bench in benches:
-        c = by_bench_tier.get((bench, "common"), 0)
+        h = by_bench_tier.get((bench, "high"), 0)
         m = by_bench_tier.get((bench, "mid"), 0)
-        rr = by_bench_tier.get((bench, "rare"), 0)
-        print(f"{bench:30s}   {c:4d} {m:4d}  {rr:4d}")
+        lo = by_bench_tier.get((bench, "low"), 0)
+        print(f"{bench:30s}   {h:4d} {m:4d}  {lo:4d}")
 
 
 def main() -> None:
