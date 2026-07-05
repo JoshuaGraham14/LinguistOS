@@ -1,13 +1,17 @@
 lang: en
-n_verbs: 2265
-search_top_n: 30000
-zipf_min: 3.004
-zipf_max: 6.799
-zipf_mean: 4.329
-zipf_median: 4.259
+n_verbs: 7007
+n_wordfreq_tokens: 321180
+verb_source: "wordfreq full dictionary \u2229 WordNet verb lemmas"
+lemma_scoring: 'lemma-summed Zipf: Spanish via verbecc present+infinitive+gerund+participle;
+  English via regular -s/-ed/-ing plus en_irregular.py table'
+zipf_min: 1.009
+zipf_max: 7.551
+zipf_mean: 3.462
+zipf_median: 3.434
 tier_cutoffs:
-  low_upper: 3.915
-  high_lower: 4.656
+  low_upper: 2.995
+  high_lower: 3.911
 tier_interpretation: low = Zipf below 33rd percentile of this census; high = Zipf
-  at/above 67th percentile; mid = between. Verbs outside the census are scored via
-  the same Zipf function and compared against these frozen boundaries.
+  at/above 67th percentile; mid = between. Tiers are for stratified verb selection;
+  Zipf is the continuous analysis variable. Verbs outside the census use the same
+  Zipf function and frozen boundaries.

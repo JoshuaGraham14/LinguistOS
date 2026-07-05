@@ -66,10 +66,10 @@ spanish_grammar_probe,es,probe_subj_verb,preterite,1st,plural,comimos,,0.0,low,n
 spanish_grammar_probe,es,probe_det_noun,present,3rd,singular,come,,0.0,low,no,no
 spanish_grammar_probe,es,probe_prep,preterite,1st,singular,fui,,0.0,low,no,no
 spanish_grammar_probe,es,probe_correct,present,2nd,singular,hablas,,0.0,low,no,no
-spanish_niche,es,henchir,preterite,1st,singular,henchí,C1,2.864,low,no,no
-spanish_niche,es,argüir,preterite,1st,singular,argüí,C1,2.949,low,no,no
-spanish_niche,es,atestiguar,preterite,1st,singular,atestigüé,C1,3.399,low,no,yes
-spanish_niche,es,menguar,present,1st,singular,menguo,C1,2.998,low,no,no
-spanish_niche,es,empalagar,present,1st,singular,empalago,C1,2.119,low,no,no
-spanish_niche,es,blandir,preterite,1st,singular,blandí,C1,3.656,low,no,yes
-spanish_niche,es,proferir,present,1st,singular,profiero,C1,2.741,low,no,yes
+spanish_niche,es,henchir,preterite,1st,singular,henchí,C1,2.864,mid,yes,no
+spanish_niche,es,argüir,preterite,1st,singular,argüí,C1,2.949,mid,yes,no
+spanish_niche,es,atestiguar,preterite,1st,singular,atestigüé,C1,3.399,mid,yes,yes
+spanish_niche,es,menguar,present,1st,singular,menguo,C1,2.998,mid,yes,no
+spanish_niche,es,empalagar,present,1st,singular,empalago,C1,2.119,low,yes,no
+spanish_niche,es,blandir,preterite,1st,singular,blandí,C1,3.656,mid,yes,yes
+spanish_niche,es,proferir,present,1st,singular,profiero,C1,2.741,low,yes,yes

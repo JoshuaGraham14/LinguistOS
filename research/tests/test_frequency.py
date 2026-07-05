@@ -8,6 +8,7 @@ import pytest
 from wordfreq import word_frequency
 
 from research.evaluation.lexicon.frequency import (
+    TIER_CUTOFFS,
     filter_by_tier,
     in_census,
     is_irregular,
@@ -40,41 +41,51 @@ def test_spanish_basic_verbs_are_high_tier() -> None:
         assert tier(v, "es") == "high", f"expected {v} to be high"
 
 
-def test_spanish_niche_verbs_are_low_tier() -> None:
-    for v in ("henchir", "argüir", "menguar", "empalagar",
-              "blandir", "proferir", "atestiguar"):
-        assert tier(v, "es") == "low", f"expected {v} to be low"
+def test_spanish_niche_verbs_are_not_high_tier() -> None:
+    """Niche benchmark verbs sit below the high-frequency third of the census."""
+    _, high_lower = TIER_CUTOFFS["es"]
+    for v in ("henchir", "argüir", "menguar", "empalagar", "blandir", "proferir", "atestiguar"):
+        assert tier(v, "es") != "high", f"expected {v} not to be high"
+        assert verb_zipf(v, "es") < high_lower, f"expected {v} below high cutoff"
 
 
-def test_niche_verbs_not_in_census_but_still_tiered() -> None:
-    assert in_census("henchir", "es") is False
-    assert tier("henchir", "es") == "low"
-
-
-def test_census_high_verbs_are_in_census() -> None:
-    assert in_census("comer", "es") is True
-    assert tier("comer", "es") == "high"
+def test_spanish_niche_verbs_in_census() -> None:
+    for v in ("henchir", "argüir", "empalagar", "proferir", "atestiguar"):
+        assert in_census(v, "es") is True, f"expected {v} in census"
 
 
 def test_census_partition_covers_all_verbs() -> None:
     high = verbs_in_tier("high", "es")
     mid = verbs_in_tier("mid", "es")
     low = verbs_in_tier("low", "es")
-    assert len(high) + len(mid) + len(low) == 1180
+    assert len(high) + len(mid) + len(low) == 4044
     assert len(set(high) & set(mid) & set(low)) == 0
 
 
+def test_english_irregular_lemma_sum_beats_regular_only() -> None:
+    from research.evaluation.lexicon.frequency import _en_canonical_forms, _en_regular_forms
+    from wordfreq import word_frequency
+
+    def _sum_zipf(forms: list[str]) -> float:
+        total = sum(word_frequency(f, "en") for f in forms)
+        return 0.0 if total <= 0 else math.log10(total * 1_000_000_000)
+
+    assert _sum_zipf(_en_canonical_forms("go")) > _sum_zipf(_en_regular_forms("go"))
+    assert _sum_zipf(_en_canonical_forms("run")) > _sum_zipf(_en_regular_forms("run"))
+
+
 def test_tier_from_zipf_boundaries() -> None:
-    low_upper, high_lower = 4.131, 4.693
+    low_upper, high_lower = 2.858, 3.822
     assert tier_from_zipf(low_upper - 0.01, "es") == "low"
     assert tier_from_zipf(high_lower, "es") == "high"
     assert tier_from_zipf((low_upper + high_lower) / 2, "es") == "mid"
 
 
 def test_filter_by_tier_on_candidate_list() -> None:
-    candidates = ["comer", "henchir", "hablar", "argüir"]
+    candidates = ["comer", "henchir", "hablar", "empalagar"]
     assert filter_by_tier(candidates, "high", "es") == ["comer", "hablar"]
-    assert filter_by_tier(candidates, "low", "es") == ["henchir", "argüir"]
+    assert filter_by_tier(candidates, "low", "es") == ["empalagar"]
+    assert filter_by_tier(candidates, "mid", "es") == ["henchir"]
 
 
 def test_sample_verbs_respects_exclude() -> None:
