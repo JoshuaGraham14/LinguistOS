@@ -47,12 +47,18 @@ def _load_model(model_id: str) -> tuple[Any, Any]:
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        device = "cpu"
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     # eager attention: MPS sdpa kernel fails on grouped-query attention shapes.
+    use_fp16 = device in ("mps", "cuda")
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        dtype=torch.float16 if device == "mps" else torch.float32,
+        dtype=torch.float16 if use_fp16 else torch.float32,
         attn_implementation="eager",
     )
     model.to(device)

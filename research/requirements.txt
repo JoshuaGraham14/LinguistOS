@@ -9,6 +9,7 @@ language-tool-python>=2.8  # grammar_languagetool (requires Java for local serve
 wordfreq>=3.1  # Zipf-scale verb frequency for objective rarity tiers
 verbecc>=1.10  # Spanish verb conjugation for lemma-summed frequency and irregularity flags
 nltk>=3.8  # WordNet verb lemmas for English census
+lemminflect>=0.2.3  # English past/participle for census irregularity + gold forms
 
 # dev / testing
 pytest>=8.0

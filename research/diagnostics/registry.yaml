@@ -1,0 +1,62 @@
+# Diagnostic registry — rigorous, frequency-validated runs for the thesis.
+#
+# Diagnostics are numbered independently of the original exploratory
+# "Experiment 1–10" series. A diagnostic may subsume, replace, or
+# diverge from an old experiment number; see ``related_experiments``.
+#
+# Experiments (historical): exploratory spikes, LLM-labelled stimuli,
+#   documented under docs/experiment-results/.
+# Diagnostics (this file): final diagnosis runs — census manifest,
+#   frozen cutoffs, reproducible seeds — feeding the build phase.
+
+diagnostics:
+  - id: diagnostic_1
+    number: 1
+    title: Cross-language morphology isolation
+    question: >-
+      Can small Qwen models produce correct verb forms in isolation, and
+      does accuracy vary by corpus frequency and irregularity? Is there a
+      language gap at matched structural cells (EN vs ES)?
+    script: research/prototyping/exp1_freq_validated_isolation_qwen_spike.py
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
+    results: docs/spike-results/eval_diagnostic_1_isolation_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B-Instruct-2507]
+    related_experiments: [1, 2, "1B", "2B"]
+    status: complete
+
+  # Planned — numbers are provisional; reorder as needed.
+  - id: diagnostic_2
+    number: 2
+    title: Paradigm recall vs sentence binding
+    question: >-
+      For common verbs on the manifest, does the model know the form in
+      isolation but fail to bind it in sentence generation (CTG gap)?
+    script: null
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
+    results: null
+    related_experiments: [3, "3B"]
+    status: planned
+
+  - id: diagnostic_3
+    number: 3
+    title: Morphology verification (generate vs judge)
+    question: >-
+      Can the model verify whether a proposed form is correct even when
+      generation fails (supervisor verify-not-generate probe)?
+    script: null
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
+    results: null
+    related_experiments: []
+    status: planned
+
+  - id: diagnostic_4
+    number: 4
+    title: Prompt ablation on frequency-validated benchmarks
+    question: >-
+      Does explicit prompting rescue binding on the new basic/challenging
+      YAMLs built from the manifest?
+    script: null
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
+    results: null
+    related_experiments: [4, 5]
+    status: planned
