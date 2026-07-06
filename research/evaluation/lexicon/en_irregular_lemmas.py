@@ -1,4 +1,4 @@
-"""English past-tense irregularity for Exp 1 stratified sampling.
+"""English past-tense irregularity for Diagnostic 1 stratified sampling.
 
 Classifies census verbs programmatically (lemminflect past vs naive ``-ed``),
 mirroring Spanish ``verbecc``-based irregularity. Pure consonant-doubling /

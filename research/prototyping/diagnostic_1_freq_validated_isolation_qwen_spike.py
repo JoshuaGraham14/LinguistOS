@@ -20,15 +20,15 @@ REPRODUCIBILITY
 ----------------------------------------------------------------------
 Status:      Diagnostic 1. Not run through ``research.run_experiment`` or the DB.
 
-Run:         python3 -m research.prototyping.exp1_freq_validated_isolation_qwen_spike
-             python3 -m research.prototyping.exp1_freq_validated_isolation_qwen_spike --dry-run
-             python3 -m research.prototyping.exp1_freq_validated_isolation_qwen_spike \\
+Run:         python3 -m research.prototyping.diagnostic_1_freq_validated_isolation_qwen_spike
+             python3 -m research.prototyping.diagnostic_1_freq_validated_isolation_qwen_spike --dry-run
+             python3 -m research.prototyping.diagnostic_1_freq_validated_isolation_qwen_spike \\
                  --models qwen06b --limit 4
 
 Manifest:    research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
-Legacy n=10: research/evaluation/lexicon/experiment_verbs/manifest_exp1.csv
+Legacy n=10: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n10.csv
 Registry:    research/diagnostics/registry.yaml
-Models:      Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B-Instruct-2507
+Models:      Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B (thinking disabled)
 Decoding:    Greedy (temperature=0), max_new_tokens=32
 ----------------------------------------------------------------------
 """
@@ -56,10 +56,12 @@ _EDGE_PUNCT = string.punctuation + "«»""''¡¿"
 QWEN_MODELS: dict[str, str] = {
     "qwen06b": "Qwen/Qwen3-0.6B",
     "qwen17b": "Qwen/Qwen3-1.7B",
-    "qwen4b": "Qwen/Qwen3-4B-Instruct-2507",
+    "qwen4b": "Qwen/Qwen3-4B",
     # Legacy key (Qwen2.5); kept for reproducing older spikes only.
     "qwen05b": "Qwen/Qwen2.5-0.5B-Instruct",
 }
+
+DEFAULT_MODEL_KEYS: tuple[str, ...] = ("qwen06b", "qwen17b", "qwen4b")
 
 DEFAULT_MANIFEST = (
     Path(__file__).resolve().parents[1]
@@ -422,8 +424,8 @@ def main() -> None:
         "--models",
         nargs="+",
         choices=list(QWEN_MODELS),
-        default=list(QWEN_MODELS),
-        help="Which Qwen checkpoints to run (default: all three).",
+        default=list(DEFAULT_MODEL_KEYS),
+        help="Which Qwen checkpoints to run (default: qwen06b qwen17b qwen4b).",
     )
     parser.add_argument(
         "--lang",

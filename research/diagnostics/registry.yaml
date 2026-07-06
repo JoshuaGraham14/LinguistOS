@@ -17,12 +17,12 @@ diagnostics:
       Can small Qwen models produce correct verb forms in isolation, and
       does accuracy vary by corpus frequency and irregularity? Is there a
       language gap at matched structural cells (EN vs ES)?
-    script: research/prototyping/exp1_freq_validated_isolation_qwen_spike.py
+    script: research/prototyping/diagnostic_1_freq_validated_isolation_qwen_spike.py
     manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
     results: docs/spike-results/eval_diagnostic_1_isolation_qwen_results.json
-    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B-Instruct-2507]
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
     related_experiments: [1, 2, "1B", "2B"]
-    status: complete
+    status: pending
 
   # Planned — numbers are provisional; reorder as needed.
   - id: diagnostic_2
