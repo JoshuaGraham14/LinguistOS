@@ -8,9 +8,14 @@
 #   1A — production (generate one form)
 #   1B — verification (judge a proposed form, yes/no)
 #
-# Diagnostic 2 is a paired series on the same 150 Spanish verbs:
+# Diagnostic 2 is paradigm isolation on the same 150 Spanish verbs:
 #   2A — full-paradigm production (six-person tables + participle)
 #   2B — single-slot production (one form per call)
+#
+# Diagnostic 3 is sentence binding on the same 150 verbs (paired to 2A):
+#   3A — plain-text sentence, 2A-aligned hints (T=0, 1 sample)
+#   3B — production baseline prompt (planned)
+#   3C — production prompt + T=0.7, 10 samples (planned)
 #
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
 #   documented under docs/experiment-results/.
@@ -102,6 +107,37 @@ diagnostics:
     models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
     related_experiments: [3, "3B", 10]
     status: complete
+
+  - id: diagnostic_3
+    number: 3
+    title: Spanish sentence binding vs paradigm recall
+    question: >-
+      On the same 150 verbs and morphological cells as Diagnostic 2A, does
+      the model use the required surface form in sentence generation when
+      it already produced that form correctly in the paradigm table?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    variants: [diagnostic_3a, diagnostic_3b, diagnostic_3c]
+    related_experiments: [3, "3B", 10]
+    status: in_progress
+
+  - id: diagnostic_3a
+    number: "3A"
+    series: diagnostic_3
+    title: Spanish sentence binding (2A-aligned hints, plain text)
+    question: >-
+      With plain-text output, 2A-aligned tense/person hints, no length band,
+      no JSON, and no CEFR, does sentence pass rate lag 2A strict slot recall
+      (binding gap)?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    variant: diagnostic_3a
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1}
+    related_experiments: [3, "3B", 10]
+    status: ready
 
   - id: diagnostic_4
     number: 4
