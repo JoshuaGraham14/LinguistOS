@@ -8,7 +8,8 @@ Paired sentence probes on the same 150 Spanish verbs as Diagnostic 2A:
 - **Diagnostic 3B** (``diagnostic_3b``): production ``build_prompt`` baseline (short,
   JSON + translation, generic constraint labels, no CEFR), T=0, 1 sample/cell.
 - **Diagnostic 3C** (``diagnostic_3c``): same prompt as 3B, T=0.7, 10 samples/cell
-  (pass@10); default model is 1.7B only.
+  (pass@10), batched JSON with top-up retries on parse failure (mirrors
+  ``baseline_hf``); default model is 1.7B only.
 
 Part of the **Diagnostics** track; see ``research/diagnostics/registry.yaml``.
 
@@ -49,6 +50,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from research.evaluation.length_bands import band_label
 from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
 from research.generation.baseline_hf import (
+    BaselineHFGenerator,
     _is_qwen3,
     _load_model,
     _strip_thinking,
@@ -141,6 +143,7 @@ SYSTEM_MESSAGE_PRODUCTION = (
 
 _JSONish_RE = re.compile(r"^\s*[\[{]")
 _EF = ExpectedFormMatchEvaluator()
+MAX_TOPUP_CALLS = BaselineHFGenerator.MAX_CALLS
 
 
 @dataclass
@@ -415,19 +418,12 @@ def _score_one_sentence(sentence: str, expected_form: str) -> dict[str, Any]:
     }
 
 
-def score_output(case: SentenceCase, raw: str) -> dict[str, Any]:
-    cfg = variant_config(case.variant)
-    output_format = cfg["output_format"]
-
-    if output_format == "plain_text":
-        sentence = extract_plain_sentence(raw)
-        scored = _score_one_sentence(sentence, case.expected_form)
-        return {
-            "raw": raw.strip(),
-            **scored,
-        }
-
-    cands, parse_mode = parse_candidates_lenient(_strip_thinking(raw))
+def _score_json_candidates(
+    case: SentenceCase,
+    cands: list[dict[str, str]],
+    *,
+    parse_mode: str | None = None,
+) -> dict[str, Any]:
     scored_cands: list[dict[str, Any]] = []
     for cand in cands:
         sentence = str(cand.get("sentence", "")).strip()
@@ -444,9 +440,7 @@ def score_output(case: SentenceCase, raw: str) -> dict[str, Any]:
     n_pass = sum(1 for c in scored_cands if c["expected_form_pass"])
     pass_at_k = n_pass > 0
     first = scored_cands[0] if scored_cands else None
-    return {
-        "raw": raw.strip(),
-        "parse_mode": parse_mode,
+    out: dict[str, Any] = {
         "candidates": scored_cands,
         "n_candidates_parsed": len(scored_cands),
         "n_pass": n_pass,
@@ -459,6 +453,28 @@ def score_output(case: SentenceCase, raw: str) -> dict[str, Any]:
         ),
         "matched_token": first["matched_token"] if first else None,
         "tokens_checked": first["tokens_checked"] if first else 0,
+    }
+    if parse_mode is not None:
+        out["parse_mode"] = parse_mode
+    return out
+
+
+def score_output(case: SentenceCase, raw: str) -> dict[str, Any]:
+    cfg = variant_config(case.variant)
+    output_format = cfg["output_format"]
+
+    if output_format == "plain_text":
+        sentence = extract_plain_sentence(raw)
+        scored = _score_one_sentence(sentence, case.expected_form)
+        return {
+            "raw": raw.strip(),
+            **scored,
+        }
+
+    cands, parse_mode = parse_candidates_lenient(_strip_thinking(raw))
+    return {
+        "raw": raw.strip(),
+        **_score_json_candidates(case, cands, parse_mode=parse_mode),
     }
 
 
@@ -594,18 +610,38 @@ def summarize(
     return out
 
 
-def _max_new_tokens(case: SentenceCase) -> int:
-    if case.variant == "diagnostic_3a":
+def _max_new_tokens_for_candidates(num_candidates: int, *, variant: Variant) -> int:
+    if variant == "diagnostic_3a":
         return 128
-    remaining = case.num_candidates
-    return min(80 * remaining + 200, 3072)
+    return min(80 * num_candidates + 200, 3072)
 
 
-def complete(model_id: str, case: SentenceCase, *, temperature: float) -> str:
+def _prompt_for_remaining(case: SentenceCase, remaining: int) -> str:
+    if remaining == case.num_candidates and case.prompt:
+        return case.prompt
+    return build_case_prompt(
+        case.variant,
+        case.lemma,
+        tense=case.tense,
+        person=case.person,
+        number=case.number,
+        expected_form=case.expected_form,
+        is_participle=case.is_participle,
+        num_candidates=remaining,
+    )
+
+
+def _run_generation(
+    model_id: str,
+    case: SentenceCase,
+    *,
+    prompt: str,
+    max_new_tokens: int,
+    temperature: float,
+) -> str:
     import torch
 
     tokenizer, model = _load_model(model_id)
-    prompt = build_prompt_for_case(case)
     messages = [
         {"role": "system", "content": system_message(case.variant)},
         {"role": "user", "content": prompt},
@@ -617,7 +653,7 @@ def complete(model_id: str, case: SentenceCase, *, temperature: float) -> str:
     inputs = tokenizer(text, return_tensors="pt").to(model.device)
 
     gen_kwargs: dict[str, Any] = {
-        "max_new_tokens": _max_new_tokens(case),
+        "max_new_tokens": max_new_tokens,
         "pad_token_id": tokenizer.eos_token_id,
     }
     if temperature <= 0:
@@ -632,6 +668,70 @@ def complete(model_id: str, case: SentenceCase, *, temperature: float) -> str:
     prompt_len = inputs["input_ids"].shape[1]
     raw = tokenizer.decode(output[0][prompt_len:], skip_special_tokens=True)
     return _strip_thinking(raw)
+
+
+def complete(model_id: str, case: SentenceCase, *, temperature: float) -> str:
+    prompt = build_prompt_for_case(case)
+    return _run_generation(
+        model_id,
+        case,
+        prompt=prompt,
+        max_new_tokens=_max_new_tokens_for_candidates(case.num_candidates, variant=case.variant),
+        temperature=temperature,
+    )
+
+
+def complete_with_topup(
+    model_id: str,
+    case: SentenceCase,
+    *,
+    temperature: float,
+) -> dict[str, Any]:
+    """Batched JSON generation with top-up calls when parsing returns too few candidates."""
+    collected: list[dict[str, str]] = []
+    raw_calls: list[str] = []
+    parse_modes: list[str] = []
+
+    for call_idx in range(MAX_TOPUP_CALLS):
+        remaining = case.num_candidates - len(collected)
+        if remaining <= 0:
+            break
+        prompt = _prompt_for_remaining(case, remaining)
+        raw = _run_generation(
+            model_id,
+            case,
+            prompt=prompt,
+            max_new_tokens=_max_new_tokens_for_candidates(remaining, variant=case.variant),
+            temperature=temperature,
+        )
+        raw_calls.append(raw.strip())
+        cands, mode = parse_candidates_lenient(raw)
+        parse_modes.append(mode)
+        print(
+            f"      [top-up call {call_idx + 1}/{MAX_TOPUP_CALLS}] "
+            f"requested={remaining} parsed={len(cands)} mode={mode}",
+            flush=True,
+        )
+        collected.extend(cands)
+
+    return {
+        "candidates": collected[: case.num_candidates],
+        "raw_calls": raw_calls,
+        "parse_modes": parse_modes,
+        "n_generation_calls": len(raw_calls),
+    }
+
+
+def _join_raw_calls(raw_calls: list[str]) -> str:
+    if not raw_calls:
+        return ""
+    if len(raw_calls) == 1:
+        return raw_calls[0]
+    parts = [
+        f"--- generation call {idx + 1} ---\n{raw.strip()}"
+        for idx, raw in enumerate(raw_calls)
+    ]
+    return "\n\n".join(parts)
 
 
 def _save_payload(payload: dict[str, Any], path: Path) -> None:
@@ -690,6 +790,9 @@ def run_spike(
             "models": {k: QWEN_MODELS[k] for k in model_keys},
             "temperature": temperature,
             "samples_per_cell": samples_per_cell,
+            "generation_topup_calls_max": (
+                MAX_TOPUP_CALLS if samples_per_cell > 1 else None
+            ),
             "cefr_level": meta["cefr_level"],
             "sentence_length": meta["sentence_length"],
             "output_format": meta["output_format"],
@@ -713,11 +816,20 @@ def run_spike(
         print(f"\n=== {variant} / {key} ({model_id}) ===")
         rows: list[dict[str, Any]] = []
         t0 = time.perf_counter()
+        use_topup = samples_per_cell > 1
         for i, case in enumerate(cases, 1):
             print(f"  [{i}/{len(cases)}] {case.id}...", flush=True)
             t_case = time.perf_counter()
-            raw = complete(model_id, case, temperature=temperature)
-            scored = score_output(case, raw)
+            if use_topup:
+                batch = complete_with_topup(model_id, case, temperature=temperature)
+                scored = _score_json_candidates(case, batch["candidates"])
+                scored["raw"] = _join_raw_calls(batch["raw_calls"])
+                scored["raw_calls"] = batch["raw_calls"]
+                scored["parse_modes"] = batch["parse_modes"]
+                scored["n_generation_calls"] = batch["n_generation_calls"]
+            else:
+                raw = complete(model_id, case, temperature=temperature)
+                scored = score_output(case, raw)
             rows.append(
                 {
                     "case": asdict(case),
