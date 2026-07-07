@@ -11,8 +11,8 @@ set -euo pipefail
 
 PROJECT=/vol/bitbucket/jjg25/LinguistOS
 VENV="${PROJECT}/.venv"
-OUTPUT_PARADIGM="${PROJECT}/docs/spike-results/eval_diagnostic_2_n150_paradigm_qwen_results.json"
-OUTPUT_SINGLE="${PROJECT}/docs/spike-results/eval_diagnostic_2_n150_single_slot_qwen_results.json"
+OUTPUT_2A="${PROJECT}/docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json"
+OUTPUT_2B="${PROJECT}/docs/spike-results/eval_diagnostic_2b_n150_single_slot_qwen_results.json"
 
 mkdir -p "${PROJECT}/logs" "${PROJECT}/docs/spike-results"
 
@@ -37,7 +37,7 @@ export HF_HOME="${PROJECT}/.cache/huggingface"
 export TRANSFORMERS_CACHE="${HF_HOME}"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
 
-echo "=== Diagnostic 2 n=150 — $(date -Is) ==="
+echo "=== Diagnostic 2 (2A + 2B) n=150 — $(date -Is) ==="
 echo "Host: $(hostname)"
 echo "Job: ${SLURM_JOB_ID:-interactive}"
 nvidia-smi || true
@@ -46,19 +46,19 @@ python3 -c "import torch; print('cuda:', torch.cuda.is_available(), torch.cuda.g
 run_model() {
   local model="$1"
   echo ""
-  echo "=== ${model}: full_paradigm ==="
+  echo "=== ${model}: diagnostic_2a (full paradigm) ==="
   python3 -m research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike \
-    --probe-mode full_paradigm \
+    --probe-mode diagnostic_2a \
     --models "${model}" \
-    --output "${OUTPUT_PARADIGM}" \
+    --output "${OUTPUT_2A}" \
     --resume
 
   echo ""
-  echo "=== ${model}: single_slot ==="
+  echo "=== ${model}: diagnostic_2b (single slot) ==="
   python3 -m research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike \
-    --probe-mode single_slot \
+    --probe-mode diagnostic_2b \
     --models "${model}" \
-    --output "${OUTPUT_SINGLE}" \
+    --output "${OUTPUT_2B}" \
     --resume
 }
 
@@ -73,8 +73,8 @@ import json
 from pathlib import Path
 
 for label, path in [
-    ("paradigm", Path("/vol/bitbucket/jjg25/LinguistOS/docs/spike-results/eval_diagnostic_2_n150_paradigm_qwen_results.json")),
-    ("single_slot", Path("/vol/bitbucket/jjg25/LinguistOS/docs/spike-results/eval_diagnostic_2_n150_single_slot_qwen_results.json")),
+    ("2A", Path("/vol/bitbucket/jjg25/LinguistOS/docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json")),
+    ("2B", Path("/vol/bitbucket/jjg25/LinguistOS/docs/spike-results/eval_diagnostic_2b_n150_single_slot_qwen_results.json")),
 ]:
     if not path.is_file():
         print(f"{label}: missing {path}")

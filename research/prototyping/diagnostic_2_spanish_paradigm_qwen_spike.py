@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """Diagnostic 2 — Spanish paradigm isolation (frequency-validated, verbecc gold).
 
-Census-grounded version of Experiment 3: full six-person paradigms and
-single-slot form asks on Spanish verbs from the Diagnostic 1 manifest
-(default: all 150 Spanish verbs, 25 per frequency×irregularity cell).
+Paired production probes on the same 150 Spanish verbs (Diagnostic 2 series):
 
-Six tenses: five indicative paradigms plus past participle (single form,
-matching Diagnostic 1A/B).
+- **Diagnostic 2A** (``diagnostic_2a``): full six-person paradigm tables + participle
+- **Diagnostic 2B** (``diagnostic_2b``): single-form production (one person per call)
 
 Part of the **Diagnostics** track; see ``research/diagnostics/registry.yaml``.
 
 Output:
-  docs/spike-results/eval_diagnostic_2_n150_paradigm_qwen_results.json
-  docs/spike-results/eval_diagnostic_2_n150_single_slot_qwen_results.json
+  docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+  docs/spike-results/eval_diagnostic_2b_n150_single_slot_qwen_results.json
 
 ----------------------------------------------------------------------
 REPRODUCIBILITY
@@ -20,13 +18,13 @@ REPRODUCIBILITY
 Run:
   python3 -m research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike --dry-run
   python3 -m research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike \\
-      --probe-mode full_paradigm --models qwen17b --limit 2
+      --probe-mode diagnostic_2a --models qwen17b --limit 2
   python3 -m research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike \\
       --probe-mode both --resume
 
 Manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
 Models:    Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B (thinking disabled)
-Decoding:  Greedy (temperature=0); max_new_tokens 256 (paradigm) / 64 (single slot / participle)
+Decoding:  Greedy (temperature=0); max_new_tokens 256 (2A) / 64 (2B / participle)
 ----------------------------------------------------------------------
 """
 
@@ -35,11 +33,8 @@ from __future__ import annotations
 import csv
 import json
 import math
-import re
-import string
 import sys
 import time
-import unicodedata
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -47,9 +42,14 @@ from typing import Any, Literal
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from research.evaluation.lexicon.frequency import _actual_es_form, _conjugate_es, _strip_pronoun
+from research.evaluation.paradigm_slot_scoring import (
+    SCORING_VERSION,
+    first_token,
+    normalize_form,
+    score_indicative_paradigm,
+    score_participle_form,
+)
 from research.generation.baseline_hf import _is_qwen3, _load_model, _strip_thinking, unload_model
-
-_EDGE_PUNCT = string.punctuation + "«»""''¡¿"
 
 QWEN_MODELS: dict[str, str] = {
     "qwen06b": "Qwen/Qwen3-0.6B",
@@ -70,17 +70,50 @@ DEFAULT_MANIFEST = (
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "docs" / "spike-results"
 
 DEFAULT_OUTPUTS: dict[str, Path] = {
-    "full_paradigm": RESULTS_DIR / "eval_diagnostic_2_n150_paradigm_qwen_results.json",
-    "single_slot": RESULTS_DIR / "eval_diagnostic_2_n150_single_slot_qwen_results.json",
+    "diagnostic_2a": RESULTS_DIR / "eval_diagnostic_2a_n150_paradigm_qwen_results.json",
+    "diagnostic_2b": RESULTS_DIR / "eval_diagnostic_2b_n150_single_slot_qwen_results.json",
 }
 
-DIAGNOSTIC_ID = "diagnostic_2"
-DIAGNOSTIC_NUMBER = "2"
-DIAGNOSTIC_TITLE = "Spanish paradigm recall vs sentence binding"
-DIAGNOSTIC_LABEL = "Diagnostic 2 — Spanish paradigm isolation (frequency-validated)"
+DIAGNOSTIC_SERIES = "diagnostic_2"
+DIAGNOSTIC_SERIES_TITLE = "Spanish paradigm recall vs sentence binding"
+DIAGNOSTIC_SERIES_LABEL = "Diagnostic 2 — Spanish paradigm isolation (frequency-validated)"
 
-ProbeMode = Literal["full_paradigm", "single_slot"]
-PROBE_MODES: tuple[ProbeMode, ...] = ("full_paradigm", "single_slot")
+ProbeMode = Literal["diagnostic_2a", "diagnostic_2b"]
+PROBE_MODES: tuple[ProbeMode, ...] = ("diagnostic_2a", "diagnostic_2b")
+
+# Legacy CLI / JSON values from before the 2A/2B split.
+PROBE_MODE_ALIASES: dict[str, ProbeMode] = {
+    "full_paradigm": "diagnostic_2a",
+    "single_slot": "diagnostic_2b",
+}
+
+DIAGNOSTIC_BY_MODE: dict[ProbeMode, dict[str, str]] = {
+    "diagnostic_2a": {
+        "diagnostic_id": "diagnostic_2a",
+        "diagnostic_number": "2A",
+        "diagnostic_title": "Spanish paradigm production (full table)",
+        "diagnostic_label": "Diagnostic 2A — Spanish full-paradigm production",
+    },
+    "diagnostic_2b": {
+        "diagnostic_id": "diagnostic_2b",
+        "diagnostic_number": "2B",
+        "diagnostic_title": "Spanish paradigm production (single slot)",
+        "diagnostic_label": "Diagnostic 2B — Spanish single-slot production",
+    },
+}
+
+
+def normalize_probe_mode(mode: str) -> ProbeMode:
+    """Accept ``diagnostic_2a``/``diagnostic_2b`` and legacy probe-mode names."""
+    if mode in PROBE_MODES:
+        return mode  # type: ignore[return-value]
+    if mode in PROBE_MODE_ALIASES:
+        return PROBE_MODE_ALIASES[mode]
+    raise ValueError(f"Unknown probe mode: {mode!r}")
+
+
+def is_paradigm_mode(mode: str) -> bool:
+    return normalize_probe_mode(mode) == "diagnostic_2a"
 
 INDICATIVE_TENSES: tuple[str, ...] = (
     "present", "preterite", "imperfect", "future", "conditional",
@@ -279,7 +312,7 @@ def build_cases(
             "irregular_probed": _parse_bool(row["irregular_probed"]),
         }
 
-        if probe_mode == "full_paradigm":
+        if is_paradigm_mode(probe_mode):
             for tense in INDICATIVE_TENSES:
                 expected, labels = gold_paradigm(lemma, tense)
                 cases.append(
@@ -342,24 +375,6 @@ def build_cases(
     return cases
 
 
-def _normalize(text: str) -> str:
-    return unicodedata.normalize("NFC", text).strip(_EDGE_PUNCT).casefold()
-
-
-def _tokenize_spanish(text: str) -> list[str]:
-    text = _strip_thinking(text)
-    return re.findall(r"[\w\u00C0-\u024F]+", text, flags=re.UNICODE)
-
-
-def _first_token(text: str) -> str:
-    cleaned = _strip_thinking(text).strip()
-    cleaned = cleaned.split("\n", 1)[0].strip()
-    cleaned = re.sub(r"^(answer|response|respuesta)\s*:\s*", "", cleaned, flags=re.I)
-    cleaned = cleaned.strip("\"'` ")
-    match = re.search(r"[\w'\-]+", cleaned, flags=re.UNICODE)
-    return match.group(0) if match else cleaned
-
-
 def wilson_ci(k: int, n: int, z: float = 1.96) -> tuple[float | None, float | None]:
     if n <= 0:
         return None, None
@@ -416,98 +431,81 @@ def complete(
 
 def score_paradigm(case: ParadigmCase, raw: str) -> dict[str, Any]:
     if case.is_participle:
-        return _score_strict_single_form(case, raw)
+        return score_participle_form(expected=case.expected[0], raw=raw)
 
-    tokens = [_normalize(t) for t in _tokenize_spanish(raw)]
-    token_set = set(tokens)
-    per_person: list[dict[str, Any]] = []
-    hits = 0
-    line_hits = 0
-    lines = [ln.strip() for ln in _strip_thinking(raw).splitlines() if ln.strip()]
-
-    for i, (label, gold) in enumerate(zip(case.person_labels, case.expected, strict=True)):
-        gold_norm = _normalize(gold)
-        found = gold_norm in token_set
-        if found:
-            hits += 1
-        line_found = False
-        if i < len(lines):
-            line_token = _first_token(lines[i])
-            line_found = _normalize(line_token) == gold_norm
-            if line_found:
-                line_hits += 1
-        per_person.append(
-            {
-                "person": label,
-                "expected": gold,
-                "found": found,
-                "line_order_match": line_found,
-            }
-        )
-
-    return {
-        "raw": raw.strip(),
-        "forms_found": hits,
-        "forms_total": len(case.expected),
-        "form_recall": round(hits / len(case.expected), 4),
-        "line_order_recall": round(line_hits / len(case.expected), 4),
-        "per_person": per_person,
-        "missing": [p["expected"] for p in per_person if not p["found"]],
-        "correct": hits == len(case.expected),
-    }
+    scored = score_indicative_paradigm(
+        expected=case.expected,
+        person_labels=case.person_labels,
+        raw=raw,
+    )
+    scored["raw"] = raw.strip()
+    return scored
 
 
-def _score_strict_single_form(case: ProbeCase, raw: str) -> dict[str, Any]:
-    token = _first_token(raw)
-    norm = _normalize(token)
-    if isinstance(case, ParadigmCase):
-        expected = case.expected[0]
-    else:
-        expected = case.expected
-    expected_norm = _normalize(expected)
+def score_single_slot(case: SingleSlotCase, raw: str) -> dict[str, Any]:
+    token = first_token(raw)
+    norm = normalize_form(token)
+    expected_norm = normalize_form(case.expected)
     correct = norm == expected_norm
     return {
         "raw": raw.strip(),
         "parsed_token": token,
-        "forms_found": 1 if correct else 0,
-        "forms_total": 1,
-        "form_recall": 1.0 if correct else 0.0,
         "correct": correct,
-        "infinitive_fallback": norm == _normalize(case.lemma),
+        "infinitive_fallback": norm == normalize_form(case.lemma),
     }
 
 
-def score_single_slot(case: SingleSlotCase, raw: str) -> dict[str, Any]:
-    scored = _score_strict_single_form(case, raw)
-    return {
-        "raw": scored["raw"],
-        "parsed_token": scored["parsed_token"],
-        "correct": scored["correct"],
-        "infinitive_fallback": scored["infinitive_fallback"],
-    }
-
-
-def _rate_paradigm(rows: list[dict[str, Any]], **filters: Any) -> dict[str, Any]:
+def _rate_slot_metric(
+    rows: list[dict[str, Any]],
+    *,
+    correct_key: str,
+    total_key: str,
+    recall_key: str,
+    **filters: Any,
+) -> dict[str, Any]:
     filtered = [
         r for r in rows
         if all(r["case"].get(k) == v for k, v in filters.items())
     ]
-    n_forms = sum(r["forms_total"] for r in filtered)
-    k_forms = sum(r["forms_found"] for r in filtered)
-    lo, hi = wilson_ci(k_forms, n_forms)
+    n_total = sum(r[total_key] for r in filtered)
+    k_correct = sum(r[correct_key] for r in filtered)
+    lo, hi = wilson_ci(k_correct, n_total)
     n_cases = len(filtered)
     return {
         "cases": n_cases,
-        "forms_correct": k_forms,
-        "forms_total": n_forms,
-        "form_recall": round(k_forms / n_forms, 4) if n_forms else None,
+        "slots_correct": k_correct,
+        "slots_total": n_total,
+        "slot_recall": round(k_correct / n_total, 4) if n_total else None,
         "wilson_95_ci": [round(lo, 4), round(hi, 4)] if lo is not None else None,
         "mean_recall_per_case": round(
-            sum(r["form_recall"] for r in filtered) / n_cases, 4
+            sum(r[recall_key] for r in filtered) / n_cases, 4
         )
         if n_cases
         else None,
     }
+
+
+def _rate_perfect_paradigm(rows: list[dict[str, Any]], **filters: Any) -> dict[str, Any]:
+    filtered = [
+        r for r in rows
+        if all(r["case"].get(k) == v for k, v in filters.items())
+    ]
+    n = len(filtered)
+    k = sum(1 for r in filtered if r.get("perfect_paradigm"))
+    lo, hi = wilson_ci(k, n)
+    return {
+        "cases": n,
+        "perfect_paradigms": k,
+        "perfect_paradigm_rate": round(k / n, 4) if n else None,
+        "wilson_95_ci": [round(lo, 4), round(hi, 4)] if lo is not None else None,
+    }
+
+
+def _strict_slots_histogram(rows: list[dict[str, Any]]) -> dict[str, int]:
+    from collections import Counter
+
+    counts = Counter(r["strict_slots_correct"] for r in rows)
+    return {str(k): counts[k] for k in sorted(counts)}
 
 
 def _rate_single_slot(rows: list[dict[str, Any]], **filters: Any) -> dict[str, Any]:
@@ -527,30 +525,78 @@ def _rate_single_slot(rows: list[dict[str, Any]], **filters: Any) -> dict[str, A
 
 
 def summarize(payload: dict[str, Any]) -> dict[str, Any]:
-    probe_mode: ProbeMode = payload["probe_mode"]
+    probe_mode = normalize_probe_mode(payload["probe_mode"])
     out: dict[str, Any] = {"per_model": {}}
 
     for key, block in payload["by_model"].items():
         rows = block["results"]
         per_model: dict[str, Any] = {}
 
-        if probe_mode == "full_paradigm":
-            per_model["overall"] = _rate_paradigm(rows)
+        if is_paradigm_mode(probe_mode):
+            per_model["overall_strict"] = _rate_slot_metric(
+                rows,
+                correct_key="strict_slots_correct",
+                total_key="strict_slots_total",
+                recall_key="strict_slot_recall",
+            )
+            per_model["overall_perfect_paradigm"] = _rate_perfect_paradigm(rows)
+            per_model["overall_assignment"] = _rate_slot_metric(
+                rows,
+                correct_key="assignment_slots_correct",
+                total_key="assignment_slots_total",
+                recall_key="unordered_assignment_recall",
+            )
+            per_model["overall_form_presence"] = _rate_slot_metric(
+                rows,
+                correct_key="unique_forms_found",
+                total_key="unique_forms_expected",
+                recall_key="form_presence_recall",
+            )
+            per_model["strict_slots_histogram"] = _strict_slots_histogram(rows)
             for cell in CELLS:
-                per_model[cell] = _rate_paradigm(rows, cell_id=cell)
+                per_model[f"{cell}_strict"] = _rate_slot_metric(
+                    rows,
+                    correct_key="strict_slots_correct",
+                    total_key="strict_slots_total",
+                    recall_key="strict_slot_recall",
+                    cell_id=cell,
+                )
+                per_model[f"{cell}_perfect"] = _rate_perfect_paradigm(rows, cell_id=cell)
             for tense in TENSES:
-                per_model[f"tense_{tense}"] = _rate_paradigm(rows, tense=tense)
+                per_model[f"tense_{tense}_strict"] = _rate_slot_metric(
+                    rows,
+                    correct_key="strict_slots_correct",
+                    total_key="strict_slots_total",
+                    recall_key="strict_slot_recall",
+                    tense=tense,
+                )
+                per_model[f"tense_{tense}_assignment"] = _rate_slot_metric(
+                    rows,
+                    correct_key="assignment_slots_correct",
+                    total_key="assignment_slots_total",
+                    recall_key="unordered_assignment_recall",
+                    tense=tense,
+                )
+                per_model[f"tense_{tense}_form_presence"] = _rate_slot_metric(
+                    rows,
+                    correct_key="unique_forms_found",
+                    total_key="unique_forms_expected",
+                    recall_key="form_presence_recall",
+                    tense=tense,
+                )
             per_model["failures"] = [
                 {
                     "id": r["case"]["id"],
                     "cell_id": r["case"]["cell_id"],
                     "tense": r["case"]["tense"],
+                    "strict_slot_recall": r.get("strict_slot_recall"),
+                    "unordered_assignment_recall": r.get("unordered_assignment_recall"),
+                    "output_forms": r.get("output_forms"),
                     "missing": r.get("missing", []),
-                    "form_recall": r["form_recall"],
-                    "got": r.get("parsed_token"),
+                    "parsed_slots": r.get("parsed_slots"),
                 }
                 for r in rows
-                if r["form_recall"] < 1.0
+                if not r.get("perfect_paradigm")
             ]
         else:
             per_model["overall"] = _rate_single_slot(rows)
@@ -601,6 +647,8 @@ def run_spike(
     if resume and output_path.is_file():
         with output_path.open(encoding="utf-8") as f:
             payload = json.load(f)
+        if payload.get("probe_mode"):
+            payload["probe_mode"] = normalize_probe_mode(payload["probe_mode"])
         done = set(payload.get("by_model", {}))
         model_keys = [k for k in model_keys if k not in done]
         if not model_keys:
@@ -609,15 +657,19 @@ def run_spike(
         print(f"Resuming {probe_mode}; remaining models: {model_keys}", flush=True)
 
     if payload is None:
+        meta = DIAGNOSTIC_BY_MODE[probe_mode]
         payload = {
-            "diagnostic_id": DIAGNOSTIC_ID,
-            "diagnostic_number": DIAGNOSTIC_NUMBER,
-            "diagnostic_title": DIAGNOSTIC_TITLE,
-            "diagnostic_label": DIAGNOSTIC_LABEL,
+            "diagnostic_series": DIAGNOSTIC_SERIES,
+            "diagnostic_series_title": DIAGNOSTIC_SERIES_TITLE,
+            "diagnostic_id": meta["diagnostic_id"],
+            "diagnostic_number": meta["diagnostic_number"],
+            "diagnostic_title": meta["diagnostic_title"],
+            "diagnostic_label": meta["diagnostic_label"],
             "related_diagnostics": ["diagnostic_1a", "diagnostic_1b"],
             "related_experiments": [3, "3B", 10],
             "probe_mode": probe_mode,
             "prompt_version": "explicit_v1",
+            "scoring_version": SCORING_VERSION,
             "manifest_path": str(manifest_path),
             "manifest_seed": manifest_rows[0].get("seed") if manifest_rows else None,
             "n_verbs": len(manifest_rows),
@@ -668,7 +720,7 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
-        description=f"{DIAGNOSTIC_LABEL} — Qwen ladder paradigm probe from manifest.",
+        description=f"{DIAGNOSTIC_SERIES_LABEL} — Qwen ladder paradigm probe from manifest.",
     )
     parser.add_argument(
         "--manifest",
@@ -678,7 +730,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--probe-mode",
-        choices=("full_paradigm", "single_slot", "both"),
+        choices=(
+            "diagnostic_2a", "diagnostic_2b", "both",
+            "full_paradigm", "single_slot",  # legacy aliases
+        ),
         default="both",
         help="Which probe mode(s) to run (default: both).",
     )
@@ -696,14 +751,13 @@ def main() -> None:
     args = parser.parse_args()
 
     manifest_rows = load_manifest(args.manifest)
-    modes: list[ProbeMode]
     if args.probe_mode == "both":
-        modes = list(PROBE_MODES)
+        modes: list[ProbeMode] = list(PROBE_MODES)
     else:
-        modes = [args.probe_mode]  # type: ignore[list-item]
+        modes = [normalize_probe_mode(args.probe_mode)]
 
     if args.dry_run:
-        print(f"{DIAGNOSTIC_LABEL}")
+        print(f"{DIAGNOSTIC_SERIES_LABEL}")
         print(f"Manifest: {args.manifest} ({len(manifest_rows)} Spanish verbs)")
         for mode in modes:
             cases = build_cases(manifest_rows, probe_mode=mode, limit=args.limit)

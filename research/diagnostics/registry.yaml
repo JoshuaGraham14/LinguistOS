@@ -8,6 +8,10 @@
 #   1A — production (generate one form)
 #   1B — verification (judge a proposed form, yes/no)
 #
+# Diagnostic 2 is a paired series on the same 150 Spanish verbs:
+#   2A — full-paradigm production (six-person tables + participle)
+#   2B — single-slot production (one form per call)
+#
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
 #   documented under docs/experiment-results/.
 # Diagnostics (this file): final diagnosis runs — census manifest,
@@ -64,12 +68,40 @@ diagnostics:
       generation?
     script: research/prototyping/diagnostic_2_spanish_paradigm_qwen_spike.py
     manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
-    results:
-      - docs/spike-results/eval_diagnostic_2_n150_paradigm_qwen_results.json
-      - docs/spike-results/eval_diagnostic_2_n150_single_slot_qwen_results.json
+    variants: [diagnostic_2a, diagnostic_2b]
+    related_experiments: [3, "3B", 10]
+    status: complete
+
+  - id: diagnostic_2a
+    number: "2A"
+    series: diagnostic_2
+    title: Spanish paradigm production (full table)
+    question: >-
+      Can the model produce full six-person Spanish paradigms (plus
+      participle) for census-validated verbs, and does accuracy vary by
+      model size, tense, person, and frequency?
+    script: research/prototyping/diagnostic_2_spanish_paradigm_qwen_spike.py
+    probe_mode: diagnostic_2a
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    results: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
     models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
     related_experiments: [3, "3B", 10]
-    status: planned
+    status: complete
+
+  - id: diagnostic_2b
+    number: "2B"
+    series: diagnostic_2
+    title: Spanish paradigm production (single slot)
+    question: >-
+      Can the model produce one Spanish verb form at a time when asked
+      directly (every person × tense), on the same verbs as Diagnostic 2A?
+    script: research/prototyping/diagnostic_2_spanish_paradigm_qwen_spike.py
+    probe_mode: diagnostic_2b
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    results: docs/spike-results/eval_diagnostic_2b_n150_single_slot_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    related_experiments: [3, "3B", 10]
+    status: complete
 
   - id: diagnostic_4
     number: 4
