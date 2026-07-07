@@ -10,7 +10,7 @@ Copy this into a new chat to run, re-score, or extend the Diagnostic 3 series.
 |---|---|---|
 | **2A** | Complete | Full paradigm tables (n=150) — knowledge side |
 | **3A** | Ready to run | Plain-text sentence, 2A hints, T=0, 1/cell |
-| **3B** | Planned | Production `build_prompt` (JSON, short, no 2A hints) |
+| **3B** | Ready to run | Production `build_prompt`, JSON, short, T=0, 1/cell |
 | **3C** | Planned | Same as 3B, T=0.7, 10 samples/cell (1.7B) |
 
 **Registry:** `research/diagnostics/registry.yaml`  
@@ -18,56 +18,51 @@ Copy this into a new chat to run, re-score, or extend the Diagnostic 3 series.
 
 ---
 
-## Diagnostic 3A design
+## Variant summary
 
-- **150 verbs** — same manifest as Diagnostic 2A  
-- **4,650 cells** per model (5 tenses × 6 persons + participle)  
-- **Prompt:** plain Spanish sentence; reuses `TENSE_PHRASE` and `SUBJECT_HINTS` from Diagnostic 2  
-- **No** CEFR, length band, JSON, or gold-form injection  
-- **Decoding:** temperature 0, 1 sentence per cell  
-- **Score:** `expected_form_match` — gold token in sentence  
-- **Summary:** sentence pass rate + **binding gap** vs 2A strict (joins `eval_diagnostic_2a_n150_paradigm_qwen_results.json`)
+| Variant | Prompt | Output | T | Samples | Models |
+|---------|--------|--------|---|---------|--------|
+| **3A** | Plain text, 2A `TENSE_PHRASE` / `SUBJECT_HINTS` | One Spanish sentence | 0 | 1 | 0.6B, 1.7B, 4B |
+| **3B** | `build_prompt` baseline (no CEFR, no 2A hints) | JSON + translation | 0 | 1 | 0.6B, 1.7B, 4B |
+| **3C** | Same as 3B | JSON (10 candidates) | 0.7 | 10 | 1.7B only |
 
-### Scale per model (3A)
-
-| Calls | Cells scored |
-|---|---|
-| **4,650** | 4,650 |
-
-× 3 models (0.6B, 1.7B, 4B).
+All variants: **4,650 cells** per model (150 verbs × 31 slots), same gold forms as 2A.
 
 ---
 
 ## How to run
 
 ```bash
-python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike --dry-run
+python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike --dry-run \
+  --variant diagnostic_3b
 
 python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
   --variant diagnostic_3a --models qwen17b --limit 5
 
 python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
-  --variant diagnostic_3a --resume
+  --variant diagnostic_3b --resume
 ```
 
-Cluster: `sbatch research/scripts/cluster/diagnostic_3a_n150_gpu.sh`
+Cluster:
+- `sbatch research/scripts/cluster/diagnostic_3a_n150_gpu.sh`
+- `sbatch research/scripts/cluster/diagnostic_3b_n150_gpu.sh`
 
 ---
 
-## Artifacts (3A)
+## Artifacts
 
-| Artifact | Path |
-|---|---|
-| Script | `research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py` |
-| Verb list | `research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv` |
-| 2A join | `docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json` |
-| **3A results** | `docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json` |
-| Cluster | `research/scripts/cluster/diagnostic_3a_n150_gpu.sh` |
+| Variant | Results JSON | Cluster script |
+|---------|--------------|----------------|
+| 3A | `docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json` | `diagnostic_3a_n150_gpu.sh` |
+| 3B | `docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json` | `diagnostic_3b_n150_gpu.sh` |
+| 3C | `docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json` | (planned) |
+
+2A join for binding gap: `docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json`
 
 ---
 
 ## Do not
 
-- Compare binding gap to Diagnostic **2B** — use **2A strict** slot scores only.  
-- Add explicit overlay or form injection in 3A — that belongs in Diagnostic 4 / form-injection work.  
-- Expect overall pass rate to match the old ~21% baseline (different verbs, T=0, no length/JSON).
+- Compare binding gap to Diagnostic **2B** — use **2A strict** only.  
+- Add explicit overlay or form injection in 3A/3B/3C.  
+- Add 2A-style tense hints to 3B/3C (that is 3A’s role).

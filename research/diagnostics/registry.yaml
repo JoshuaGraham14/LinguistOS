@@ -14,7 +14,7 @@
 #
 # Diagnostic 3 is sentence binding on the same 150 verbs (paired to 2A):
 #   3A — plain-text sentence, 2A-aligned hints (T=0, 1 sample)
-#   3B — production baseline prompt (planned)
+#   3B — production baseline prompt (JSON, short, T=0)
 #   3C — production prompt + T=0.7, 10 samples (planned)
 #
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
@@ -136,6 +136,23 @@ diagnostics:
     results: docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
     models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
     decoding: {temperature: 0, samples_per_cell: 1}
+    related_experiments: [3, "3B", 10]
+    status: ready
+
+  - id: diagnostic_3b
+    number: "3B"
+    series: diagnostic_3
+    title: Spanish sentence binding (production baseline prompt)
+    question: >-
+      Under the standard build_prompt baseline (short length, JSON output, generic
+      constraint labels, no CEFR), does sentence pass rate lag 2A strict slot recall?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    variant: diagnostic_3b
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
     related_experiments: [3, "3B", 10]
     status: ready
 

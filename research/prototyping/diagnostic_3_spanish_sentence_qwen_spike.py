@@ -5,11 +5,14 @@ Paired sentence probes on the same 150 Spanish verbs as Diagnostic 2A:
 
 - **Diagnostic 3A** (``diagnostic_3a``): plain-text sentence, 2A-aligned tense/person
   hints, no length band, no JSON, no CEFR — compare slot-level pass to 2A strict.
+- **Diagnostic 3B** (``diagnostic_3b``): production ``build_prompt`` baseline (short,
+  JSON + translation, generic constraint labels, no CEFR), T=0, 1 sample/cell.
 
 Part of the **Diagnostics** track; see ``research/diagnostics/registry.yaml``.
 
 Output:
   docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
+  docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json
 
 ----------------------------------------------------------------------
 REPRODUCIBILITY
@@ -19,11 +22,10 @@ Run:
   python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \\
       --variant diagnostic_3a --models qwen17b --limit 5
   python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \\
-      --variant diagnostic_3a --resume
+      --variant diagnostic_3b --resume
 
 Manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
-Models:    Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B (thinking disabled)
-Decoding:  Greedy (temperature=0); 1 sentence per morphological cell
+Models:    Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B
 ----------------------------------------------------------------------
 """
 
@@ -33,14 +35,22 @@ import json
 import re
 import sys
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from research.evaluation.length_bands import band_label
 from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
-from research.generation.baseline_hf import _is_qwen3, _load_model, _strip_thinking, unload_model
+from research.generation.baseline_hf import (
+    _is_qwen3,
+    _load_model,
+    _strip_thinking,
+    parse_candidates_lenient,
+    unload_model,
+)
+from research.generation.prompt_builder import build_prompt
 from research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike import (
     DEFAULT_MANIFEST,
     DEFAULT_MODEL_KEYS,
@@ -58,13 +68,14 @@ from research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike import (
     wilson_ci,
 )
 
-Variant = Literal["diagnostic_3a"]
-VARIANTS: tuple[Variant, ...] = ("diagnostic_3a",)
+Variant = Literal["diagnostic_3a", "diagnostic_3b"]
+VARIANTS: tuple[Variant, ...] = ("diagnostic_3a", "diagnostic_3b")
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "docs" / "spike-results"
 
 DEFAULT_OUTPUTS: dict[Variant, Path] = {
     "diagnostic_3a": RESULTS_DIR / "eval_diagnostic_3a_n150_sentence_qwen_results.json",
+    "diagnostic_3b": RESULTS_DIR / "eval_diagnostic_3b_n150_sentence_qwen_results.json",
 }
 
 DEFAULT_2A_RESULTS = RESULTS_DIR / "eval_diagnostic_2a_n150_paradigm_qwen_results.json"
@@ -73,18 +84,40 @@ DIAGNOSTIC_SERIES = "diagnostic_3"
 DIAGNOSTIC_SERIES_TITLE = "Spanish sentence binding vs paradigm recall"
 DIAGNOSTIC_SERIES_LABEL = "Diagnostic 3 — Spanish sentence binding (frequency-validated)"
 
-VARIANT_META: dict[Variant, dict[str, str]] = {
+VARIANT_META: dict[Variant, dict[str, Any]] = {
     "diagnostic_3a": {
         "diagnostic_id": "diagnostic_3a",
         "diagnostic_number": "3A",
         "diagnostic_title": "Spanish sentence binding (2A-aligned hints, plain text)",
         "diagnostic_label": "Diagnostic 3A — Spanish sentence binding (plain text)",
         "prompt_version": "sentence_3a_v1",
+        "temperature": 0.0,
+        "samples_per_cell": 1,
+        "default_models": DEFAULT_MODEL_KEYS,
+        "sentence_length": None,
+        "output_format": "plain_text",
+        "cefr_level": None,
+    },
+    "diagnostic_3b": {
+        "diagnostic_id": "diagnostic_3b",
+        "diagnostic_number": "3B",
+        "diagnostic_title": "Spanish sentence binding (production baseline prompt)",
+        "diagnostic_label": "Diagnostic 3B — Spanish sentence binding (production prompt)",
+        "prompt_version": "build_prompt_baseline_v1",
+        "temperature": 0.0,
+        "samples_per_cell": 1,
+        "default_models": DEFAULT_MODEL_KEYS,
+        "sentence_length": "short",
+        "output_format": "json",
+        "cefr_level": None,
     },
 }
 
 SYSTEM_MESSAGE_3A = (
     "You are a Spanish language assistant. Follow the instruction exactly."
+)
+SYSTEM_MESSAGE_PRODUCTION = (
+    "You are a helpful Spanish language tutor. Always respond with valid JSON."
 )
 
 _JSONish_RE = re.compile(r"^\s*[\[{]")
@@ -106,7 +139,10 @@ class SentenceCase:
     person_label: str
     expected_form: str
     prompt: str
+    translation: str = ""
+    num_candidates: int = 1
     is_participle: bool = False
+    constraints: dict[str, str] = field(default_factory=dict)
 
 
 def normalize_variant(value: str) -> Variant:
@@ -115,8 +151,17 @@ def normalize_variant(value: str) -> Variant:
     raise ValueError(f"Unknown variant: {value!r}; expected one of {VARIANTS}")
 
 
+def variant_config(variant: Variant) -> dict[str, Any]:
+    return VARIANT_META[variant]
+
+
 def _parse_bool(value: str) -> bool:
     return value.strip().lower() in {"yes", "true", "1"}
+
+
+def lemma_translation(lemma: str) -> str:
+    """Manifest verbs lack English glosses; use lemma as a neutral placeholder."""
+    return lemma
 
 
 def build_prompt_3a(
@@ -148,22 +193,104 @@ def build_prompt_3a(
     )
 
 
-def build_prompt(case: SentenceCase) -> str:
-    if case.variant == "diagnostic_3a":
-        return case.prompt
-    raise ValueError(f"No prompt builder for variant {case.variant!r}")
+def build_prompt_3b_participle(
+    lemma: str,
+    *,
+    participle: str,
+    num_candidates: int,
+    sentence_length: str,
+) -> str:
+    """Production-style prompt for participle cells (not covered by build_prompt)."""
+    length_desc = band_label(sentence_length)
+    translation = lemma_translation(lemma)
+    return (
+        "You generate Spanish example sentences for vocabulary practice.\n"
+        f'Target word (lemma): "{lemma}" (English: "{translation}")\n'
+        f"Constraints:\n  length: {length_desc}.\n"
+        f'The sentence must contain the past participle of "{lemma}" '
+        f'(the form "{participle}") — not the bare infinitive.\n'
+        f"Produce {num_candidates} natural Spanish sentences within the length band. "
+        "Each sentence must contain the participle form specified above, "
+        "with its English translation.\n"
+        "Reply ONLY as JSON in this exact shape:\n"
+        '{"candidates":[{"sentence":"...","translation":"..."}, ...]}'
+    )
+
+
+def build_prompt_3b_indicative(
+    lemma: str,
+    *,
+    tense: str,
+    person: str,
+    number: str,
+    num_candidates: int,
+    sentence_length: str,
+) -> str:
+    return build_prompt(
+        keyword=lemma,
+        translation=lemma_translation(lemma),
+        target_language="es",
+        constraints={"tense": tense, "person": person, "number": number},
+        num_candidates=num_candidates,
+        sentence_length=sentence_length,
+        cefr_level=None,
+    )
+
+
+def build_case_prompt(
+    variant: Variant,
+    lemma: str,
+    *,
+    tense: str,
+    person: str,
+    number: str,
+    expected_form: str,
+    is_participle: bool,
+    num_candidates: int,
+) -> str:
+    if variant == "diagnostic_3a":
+        return build_prompt_3a(
+            lemma,
+            tense=tense,
+            person=person,
+            number=number,
+            expected_form=expected_form,
+            is_participle=is_participle,
+        )
+
+    sentence_length = str(variant_config(variant)["sentence_length"])
+    if is_participle:
+        return build_prompt_3b_participle(
+            lemma,
+            participle=expected_form,
+            num_candidates=num_candidates,
+            sentence_length=sentence_length,
+        )
+    return build_prompt_3b_indicative(
+        lemma,
+        tense=tense,
+        person=person,
+        number=number,
+        num_candidates=num_candidates,
+        sentence_length=sentence_length,
+    )
+
+
+def build_prompt_for_case(case: SentenceCase) -> str:
+    return case.prompt
 
 
 def system_message(variant: Variant) -> str:
     if variant == "diagnostic_3a":
         return SYSTEM_MESSAGE_3A
-    raise ValueError(f"No system message for variant {variant!r}")
+    return SYSTEM_MESSAGE_PRODUCTION
 
 
 def build_cases(
     manifest_rows: list[dict[str, str]],
     *,
     variant: Variant,
+    num_candidates: int,
     limit: int | None = None,
 ) -> list[SentenceCase]:
     cases: list[SentenceCase] = []
@@ -171,6 +298,7 @@ def build_cases(
     for row in manifest_rows:
         lemma = row["verb"]
         participle = gold_participle(row)
+        translation = lemma_translation(lemma)
         base = {
             "variant": variant,
             "lemma": lemma,
@@ -178,18 +306,22 @@ def build_cases(
             "zipf": float(row["zipf"]),
             "tier": row["tier"],
             "irregular_probed": _parse_bool(row["irregular_probed"]),
+            "translation": translation,
+            "num_candidates": num_candidates,
         }
 
         for tense in INDICATIVE_TENSES:
             for person, number, label in PERSON_NUMBER_SLOTS:
                 expected = gold_form(lemma, tense, person, number)
-                prompt = build_prompt_3a(
+                prompt = build_case_prompt(
+                    variant,
                     lemma,
                     tense=tense,
                     person=person,
                     number=number,
                     expected_form=expected,
                     is_participle=False,
+                    num_candidates=num_candidates,
                 )
                 cases.append(
                     SentenceCase(
@@ -200,17 +332,20 @@ def build_cases(
                         person_label=label,
                         expected_form=expected,
                         prompt=prompt,
+                        constraints={"tense": tense, "person": person, "number": number},
                         **base,
                     )
                 )
 
-        prompt = build_prompt_3a(
+        prompt = build_case_prompt(
+            variant,
             lemma,
             tense=PARTICIPLE_TENSE,
             person="",
             number="",
             expected_form=participle,
             is_participle=True,
+            num_candidates=num_candidates,
         )
         cases.append(
             SentenceCase(
@@ -222,6 +357,7 @@ def build_cases(
                 expected_form=participle,
                 prompt=prompt,
                 is_participle=True,
+                constraints={},
                 **base,
             )
         )
@@ -231,26 +367,16 @@ def build_cases(
     return cases
 
 
-def extract_sentence(raw: str) -> str:
+def extract_plain_sentence(raw: str) -> str:
     """Take the first usable sentence line from plain model output."""
     cleaned = _strip_thinking(raw).strip()
     if not cleaned:
         return ""
 
-    # If the model ignored instructions and returned JSON, salvage sentence field.
     if _JSONish_RE.match(cleaned):
-        try:
-            data = json.loads(cleaned)
-            if isinstance(data, dict):
-                candidates = data.get("candidates")
-                if isinstance(candidates, list) and candidates:
-                    first = candidates[0]
-                    if isinstance(first, dict):
-                        sentence = str(first.get("sentence", "")).strip()
-                        if sentence:
-                            return sentence
-        except json.JSONDecodeError:
-            pass
+        cands, _ = parse_candidates_lenient(cleaned)
+        if cands:
+            return str(cands[0].get("sentence", "")).strip()
 
     for line in cleaned.splitlines():
         line = line.strip().strip('"').strip("'")
@@ -259,16 +385,61 @@ def extract_sentence(raw: str) -> str:
     return cleaned
 
 
-def score_sentence(case: SentenceCase, raw: str) -> dict[str, Any]:
-    sentence = extract_sentence(raw)
-    ef = _EF.evaluate(sentence, "", {"expected_form": case.expected_form})
+def _score_one_sentence(sentence: str, expected_form: str) -> dict[str, Any]:
+    ef = _EF.evaluate(sentence, "", {"expected_form": expected_form})
     passed = bool(ef.details.get("passed"))
     return {
-        "raw": raw.strip(),
         "sentence": sentence,
         "expected_form_pass": passed,
         "matched_token": ef.details.get("matched_token"),
         "tokens_checked": ef.details.get("tokens_checked"),
+    }
+
+
+def score_output(case: SentenceCase, raw: str) -> dict[str, Any]:
+    cfg = variant_config(case.variant)
+    output_format = cfg["output_format"]
+
+    if output_format == "plain_text":
+        sentence = extract_plain_sentence(raw)
+        scored = _score_one_sentence(sentence, case.expected_form)
+        return {
+            "raw": raw.strip(),
+            **scored,
+        }
+
+    cands, parse_mode = parse_candidates_lenient(_strip_thinking(raw))
+    scored_cands: list[dict[str, Any]] = []
+    for cand in cands:
+        sentence = str(cand.get("sentence", "")).strip()
+        translation = str(cand.get("translation", "")).strip()
+        one = _score_one_sentence(sentence, case.expected_form)
+        scored_cands.append(
+            {
+                "sentence": sentence,
+                "translation": translation,
+                **one,
+            }
+        )
+
+    n_pass = sum(1 for c in scored_cands if c["expected_form_pass"])
+    pass_at_k = n_pass > 0
+    first = scored_cands[0] if scored_cands else None
+    return {
+        "raw": raw.strip(),
+        "parse_mode": parse_mode,
+        "candidates": scored_cands,
+        "n_candidates_parsed": len(scored_cands),
+        "n_pass": n_pass,
+        "pass_at_k": pass_at_k,
+        "pass_at_1": bool(first and first["expected_form_pass"]),
+        "sentence": first["sentence"] if first else "",
+        "translation": first["translation"] if first else "",
+        "expected_form_pass": pass_at_k if case.num_candidates > 1 else bool(
+            first and first["expected_form_pass"]
+        ),
+        "matched_token": first["matched_token"] if first else None,
+        "tokens_checked": first["tokens_checked"] if first else 0,
     }
 
 
@@ -308,13 +479,13 @@ def load_2a_strict_index(path: Path) -> dict[str, dict[str, bool]]:
     return out
 
 
-def _rate(rows: list[dict[str, Any]], **filters: Any) -> dict[str, Any]:
+def _rate(rows: list[dict[str, Any]], *, pass_key: str = "expected_form_pass", **filters: Any) -> dict[str, Any]:
     filtered = [
         r for r in rows
         if all(r["case"].get(k) == v for k, v in filters.items())
     ]
     n = len(filtered)
-    k = sum(1 for r in filtered if r.get("expected_form_pass"))
+    k = sum(1 for r in filtered if r.get(pass_key))
     lo, hi = wilson_ci(k, n)
     return {
         "n": n,
@@ -324,7 +495,12 @@ def _rate(rows: list[dict[str, Any]], **filters: Any) -> dict[str, Any]:
     }
 
 
-def _binding_gap(rows: list[dict[str, Any]], d2a_index: dict[str, bool]) -> dict[str, Any]:
+def _binding_gap(
+    rows: list[dict[str, Any]],
+    d2a_index: dict[str, bool],
+    *,
+    pass_key: str = "expected_form_pass",
+) -> dict[str, Any]:
     known = 0
     known_sentence_pass = 0
     gap = 0
@@ -333,7 +509,7 @@ def _binding_gap(rows: list[dict[str, Any]], d2a_index: dict[str, bool]) -> dict
         if not d2a_index.get(case_id):
             continue
         known += 1
-        if row.get("expected_form_pass"):
+        if row.get(pass_key):
             known_sentence_pass += 1
         else:
             gap += 1
@@ -353,23 +529,33 @@ def summarize(
     *,
     d2a_index_by_model: dict[str, dict[str, bool]],
 ) -> dict[str, Any]:
+    variant = payload.get("variant", "diagnostic_3a")
+    samples_per_cell = int(payload.get("samples_per_cell", 1))
+    pass_key = "expected_form_pass"
     out: dict[str, Any] = {"per_model": {}}
+
     for key, block in payload.get("by_model", {}).items():
         rows = block["results"]
         per_model: dict[str, Any] = {
-            "overall": _rate(rows),
+            "overall": _rate(rows, pass_key=pass_key),
         }
+        if samples_per_cell > 1:
+            per_model["pass_at_1"] = _rate(rows, pass_key="pass_at_1")
+            per_model["pass_at_k"] = _rate(rows, pass_key="pass_at_k")
+
         for tier in ("high", "mid", "low"):
-            per_model[f"tier_{tier}"] = _rate(rows, tier=tier)
+            per_model[f"tier_{tier}"] = _rate(rows, pass_key=pass_key, tier=tier)
         for tense in TENSES:
-            per_model[f"tense_{tense}"] = _rate(rows, tense=tense)
+            per_model[f"tense_{tense}"] = _rate(rows, pass_key=pass_key, tense=tense)
 
         d2a_index = d2a_index_by_model.get(key, {})
         if d2a_index:
-            per_model["binding_gap_vs_2a_strict"] = _binding_gap(rows, d2a_index)
+            per_model["binding_gap_vs_2a_strict"] = _binding_gap(rows, d2a_index, pass_key=pass_key)
             for tier in ("high", "mid", "low"):
                 tier_rows = [r for r in rows if r["case"].get("tier") == tier]
-                per_model[f"binding_gap_tier_{tier}"] = _binding_gap(tier_rows, d2a_index)
+                per_model[f"binding_gap_tier_{tier}"] = _binding_gap(
+                    tier_rows, d2a_index, pass_key=pass_key
+                )
 
         per_model["failures"] = [
             {
@@ -378,20 +564,29 @@ def summarize(
                 "tense": r["case"]["tense"],
                 "expected_form": r["case"]["expected_form"],
                 "sentence": r.get("sentence"),
+                "n_pass": r.get("n_pass"),
                 "raw": r.get("raw"),
             }
             for r in rows
-            if not r.get("expected_form_pass")
+            if not r.get(pass_key)
         ]
         out["per_model"][key] = per_model
+    out["variant"] = variant
     return out
+
+
+def _max_new_tokens(case: SentenceCase) -> int:
+    if case.variant == "diagnostic_3a":
+        return 128
+    remaining = case.num_candidates
+    return min(80 * remaining + 200, 3072)
 
 
 def complete(model_id: str, case: SentenceCase, *, temperature: float) -> str:
     import torch
 
     tokenizer, model = _load_model(model_id)
-    prompt = build_prompt(case)
+    prompt = build_prompt_for_case(case)
     messages = [
         {"role": "system", "content": system_message(case.variant)},
         {"role": "user", "content": prompt},
@@ -403,7 +598,7 @@ def complete(model_id: str, case: SentenceCase, *, temperature: float) -> str:
     inputs = tokenizer(text, return_tensors="pt").to(model.device)
 
     gen_kwargs: dict[str, Any] = {
-        "max_new_tokens": 128,
+        "max_new_tokens": _max_new_tokens(case),
         "pad_token_id": tokenizer.eos_token_id,
     }
     if temperature <= 0:
@@ -439,10 +634,7 @@ def run_spike(
     d2a_results_path: Path,
     resume: bool = False,
 ) -> dict[str, Any]:
-    if samples_per_cell != 1:
-        raise ValueError("Diagnostic 3A uses samples_per_cell=1")
-
-    meta = VARIANT_META[variant]
+    meta = variant_config(variant)
     d2a_index_by_model = load_2a_strict_index(d2a_results_path)
 
     payload: dict[str, Any] | None = None
@@ -464,7 +656,7 @@ def run_spike(
             "diagnostic_number": meta["diagnostic_number"],
             "diagnostic_title": meta["diagnostic_title"],
             "diagnostic_label": meta["diagnostic_label"],
-            "related_diagnostics": ["diagnostic_2a"],
+            "related_diagnostics": ["diagnostic_2a", "diagnostic_3a"],
             "related_experiments": [3, "3B", 10],
             "variant": variant,
             "prompt_version": meta["prompt_version"],
@@ -479,12 +671,16 @@ def run_spike(
             "models": {k: QWEN_MODELS[k] for k in model_keys},
             "temperature": temperature,
             "samples_per_cell": samples_per_cell,
-            "cefr_level": None,
-            "sentence_length": None,
-            "output_format": "plain_text",
+            "cefr_level": meta["cefr_level"],
+            "sentence_length": meta["sentence_length"],
+            "output_format": meta["output_format"],
             "gold_source": "verbecc (+ manifest gold_participle where present)",
             "by_model": {},
         }
+        if variant == "diagnostic_3a":
+            payload["related_diagnostics"] = ["diagnostic_2a"]
+        elif variant == "diagnostic_3b":
+            payload["related_diagnostics"] = ["diagnostic_2a", "diagnostic_3a"]
     else:
         payload["models"] = {
             **payload.get("models", {}),
@@ -500,7 +696,7 @@ def run_spike(
             print(f"  [{i}/{len(cases)}] {case.id}...", flush=True)
             t_case = time.perf_counter()
             raw = complete(model_id, case, temperature=temperature)
-            scored = score_sentence(case, raw)
+            scored = score_output(case, raw)
             rows.append(
                 {
                     "case": asdict(case),
@@ -542,14 +738,14 @@ def main() -> None:
         "--models",
         nargs="+",
         choices=list(QWEN_MODELS),
-        default=list(DEFAULT_MODEL_KEYS),
+        default=None,
     )
-    parser.add_argument("--temperature", type=float, default=0.0)
+    parser.add_argument("--temperature", type=float, default=None)
     parser.add_argument(
         "--samples-per-cell",
         type=int,
-        default=1,
-        help="Sentences per cell (3A uses 1).",
+        default=None,
+        help="Sentences requested per cell (3A/3B: 1; 3C: 10).",
     )
     parser.add_argument("--limit", type=int, default=None, help="First N probes only.")
     parser.add_argument("--dry-run", action="store_true")
@@ -564,29 +760,42 @@ def main() -> None:
     args = parser.parse_args()
 
     variant = normalize_variant(args.variant)
+    cfg = variant_config(variant)
+    temperature = cfg["temperature"] if args.temperature is None else args.temperature
+    samples_per_cell = cfg["samples_per_cell"] if args.samples_per_cell is None else args.samples_per_cell
+    model_keys = list(cfg["default_models"]) if args.models is None else args.models
+
     manifest_rows = load_manifest(args.manifest)
-    cases = build_cases(manifest_rows, variant=variant, limit=args.limit)
+    cases = build_cases(
+        manifest_rows,
+        variant=variant,
+        num_candidates=samples_per_cell,
+        limit=args.limit,
+    )
 
     if args.dry_run:
         print(f"{DIAGNOSTIC_SERIES_LABEL}")
         print(f"Variant: {variant}")
         print(f"Manifest: {args.manifest} ({len(manifest_rows)} Spanish verbs)")
         print(f"Probes: {len(cases)} ({len(manifest_rows)} verbs × 31 cells)")
+        print(f"Models: {model_keys}")
+        print(f"Temperature: {temperature}")
+        print(f"Samples per cell: {samples_per_cell}")
         print(f"System: {system_message(variant)!r}")
-        for case in cases[:6]:
+        for case in cases[:4]:
             print(f"\n--- {case.id} → {case.expected_form} ---")
             print(case.prompt)
-        if len(cases) > 6:
-            print(f"\n... and {len(cases) - 6} more")
+        if len(cases) > 4:
+            print(f"\n... and {len(cases) - 4} more")
         return
 
     output_path = args.output or DEFAULT_OUTPUTS[variant]
     data = run_spike(
         cases,
-        args.models,
+        model_keys,
         variant=variant,
-        temperature=args.temperature,
-        samples_per_cell=args.samples_per_cell,
+        temperature=temperature,
+        samples_per_cell=samples_per_cell,
         manifest_path=args.manifest,
         manifest_rows=manifest_rows,
         output_path=output_path,
