@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Diagnostic 1 — cross-language morphology isolation (frequency-validated).
+"""Diagnostic 1A — cross-language morphology isolation, production (frequency-validated).
+
+Diagnostic 1A is the **generate** arm of Diagnostic 1 (isolation morphology).
+The paired **verify** arm is Diagnostic 1B
+(``diagnostic_1b_morphology_verification_qwen_spike``).
 
 Loads stimuli from ``research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv``
 (300 verbs: 150 English + 150 Spanish, 25 per frequency×irregularity cell).
@@ -18,7 +22,7 @@ Output: ``docs/spike-results/eval_diagnostic_1_isolation_qwen_results.json``
 ----------------------------------------------------------------------
 REPRODUCIBILITY
 ----------------------------------------------------------------------
-Status:      Diagnostic 1. Not run through ``research.run_experiment`` or the DB.
+Status:      Diagnostic 1A. Not run through ``research.run_experiment`` or the DB.
 
 Run:         python3 -m research.prototyping.diagnostic_1_freq_validated_isolation_qwen_spike
              python3 -m research.prototyping.diagnostic_1_freq_validated_isolation_qwen_spike --dry-run
@@ -49,7 +53,7 @@ from typing import Any, Literal
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from research.generation.baseline_hf import _is_qwen3, _load_model, _strip_thinking
+from research.generation.baseline_hf import _is_qwen3, _load_model, _strip_thinking, unload_model
 
 _EDGE_PUNCT = string.punctuation + "«»""''¡¿"
 
@@ -78,10 +82,11 @@ DEFAULT_OUTPUT = (
     / "eval_diagnostic_1_isolation_qwen_results.json"
 )
 
-DIAGNOSTIC_ID = "diagnostic_1"
-DIAGNOSTIC_NUMBER = 1
-DIAGNOSTIC_TITLE = "Cross-language morphology isolation"
-DIAGNOSTIC_LABEL = "Diagnostic 1 — cross-language morphology isolation (frequency-validated)"
+DIAGNOSTIC_ID = "diagnostic_1a"
+DIAGNOSTIC_NUMBER = "1A"
+DIAGNOSTIC_TITLE = "Cross-language morphology isolation (production)"
+DIAGNOSTIC_LABEL = "Diagnostic 1A — cross-language morphology isolation, production (frequency-validated)"
+DIAGNOSTIC_SERIES = "diagnostic_1"
 
 LangName = Literal["English", "Spanish"]
 LangCode = Literal["en", "es"]
@@ -357,25 +362,45 @@ def run_spike(
     output_path: Path | None = None,
     prompt_variant: str = "default",
     user_template: str = USER_TEMPLATE,
+    resume: bool = False,
 ) -> dict[str, Any]:
-    payload: dict[str, Any] = {
-        "diagnostic_id": DIAGNOSTIC_ID,
-        "diagnostic_number": DIAGNOSTIC_NUMBER,
-        "diagnostic_title": DIAGNOSTIC_TITLE,
-        "diagnostic_label": DIAGNOSTIC_LABEL,
-        "related_experiments": [1, 2, "1B", "2B"],
-        "manifest_path": str(manifest_path),
-        "manifest_seed": manifest_rows[0].get("seed") if manifest_rows else None,
-        "n_verbs": len(manifest_rows),
-        "n_probes": len(cases),
-        "models": {k: QWEN_MODELS[k] for k in model_keys},
-        "temperature": temperature,
-        "probes": list({c.probe for c in cases}),
-        "form_labels": FORM_LABELS,
-        "prompt_variant": prompt_variant,
-        "user_template": user_template,
-        "by_model": {},
-    }
+    payload: dict[str, Any] | None = None
+    if resume and output_path is not None and output_path.is_file():
+        with output_path.open(encoding="utf-8") as f:
+            payload = json.load(f)
+        done = set(payload.get("by_model", {}))
+        model_keys = [k for k in model_keys if k not in done]
+        if not model_keys:
+            print(f"All requested models already in {output_path}", flush=True)
+            return payload
+        print(f"Resuming; remaining models: {model_keys}", flush=True)
+
+    if payload is None:
+        payload = {
+            "diagnostic_id": DIAGNOSTIC_ID,
+            "diagnostic_number": DIAGNOSTIC_NUMBER,
+            "diagnostic_series": DIAGNOSTIC_SERIES,
+            "diagnostic_title": DIAGNOSTIC_TITLE,
+            "diagnostic_label": DIAGNOSTIC_LABEL,
+            "related_diagnostics": ["diagnostic_1b"],
+            "related_experiments": [1, 2, "1B", "2B"],
+            "manifest_path": str(manifest_path),
+            "manifest_seed": manifest_rows[0].get("seed") if manifest_rows else None,
+            "n_verbs": len(manifest_rows),
+            "n_probes": len(cases),
+            "models": {k: QWEN_MODELS[k] for k in model_keys},
+            "temperature": temperature,
+            "probes": list({c.probe for c in cases}),
+            "form_labels": FORM_LABELS,
+            "prompt_variant": prompt_variant,
+            "user_template": user_template,
+            "by_model": {},
+        }
+    else:
+        payload["models"] = {
+            **payload.get("models", {}),
+            **{k: QWEN_MODELS[k] for k in model_keys},
+        }
 
     for key in model_keys:
         model_id = QWEN_MODELS[key]
@@ -405,6 +430,7 @@ def run_spike(
         if output_path is not None:
             _save_payload(payload, output_path)
             print(f"  checkpoint saved → {output_path}", flush=True)
+        unload_model(model_id)
     return payload
 
 
@@ -470,6 +496,11 @@ def main() -> None:
         default=None,
         help="Output JSON path.",
     )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Skip models already present in --output (for cluster retries).",
+    )
     args = parser.parse_args()
 
     user_template = PROMPT_VARIANTS[args.prompt_variant]
@@ -511,6 +542,7 @@ def main() -> None:
         output_path=args.output,
         prompt_variant=args.prompt_variant,
         user_template=user_template,
+        resume=args.resume,
     )
     _save_payload(data, args.output)
     print("\n--- Summary ---")

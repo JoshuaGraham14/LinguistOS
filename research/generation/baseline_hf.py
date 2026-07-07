@@ -40,6 +40,22 @@ def _strip_thinking(raw: str) -> str:
         cleaned = cleaned.replace(token, "")
     return cleaned.strip()
 
+def unload_model(model_id: str) -> None:
+    """Drop a cached model so the next checkpoint can load without OOM."""
+    cached = _MODEL_CACHE.pop(model_id, None)
+    if cached is None:
+        return
+    import gc
+
+    import torch
+
+    _, model = cached
+    del model
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
 def _load_model(model_id: str) -> tuple[Any, Any]:
     if model_id in _MODEL_CACHE:
         return _MODEL_CACHE[model_id]
