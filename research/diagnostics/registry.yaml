@@ -4,12 +4,28 @@
 # "Experiment 1–10" series. A diagnostic may subsume, replace, or
 # diverge from an old experiment number; see ``related_experiments``.
 #
+# Diagnostic 1 is a paired series on the same manifest:
+#   1A — production (generate one form)
+#   1B — verification (judge a proposed form, yes/no)
+#
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
 #   documented under docs/experiment-results/.
 # Diagnostics (this file): final diagnosis runs — census manifest,
 #   frozen cutoffs, reproducible seeds — feeding the build phase.
 
 diagnostics:
+  - id: diagnostic_1
+    number: 1
+    title: Cross-language morphology isolation
+    question: >-
+      On frequency-validated EN/ES verbs, can small Qwen models handle
+      verb morphology in isolation (produce and verify forms), and does
+      accuracy vary by corpus frequency and irregularity?
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
+    variants: [diagnostic_1a, diagnostic_1b]
+    related_experiments: [1, 2, "1B", "2B"]
+    status: in_progress
+
   - id: diagnostic_1a
     number: "1A"
     series: diagnostic_1
@@ -25,29 +41,31 @@ diagnostics:
     related_experiments: [1, 2, "1B", "2B"]
     status: complete
 
-  # Planned — numbers are provisional; reorder as needed.
+  - id: diagnostic_1b
+    number: "1B"
+    series: diagnostic_1
+    title: Cross-language morphology isolation (verification)
+    question: >-
+      Can the model verify whether a proposed form is correct even when
+      production fails (paired yes/no judge on the same manifest cells)?
+    script: research/prototyping/diagnostic_1b_morphology_verification_qwen_spike.py
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
+    results: docs/spike-results/eval_diagnostic_1b_n25_verification_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    related_experiments: []
+    status: complete
+
   - id: diagnostic_2
     number: 2
-    title: Paradigm recall vs sentence binding
+    title: Spanish paradigm recall vs sentence binding
     question: >-
-      For common verbs on the manifest, does the model know the form in
-      isolation but fail to bind it in sentence generation (CTG gap)?
+      For Spanish verbs on the manifest, does the model know the form in
+      isolation (paradigm or single-slot) but fail to bind it in sentence
+      generation?
     script: null
     manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
     results: null
     related_experiments: [3, "3B"]
-    status: planned
-
-  - id: diagnostic_3
-    number: 3
-    title: Morphology verification (generate vs judge)
-    question: >-
-      Can the model verify whether a proposed form is correct even when
-      generation fails (supervisor verify-not-generate probe)?
-    script: null
-    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
-    results: null
-    related_experiments: []
     status: planned
 
   - id: diagnostic_4
