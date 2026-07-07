@@ -11,7 +11,7 @@ Copy this into a new chat to run, re-score, or extend the Diagnostic 3 series.
 | **2A** | Complete | Full paradigm tables (n=150) — knowledge side |
 | **3A** | Ready to run | Plain-text sentence, 2A hints, T=0, 1/cell |
 | **3B** | Ready to run | Production `build_prompt`, JSON, short, T=0, 1/cell |
-| **3C** | Planned | Same as 3B, T=0.7, 10 samples/cell (1.7B) |
+| **3C** | Ready to run | Same as 3B, T=0.7, 10 samples/cell, pass@10 (1.7B) |
 
 **Registry:** `research/diagnostics/registry.yaml`  
 **Script:** `research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py`
@@ -40,12 +40,13 @@ python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
   --variant diagnostic_3a --models qwen17b --limit 5
 
 python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
-  --variant diagnostic_3b --resume
+  --variant diagnostic_3c --resume
 ```
 
 Cluster:
 - `sbatch research/scripts/cluster/diagnostic_3a_n150_gpu.sh`
 - `sbatch research/scripts/cluster/diagnostic_3b_n150_gpu.sh`
+- `sbatch research/scripts/cluster/diagnostic_3c_n150_gpu.sh`
 
 ---
 
@@ -55,7 +56,7 @@ Cluster:
 |---------|--------------|----------------|
 | 3A | `docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json` | `diagnostic_3a_n150_gpu.sh` |
 | 3B | `docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json` | `diagnostic_3b_n150_gpu.sh` |
-| 3C | `docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json` | (planned) |
+| 3C | `docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json` | `diagnostic_3c_n150_gpu.sh` |
 
 2A join for binding gap: `docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json`
 

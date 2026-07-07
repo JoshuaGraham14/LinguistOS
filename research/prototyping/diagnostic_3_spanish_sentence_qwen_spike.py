@@ -7,12 +7,15 @@ Paired sentence probes on the same 150 Spanish verbs as Diagnostic 2A:
   hints, no length band, no JSON, no CEFR — compare slot-level pass to 2A strict.
 - **Diagnostic 3B** (``diagnostic_3b``): production ``build_prompt`` baseline (short,
   JSON + translation, generic constraint labels, no CEFR), T=0, 1 sample/cell.
+- **Diagnostic 3C** (``diagnostic_3c``): same prompt as 3B, T=0.7, 10 samples/cell
+  (pass@10); default model is 1.7B only.
 
 Part of the **Diagnostics** track; see ``research/diagnostics/registry.yaml``.
 
 Output:
   docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
   docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json
+  docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
 
 ----------------------------------------------------------------------
 REPRODUCIBILITY
@@ -23,9 +26,11 @@ Run:
       --variant diagnostic_3a --models qwen17b --limit 5
   python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \\
       --variant diagnostic_3b --resume
+  python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \\
+      --variant diagnostic_3c --resume
 
 Manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
-Models:    Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B
+Models:    Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B (3C default: 1.7B only)
 ----------------------------------------------------------------------
 """
 
@@ -68,14 +73,15 @@ from research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike import (
     wilson_ci,
 )
 
-Variant = Literal["diagnostic_3a", "diagnostic_3b"]
-VARIANTS: tuple[Variant, ...] = ("diagnostic_3a", "diagnostic_3b")
+Variant = Literal["diagnostic_3a", "diagnostic_3b", "diagnostic_3c"]
+VARIANTS: tuple[Variant, ...] = ("diagnostic_3a", "diagnostic_3b", "diagnostic_3c")
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "docs" / "spike-results"
 
 DEFAULT_OUTPUTS: dict[Variant, Path] = {
     "diagnostic_3a": RESULTS_DIR / "eval_diagnostic_3a_n150_sentence_qwen_results.json",
     "diagnostic_3b": RESULTS_DIR / "eval_diagnostic_3b_n150_sentence_qwen_results.json",
+    "diagnostic_3c": RESULTS_DIR / "eval_diagnostic_3c_n150_sentence_qwen_results.json",
 }
 
 DEFAULT_2A_RESULTS = RESULTS_DIR / "eval_diagnostic_2a_n150_paradigm_qwen_results.json"
@@ -107,6 +113,19 @@ VARIANT_META: dict[Variant, dict[str, Any]] = {
         "temperature": 0.0,
         "samples_per_cell": 1,
         "default_models": DEFAULT_MODEL_KEYS,
+        "sentence_length": "short",
+        "output_format": "json",
+        "cefr_level": None,
+    },
+    "diagnostic_3c": {
+        "diagnostic_id": "diagnostic_3c",
+        "diagnostic_number": "3C",
+        "diagnostic_title": "Spanish sentence binding (production prompt, stochastic)",
+        "diagnostic_label": "Diagnostic 3C — Spanish sentence binding (T=0.7, pass@10)",
+        "prompt_version": "build_prompt_baseline_v1",
+        "temperature": 0.7,
+        "samples_per_cell": 10,
+        "default_models": ("qwen17b",),
         "sentence_length": "short",
         "output_format": "json",
         "cefr_level": None,
@@ -681,6 +700,8 @@ def run_spike(
             payload["related_diagnostics"] = ["diagnostic_2a"]
         elif variant == "diagnostic_3b":
             payload["related_diagnostics"] = ["diagnostic_2a", "diagnostic_3a"]
+        elif variant == "diagnostic_3c":
+            payload["related_diagnostics"] = ["diagnostic_2a", "diagnostic_3a", "diagnostic_3b"]
     else:
         payload["models"] = {
             **payload.get("models", {}),
