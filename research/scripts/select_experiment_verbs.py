@@ -41,7 +41,17 @@ OUT_PATH = (
     / "experiment_verbs"
     / "manifest_diagnostic_1_n25.csv"
 )
+D2_OUT_PATH = (
+    ROOT
+    / "research"
+    / "evaluation"
+    / "lexicon"
+    / "experiment_verbs"
+    / "manifest_diagnostic_2_paradigm_n150.csv"
+)
+D1_MANIFEST = OUT_PATH
 EXPERIMENT_ID = "diagnostic_1"
+D2_EXPERIMENT_ID = "diagnostic_2"
 
 TIERS = ("high", "mid", "low")
 # Modals have no infinitival past-tense answer for an isolation probe.
@@ -329,11 +339,39 @@ def swap_blocked_en_verbs(rows: list[dict[str, str]], *, seed: int) -> list[dict
     return out
 
 
+def subsample_diagnostic_2_manifest(
+    source_rows: list[dict[str, str]],
+    *,
+    per_cell: int = 25,
+    seed: int = 42,
+) -> list[dict[str, str]]:
+    """Subsample Spanish verbs from a Diagnostic 1 manifest (25 per cell for D2)."""
+    es_rows = [r for r in source_rows if r["lang"] == "es"]
+    by_cell: dict[str, list[dict[str, str]]] = {}
+    for row in es_rows:
+        by_cell.setdefault(row["cell_id"], []).append(row)
+
+    rng = random.Random(seed)
+    picked: list[dict[str, str]] = []
+    for cell_id in sorted(by_cell):
+        pool = list(by_cell[cell_id])
+        rng.shuffle(pool)
+        for row in pool[:per_cell]:
+            out = dict(row)
+            out["experiment"] = D2_EXPERIMENT_ID
+            out["seed"] = str(seed)
+            picked.append(out)
+
+    picked.sort(key=lambda r: (r["cell_id"], r["verb"]))
+    return picked
+
+
 def _print_summary(rows: list[dict[str, str]]) -> None:
     from collections import Counter
 
-    print(f"\nWrote {len(rows)} verbs ({len(rows) // 2} per language expected)")
-    for lang in ("es", "en"):
+    langs = sorted({r["lang"] for r in rows})
+    print(f"\nWrote {len(rows)} verbs")
+    for lang in langs:
         lang_rows = [r for r in rows if r["lang"] == lang]
         print(f"\n{lang.upper()} — {len(lang_rows)} verbs")
         counts = Counter(r["cell_id"] for r in lang_rows)
@@ -345,12 +383,24 @@ def _print_summary(rows: list[dict[str, str]]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Select Diagnostic 1 stratified verb manifest")
-    parser.add_argument("--per-cell", type=int, default=25, help="Verbs per grid cell (default 25)")
+    parser.add_argument(
+        "--experiment",
+        choices=("diagnostic_1", "diagnostic_2"),
+        default="diagnostic_1",
+        help="diagnostic_2 subsamples Spanish verbs from the D1 manifest",
+    )
+    parser.add_argument("--per-cell", type=int, default=None, help="Verbs per grid cell")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default 42)")
+    parser.add_argument(
+        "--source-manifest",
+        type=Path,
+        default=D1_MANIFEST,
+        help="Source manifest for diagnostic_2 subsample (default: manifest_diagnostic_1_n25.csv)",
+    )
     parser.add_argument(
         "--output",
         type=Path,
-        default=OUT_PATH,
+        default=None,
         help="Output CSV path",
     )
     parser.add_argument(
@@ -359,6 +409,21 @@ def main() -> None:
         help="Read --output, swap blocked EN verbs in place, and rewrite",
     )
     args = parser.parse_args()
+
+    if args.output is None:
+        args.output = D2_OUT_PATH if args.experiment == "diagnostic_2" else OUT_PATH
+    if args.per_cell is None:
+        args.per_cell = 25
+
+    if args.experiment == "diagnostic_2":
+        source_rows = _read_manifest(args.source_manifest)
+        rows = subsample_diagnostic_2_manifest(
+            source_rows, per_cell=args.per_cell, seed=args.seed,
+        )
+        _write_manifest(rows, args.output)
+        _print_summary(rows)
+        print(f"\nManifest: {args.output}")
+        return
 
     if args.swap_blocked:
         path = args.output

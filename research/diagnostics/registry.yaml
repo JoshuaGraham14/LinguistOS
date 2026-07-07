@@ -62,10 +62,13 @@ diagnostics:
       For Spanish verbs on the manifest, does the model know the form in
       isolation (paradigm or single-slot) but fail to bind it in sentence
       generation?
-    script: null
-    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
-    results: null
-    related_experiments: [3, "3B"]
+    script: research/prototyping/diagnostic_2_spanish_paradigm_qwen_spike.py
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    results:
+      - docs/spike-results/eval_diagnostic_2_n150_paradigm_qwen_results.json
+      - docs/spike-results/eval_diagnostic_2_n150_single_slot_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    related_experiments: [3, "3B", 10]
     status: planned
 
   - id: diagnostic_4
