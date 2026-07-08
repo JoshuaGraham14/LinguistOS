@@ -90,6 +90,11 @@ def _cefr_line(cefr_level: str) -> str:
 
 
 def _inflection_line(keyword: str, constraints: dict[str, Any]) -> str:
+    if str(constraints.get("tense", "")) == "participle":
+        return (
+            f'The sentence must contain the past participle of "{keyword}" '
+            "— not the bare infinitive.\n"
+        )
     parts: list[str] = []
     for key in ("tense", "mood", "person", "number"):
         if key in constraints:
@@ -216,6 +221,27 @@ def _spanish_explicit_overlay(
     tense = constraints.get("tense", "")
     lines: list[str] = []
 
+    lo, hi = None, None
+    try:
+        from research.evaluation.length_bands import get_band
+
+        lo, hi = get_band(sentence_length)
+    except ValueError:
+        pass
+    if lo is not None and hi is not None:
+        lines.append(f"- Length: {lo}–{hi} words per sentence.")
+
+    if str(tense) == "participle":
+        lines.append(
+            f'- DO NOT use the infinitive "{keyword}" — use the past participle '
+            "(participio pasado) as one token."
+        )
+        lines.append(
+            "- The participle must appear as one token in the sentence — "
+            "not the bare infinitive."
+        )
+        return "Additional requirements:\n" + "\n".join(lines) + "\n"
+
     subject = _SPANISH_SUBJECT_HINTS.get((person, number))
     if subject:
         lines.append(
@@ -227,16 +253,6 @@ def _spanish_explicit_overlay(
         lines.append(f"- Verb tense/mood: {tense_label}.")
     if constraints.get("mood"):
         lines.append(f"- Mood: {constraints['mood']}.")
-
-    lo, hi = None, None
-    try:
-        from research.evaluation.length_bands import get_band
-
-        lo, hi = get_band(sentence_length)
-    except ValueError:
-        pass
-    if lo is not None and hi is not None:
-        lines.append(f"- Length: {lo}–{hi} words per sentence.")
 
     lines.append(
         f'- DO NOT use the infinitive "{keyword}" — output a conjugated single-word verb form.'

@@ -59,7 +59,18 @@ class LanguageProfile:
         path_hint: str = "",
     ) -> None:
         prefix = f"{path_hint}: " if path_hint else ""
-        for field in self.required:
+        is_participle = str(constraints.get("tense", "")) == "participle"
+        required_fields = self.required
+        if is_participle:
+            # Past-participle cells are lemma × tense only (no person/number).
+            required_fields = tuple(f for f in self.required if f not in ("person", "number"))
+            for banned in ("person", "number"):
+                if banned in constraints:
+                    raise ValueError(
+                        f"{prefix}participle cells must not include '{banned}' "
+                        f"for language '{self.code}'"
+                    )
+        for field in required_fields:
             if field not in constraints:
                 raise ValueError(
                     f"{prefix}missing required constraint '{field}' for language '{self.code}'"

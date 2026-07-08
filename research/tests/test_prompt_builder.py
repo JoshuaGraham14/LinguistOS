@@ -154,3 +154,51 @@ def test_inject_expected_form_byte_identical_when_none():
     p_default = build_prompt(**common_kwargs)
     p_explicit_none = build_prompt(**common_kwargs, inject_expected_form=None)
     assert p_default == p_explicit_none
+
+
+def test_participle_baseline_prompt_does_not_leak_gold_form():
+    prompt = build_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "participle"},
+        num_candidates=10,
+        sentence_length="short",
+    )
+    assert "past participle" in prompt.lower()
+    assert "Required surface form" not in prompt
+    assert "comido" not in prompt
+    assert "Person:" not in prompt
+
+
+def test_participle_injected_prompt_includes_gold_form():
+    prompt = build_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "participle"},
+        num_candidates=10,
+        sentence_length="short",
+        inject_expected_form="comido",
+    )
+    assert "Required surface form" in prompt
+    assert '"comido"' in prompt
+
+
+def test_participle_explicit_overlay_without_subject_hints():
+    from research.generation.prompt_builder import build_prompt_explicit
+
+    prompt = build_prompt_explicit(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "participle"},
+        num_candidates=10,
+        sentence_length="short",
+        inject_expected_form="comido",
+    )
+    assert "Additional requirements:" in prompt
+    assert "participio pasado" in prompt
+    assert "nosotros" not in prompt
+    assert "Required surface form" in prompt
+    assert '"comido"' in prompt

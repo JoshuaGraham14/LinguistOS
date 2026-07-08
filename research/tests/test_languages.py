@@ -23,7 +23,25 @@ def test_load_spanish_profile():
     profile = load_language_profile("es")
     assert profile.code == "es"
     assert "preterite" in profile.dimensions["tense"]
+    assert "participle" in profile.dimensions["tense"]
     assert "binyan" not in profile.dimensions
+
+
+def test_validate_accepts_spanish_participle_without_person_number():
+    profile = load_language_profile("es")
+    profile.validate({"tense": "participle"})
+
+
+def test_validate_rejects_person_on_spanish_participle():
+    profile = load_language_profile("es")
+    with pytest.raises(ValueError, match="must not include 'person'"):
+        profile.validate({"tense": "participle", "person": "1st"})
+
+
+def test_validate_still_requires_person_for_indicative():
+    profile = load_language_profile("es")
+    with pytest.raises(ValueError, match="missing required constraint 'person'"):
+        profile.validate({"tense": "present", "number": "singular"})
 
 
 def test_validate_rejects_qatal_for_hebrew():

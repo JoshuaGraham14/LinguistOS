@@ -8,6 +8,7 @@ dimensions:
     - imperfect
     - future
     - conditional
+    - participle
   mood:
     - indicative
     - subjunctive
@@ -27,6 +28,7 @@ dimensions:
 glosses:
   tense:
     preterite: "Preterite (pretérito indefinido)"
+    participle: "Past participle (participio pasado)"
   mood:
     subjunctive: Subjunctive
   dialect:
