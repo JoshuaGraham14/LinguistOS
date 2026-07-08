@@ -18,7 +18,11 @@ import re
 from typing import Any
 
 from research.generation.base import BaseGenerator
-from research.generation.prompt_builder import build_prompt, language_display_name
+from research.generation.prompt_builder import (
+    build_prompt,
+    build_prompt_explicit,
+    language_display_name,
+)
 
 # One model per process; cached across constraint sets.
 _MODEL_CACHE: dict[str, tuple[Any, Any]] = {}
@@ -188,6 +192,31 @@ class BaselineHFGenerator(BaseGenerator):
         expected = constraints.get("expected_form")
         return str(expected) if expected else None
 
+    def _build_user_prompt(
+        self,
+        *,
+        keyword: str,
+        translation: str,
+        target_language: str,
+        constraints: dict[str, Any],
+        num_candidates: int,
+        sentence_length: str,
+        cefr_level: str | None,
+        explicit_subject_required: bool,
+        inject_expected_form: str | None,
+    ) -> str:
+        return build_prompt(
+            keyword=keyword,
+            translation=translation,
+            target_language=target_language,
+            constraints=constraints,
+            num_candidates=num_candidates,
+            sentence_length=sentence_length,
+            cefr_level=cefr_level,
+            explicit_subject_required=explicit_subject_required,
+            inject_expected_form=inject_expected_form,
+        )
+
     def generate(
         self,
         keyword: str,
@@ -212,7 +241,7 @@ class BaselineHFGenerator(BaseGenerator):
             remaining = num_candidates - len(collected)
             if remaining <= 0:
                 break
-            prompt = build_prompt(
+            prompt = self._build_user_prompt(
                 keyword=keyword,
                 translation=translation,
                 target_language=target_language,
@@ -228,7 +257,7 @@ class BaselineHFGenerator(BaseGenerator):
             raw = self._call(prompt, system, max_new_tokens)
             cands, mode = parse_candidates_lenient(raw)
             print(
-                f"    [baseline_hf call {call_idx + 1}] requested={remaining} "
+                f"    [{self.name} call {call_idx + 1}] requested={remaining} "
                 f"parsed={len(cands)} mode={mode}"
             )
             collected.extend(cands)
@@ -244,3 +273,36 @@ class FormInjectedHFGenerator(BaselineHFGenerator):
     @property
     def name(self) -> str:
         return "baseline_hf_form_injected"
+
+
+class FormInjectedExplicitHFGenerator(FormInjectedHFGenerator):
+    """Form injection plus the Spanish ``build_prompt_explicit`` overlay (Diag 5C)."""
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_form_injected_explicit"
+
+    def _build_user_prompt(
+        self,
+        *,
+        keyword: str,
+        translation: str,
+        target_language: str,
+        constraints: dict[str, Any],
+        num_candidates: int,
+        sentence_length: str,
+        cefr_level: str | None,
+        explicit_subject_required: bool,
+        inject_expected_form: str | None,
+    ) -> str:
+        return build_prompt_explicit(
+            keyword=keyword,
+            translation=translation,
+            target_language=target_language,
+            constraints=constraints,
+            num_candidates=num_candidates,
+            sentence_length=sentence_length,
+            cefr_level=cefr_level,
+            explicit_subject_required=explicit_subject_required,
+            inject_expected_form=inject_expected_form,
+        )

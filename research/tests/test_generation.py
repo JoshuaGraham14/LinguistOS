@@ -87,6 +87,35 @@ def test_individual_generator_returns_empty_without_api_key(monkeypatch):
 def test_registry_contains_both_methods():
     assert "baseline_gpt" in GENERATOR_REGISTRY
     assert "individual_gpt" in GENERATOR_REGISTRY
+    assert "baseline_hf" in GENERATOR_REGISTRY
+    assert "baseline_hf_form_injected" in GENERATOR_REGISTRY
+    assert "baseline_hf_form_injected_explicit" in GENERATOR_REGISTRY
+
+
+def test_form_injected_explicit_hf_prompt_uses_overlay_and_injection():
+    from research.generation.baseline_hf import FormInjectedExplicitHFGenerator
+
+    gen = FormInjectedExplicitHFGenerator()
+    prompt = gen._build_user_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={
+            "tense": "preterite",
+            "person": "1st",
+            "number": "plural",
+            "expected_form": "comimos",
+        },
+        num_candidates=10,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form="comimos",
+    )
+    assert "Required surface form" in prompt
+    assert '"comimos"' in prompt
+    assert "Additional requirements:" in prompt
+    assert "nosotros" in prompt
 
 
 def test_build_generator_from_method_config(session):
