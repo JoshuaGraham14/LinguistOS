@@ -301,3 +301,64 @@ def build_prompt_explicit(
     return base + "\n" + _spanish_explicit_overlay(
         keyword, constraints, sentence_length=sentence_length
     )
+
+
+def build_prompt_plain(
+    *,
+    keyword: str,
+    translation: str,
+    target_language: str,
+    constraints: dict[str, Any],
+    num_candidates: int,
+    sentence_length: str = "short",
+    cefr_level: str | None = None,
+    explicit_subject_required: bool = False,
+    exercise_type: str | None = None,
+    inject_expected_form: str | None = None,
+    scene_hint: str | None = None,
+) -> str:
+    """Plain-text output scaffold with the same constraints as :func:`build_prompt`."""
+    lang = language_display_name(target_language)
+    length_desc = band_label(sentence_length)
+
+    constraint_block = "\n".join(_constraint_lines(target_language, constraints))
+    if constraint_block:
+        constraint_block = f"Constraints:\n{constraint_block}\n  length: {length_desc}.\n"
+    else:
+        constraint_block = f"Constraints: length={length_desc}.\n"
+
+    cefr_line = _cefr_line(cefr_level) if cefr_level else ""
+    inflection_line = _inflection_line(keyword, constraints)
+
+    subject_line = _explicit_subject_line(
+        constraints, explicit_subject_required=explicit_subject_required
+    )
+
+    exercise_line = ""
+    if exercise_type:
+        exercise_line = f"Exercise type: {exercise_type}.\n"
+
+    form_line = (
+        _form_injection_line(keyword, inject_expected_form)
+        if inject_expected_form
+        else ""
+    )
+
+    scene_line = f"{scene_hint.strip()}\n" if scene_hint else ""
+
+    count_label = "sentence" if num_candidates == 1 else "sentences"
+    return (
+        f"You generate {lang} example sentences for vocabulary practice.\n"
+        f'Target word (lemma): "{keyword}" (English: "{translation}")\n'
+        f"{constraint_block}"
+        f"{inflection_line}"
+        f"{exercise_line}"
+        f"{subject_line}"
+        f"{cefr_line}"
+        f"{form_line}"
+        f"{scene_line}"
+        f"Produce {num_candidates} natural {lang} {count_label} within the length band. "
+        f"Each sentence must contain the target verb inflected as specified above.\n"
+        f"Reply with ONLY the {lang} sentence(s), one per line. "
+        "No JSON, no English translation, no quotes, no extra commentary."
+    )

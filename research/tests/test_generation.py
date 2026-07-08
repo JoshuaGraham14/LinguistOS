@@ -90,6 +90,40 @@ def test_registry_contains_both_methods():
     assert "baseline_hf" in GENERATOR_REGISTRY
     assert "baseline_hf_form_injected" in GENERATOR_REGISTRY
     assert "baseline_hf_form_injected_explicit" in GENERATOR_REGISTRY
+    assert "baseline_hf_form_injected_plain" in GENERATOR_REGISTRY
+    assert "constrained_hf_hard_plain" in GENERATOR_REGISTRY
+    assert "constrained_hf_soft_json" in GENERATOR_REGISTRY
+
+
+def test_baseline_hf_greedy_at_zero_temperature():
+    from research.generation.baseline_hf import _sample_kwargs
+
+    assert _sample_kwargs(0.0) == {"do_sample": False}
+    assert _sample_kwargs(0.7)["do_sample"] is True
+    assert _sample_kwargs(0.7)["temperature"] == 0.7
+
+
+def test_build_generator_passes_beam_config(session):
+    mc = MethodConfig(
+        name="test_constrained",
+        method="constrained_hf_hard_plain",
+        samples_per_case=1,
+        config={
+            "model": "Qwen/Qwen3-1.7B",
+            "temperature": 0,
+            "num_beams": 4,
+            "bias_strength": 5.0,
+        },
+    )
+    session.add(mc)
+    session.commit()
+
+    gen = _build_generator(MethodRunConfig.from_method_config(mc), mc)
+    from research.generation.constrained_hf import ConstrainedHFHardPlainGenerator
+
+    assert isinstance(gen, ConstrainedHFHardPlainGenerator)
+    assert gen._num_beams == 4
+    assert gen._bias_strength == 5.0
 
 
 def test_form_injected_explicit_hf_prompt_uses_overlay_and_injection():
@@ -329,3 +363,123 @@ def test_baseline_hf_generate_many_batches_jobs(monkeypatch):
     assert len(out[0]) == 2
     assert len(out[1]) == 1
     assert out[0][0]["sentence"] == "Como pan."
+
+
+def test_plain_hf_generate_many_uses_plain_parse(monkeypatch):
+    from research.generation.baseline_hf import FormInjectedPlainHFGenerator
+
+    jobs = [
+        {
+            "keyword": "comer",
+            "translation": "to eat",
+            "constraints": {
+                "tense": "present",
+                "person": "1st",
+                "number": "singular",
+                "expected_form": "como",
+            },
+            "num_candidates": 1,
+            "target_language": "es",
+            "cefr_level": None,
+            "sentence_length": "short",
+            "explicit_subject_required": False,
+        },
+        {
+            "keyword": "beber",
+            "translation": "to drink",
+            "constraints": {
+                "tense": "present",
+                "person": "2nd",
+                "number": "singular",
+                "expected_form": "bebes",
+            },
+            "num_candidates": 1,
+            "target_language": "es",
+            "cefr_level": None,
+            "sentence_length": "short",
+            "explicit_subject_required": False,
+        },
+    ]
+
+    def fake_batch(model_id, specs, *, temperature=0.0, batch_size=8):
+        return ["Como pan.", "Bebes agua."][: len(specs)]
+
+    monkeypatch.setattr(
+        "research.generation.baseline_hf.generate_chat_batch",
+        fake_batch,
+    )
+
+    gen = FormInjectedPlainHFGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    out = gen.generate_many(jobs, batch_size=2)
+
+    assert out[0][0]["sentence"] == "Como pan."
+    assert out[1][0]["sentence"] == "Bebes agua."
+
+
+def test_constrained_hf_generate_many_batches_jobs(monkeypatch):
+    from research.generation.constrained_hf import ConstrainedHFHardPlainGenerator
+
+    jobs = [
+        {
+            "keyword": "comer",
+            "translation": "to eat",
+            "constraints": {
+                "tense": "present",
+                "person": "1st",
+                "number": "singular",
+                "expected_form": "como",
+            },
+            "num_candidates": 1,
+            "target_language": "es",
+            "cefr_level": None,
+            "sentence_length": "short",
+            "explicit_subject_required": False,
+        },
+        {
+            "keyword": "beber",
+            "translation": "to drink",
+            "constraints": {
+                "tense": "present",
+                "person": "2nd",
+                "number": "singular",
+                "expected_form": "bebes",
+            },
+            "num_candidates": 1,
+            "target_language": "es",
+            "cefr_level": None,
+            "sentence_length": "short",
+            "explicit_subject_required": False,
+        },
+    ]
+    batch_sizes: list[int] = []
+
+    def fake_beam_batch(
+        model_id,
+        specs,
+        *,
+        num_beams,
+        use_hard_constraint,
+        bias_strength,
+        batch_size=8,
+    ):
+        batch_sizes.append(len(specs))
+        return ["Como pan.", "Bebes agua."][: len(specs)]
+
+    monkeypatch.setattr(
+        "research.generation.constrained_hf.beam_generate_batch",
+        fake_beam_batch,
+    )
+
+    gen = ConstrainedHFHardPlainGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    out = gen.generate_many(jobs, batch_size=2)
+
+    assert batch_sizes == [2]
+    assert out[0][0]["sentence"] == "Como pan."
+    assert out[1][0]["sentence"] == "Bebes agua."
+
+
+def test_batch_size_for_beam_profile():
+    from research.generation.cluster_batch_sizes import batch_size_for_profile
+
+    assert batch_size_for_profile("beam", model_key="qwen17b") == 4
+    assert batch_size_for_profile("beam", model_key="qwen4b") == 2

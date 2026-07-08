@@ -110,7 +110,11 @@ def get_mock_candidates(benchmark_name: str, keyword: str) -> list[dict[str, str
     if bench and keyword in bench:
         return list(bench[keyword])
 
-    if benchmark_name == "spanish_diagnostic_n150":
+    if benchmark_name in (
+        "spanish_diagnostic_n150",
+        "spanish_direction_hl50",
+        "spanish_direction_hl50_smoke",
+    ):
         basic = MOCK_OUTPUTS_BY_BENCHMARK["spanish_basic"].get(keyword)
         if basic:
             return list(basic)

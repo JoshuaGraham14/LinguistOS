@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from research.generation.prompt_builder import build_prompt
+from research.generation.prompt_builder import build_prompt, build_prompt_plain
 
 
 def test_spanish_prompt_lists_constraints():
@@ -202,3 +202,35 @@ def test_participle_explicit_overlay_without_subject_hints():
     assert "nosotros" not in prompt
     assert "Required surface form" in prompt
     assert '"comido"' in prompt
+
+
+def test_build_prompt_plain_matches_json_constraints():
+    json_prompt = build_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "preterite", "person": "1st", "number": "plural"},
+        num_candidates=1,
+        sentence_length="short",
+        inject_expected_form="comimos",
+    )
+    plain_prompt = build_prompt_plain(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "preterite", "person": "1st", "number": "plural"},
+        num_candidates=1,
+        sentence_length="short",
+        inject_expected_form="comimos",
+    )
+    for snippet in (
+        "Preterite (pretérito indefinido)",
+        "Person: 1st",
+        "Required surface form",
+        '"comimos"',
+        "short (2–5 tokens)",
+    ):
+        assert snippet in json_prompt
+        assert snippet in plain_prompt
+    assert "Reply ONLY as JSON" in json_prompt
+    assert "No JSON" in plain_prompt

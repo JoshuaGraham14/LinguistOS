@@ -7,13 +7,14 @@ from typing import Literal
 
 from research.generation.baseline_hf import DEFAULT_HF_BATCH_SIZE
 
-WorkloadProfile = Literal["short", "medium", "json", "heavy"]
+WorkloadProfile = Literal["short", "medium", "json", "heavy", "beam"]
 
 _PROFILE_BATCH: dict[WorkloadProfile, dict[str, int]] = {
     "short": {"qwen06b": 32, "qwen17b": 32, "qwen4b": 16, "default": 32},
     "medium": {"qwen06b": 16, "qwen17b": 16, "qwen4b": 8, "default": 16},
     "json": {"qwen06b": 16, "qwen17b": 16, "qwen4b": 8, "default": 16},
     "heavy": {"qwen06b": 8, "qwen17b": 8, "qwen4b": 4, "default": 8},
+    "beam": {"qwen06b": 8, "qwen17b": 4, "qwen4b": 2, "default": 4},
 }
 
 

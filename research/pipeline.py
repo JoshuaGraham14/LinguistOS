@@ -34,6 +34,7 @@ from research.generation import GENERATOR_REGISTRY
 from research.generation.base import BaseGenerator
 from research.generation.baseline_hf import BaselineHFGenerator
 from research.generation.cluster_batch_sizes import resolve_hf_batch_size
+from research.generation.constrained_hf import ConstrainedHFGenerator
 from research.methods.loader import load_method_config_by_name
 from research.methods.run_config import MethodRunConfig
 
@@ -73,10 +74,16 @@ def _build_generator(run_config: MethodRunConfig, method_config: MethodConfig) -
             f"Unknown generation method '{method_config.method}'. "
             f"Available: {', '.join(GENERATOR_REGISTRY)}"
         )
-    return cls(
-        model=run_config.model,
-        temperature=run_config.temperature,
-    )
+    raw = method_config.config or {}
+    kwargs: dict[str, object] = {
+        "model": run_config.model,
+        "temperature": run_config.temperature,
+    }
+    if "num_beams" in raw:
+        kwargs["num_beams"] = int(raw["num_beams"])
+    if "bias_strength" in raw:
+        kwargs["bias_strength"] = float(raw["bias_strength"])
+    return cls(**kwargs)
 
 
 def _resolved_length_from_sentence(sent: GeneratedSentence) -> str:
@@ -519,10 +526,13 @@ def run_experiment(
 
             use_hf_batch = (
                 live
-                and isinstance(generator, BaselineHFGenerator)
+                and isinstance(generator, (BaselineHFGenerator, ConstrainedHFGenerator))
                 and not run_config.is_random_length
             )
-            hf_profile = "heavy" if samples_needed > 1 else "json"
+            if isinstance(generator, ConstrainedHFGenerator):
+                hf_profile = "beam"
+            else:
+                hf_profile = "heavy" if samples_needed > 1 else "json"
             hf_batch_size = resolve_hf_batch_size(
                 model_id=run_config.model,
                 profile=hf_profile,

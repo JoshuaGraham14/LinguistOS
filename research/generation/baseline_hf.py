@@ -25,6 +25,7 @@ from research.generation.base import BaseGenerator
 from research.generation.prompt_builder import (
     build_prompt,
     build_prompt_explicit,
+    build_prompt_plain,
     language_display_name,
 )
 
@@ -254,9 +255,18 @@ class BaselineHFGenerator(BaseGenerator):
     # One batched call like baseline_gpt, plus top-up calls if short.
     MAX_CALLS = 4
 
-    def __init__(self, model: str = "Qwen/Qwen2.5-0.5B-Instruct", temperature: float = 0.7):
+    def __init__(
+        self,
+        model: str = "Qwen/Qwen2.5-0.5B-Instruct",
+        temperature: float = 0.7,
+        *,
+        num_beams: int = 4,
+        bias_strength: float = 5.0,
+    ):
         self._model_id = model
         self._temperature = temperature
+        self._num_beams = num_beams
+        self._bias_strength = bias_strength
 
     @property
     def name(self) -> str:
@@ -284,6 +294,18 @@ class BaselineHFGenerator(BaseGenerator):
             f"You are a helpful {lang} language tutor. "
             "Always respond with valid JSON."
         )
+
+    def _generation_system_prompt(self, lang: str) -> str:
+        return self._json_system_prompt(lang)
+
+    def _parse_generation_raw(self, raw: str) -> tuple[list[dict[str, str]], str]:
+        return parse_candidates_lenient(raw)
+
+    def _max_new_tokens_for_remaining(self, remaining: int) -> int:
+        return self._max_new_tokens(remaining)
+
+    def _max_candidates_per_call(self) -> int:
+        return 10_000
 
     def _build_user_prompt(
         self,
@@ -326,7 +348,7 @@ class BaselineHFGenerator(BaseGenerator):
         explicit_subject_required: bool = False,
     ) -> list[dict[str, str]]:
         lang = language_display_name(target_language)
-        system = self._json_system_prompt(lang)
+        system = self._generation_system_prompt(lang)
         inject_expected_form = self._resolve_inject_expected_form(constraints)
 
         collected: list[dict[str, str]] = []
@@ -345,13 +367,17 @@ class BaselineHFGenerator(BaseGenerator):
                 explicit_subject_required=explicit_subject_required,
                 inject_expected_form=inject_expected_form,
             )
-            raw = self._call(prompt, system, self._max_new_tokens(remaining))
-            cands, mode = parse_candidates_lenient(raw)
+            raw = self._call(
+                prompt,
+                system,
+                self._max_new_tokens_for_remaining(remaining),
+            )
+            cands, mode = self._parse_generation_raw(raw)
             print(
                 f"    [{self.name} call {call_idx + 1}] requested={remaining} "
                 f"parsed={len(cands)} mode={mode}"
             )
-            collected.extend(cands)
+            collected.extend(cands[: self._max_candidates_per_call()])
 
         return collected[:num_candidates]
 
@@ -401,9 +427,9 @@ class BaselineHFGenerator(BaseGenerator):
                 )
                 specs.append(
                     ChatGenerationSpec(
-                        system=self._json_system_prompt(lang),
+                        system=self._generation_system_prompt(lang),
                         user=prompt,
-                        max_new_tokens=self._max_new_tokens(remaining),
+                        max_new_tokens=self._max_new_tokens_for_remaining(remaining),
                     )
                 )
 
@@ -425,12 +451,12 @@ class BaselineHFGenerator(BaseGenerator):
                     continue
                 raw = raws[spec_i]
                 spec_i += 1
-                cands, mode = parse_candidates_lenient(raw)
+                cands, mode = self._parse_generation_raw(raw)
                 print(
                     f"    [{self.name} batch call {call_idx + 1} job {idx + 1}] "
                     f"requested={remaining} parsed={len(cands)} mode={mode}"
                 )
-                collected[idx].extend(cands)
+                collected[idx].extend(cands[: self._max_candidates_per_call()])
                 if (
                     len(collected[idx]) < jobs[idx]["num_candidates"]
                     and call_idx + 1 < self.MAX_CALLS
@@ -485,3 +511,68 @@ class FormInjectedExplicitHFGenerator(FormInjectedHFGenerator):
             explicit_subject_required=explicit_subject_required,
             inject_expected_form=inject_expected_form,
         )
+
+
+class PlainHFGenerator(BaselineHFGenerator):
+    """``baseline_hf`` with plain-text output (no JSON scaffold)."""
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_plain"
+
+    def _generation_system_prompt(self, lang: str) -> str:
+        return (
+            f"You are a helpful {lang} language tutor. "
+            "Reply with exactly one Spanish sentence per request."
+        )
+
+    def _parse_generation_raw(self, raw: str) -> tuple[list[dict[str, str]], str]:
+        from research.generation.plain_output import candidate_from_plain
+
+        cand, mode = candidate_from_plain(raw)
+        if cand["sentence"]:
+            return [cand], mode
+        return [], mode
+
+    def _max_new_tokens_for_remaining(self, remaining: int) -> int:
+        return min(40 * remaining + 40, 512)
+
+    def _max_candidates_per_call(self) -> int:
+        return 1
+
+    def _build_user_prompt(
+        self,
+        *,
+        keyword: str,
+        translation: str,
+        target_language: str,
+        constraints: dict[str, Any],
+        num_candidates: int,
+        sentence_length: str,
+        cefr_level: str | None,
+        explicit_subject_required: bool,
+        inject_expected_form: str | None,
+        scene_hint: str | None = None,
+    ) -> str:
+        return build_prompt_plain(
+            keyword=keyword,
+            translation=translation,
+            target_language=target_language,
+            constraints=constraints,
+            num_candidates=num_candidates,
+            sentence_length=sentence_length,
+            cefr_level=cefr_level,
+            explicit_subject_required=explicit_subject_required,
+            inject_expected_form=inject_expected_form,
+            scene_hint=scene_hint,
+        )
+
+
+class FormInjectedPlainHFGenerator(PlainHFGenerator):
+    """Form injection with plain-text output and greedy/stochastic HF decode."""
+
+    _INJECT_EXPECTED_FORM = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_form_injected_plain"

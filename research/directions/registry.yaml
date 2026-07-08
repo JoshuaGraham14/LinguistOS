@@ -1,0 +1,166 @@
+# Direction registry — technical build phase (decode-time methods).
+#
+# Direction 1 pilot: beam search vs form injection on spanish_direction_hl50
+# (25 high + 25 low tier verbs, mid excluded). All arms: run_experiment,
+# 1 sample/cell. Injection: greedy T=0 (fair vs deterministic beam).
+# Diagnostic 5B used T=0.7 n=10 on n=150 — cite separately.
+#
+# Pilot IDs use full names: inject_json, hard_plain, soft_json, etc.
+
+directions:
+  - id: direction_1
+    number: 1
+    title: Morphology-aware constrained decoding
+    question: >-
+      On hl50, does decode-time form forcing (beam) match or beat form injection
+      on expected-form match while improving grammar — and does JSON vs plain-text
+      output change performance for injection and beam alike?
+    benchmark_pilot: spanish_direction_hl50
+    benchmark_main: spanish_diagnostic_n150
+    pilot_variants:
+      - direction_1_inject_json
+      - direction_1_inject_plain
+      - direction_1a_hard_plain
+      - direction_1a_hard_json
+      - direction_1b_soft_plain
+      - direction_1b_soft_json
+    main_variants: [direction_1a, direction_1b, direction_1c]
+    compare_to_diagnostics: [diagnostic_5b]
+    runner: research.run_experiment
+    samples_per_cell: 1
+    status: planned
+
+  # --- Injection baselines ---
+
+  - id: direction_1_inject_json
+    number: inject-json
+    series: direction_1
+    phase: pilot_baseline
+    title: Form injection — JSON
+    question: >-
+      On hl50, does 5B-style form injection with JSON output reach high
+      expected-form match — with grammar and diversity on the same pipeline
+      as beam arms?
+    benchmark: spanish_direction_hl50
+    maps_to: diagnostic_5b
+    prompt: build_prompt
+    inject: true
+    output: json
+    decode: {do_sample: false, temperature: 0, num_beams: 1}
+    samples_per_cell: 1
+    runner: research.run_experiment
+    status: planned
+
+  - id: direction_1_inject_plain
+    number: inject-plain
+    series: direction_1
+    phase: pilot_baseline
+    title: Form injection — plain text
+    question: >-
+      Same injection as inject-json but plain-text output — format-fair baseline
+      for hard-plain and soft-plain beam arms.
+    benchmark: spanish_direction_hl50
+    maps_to: diagnostic_5b
+    prompt: build_prompt_plain_injected
+    inject: true
+    output: plain_text
+    decode: {do_sample: false, temperature: 0, num_beams: 1}
+    samples_per_cell: 1
+    runner: research.run_experiment
+    status: planned
+
+  # --- Beam arms ---
+
+  - id: direction_1a_hard_plain
+    number: 1A-hard-plain
+    series: direction_1
+    phase: pilot
+    title: Hard constrained decoding — plain text
+    question: >-
+      Hard beam mask, plain text, no injection — vs inject-plain on expected-form
+      and grammar.
+    benchmark: spanish_direction_hl50
+    prompt: build_prompt_plain
+    inject: false
+    output: plain_text
+    decode: {do_sample: false, num_beams: 4, constraint: hard_mask}
+    samples_per_cell: 1
+    runner: research.run_experiment
+    status: planned
+
+  - id: direction_1a_hard_json
+    number: 1A-hard-json
+    series: direction_1
+    phase: pilot
+    title: Hard constrained decoding — JSON
+    question: >-
+      Hard beam mask under production JSON scaffold — vs hard-plain and inject-json.
+    benchmark: spanish_direction_hl50
+    prompt: build_prompt
+    inject: false
+    output: json
+    decode: {do_sample: false, num_beams: 4, constraint: hard_mask}
+    samples_per_cell: 1
+    runner: research.run_experiment
+    status: planned
+
+  - id: direction_1b_soft_plain
+    number: 1B-soft-plain
+    series: direction_1
+    phase: pilot
+    title: Soft constrained decoding — plain text
+    question: >-
+      Soft logit bias (λ=5), plain text — vs hard-plain and inject-plain.
+    benchmark: spanish_direction_hl50
+    prompt: build_prompt_plain
+    inject: false
+    output: plain_text
+    decode: {do_sample: false, num_beams: 4, constraint: soft_bias, bias_strength: 5.0}
+    samples_per_cell: 1
+    runner: research.run_experiment
+    status: planned
+
+  - id: direction_1b_soft_json
+    number: 1B-soft-json
+    series: direction_1
+    phase: pilot
+    title: Soft constrained decoding — JSON
+    question: >-
+      Soft logit bias (λ=5), JSON — vs hard-json and inject-json.
+    benchmark: spanish_direction_hl50
+    prompt: build_prompt
+    inject: false
+    output: json
+    decode: {do_sample: false, num_beams: 4, constraint: soft_bias, bias_strength: 5.0}
+    samples_per_cell: 1
+    runner: research.run_experiment
+    status: planned
+
+  # --- Main arms (n=150, after pilot) ---
+
+  - id: direction_1a
+    number: 1A
+    series: direction_1
+    phase: main
+    title: Hard constrained decoding
+    benchmark: spanish_diagnostic_n150
+    runner: research.run_experiment
+    status: planned
+
+  - id: direction_1b
+    number: 1B
+    series: direction_1
+    phase: main
+    title: Soft logit-bias constrained decoding
+    benchmark: spanish_diagnostic_n150
+    runner: research.run_experiment
+    status: planned
+
+  - id: direction_1c
+    number: 1C
+    series: direction_1
+    phase: main
+    title: Soft bias with diversity preservation
+    benchmark: spanish_diagnostic_n150
+    runner: research.run_experiment
+    status: planned
