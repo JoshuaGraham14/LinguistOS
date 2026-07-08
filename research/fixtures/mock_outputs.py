@@ -106,6 +106,19 @@ MOCK_OUTPUTS = MOCK_OUTPUTS_BY_BENCHMARK["spanish_basic"]
 
 def get_mock_candidates(benchmark_name: str, keyword: str) -> list[dict[str, str]]:
     """Return canned sentences for a benchmark constraint set, or []."""
-    return list(
-        MOCK_OUTPUTS_BY_BENCHMARK.get(benchmark_name, {}).get(keyword, [])
-    )
+    bench = MOCK_OUTPUTS_BY_BENCHMARK.get(benchmark_name)
+    if bench and keyword in bench:
+        return list(bench[keyword])
+
+    if benchmark_name == "spanish_diagnostic_n150":
+        basic = MOCK_OUTPUTS_BY_BENCHMARK["spanish_basic"].get(keyword)
+        if basic:
+            return list(basic)
+        return [
+            {
+                "sentence": f"Yo uso {keyword} hoy.",
+                "translation": f"I use {keyword} today.",
+            }
+        ]
+
+    return []
