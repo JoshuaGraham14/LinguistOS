@@ -22,6 +22,13 @@
 #   4A — build_prompt_explicit (T=0, 1 sample)
 #   4B — 3C pass@1 + one constraint-only rewrite (reuse 3C pass@1 when available)
 #
+# Diagnostic 5 is form injection via the production evaluation pipeline
+# (Exp 9 successor on spanish_diagnostic_n150, Qwen3-1.7B, T=0.7, n=10):
+#   5A — baseline_hf (no gold form)
+#   5B — baseline_hf_form_injected
+#   5C — baseline_hf_form_injected_explicit
+# Results live in the research DB (not docs/spike-results JSON).
+#
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
 #   documented under docs/experiment-results/.
 # Diagnostics (this file): final diagnosis runs — census manifest,
@@ -247,4 +254,73 @@ diagnostics:
     models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
     decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
     related_experiments: [4]
+    status: ready
+
+  - id: diagnostic_5
+    number: 5
+    title: Spanish form injection (pipeline / Exp 9 successor)
+    question: >-
+      On the census n=150 × 31-cell grid through the production evaluation
+      pipeline, does Exp-9-style form injection raise sentence-level expected-form
+      match (5B), and does explicit overlay + injection (5C) add further lift,
+      relative to a matched baseline (5A) — and at what cost to grammar, length,
+      and diversity?
+    runner: research.run_experiment
+    benchmark: spanish_diagnostic_n150
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    variants: [diagnostic_5a, diagnostic_5b, diagnostic_5c]
+    related_experiments: [6, 9]
+    related_diagnostics: [diagnostic_2a, diagnostic_3d, diagnostic_4a]
+    status: ready
+
+  - id: diagnostic_5a
+    number: "5A"
+    series: diagnostic_5
+    title: Spanish form injection (pipeline baseline)
+    question: >-
+      Under production build_prompt (no gold form), T=0.7, 10 batched candidates
+      per cell, what are sentence-level EF / grammar / length / diversity rates
+      on spanish_diagnostic_n150 for Qwen3-1.7B?
+    runner: research.run_experiment
+    benchmark: spanish_diagnostic_n150
+    method: diagnostic_5a_hf_qwen3_17b_n10
+    cluster_script: research/scripts/cluster/diagnostic_5a_n150_gpu.sh
+    models: [Qwen/Qwen3-1.7B]
+    decoding: {temperature: 0.7, samples_per_cell: 10, sentence_length: short}
+    related_experiments: [9]
+    related_diagnostics: [diagnostic_3d]
+    status: ready
+
+  - id: diagnostic_5b
+    number: "5B"
+    series: diagnostic_5
+    title: Spanish form injection (pipeline inject)
+    question: >-
+      Does injecting the gold surface form into build_prompt raise sentence-level
+      expected_form_match vs Diagnostic 5A on the same n=150 grid?
+    runner: research.run_experiment
+    benchmark: spanish_diagnostic_n150
+    method: diagnostic_5b_hf_qwen3_17b_n10
+    cluster_script: research/scripts/cluster/diagnostic_5b_n150_gpu.sh
+    compare_to: [diagnostic_5a]
+    models: [Qwen/Qwen3-1.7B]
+    decoding: {temperature: 0.7, samples_per_cell: 10, sentence_length: short}
+    related_experiments: [6, 9]
+    status: ready
+
+  - id: diagnostic_5c
+    number: "5C"
+    series: diagnostic_5
+    title: Spanish form injection (pipeline inject + explicit)
+    question: >-
+      Does build_prompt_explicit plus form injection improve on 5B (especially
+      person-default failures), and how do secondary metrics move?
+    runner: research.run_experiment
+    benchmark: spanish_diagnostic_n150
+    method: diagnostic_5c_hf_qwen3_17b_n10
+    cluster_script: research/scripts/cluster/diagnostic_5c_n150_gpu.sh
+    compare_to: [diagnostic_5a, diagnostic_5b]
+    models: [Qwen/Qwen3-1.7B]
+    decoding: {temperature: 0.7, samples_per_cell: 10, sentence_length: short}
+    related_experiments: [6, 9]
     status: ready
