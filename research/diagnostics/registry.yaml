@@ -8,9 +8,19 @@
 #   1A — production (generate one form)
 #   1B — verification (judge a proposed form, yes/no)
 #
-# Diagnostic 2 is a paired series on the same 150 Spanish verbs:
+# Diagnostic 2 is paradigm isolation on the same 150 Spanish verbs:
 #   2A — full-paradigm production (six-person tables + participle)
 #   2B — single-slot production (one form per call)
+#
+# Diagnostic 3 is sentence binding on the same 150 verbs (paired to 2A):
+#   3A — plain-text sentence, 2A-aligned hints (T=0, 1 sample)
+#   3B — production JSON + same 3A hints (T=0, 1 sample)
+#   3C — production baseline prompt, no hints (JSON, short, T=0)
+#   3D — same as 3C + T=0.7, 10 samples (pass@10, 1.7B)
+#
+# Diagnostic 4 is prompt ablation on the same 150 verbs (paired to 3C):
+#   4A — build_prompt_explicit (T=0, 1 sample)
+#   4B — 3C pass@1 + one constraint-only rewrite (reuse 3C pass@1 when available)
 #
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
 #   documented under docs/experiment-results/.
@@ -103,14 +113,138 @@ diagnostics:
     related_experiments: [3, "3B", 10]
     status: complete
 
+  - id: diagnostic_3
+    number: 3
+    title: Spanish sentence binding vs paradigm recall
+    question: >-
+      On the same 150 verbs and morphological cells as Diagnostic 2A, does
+      the model use the required surface form in sentence generation when
+      it already produced that form correctly in the paradigm table?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    variants: [diagnostic_3a, diagnostic_3b, diagnostic_3c, diagnostic_3d]
+    related_experiments: [3, "3B", 10]
+    status: in_progress
+
+  - id: diagnostic_3a
+    number: "3A"
+    series: diagnostic_3
+    title: Spanish sentence binding (2A-aligned hints, plain text)
+    question: >-
+      With plain-text output, 2A-aligned tense/person hints, no length band,
+      no JSON, and no CEFR, does sentence pass rate lag 2A strict slot recall
+      (binding gap)?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    variant: diagnostic_3a
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1}
+    related_experiments: [3, "3B", 10]
+    status: ready
+
+  - id: diagnostic_3b
+    number: "3B"
+    series: diagnostic_3
+    title: Spanish sentence binding (production JSON + 3A hints)
+    question: >-
+      Under the production build_prompt JSON scaffold (short length, translation
+      field, no CEFR) but with the same 3A subject/tense hints appended, how much
+      of the 3A–3C gap is explained by missing hints vs JSON/format alone?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    variant: diagnostic_3b
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to:
+      - docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+      - docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short, subject_hints: true}
+    related_experiments: [3, "3B", 10]
+    status: in_progress
+
+  - id: diagnostic_3c
+    number: "3C"
+    series: diagnostic_3
+    title: Spanish sentence binding (production baseline prompt)
+    question: >-
+      Under the standard build_prompt baseline (short length, JSON output, generic
+      constraint labels, no CEFR), does sentence pass rate lag 2A strict slot recall?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    variant: diagnostic_3c
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
+    related_experiments: [3, "3B", 10]
+    status: ready
+
+  - id: diagnostic_3d
+    number: "3D"
+    series: diagnostic_3
+    title: Spanish sentence binding (production prompt, stochastic)
+    question: >-
+      With the same production baseline prompt as 3C but T=0.7 and 10 samples
+      per cell (pass@10), how often does at least one sentence contain the gold
+      form on 1.7B?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    variant: diagnostic_3d
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3d_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-1.7B]
+    decoding: {temperature: 0.7, samples_per_cell: 10, sentence_length: short}
+    related_experiments: [3, "3B", 10]
+    status: ready
+
   - id: diagnostic_4
     number: 4
-    title: Prompt ablation on frequency-validated benchmarks
+    title: Spanish prompt ablation (explicit vs self-correct)
     question: >-
-      Does explicit prompting rescue binding on the new basic/challenging
-      YAMLs built from the manifest?
-    script: null
-    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
-    results: null
+      On the same 150 verbs and cells as Diagnostic 3C, does explicit prompting
+      rescue binding (4A), and does constraint-only self-correction help (4B)?
+    script: research/prototyping/diagnostic_4_spanish_prompt_ablation_qwen_spike.py
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    variants: [diagnostic_4a, diagnostic_4b]
     related_experiments: [4, 5]
-    status: planned
+    status: ready
+
+  - id: diagnostic_4a
+    number: "4A"
+    series: diagnostic_4
+    title: Spanish prompt ablation (explicit overlay)
+    question: >-
+      Does build_prompt_explicit improve expected_form_match vs Diagnostic 3C
+      on the full n=150 grid, especially where 2A strict slot recall is high?
+    script: research/prototyping/diagnostic_4_spanish_prompt_ablation_qwen_spike.py
+    variant: diagnostic_4a
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to:
+      - docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+      - docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_4a_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
+    related_experiments: [4]
+    status: ready
+
+  - id: diagnostic_4b
+    number: "4B"
+    series: diagnostic_4
+    title: Spanish prompt ablation (self-correct)
+    question: >-
+      After 3C pass@1, does one constraint-only rewrite (no gold form) repair
+      EF failures, and what is the correction yield on the full n=150 grid?
+    script: research/prototyping/diagnostic_4_spanish_prompt_ablation_qwen_spike.py
+    variant: diagnostic_4b
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to:
+      - docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
+    depends_on: [diagnostic_3c]
+    results: docs/spike-results/eval_diagnostic_4b_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
+    related_experiments: [4]
+    status: ready
