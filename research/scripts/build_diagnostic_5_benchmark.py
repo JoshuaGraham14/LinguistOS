@@ -39,10 +39,64 @@ DEFAULT_OUTPUT = (
     Path(__file__).resolve().parents[1] / "benchmarks" / f"{BENCHMARK_NAME}.yaml"
 )
 
+# verbecc bug overrides: (lemma, tense, person, number) -> correct surface form.
+# verbecc assigns 'acontecer' the wrong template ('acae:cer'), producing garbage
+# ('aconteacho', 'aconteachado', ...). Correct paradigm follows crecer / parecer
+# (-cer verbs with -zco 1sg present, otherwise fully regular). Participle key
+# uses ('', '') as (person, number) sentinel to match the participle emission.
+GOLD_OVERRIDES: dict[tuple[str, str, str, str], str] = {
+    ("acontecer", "present", "1st", "singular"): "acontezco",
+    ("acontecer", "present", "2nd", "singular"): "aconteces",
+    ("acontecer", "present", "3rd", "singular"): "acontece",
+    ("acontecer", "present", "1st", "plural"): "acontecemos",
+    ("acontecer", "present", "2nd", "plural"): "acontecéis",
+    ("acontecer", "present", "3rd", "plural"): "acontecen",
+    ("acontecer", "imperfect", "1st", "singular"): "acontecía",
+    ("acontecer", "imperfect", "2nd", "singular"): "acontecías",
+    ("acontecer", "imperfect", "3rd", "singular"): "acontecía",
+    ("acontecer", "imperfect", "1st", "plural"): "acontecíamos",
+    ("acontecer", "imperfect", "2nd", "plural"): "acontecíais",
+    ("acontecer", "imperfect", "3rd", "plural"): "acontecían",
+    ("acontecer", "preterite", "1st", "singular"): "acontecí",
+    ("acontecer", "preterite", "2nd", "singular"): "aconteciste",
+    ("acontecer", "preterite", "3rd", "singular"): "aconteció",
+    ("acontecer", "preterite", "1st", "plural"): "acontecimos",
+    ("acontecer", "preterite", "2nd", "plural"): "acontecisteis",
+    ("acontecer", "preterite", "3rd", "plural"): "acontecieron",
+    ("acontecer", "future", "1st", "singular"): "aconteceré",
+    ("acontecer", "future", "2nd", "singular"): "acontecerás",
+    ("acontecer", "future", "3rd", "singular"): "acontecerá",
+    ("acontecer", "future", "1st", "plural"): "aconteceremos",
+    ("acontecer", "future", "2nd", "plural"): "aconteceréis",
+    ("acontecer", "future", "3rd", "plural"): "acontecerán",
+    ("acontecer", "conditional", "1st", "singular"): "acontecería",
+    ("acontecer", "conditional", "2nd", "singular"): "acontecerías",
+    ("acontecer", "conditional", "3rd", "singular"): "acontecería",
+    ("acontecer", "conditional", "1st", "plural"): "aconteceríamos",
+    ("acontecer", "conditional", "2nd", "plural"): "aconteceríais",
+    ("acontecer", "conditional", "3rd", "plural"): "acontecerían",
+    ("acontecer", "participle", "", ""): "acontecido",
+}
+
 
 def lemma_translation(lemma: str) -> str:
     """Manifest rows have no English gloss; keep lemma as placeholder (Diag 3/4)."""
     return lemma
+
+
+def _resolved_gold_form(lemma: str, tense: str, person: str, number: str) -> str:
+    override = GOLD_OVERRIDES.get((lemma, tense, person, number))
+    if override is not None:
+        return override
+    return gold_form(lemma, tense, person, number)
+
+
+def _resolved_participle(row: dict[str, str]) -> str:
+    lemma = row["verb"]
+    override = GOLD_OVERRIDES.get((lemma, PARTICIPLE_TENSE, "", ""))
+    if override is not None:
+        return override
+    return gold_participle(row)
 
 
 def build_constraint_sets(
@@ -58,7 +112,9 @@ def build_constraint_sets(
                     {
                         "keyword": lemma,
                         "translation": translation,
-                        "expected_form": gold_form(lemma, tense, person, number),
+                        "expected_form": _resolved_gold_form(
+                            lemma, tense, person, number
+                        ),
                         "tense": tense,
                         "person": person,
                         "number": number,
@@ -68,7 +124,7 @@ def build_constraint_sets(
             {
                 "keyword": lemma,
                 "translation": translation,
-                "expected_form": gold_participle(row),
+                "expected_form": _resolved_participle(row),
                 "tense": PARTICIPLE_TENSE,
             }
         )

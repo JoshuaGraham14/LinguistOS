@@ -18591,187 +18591,187 @@ constraint_sets:
   tense: participle
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacho
+  expected_form: acontezco
   tense: present
   person: 1st
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachas
+  expected_form: aconteces
   tense: present
   person: 2nd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacha
+  expected_form: acontece
   tense: present
   person: 3rd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachamos
+  expected_form: acontecemos
   tense: present
   person: 1st
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacháis
+  expected_form: acontecéis
   tense: present
   person: 2nd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachan
+  expected_form: acontecen
   tense: present
   person: 3rd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteaché
+  expected_form: acontecí
   tense: preterite
   person: 1st
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachaste
+  expected_form: aconteciste
   tense: preterite
   person: 2nd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachó
+  expected_form: aconteció
   tense: preterite
   person: 3rd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachamos
+  expected_form: acontecimos
   tense: preterite
   person: 1st
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachasteis
+  expected_form: acontecisteis
   tense: preterite
   person: 2nd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharon
+  expected_form: acontecieron
   tense: preterite
   person: 3rd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachaba
+  expected_form: acontecía
   tense: imperfect
   person: 1st
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachabas
+  expected_form: acontecías
   tense: imperfect
   person: 2nd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachaba
+  expected_form: acontecía
   tense: imperfect
   person: 3rd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachábamos
+  expected_form: acontecíamos
   tense: imperfect
   person: 1st
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachabais
+  expected_form: acontecíais
   tense: imperfect
   person: 2nd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachaban
+  expected_form: acontecían
   tense: imperfect
   person: 3rd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharé
+  expected_form: aconteceré
   tense: future
   person: 1st
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharás
+  expected_form: acontecerás
   tense: future
   person: 2nd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachará
+  expected_form: acontecerá
   tense: future
   person: 3rd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharemos
+  expected_form: aconteceremos
   tense: future
   person: 1st
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharéis
+  expected_form: aconteceréis
   tense: future
   person: 2nd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharán
+  expected_form: acontecerán
   tense: future
   person: 3rd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharía
+  expected_form: acontecería
   tense: conditional
   person: 1st
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharías
+  expected_form: acontecerías
   tense: conditional
   person: 2nd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharía
+  expected_form: acontecería
   tense: conditional
   person: 3rd
   number: singular
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharíamos
+  expected_form: aconteceríamos
   tense: conditional
   person: 1st
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharíais
+  expected_form: aconteceríais
   tense: conditional
   person: 2nd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteacharían
+  expected_form: acontecerían
   tense: conditional
   person: 3rd
   number: plural
 - keyword: acontecer
   translation: acontecer
-  expected_form: aconteachado
+  expected_form: acontecido
   tense: participle
 - keyword: ahorcar
   translation: ahorcar
