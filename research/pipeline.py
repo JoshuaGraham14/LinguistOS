@@ -257,6 +257,72 @@ def _generate_live_candidates(
     return out
 
 
+def _sentence_counts_by_constraint_set(
+    session,
+    experiment_id: int,
+) -> dict[int, int]:
+    """Map constraint_set_id -> number of stored sentences for an experiment."""
+    rows = (
+        session.query(
+            GeneratedSentence.constraint_set_id,
+            GeneratedSentence.id,
+        )
+        .filter_by(experiment_id=experiment_id)
+        .all()
+    )
+    counts: dict[int, int] = defaultdict(int)
+    for cs_id, _sent_id in rows:
+        counts[int(cs_id)] += 1
+    return dict(counts)
+
+
+def _resolve_resume_experiment(
+    session,
+    *,
+    benchmark: Benchmark,
+    method_config: MethodConfig,
+    live: bool,
+    resume_experiment_id: int | None,
+    resume: bool,
+) -> Experiment | None:
+    """Return an existing experiment to continue, or None for a fresh run."""
+    expected_name = _experiment_name(
+        benchmark=benchmark,
+        method_config=method_config,
+        live=live,
+    )
+    if resume_experiment_id is not None:
+        experiment = session.query(Experiment).filter_by(id=resume_experiment_id).first()
+        if experiment is None:
+            raise ValueError(f"No experiment with id={resume_experiment_id}")
+        if experiment.benchmark_id != benchmark.id:
+            raise ValueError(
+                f"Experiment {resume_experiment_id} benchmark_id="
+                f"{experiment.benchmark_id} does not match '{benchmark.name}'"
+            )
+        if experiment.method_config_id != method_config.id:
+            raise ValueError(
+                f"Experiment {resume_experiment_id} method_config_id="
+                f"{experiment.method_config_id} does not match '{method_config.name}'"
+            )
+        return experiment
+
+    if not resume:
+        return None
+
+    return (
+        session.query(Experiment)
+        .filter(
+            Experiment.benchmark_id == benchmark.id,
+            Experiment.method_config_id == method_config.id,
+            Experiment.name == expected_name,
+            Experiment.status.in_(("running", "failed")),
+        )
+        .order_by(Experiment.id.desc())
+        .first()
+    )
+
+
 def run_experiment(
     *,
     benchmark_name: str,
@@ -264,8 +330,15 @@ def run_experiment(
     live: bool = False,
     evaluate: bool = True,
     metrics: bool = True,
+    resume: bool = False,
+    resume_experiment_id: int | None = None,
 ) -> None:
-    """Run a full experiment: generate, evaluate, compute metrics, print summary."""
+    """Run a full experiment: generate, evaluate, compute metrics, print summary.
+
+    When ``resume`` / ``resume_experiment_id`` is set, generation skips constraint
+    sets that already have ``samples_per_case`` sentences stored, then re-runs
+    evaluators and group metrics over the full experiment.
+    """
     init_db()
     session = SessionLocal()
 
@@ -280,39 +353,89 @@ def run_experiment(
         constraint_sets = (
             session.query(ConstraintSet)
             .filter_by(benchmark_id=benchmark.id)
+            .order_by(ConstraintSet.id)
             .all()
         )
 
-        experiment = Experiment(
-            benchmark_id=benchmark.id,
-            method_config_id=method_config.id,
-            name=_experiment_name(
-                benchmark=benchmark,
-                method_config=method_config,
-                live=live,
-            ),
-            status="running",
+        existing = _resolve_resume_experiment(
+            session,
+            benchmark=benchmark,
+            method_config=method_config,
+            live=live,
+            resume_experiment_id=resume_experiment_id,
+            resume=resume,
         )
-        session.add(experiment)
-        session.commit()
+        if existing is not None:
+            experiment = existing
+            experiment.status = "running"
+            experiment.completed_at = None
+            session.commit()
+            print(
+                f"  Resuming experiment id={experiment.id} ({experiment.name})",
+                flush=True,
+            )
+        else:
+            if resume or resume_experiment_id is not None:
+                print(
+                    "  Resume requested but no matching incomplete experiment found; "
+                    "starting a new run.",
+                    flush=True,
+                )
+            experiment = Experiment(
+                benchmark_id=benchmark.id,
+                method_config_id=method_config.id,
+                name=_experiment_name(
+                    benchmark=benchmark,
+                    method_config=method_config,
+                    live=live,
+                ),
+                status="running",
+            )
+            session.add(experiment)
+            session.commit()
 
         try:
-            total_stored = 0
+            already_by_cs = _sentence_counts_by_constraint_set(session, experiment.id)
+            samples_needed = method_config.samples_per_case
+            total_stored = sum(already_by_cs.values())
+            skipped_sets = 0
+            newly_stored = 0
 
             for cs in constraint_sets:
-                print(f"\n  Constraint set: {cs.keyword} + {cs.tense} + {cs.person} + {cs.number}")
+                label = f"{cs.keyword} + {cs.tense} + {cs.person} + {cs.number}"
+                existing_n = already_by_cs.get(cs.id, 0)
+                if existing_n >= samples_needed:
+                    skipped_sets += 1
+                    print(f"\n  Constraint set: {label}")
+                    print(
+                        f"    Skip (already have {existing_n}/{samples_needed} sentences)"
+                    )
+                    continue
+
+                print(f"\n  Constraint set: {label}")
+                if existing_n:
+                    print(
+                        f"    Incomplete ({existing_n}/{samples_needed}); regenerating full batch"
+                    )
+                    (
+                        session.query(GeneratedSentence)
+                        .filter_by(experiment_id=experiment.id, constraint_set_id=cs.id)
+                        .delete(synchronize_session="fetch")
+                    )
+                    session.commit()
+                    total_stored -= existing_n
 
                 if live:
                     candidate_pairs = _generate_live_candidates(
                         generator,
                         cs=cs,
                         run_config=run_config,
-                        samples_per_case=method_config.samples_per_case,
+                        samples_per_case=samples_needed,
                         rng=rng,
                     )
                 else:
                     mock_batch = get_mock_candidates(benchmark.name, cs.keyword)[
-                        : method_config.samples_per_case
+                        : samples_needed
                     ]
                     candidate_pairs = []
                     for cand in mock_batch:
@@ -345,9 +468,15 @@ def run_experiment(
                     )
                     session.add(gen)
                     total_stored += 1
+                    newly_stored += 1
 
                 session.commit()
                 print(f"    Stored {len(candidate_pairs)} sentences")
+
+            print(
+                f"\n  Generation done: skipped_complete_sets={skipped_sets} "
+                f"newly_stored={newly_stored} total_sentences={total_stored}"
+            )
 
             total_evals = 0
             if evaluate:
@@ -394,30 +523,32 @@ def run_experiment(
         print(f"  Roll-up metrics: {total_rollups}")
         print("=" * 60)
 
-        print("\n  Stored sentences:\n")
-        for cs in constraint_sets:
-            sentences = (
-                session.query(GeneratedSentence)
-                .filter_by(experiment_id=experiment.id, constraint_set_id=cs.id)
-                .order_by(GeneratedSentence.sample_index)
-                .all()
-            )
-            if sentences:
-                print(f"  [{cs.keyword} + {cs.tense} + {cs.person} + {cs.number}]")
-                for s in sentences:
-                    evals = (
-                        session.query(SentenceEvaluation)
-                        .filter_by(sentence_id=s.id)
-                        .all()
-                    )
-                    scores = {e.evaluator_name: e.score for e in evals}
-                    score_str = (
-                        "  " + "  ".join(f"[{k}: {v}]" for k, v in scores.items())
-                        if scores else ""
-                    )
-                    print(f"    {s.sample_index}: {s.sentence}{score_str}")
-                    print(f"       {s.translation}")
-                print()
+        # Full listing is fine for small benches; skip dump for huge grids.
+        if len(constraint_sets) <= 50:
+            print("\n  Stored sentences:\n")
+            for cs in constraint_sets:
+                sentences = (
+                    session.query(GeneratedSentence)
+                    .filter_by(experiment_id=experiment.id, constraint_set_id=cs.id)
+                    .order_by(GeneratedSentence.sample_index)
+                    .all()
+                )
+                if sentences:
+                    print(f"  [{cs.keyword} + {cs.tense} + {cs.person} + {cs.number}]")
+                    for s in sentences:
+                        evals = (
+                            session.query(SentenceEvaluation)
+                            .filter_by(sentence_id=s.id)
+                            .all()
+                        )
+                        scores = {e.evaluator_name: e.score for e in evals}
+                        score_str = (
+                            "  " + "  ".join(f"[{k}: {v}]" for k, v in scores.items())
+                            if scores else ""
+                        )
+                        print(f"    {s.sample_index}: {s.sentence}{score_str}")
+                        print(f"       {s.translation}")
+                    print()
 
     finally:
         session.close()

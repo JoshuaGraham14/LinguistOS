@@ -25,6 +25,8 @@ from research.pipeline import (
     _compute_and_store_group_metrics,
     _evaluate_sentences,
     _experiment_name,
+    _resolve_resume_experiment,
+    _sentence_counts_by_constraint_set,
 )
 
 
@@ -393,3 +395,111 @@ def test_full_phase3_metrics_pipeline(session):
     assert r == 24  # 1 evaluator × 4 rollup kinds × (5 constraint_set + 1 experiment)
 
     assert session.query(ExperimentMetric).count() == 78  # 54 group + 24 roll-up
+
+
+def test_sentence_counts_by_constraint_set(session, sample_constraint_set, sample_experiment):
+    session.add(
+        GeneratedSentence(
+            experiment_id=sample_experiment.id,
+            constraint_set_id=sample_constraint_set.id,
+            sentence="Uno.",
+            translation="One.",
+            sample_index=0,
+        )
+    )
+    session.add(
+        GeneratedSentence(
+            experiment_id=sample_experiment.id,
+            constraint_set_id=sample_constraint_set.id,
+            sentence="Dos.",
+            translation="Two.",
+            sample_index=1,
+        )
+    )
+    session.commit()
+    counts = _sentence_counts_by_constraint_set(session, sample_experiment.id)
+    assert counts[sample_constraint_set.id] == 2
+
+
+def test_resolve_resume_experiment_by_id(session):
+    bm, _sets = _create_test_benchmark(session)
+    method = MethodConfig(name="resume_method", method="baseline_gpt", samples_per_case=3)
+    session.add(method)
+    session.flush()
+    exp = Experiment(
+        benchmark_id=bm.id,
+        method_config_id=method.id,
+        name=_experiment_name(benchmark=bm, method_config=method, live=False),
+        status="failed",
+    )
+    session.add(exp)
+    session.commit()
+
+    resolved = _resolve_resume_experiment(
+        session,
+        benchmark=bm,
+        method_config=method,
+        live=False,
+        resume_experiment_id=exp.id,
+        resume=False,
+    )
+    assert resolved is not None
+    assert resolved.id == exp.id
+
+
+def test_resolve_resume_latest_incomplete(session):
+    bm, _sets = _create_test_benchmark(session)
+    method = MethodConfig(name="resume_auto", method="baseline_gpt", samples_per_case=3)
+    session.add(method)
+    session.flush()
+    name = _experiment_name(benchmark=bm, method_config=method, live=True)
+    older = Experiment(
+        benchmark_id=bm.id,
+        method_config_id=method.id,
+        name=name,
+        status="failed",
+    )
+    newer = Experiment(
+        benchmark_id=bm.id,
+        method_config_id=method.id,
+        name=name,
+        status="running",
+    )
+    session.add_all([older, newer])
+    session.commit()
+
+    resolved = _resolve_resume_experiment(
+        session,
+        benchmark=bm,
+        method_config=method,
+        live=True,
+        resume_experiment_id=None,
+        resume=True,
+    )
+    assert resolved is not None
+    assert resolved.id == newer.id
+
+
+def test_resolve_resume_none_when_only_completed(session):
+    bm, _sets = _create_test_benchmark(session)
+    method = MethodConfig(name="resume_done", method="baseline_gpt", samples_per_case=3)
+    session.add(method)
+    session.flush()
+    session.add(
+        Experiment(
+            benchmark_id=bm.id,
+            method_config_id=method.id,
+            name=_experiment_name(benchmark=bm, method_config=method, live=False),
+            status="completed",
+        )
+    )
+    session.commit()
+    resolved = _resolve_resume_experiment(
+        session,
+        benchmark=bm,
+        method_config=method,
+        live=False,
+        resume_experiment_id=None,
+        resume=True,
+    )
+    assert resolved is None
