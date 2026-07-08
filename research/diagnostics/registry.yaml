@@ -18,9 +18,9 @@
 #   3C — production baseline prompt, no hints (JSON, short, T=0)
 #   3D — same as 3C + T=0.7, 10 samples (pass@10, 1.7B)
 #
-# Diagnostic 4 is prompt ablation on the same 150 verbs (paired to 3B):
+# Diagnostic 4 is prompt ablation on the same 150 verbs (paired to 3C):
 #   4A — build_prompt_explicit (T=0, 1 sample)
-#   4B — 3B pass@1 + one constraint-only rewrite (reuse 3B pass@1 when available)
+#   4B — 3C pass@1 + one constraint-only rewrite (reuse 3C pass@1 when available)
 #
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
 #   documented under docs/experiment-results/.
@@ -201,12 +201,50 @@ diagnostics:
 
   - id: diagnostic_4
     number: 4
-    title: Prompt ablation on frequency-validated benchmarks
+    title: Spanish prompt ablation (explicit vs self-correct)
     question: >-
-      Does explicit prompting rescue binding on the new basic/challenging
-      YAMLs built from the manifest?
-    script: null
-    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_1_n25.csv
-    results: null
+      On the same 150 verbs and cells as Diagnostic 3C, does explicit prompting
+      rescue binding (4A), and does constraint-only self-correction help (4B)?
+    script: research/prototyping/diagnostic_4_spanish_prompt_ablation_qwen_spike.py
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    variants: [diagnostic_4a, diagnostic_4b]
     related_experiments: [4, 5]
-    status: planned
+    status: ready
+
+  - id: diagnostic_4a
+    number: "4A"
+    series: diagnostic_4
+    title: Spanish prompt ablation (explicit overlay)
+    question: >-
+      Does build_prompt_explicit improve expected_form_match vs Diagnostic 3C
+      on the full n=150 grid, especially where 2A strict slot recall is high?
+    script: research/prototyping/diagnostic_4_spanish_prompt_ablation_qwen_spike.py
+    variant: diagnostic_4a
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to:
+      - docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+      - docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_4a_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
+    related_experiments: [4]
+    status: ready
+
+  - id: diagnostic_4b
+    number: "4B"
+    series: diagnostic_4
+    title: Spanish prompt ablation (self-correct)
+    question: >-
+      After 3C pass@1, does one constraint-only rewrite (no gold form) repair
+      EF failures, and what is the correction yield on the full n=150 grid?
+    script: research/prototyping/diagnostic_4_spanish_prompt_ablation_qwen_spike.py
+    variant: diagnostic_4b
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to:
+      - docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
+    depends_on: [diagnostic_3c]
+    results: docs/spike-results/eval_diagnostic_4b_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
+    related_experiments: [4]
+    status: ready
