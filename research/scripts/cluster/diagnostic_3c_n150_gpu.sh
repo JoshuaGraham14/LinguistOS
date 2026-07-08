@@ -37,7 +37,7 @@ export HF_HOME="${PROJECT}/.cache/huggingface"
 export TRANSFORMERS_CACHE="${HF_HOME}"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
 
-echo "=== Diagnostic 3C n=150 (1.7B, T=0.7, pass@10) — $(date -Is) ==="
+echo "=== Diagnostic 3C n=150 (production baseline) — $(date -Is) ==="
 echo "Host: $(hostname)"
 echo "Job: ${SLURM_JOB_ID:-interactive}"
 nvidia-smi || true
@@ -47,12 +47,21 @@ if [[ ! -f "${D2A}" ]]; then
   echo "WARNING: ${D2A} missing — binding-gap summary will be skipped." >&2
 fi
 
-python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
-  --variant diagnostic_3c \
-  --models qwen17b \
-  --output "${OUTPUT_3C}" \
-  --d2a-results "${D2A}" \
-  --resume
+run_model() {
+  local model="$1"
+  echo ""
+  echo "=== ${model}: diagnostic_3c (production baseline prompt) ==="
+  python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
+    --variant diagnostic_3c \
+    --models "${model}" \
+    --output "${OUTPUT_3C}" \
+    --d2a-results "${D2A}" \
+    --resume
+}
+
+run_model qwen06b
+run_model qwen17b
+run_model qwen4b
 
 echo ""
 echo "=== Done $(date -Is) ==="

@@ -5,9 +5,11 @@ Paired sentence probes on the same 150 Spanish verbs as Diagnostic 2A:
 
 - **Diagnostic 3A** (``diagnostic_3a``): plain-text sentence, 2A-aligned tense/person
   hints, no length band, no JSON, no CEFR — compare slot-level pass to 2A strict.
-- **Diagnostic 3B** (``diagnostic_3b``): production ``build_prompt`` baseline (short,
+- **Diagnostic 3B** (``diagnostic_3b``): production ``build_prompt`` JSON (short,
+  translation field) **plus 3A-style subject/tense hints**; T=0, 1 sample/cell.
+- **Diagnostic 3C** (``diagnostic_3c``): production ``build_prompt`` baseline (short,
   JSON + translation, generic constraint labels, no CEFR), T=0, 1 sample/cell.
-- **Diagnostic 3C** (``diagnostic_3c``): same prompt as 3B, T=0.7, 10 samples/cell
+- **Diagnostic 3D** (``diagnostic_3d``): same prompt as 3C, T=0.7, 10 samples/cell
   (pass@10), batched JSON with top-up retries on parse failure (mirrors
   ``baseline_hf``); default model is 1.7B only.
 
@@ -17,6 +19,7 @@ Output:
   docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
   docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json
   docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
+  docs/spike-results/eval_diagnostic_3d_n150_sentence_qwen_results.json
 
 ----------------------------------------------------------------------
 REPRODUCIBILITY
@@ -29,9 +32,11 @@ Run:
       --variant diagnostic_3b --resume
   python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \\
       --variant diagnostic_3c --resume
+  python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \\
+      --variant diagnostic_3d --resume
 
 Manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
-Models:    Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B (3C default: 1.7B only)
+Models:    Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B (3D default: 1.7B only)
 ----------------------------------------------------------------------
 """
 
@@ -75,8 +80,20 @@ from research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike import (
     wilson_ci,
 )
 
-Variant = Literal["diagnostic_3a", "diagnostic_3b", "diagnostic_3c"]
-VARIANTS: tuple[Variant, ...] = ("diagnostic_3a", "diagnostic_3b", "diagnostic_3c")
+Variant = Literal[
+    "diagnostic_3a", "diagnostic_3b", "diagnostic_3c", "diagnostic_3d"
+]
+VARIANTS: tuple[Variant, ...] = (
+    "diagnostic_3a",
+    "diagnostic_3b",
+    "diagnostic_3c",
+    "diagnostic_3d",
+)
+PRODUCTION_VARIANTS: tuple[Variant, ...] = (
+    "diagnostic_3b",
+    "diagnostic_3c",
+    "diagnostic_3d",
+)
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "docs" / "spike-results"
 
@@ -84,6 +101,7 @@ DEFAULT_OUTPUTS: dict[Variant, Path] = {
     "diagnostic_3a": RESULTS_DIR / "eval_diagnostic_3a_n150_sentence_qwen_results.json",
     "diagnostic_3b": RESULTS_DIR / "eval_diagnostic_3b_n150_sentence_qwen_results.json",
     "diagnostic_3c": RESULTS_DIR / "eval_diagnostic_3c_n150_sentence_qwen_results.json",
+    "diagnostic_3d": RESULTS_DIR / "eval_diagnostic_3d_n150_sentence_qwen_results.json",
 }
 
 DEFAULT_2A_RESULTS = RESULTS_DIR / "eval_diagnostic_2a_n150_paradigm_qwen_results.json"
@@ -109,27 +127,43 @@ VARIANT_META: dict[Variant, dict[str, Any]] = {
     "diagnostic_3b": {
         "diagnostic_id": "diagnostic_3b",
         "diagnostic_number": "3B",
+        "diagnostic_title": "Spanish sentence binding (production JSON + 3A hints)",
+        "diagnostic_label": "Diagnostic 3B — Spanish sentence binding (JSON + hints)",
+        "prompt_version": "build_prompt_baseline_hints_v1",
+        "temperature": 0.0,
+        "samples_per_cell": 1,
+        "default_models": DEFAULT_MODEL_KEYS,
+        "sentence_length": "short",
+        "output_format": "json",
+        "subject_hints": True,
+        "cefr_level": None,
+    },
+    "diagnostic_3c": {
+        "diagnostic_id": "diagnostic_3c",
+        "diagnostic_number": "3C",
         "diagnostic_title": "Spanish sentence binding (production baseline prompt)",
-        "diagnostic_label": "Diagnostic 3B — Spanish sentence binding (production prompt)",
+        "diagnostic_label": "Diagnostic 3C — Spanish sentence binding (production prompt)",
         "prompt_version": "build_prompt_baseline_v1",
         "temperature": 0.0,
         "samples_per_cell": 1,
         "default_models": DEFAULT_MODEL_KEYS,
         "sentence_length": "short",
         "output_format": "json",
+        "subject_hints": False,
         "cefr_level": None,
     },
-    "diagnostic_3c": {
-        "diagnostic_id": "diagnostic_3c",
-        "diagnostic_number": "3C",
+    "diagnostic_3d": {
+        "diagnostic_id": "diagnostic_3d",
+        "diagnostic_number": "3D",
         "diagnostic_title": "Spanish sentence binding (production prompt, stochastic)",
-        "diagnostic_label": "Diagnostic 3C — Spanish sentence binding (T=0.7, pass@10)",
+        "diagnostic_label": "Diagnostic 3D — Spanish sentence binding (T=0.7, pass@10)",
         "prompt_version": "build_prompt_baseline_v1",
         "temperature": 0.7,
         "samples_per_cell": 10,
         "default_models": ("qwen17b",),
         "sentence_length": "short",
         "output_format": "json",
+        "subject_hints": False,
         "cefr_level": None,
     },
 }
@@ -215,14 +249,31 @@ def build_prompt_3a(
     )
 
 
-def build_prompt_3b_participle(
+def _morphology_hint_overlay_3a(
+    lemma: str,
+    *,
+    tense: str,
+    person: str,
+    number: str,
+) -> str:
+    """Same subject/tense hint wording as Diagnostic 3A, appended to production JSON prompts."""
+    tense_label = TENSE_PHRASE.get(tense, tense)
+    subject_hint = SUBJECT_HINTS[(person, number)]
+    return (
+        f'The verb "{lemma}" must appear inflected in the {tense_label} '
+        f"for {subject_hint} ({person} person, {number}) — "
+        "not as the bare infinitive.\n"
+    )
+
+
+def build_prompt_production_participle(
     lemma: str,
     *,
     participle: str,
     num_candidates: int,
     sentence_length: str,
 ) -> str:
-    """Production-style prompt for participle cells (not covered by build_prompt)."""
+    """Production-style JSON prompt for participle cells (not covered by build_prompt)."""
     length_desc = band_label(sentence_length)
     translation = lemma_translation(lemma)
     return (
@@ -239,7 +290,11 @@ def build_prompt_3b_participle(
     )
 
 
-def build_prompt_3b_indicative(
+# Back-compat alias for Diagnostic 4 (baseline scaffold = production, no hints).
+build_prompt_3c_participle = build_prompt_production_participle
+
+
+def build_prompt_production_indicative(
     lemma: str,
     *,
     tense: str,
@@ -247,8 +302,9 @@ def build_prompt_3b_indicative(
     number: str,
     num_candidates: int,
     sentence_length: str,
+    with_hints: bool = False,
 ) -> str:
-    return build_prompt(
+    prompt = build_prompt(
         keyword=lemma,
         translation=lemma_translation(lemma),
         target_language="es",
@@ -257,6 +313,15 @@ def build_prompt_3b_indicative(
         sentence_length=sentence_length,
         cefr_level=None,
     )
+    if with_hints:
+        prompt += "\n" + _morphology_hint_overlay_3a(
+            lemma, tense=tense, person=person, number=number
+        )
+    return prompt
+
+
+# Back-compat alias for Diagnostic 4 (baseline scaffold = production, no hints).
+build_prompt_3c_indicative = build_prompt_production_indicative
 
 
 def build_case_prompt(
@@ -281,20 +346,22 @@ def build_case_prompt(
         )
 
     sentence_length = str(variant_config(variant)["sentence_length"])
+    with_hints = bool(variant_config(variant).get("subject_hints"))
     if is_participle:
-        return build_prompt_3b_participle(
+        return build_prompt_production_participle(
             lemma,
             participle=expected_form,
             num_candidates=num_candidates,
             sentence_length=sentence_length,
         )
-    return build_prompt_3b_indicative(
+    return build_prompt_production_indicative(
         lemma,
         tense=tense,
         person=person,
         number=number,
         num_candidates=num_candidates,
         sentence_length=sentence_length,
+        with_hints=with_hints,
     )
 
 
@@ -804,7 +871,18 @@ def run_spike(
         elif variant == "diagnostic_3b":
             payload["related_diagnostics"] = ["diagnostic_2a", "diagnostic_3a"]
         elif variant == "diagnostic_3c":
-            payload["related_diagnostics"] = ["diagnostic_2a", "diagnostic_3a", "diagnostic_3b"]
+            payload["related_diagnostics"] = [
+                "diagnostic_2a",
+                "diagnostic_3a",
+                "diagnostic_3b",
+            ]
+        elif variant == "diagnostic_3d":
+            payload["related_diagnostics"] = [
+                "diagnostic_2a",
+                "diagnostic_3a",
+                "diagnostic_3b",
+                "diagnostic_3c",
+            ]
     else:
         payload["models"] = {
             **payload.get("models", {}),
@@ -878,7 +956,7 @@ def main() -> None:
         "--samples-per-cell",
         type=int,
         default=None,
-        help="Sentences requested per cell (3A/3B: 1; 3C: 10).",
+        help="Sentences requested per cell (3A–3C: 1; 3D: 10).",
     )
     parser.add_argument("--limit", type=int, default=None, help="First N probes only.")
     parser.add_argument("--dry-run", action="store_true")

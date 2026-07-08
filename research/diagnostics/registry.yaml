@@ -14,8 +14,13 @@
 #
 # Diagnostic 3 is sentence binding on the same 150 verbs (paired to 2A):
 #   3A — plain-text sentence, 2A-aligned hints (T=0, 1 sample)
-#   3B — production baseline prompt (JSON, short, T=0)
-#   3C — production prompt + T=0.7, 10 samples (pass@10)
+#   3B — production JSON + same 3A hints (T=0, 1 sample)
+#   3C — production baseline prompt, no hints (JSON, short, T=0)
+#   3D — same as 3C + T=0.7, 10 samples (pass@10, 1.7B)
+#
+# Diagnostic 4 is prompt ablation on the same 150 verbs (paired to 3B):
+#   4A — build_prompt_explicit (T=0, 1 sample)
+#   4B — 3B pass@1 + one constraint-only rewrite (reuse 3B pass@1 when available)
 #
 # Experiments (historical): exploratory spikes, LLM-labelled stimuli,
 #   documented under docs/experiment-results/.
@@ -117,7 +122,7 @@ diagnostics:
       it already produced that form correctly in the paradigm table?
     script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
     manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
-    variants: [diagnostic_3a, diagnostic_3b, diagnostic_3c]
+    variants: [diagnostic_3a, diagnostic_3b, diagnostic_3c, diagnostic_3d]
     related_experiments: [3, "3B", 10]
     status: in_progress
 
@@ -142,33 +147,53 @@ diagnostics:
   - id: diagnostic_3b
     number: "3B"
     series: diagnostic_3
+    title: Spanish sentence binding (production JSON + 3A hints)
+    question: >-
+      Under the production build_prompt JSON scaffold (short length, translation
+      field, no CEFR) but with the same 3A subject/tense hints appended, how much
+      of the 3A–3C gap is explained by missing hints vs JSON/format alone?
+    script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
+    variant: diagnostic_3b
+    manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
+    compare_to:
+      - docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
+      - docs/spike-results/eval_diagnostic_3a_n150_sentence_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json
+    models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
+    decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short, subject_hints: true}
+    related_experiments: [3, "3B", 10]
+    status: in_progress
+
+  - id: diagnostic_3c
+    number: "3C"
+    series: diagnostic_3
     title: Spanish sentence binding (production baseline prompt)
     question: >-
       Under the standard build_prompt baseline (short length, JSON output, generic
       constraint labels, no CEFR), does sentence pass rate lag 2A strict slot recall?
     script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
-    variant: diagnostic_3b
+    variant: diagnostic_3c
     manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
     compare_to: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
-    results: docs/spike-results/eval_diagnostic_3b_n150_sentence_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
     models: [Qwen/Qwen3-0.6B, Qwen/Qwen3-1.7B, Qwen/Qwen3-4B]
     decoding: {temperature: 0, samples_per_cell: 1, sentence_length: short}
     related_experiments: [3, "3B", 10]
     status: ready
 
-  - id: diagnostic_3c
-    number: "3C"
+  - id: diagnostic_3d
+    number: "3D"
     series: diagnostic_3
     title: Spanish sentence binding (production prompt, stochastic)
     question: >-
-      With the same production baseline prompt as 3B but T=0.7 and 10 samples
+      With the same production baseline prompt as 3C but T=0.7 and 10 samples
       per cell (pass@10), how often does at least one sentence contain the gold
       form on 1.7B?
     script: research/prototyping/diagnostic_3_spanish_sentence_qwen_spike.py
-    variant: diagnostic_3c
+    variant: diagnostic_3d
     manifest: research/evaluation/lexicon/experiment_verbs/manifest_diagnostic_2_paradigm_n150.csv
     compare_to: docs/spike-results/eval_diagnostic_2a_n150_paradigm_qwen_results.json
-    results: docs/spike-results/eval_diagnostic_3c_n150_sentence_qwen_results.json
+    results: docs/spike-results/eval_diagnostic_3d_n150_sentence_qwen_results.json
     models: [Qwen/Qwen3-1.7B]
     decoding: {temperature: 0.7, samples_per_cell: 10, sentence_length: short}
     related_experiments: [3, "3B", 10]

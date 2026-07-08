@@ -37,7 +37,7 @@ export HF_HOME="${PROJECT}/.cache/huggingface"
 export TRANSFORMERS_CACHE="${HF_HOME}"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
 
-echo "=== Diagnostic 3B n=150 — $(date -Is) ==="
+echo "=== Diagnostic 3B n=150 (production JSON + 3A hints) — $(date -Is) ==="
 echo "Host: $(hostname)"
 echo "Job: ${SLURM_JOB_ID:-interactive}"
 nvidia-smi || true
@@ -50,7 +50,7 @@ fi
 run_model() {
   local model="$1"
   echo ""
-  echo "=== ${model}: diagnostic_3b (production baseline prompt) ==="
+  echo "=== ${model}: diagnostic_3b (JSON + 3A hints) ==="
   python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
     --variant diagnostic_3b \
     --models "${model}" \
