@@ -6,6 +6,7 @@ import random
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy.orm import joinedload
 
@@ -31,6 +32,8 @@ from research.evaluation.sentence.base import BaseEvaluator
 from research.fixtures.mock_outputs import get_mock_candidates
 from research.generation import GENERATOR_REGISTRY
 from research.generation.base import BaseGenerator
+from research.generation.baseline_hf import BaselineHFGenerator
+from research.generation.cluster_batch_sizes import resolve_hf_batch_size
 from research.methods.loader import load_method_config_by_name
 from research.methods.run_config import MethodRunConfig
 
@@ -285,6 +288,60 @@ def _generate_live_candidates(
     return out
 
 
+def _constraint_generation_job(
+    cs: ConstraintSet,
+    *,
+    run_config: MethodRunConfig,
+    samples_per_case: int,
+) -> dict[str, Any]:
+    constraints = dict(cs.constraints)
+    if cs.expected_form is not None:
+        constraints["expected_form"] = cs.expected_form
+    return {
+        "keyword": cs.keyword,
+        "translation": cs.translation,
+        "constraints": constraints,
+        "num_candidates": samples_per_case,
+        "target_language": cs.target_language,
+        "cefr_level": cs.cefr_level,
+        "sentence_length": run_config.sentence_length,
+        "explicit_subject_required": run_config.explicit_subject_required,
+    }
+
+
+def _store_generated_sentences(
+    session,
+    *,
+    experiment: Experiment,
+    constraint_set: ConstraintSet,
+    candidate_pairs: list[tuple[dict[str, str], str]],
+    method_config: MethodConfig,
+    run_config: MethodRunConfig,
+    live: bool,
+) -> int:
+    stored = 0
+    for i, (cand, resolved_length) in enumerate(candidate_pairs):
+        session.add(
+            GeneratedSentence(
+                experiment_id=experiment.id,
+                constraint_set_id=constraint_set.id,
+                sentence=cand["sentence"],
+                translation=cand["translation"],
+                sample_index=i,
+                generation_meta={
+                    "method": method_config.method,
+                    "live": live,
+                    "sentence_length": run_config.sentence_length,
+                    "resolved_sentence_length": resolved_length,
+                    "explicit_subject_required": run_config.explicit_subject_required,
+                    "constraints": dict(constraint_set.constraints),
+                },
+            )
+        )
+        stored += 1
+    return stored
+
+
 def _sentence_counts_by_constraint_set(
     session,
     experiment_id: int,
@@ -434,6 +491,7 @@ def run_experiment(
             skipped_sets = 0
             newly_stored = 0
 
+            work_queue: list[tuple[ConstraintSet, str]] = []
             for cs in constraint_sets:
                 label = f"{cs.keyword} + {cs.tense} + {cs.person} + {cs.number}"
                 existing_n = already_by_cs.get(cs.id, 0)
@@ -457,54 +515,98 @@ def run_experiment(
                     )
                     session.commit()
                     total_stored -= existing_n
+                work_queue.append((cs, label))
 
-                if live:
-                    candidate_pairs = _generate_live_candidates(
-                        generator,
-                        cs=cs,
-                        run_config=run_config,
-                        samples_per_case=samples_needed,
-                        rng=rng,
-                    )
-                else:
-                    mock_batch = get_mock_candidates(benchmark.name, cs.keyword)[
-                        : samples_needed
-                    ]
-                    candidate_pairs = []
-                    for cand in mock_batch:
-                        resolved = (
-                            run_config.resolve_length(rng)
-                            if run_config.is_random_length
-                            else run_config.sentence_length
-                        )
-                        candidate_pairs.append((cand, resolved))
+            use_hf_batch = (
+                live
+                and isinstance(generator, BaselineHFGenerator)
+                and not run_config.is_random_length
+            )
+            hf_profile = "heavy" if samples_needed > 1 else "json"
+            hf_batch_size = resolve_hf_batch_size(
+                model_id=run_config.model,
+                profile=hf_profile,
+                yaml_override=run_config.hf_batch_size,
+            )
 
+            if use_hf_batch and work_queue:
+                print(
+                    f"\n  HF padded batching enabled "
+                    f"(batch_size={hf_batch_size}, profile={hf_profile})",
+                    flush=True,
+                )
+
+            def _process_candidate_pairs(
+                cs: ConstraintSet,
+                label: str,
+                candidate_pairs: list[tuple[dict[str, str], str]],
+            ) -> None:
+                nonlocal total_stored, newly_stored
                 if not candidate_pairs:
                     print(f"    No candidates generated for {cs.keyword}")
-                    continue
-
-                for i, (cand, resolved_length) in enumerate(candidate_pairs):
-                    gen = GeneratedSentence(
-                        experiment_id=experiment.id,
-                        constraint_set_id=cs.id,
-                        sentence=cand["sentence"],
-                        translation=cand["translation"],
-                        sample_index=i,
-                        generation_meta={
-                            "method": method_config.method,
-                            "live": live,
-                            "sentence_length": run_config.sentence_length,
-                            "resolved_sentence_length": resolved_length,
-                            "explicit_subject_required": run_config.explicit_subject_required,
-                            "constraints": dict(cs.constraints),
-                        },
-                    )
-                    session.add(gen)
-                    total_stored += 1
-                    newly_stored += 1
-
+                    return
+                stored = _store_generated_sentences(
+                    session,
+                    experiment=experiment,
+                    constraint_set=cs,
+                    candidate_pairs=candidate_pairs,
+                    method_config=method_config,
+                    run_config=run_config,
+                    live=live,
+                )
+                total_stored += stored
+                newly_stored += stored
                 session.commit()
-                print(f"    Stored {len(candidate_pairs)} sentences")
+                print(f"    Stored {stored} sentences")
+
+            if use_hf_batch:
+                resolved = run_config.sentence_length
+                for batch_start in range(0, len(work_queue), hf_batch_size):
+                    chunk = work_queue[batch_start : batch_start + hf_batch_size]
+                    batch_end = batch_start + len(chunk)
+                    print(
+                        f"\n  HF batch [{batch_end}/{len(work_queue)}] "
+                        f"cells {batch_start + 1}-{batch_end}",
+                        flush=True,
+                    )
+                    jobs = [
+                        _constraint_generation_job(
+                            cs,
+                            run_config=run_config,
+                            samples_per_case=samples_needed,
+                        )
+                        for cs, _ in chunk
+                    ]
+                    batches = generator.generate_many(
+                        jobs,
+                        batch_size=hf_batch_size,
+                    )
+                    for (cs, label), candidates in zip(chunk, batches):
+                        pairs = [(cand, resolved) for cand in candidates]
+                        _process_candidate_pairs(cs, label, pairs)
+            else:
+                for cs, label in work_queue:
+                    if live:
+                        candidate_pairs = _generate_live_candidates(
+                            generator,
+                            cs=cs,
+                            run_config=run_config,
+                            samples_per_case=samples_needed,
+                            rng=rng,
+                        )
+                    else:
+                        mock_batch = get_mock_candidates(benchmark.name, cs.keyword)[
+                            : samples_needed
+                        ]
+                        candidate_pairs = []
+                        for cand in mock_batch:
+                            resolved = (
+                                run_config.resolve_length(rng)
+                                if run_config.is_random_length
+                                else run_config.sentence_length
+                            )
+                            candidate_pairs.append((cand, resolved))
+                    _process_candidate_pairs(cs, label, candidate_pairs)
 
             print(
                 f"\n  Generation done: skipped_complete_sets={skipped_sets} "
