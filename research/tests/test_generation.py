@@ -279,3 +279,53 @@ def test_batch_size_for_profile():
 
     assert batch_size_for_profile("short", model_key="qwen17b") == 32
     assert batch_size_for_profile("heavy", model_key="qwen4b") == 4
+
+
+def test_baseline_hf_generate_many_batches_jobs(monkeypatch):
+    from research.generation.baseline_hf import BaselineHFGenerator
+
+    jobs = [
+        {
+            "keyword": "comer",
+            "translation": "to eat",
+            "constraints": {"tense": "present", "person": "1st", "number": "singular"},
+            "num_candidates": 2,
+            "target_language": "es",
+            "cefr_level": None,
+            "sentence_length": "short",
+            "explicit_subject_required": False,
+        },
+        {
+            "keyword": "beber",
+            "translation": "to drink",
+            "constraints": {"tense": "present", "person": "2nd", "number": "singular"},
+            "num_candidates": 1,
+            "target_language": "es",
+            "cefr_level": None,
+            "sentence_length": "short",
+            "explicit_subject_required": False,
+        },
+    ]
+    fake_json = [
+        '{"candidates":[{"sentence":"Como pan.","translation":"I eat bread."},'
+        '{"sentence":"Como arroz.","translation":"I eat rice."}]}',
+        '{"candidates":[{"sentence":"Bebes agua.","translation":"You drink water."}]}',
+    ]
+    batch_sizes: list[int] = []
+
+    def fake_batch(model_id, specs, *, temperature=0.0, batch_size=8):
+        batch_sizes.append(len(specs))
+        return fake_json[: len(specs)]
+
+    monkeypatch.setattr(
+        "research.generation.baseline_hf.generate_chat_batch",
+        fake_batch,
+    )
+
+    gen = BaselineHFGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    out = gen.generate_many(jobs, batch_size=2)
+
+    assert batch_sizes == [2]
+    assert len(out[0]) == 2
+    assert len(out[1]) == 1
+    assert out[0][0]["sentence"] == "Como pan."
