@@ -50,9 +50,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from research.evaluation.length_bands import get_band
 from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
 from research.generation.baseline_hf import (
-    _is_qwen3,
-    _load_model,
-    _strip_thinking,
+    ChatGenerationSpec,
+    DEFAULT_HF_BATCH_SIZE,
+    generate_chat_batch,
     parse_candidates_lenient,
     unload_model,
 )
@@ -448,41 +448,35 @@ def _max_new_tokens(num_candidates: int) -> int:
     return min(80 * num_candidates + 200, 3072)
 
 
-def _run_generation(
-    model_id: str,
+def _generation_spec(
     prompt: str,
+    *,
+    max_new_tokens: int,
+) -> ChatGenerationSpec:
+    return ChatGenerationSpec(
+        system=SYSTEM_MESSAGE_PRODUCTION,
+        user=prompt,
+        max_new_tokens=max_new_tokens,
+    )
+
+
+def _run_generation_batch(
+    model_id: str,
+    prompts: list[str],
     *,
     temperature: float,
     max_new_tokens: int,
-) -> str:
-    import torch
-
-    tokenizer, model = _load_model(model_id)
-    messages = [
-        {"role": "system", "content": SYSTEM_MESSAGE_PRODUCTION},
-        {"role": "user", "content": prompt},
+    batch_size: int,
+) -> list[str]:
+    specs = [
+        _generation_spec(prompt, max_new_tokens=max_new_tokens) for prompt in prompts
     ]
-    template_kwargs: dict[str, Any] = {"add_generation_prompt": True, "tokenize": False}
-    if _is_qwen3(model_id):
-        template_kwargs["enable_thinking"] = False
-    text = tokenizer.apply_chat_template(messages, **template_kwargs)
-    inputs = tokenizer(text, return_tensors="pt").to(model.device)
-
-    gen_kwargs: dict[str, Any] = {
-        "max_new_tokens": max_new_tokens,
-        "pad_token_id": tokenizer.eos_token_id,
-    }
-    if temperature <= 0:
-        gen_kwargs["do_sample"] = False
-    else:
-        gen_kwargs["do_sample"] = True
-        gen_kwargs["temperature"] = temperature
-        gen_kwargs["top_p"] = 0.9
-
-    with torch.no_grad():
-        output = model.generate(**inputs, **gen_kwargs)
-    prompt_len = inputs["input_ids"].shape[1]
-    return _strip_thinking(tokenizer.decode(output[0][prompt_len:], skip_special_tokens=True))
+    return generate_chat_batch(
+        model_id,
+        specs,
+        temperature=temperature,
+        batch_size=batch_size,
+    )
 
 
 def _pass1_from_3c_row(row: dict[str, Any]) -> dict[str, Any]:
@@ -665,6 +659,7 @@ def run_spike_4a(
     d2a_results_path: Path,
     d3c_results_path: Path,
     resume: bool = False,
+    batch_size: int = DEFAULT_HF_BATCH_SIZE,
 ) -> dict[str, Any]:
     variant: Variant = "diagnostic_4a"
     meta = variant_config(variant)
@@ -705,23 +700,33 @@ def run_spike_4a(
         print(f"\n=== {variant} / {key} ({model_id}) ===")
         rows: list[dict[str, Any]] = []
         t0 = time.perf_counter()
-        for i, case in enumerate(cases, 1):
-            print(f"  [{i}/{len(cases)}] {case.id}...", flush=True)
-            t_case = time.perf_counter()
-            raw = _run_generation(
+        for batch_start in range(0, len(cases), batch_size):
+            batch_cases = cases[batch_start : batch_start + batch_size]
+            batch_end = batch_start + len(batch_cases)
+            print(
+                f"  [{batch_end}/{len(cases)}] batch {batch_start + 1}-{batch_end} "
+                f"(size={len(batch_cases)})...",
+                flush=True,
+            )
+            t_batch = time.perf_counter()
+            max_toks = max(_max_new_tokens(case.num_candidates) for case in batch_cases)
+            raws = _run_generation_batch(
                 model_id,
-                case.prompt,
+                [case.prompt for case in batch_cases],
                 temperature=TEMPERATURE,
-                max_new_tokens=_max_new_tokens(case.num_candidates),
+                max_new_tokens=max_toks,
+                batch_size=batch_size,
             )
-            scored = _score_json_raw(raw, case)
-            rows.append(
-                {
-                    "case": asdict(case),
-                    "latency_s": round(time.perf_counter() - t_case, 3),
-                    **scored,
-                }
-            )
+            per_case_latency = (time.perf_counter() - t_batch) / len(batch_cases)
+            for case, raw in zip(batch_cases, raws):
+                scored = _score_json_raw(raw, case)
+                rows.append(
+                    {
+                        "case": asdict(case),
+                        "latency_s": round(per_case_latency, 3),
+                        **scored,
+                    }
+                )
         payload["by_model"][key] = {
             "model_id": model_id,
             "elapsed_s": round(time.perf_counter() - t0, 1),
@@ -749,6 +754,7 @@ def run_spike_4b(
     d3c_results_path: Path,
     reuse_3c_pass1: bool,
     resume: bool = False,
+    batch_size: int = DEFAULT_HF_BATCH_SIZE,
 ) -> dict[str, Any]:
     variant: Variant = "diagnostic_4b"
     meta = variant_config(variant)
@@ -802,73 +808,115 @@ def run_spike_4b(
         print(f"\n=== {variant} / {key} ({model_id}) ===")
         rows: list[dict[str, Any]] = []
         t0 = time.perf_counter()
-        for i, case in enumerate(cases, 1):
-            print(f"  [{i}/{len(cases)}] {case.id}...", flush=True)
-            t_case = time.perf_counter()
+        for batch_start in range(0, len(cases), batch_size):
+            batch_cases = cases[batch_start : batch_start + batch_size]
+            batch_end = batch_start + len(batch_cases)
+            print(
+                f"  [{batch_end}/{len(cases)}] batch {batch_start + 1}-{batch_end} "
+                f"(size={len(batch_cases)})...",
+                flush=True,
+            )
+            t_batch = time.perf_counter()
 
-            pass1_reused = False
-            d3c_row = d3c_for_model.get(case.id) if reuse_3c_pass1 else None
-            if d3c_row is not None:
-                pass1 = _pass1_from_3c_row(d3c_row)
-                pass1_reused = True
-            else:
-                raw1 = _run_generation(
+            pass1_by_idx: dict[int, dict[str, Any]] = {}
+            reused_by_idx: dict[int, bool] = {}
+            pass1_prompts: list[str] = []
+            pass1_batch_indices: list[int] = []
+
+            for local_idx, case in enumerate(batch_cases):
+                d3c_row = d3c_for_model.get(case.id) if reuse_3c_pass1 else None
+                if d3c_row is not None:
+                    pass1_by_idx[local_idx] = _pass1_from_3c_row(d3c_row)
+                    reused_by_idx[local_idx] = True
+                else:
+                    pass1_batch_indices.append(local_idx)
+                    pass1_prompts.append(case.pass1_prompt)
+
+            if pass1_prompts:
+                pass1_max = max(
+                    _max_new_tokens(batch_cases[i].num_candidates) for i in pass1_batch_indices
+                )
+                pass1_raws = _run_generation_batch(
                     model_id,
-                    case.pass1_prompt,
+                    pass1_prompts,
                     temperature=TEMPERATURE,
-                    max_new_tokens=_max_new_tokens(case.num_candidates),
+                    max_new_tokens=pass1_max,
+                    batch_size=batch_size,
                 )
-                pass1 = _score_json_raw(raw1, case)
+                for local_idx, raw in zip(pass1_batch_indices, pass1_raws):
+                    pass1_by_idx[local_idx] = _score_json_raw(raw, batch_cases[local_idx])
+                    reused_by_idx[local_idx] = False
 
-            pass_at_1 = bool(pass1.get("pass_at_1"))
-            corrected = False
-            pass_at_2 = pass_at_1
-            correction_raw = None
-            correction_prompt = None
+            correction_prompts: list[str] = []
+            correction_indices: list[int] = []
+            correction_prompt_by_idx: dict[int, str] = {}
 
-            if not pass_at_1:
-                correction_prompt = build_correction_prompt(
-                    case,
-                    sentence=str(pass1.get("sentence", "")),
-                    translation=str(pass1.get("translation", "")),
-                )
-                correction_raw = _run_generation(
+            for local_idx, case in enumerate(batch_cases):
+                pass1 = pass1_by_idx[local_idx]
+                if not bool(pass1.get("pass_at_1")):
+                    correction_prompt = build_correction_prompt(
+                        case,
+                        sentence=str(pass1.get("sentence", "")),
+                        translation=str(pass1.get("translation", "")),
+                    )
+                    correction_indices.append(local_idx)
+                    correction_prompts.append(correction_prompt)
+                    correction_prompt_by_idx[local_idx] = correction_prompt
+
+            correction_raw_by_idx: dict[int, str] = {}
+            if correction_prompts:
+                correction_raws = _run_generation_batch(
                     model_id,
-                    correction_prompt,
+                    correction_prompts,
                     temperature=TEMPERATURE,
                     max_new_tokens=256,
+                    batch_size=batch_size,
                 )
-                corrected = True
-                fix = _score_json_raw(correction_raw, case)
-                pass_at_2 = bool(fix.get("expected_form_pass"))
-                pass1["corrected_sentence"] = fix.get("sentence")
-                pass1["corrected_translation"] = fix.get("translation")
-                pass1["correction_raw"] = correction_raw
-                pass1["correction_parse_mode"] = fix.get("parse_mode")
+                for local_idx, raw in zip(correction_indices, correction_raws):
+                    correction_raw_by_idx[local_idx] = raw
 
-            rows.append(
-                {
-                    "case": asdict(case),
-                    "latency_s": round(time.perf_counter() - t_case, 3),
-                    **pass1,
-                    "pass1_reused_from_3c": pass1_reused,
-                    "correction_prompt": correction_prompt,
-                    "corrected": corrected,
-                    "pass_at_1": pass_at_1,
-                    "pass_at_2": pass_at_2,
-                    "expected_form_pass": pass_at_2,
-                    "sentence": (
-                        pass1.get("corrected_sentence")
-                        if corrected and pass_at_2
-                        else pass1.get("sentence")
-                    ),
-                    "translation": (
-                        pass1.get("corrected_translation")
-                        if corrected and pass_at_2
-                        else pass1.get("translation")
-                    ),
-                }
-            )
+            per_case_latency = (time.perf_counter() - t_batch) / len(batch_cases)
+            for local_idx, case in enumerate(batch_cases):
+                pass1 = dict(pass1_by_idx[local_idx])
+                pass1_reused = reused_by_idx[local_idx]
+                pass_at_1 = bool(pass1.get("pass_at_1"))
+                corrected = False
+                pass_at_2 = pass_at_1
+                correction_prompt = correction_prompt_by_idx.get(local_idx)
+                correction_raw = correction_raw_by_idx.get(local_idx)
+
+                if not pass_at_1 and correction_raw is not None:
+                    corrected = True
+                    fix = _score_json_raw(correction_raw, case)
+                    pass_at_2 = bool(fix.get("expected_form_pass"))
+                    pass1["corrected_sentence"] = fix.get("sentence")
+                    pass1["corrected_translation"] = fix.get("translation")
+                    pass1["correction_raw"] = correction_raw
+                    pass1["correction_parse_mode"] = fix.get("parse_mode")
+
+                rows.append(
+                    {
+                        "case": asdict(case),
+                        "latency_s": round(per_case_latency, 3),
+                        **pass1,
+                        "pass1_reused_from_3c": pass1_reused,
+                        "correction_prompt": correction_prompt,
+                        "corrected": corrected,
+                        "pass_at_1": pass_at_1,
+                        "pass_at_2": pass_at_2,
+                        "expected_form_pass": pass_at_2,
+                        "sentence": (
+                            pass1.get("corrected_sentence")
+                            if corrected and pass_at_2
+                            else pass1.get("sentence")
+                        ),
+                        "translation": (
+                            pass1.get("corrected_translation")
+                            if corrected and pass_at_2
+                            else pass1.get("translation")
+                        ),
+                    }
+                )
 
         payload["by_model"][key] = {
             "model_id": model_id,
@@ -921,6 +969,7 @@ def _new_payload(
         "models": {k: QWEN_MODELS[k] for k in model_keys},
         "temperature": TEMPERATURE,
         "samples_per_cell": SAMPLES_PER_CELL,
+        "batch_size": DEFAULT_HF_BATCH_SIZE,
         "cefr_level": None,
         "sentence_length": SENTENCE_LENGTH,
         "output_format": "json",
@@ -957,6 +1006,12 @@ def main() -> None:
         default=None,
     )
     parser.add_argument("--limit", type=int, default=None, help="First N probes only.")
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_HF_BATCH_SIZE,
+        help=f"Padded HF prompts per generate() call (default: {DEFAULT_HF_BATCH_SIZE}).",
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--output", type=Path, default=None, help="Override output JSON path.")
     parser.add_argument(
@@ -1023,6 +1078,7 @@ def main() -> None:
             d2a_results_path=args.d2a_results,
             d3c_results_path=args.d3c_results,
             resume=args.resume,
+            batch_size=args.batch_size,
         )
     else:
         data = run_spike_4b(
@@ -1035,6 +1091,7 @@ def main() -> None:
             d3c_results_path=args.d3c_results,
             reuse_3c_pass1=bool(reuse_3c),
             resume=args.resume,
+            batch_size=args.batch_size,
         )
 
     print(f"\n--- Summary ({variant}) ---")

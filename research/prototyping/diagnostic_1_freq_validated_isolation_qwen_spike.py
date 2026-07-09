@@ -53,7 +53,12 @@ from typing import Any, Literal
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from research.generation.baseline_hf import _is_qwen3, _load_model, _strip_thinking, unload_model
+from research.generation.baseline_hf import (
+    ChatGenerationSpec,
+    DEFAULT_HF_BATCH_SIZE,
+    generate_chat_batch,
+    unload_model,
+)
 
 _EDGE_PUNCT = string.punctuation + "«»""''¡¿"
 
@@ -247,42 +252,33 @@ def _system_message(language: LangName, *, prompt_variant: str = "default") -> s
     )
 
 
-def complete(
-    model_id: str,
+def _generation_spec(
     case: ProbeCase,
     *,
-    temperature: float,
     prompt_variant: str = "default",
-) -> str:
-    import torch
+) -> ChatGenerationSpec:
+    return ChatGenerationSpec(
+        system=_system_message(case.language, prompt_variant=prompt_variant),
+        user=case.prompt,
+        max_new_tokens=32,
+    )
 
-    tokenizer, model = _load_model(model_id)
-    messages = [
-        {"role": "system", "content": _system_message(case.language, prompt_variant=prompt_variant)},
-        {"role": "user", "content": case.prompt},
-    ]
-    template_kwargs: dict[str, Any] = {"add_generation_prompt": True, "tokenize": False}
-    if _is_qwen3(model_id):
-        template_kwargs["enable_thinking"] = False
-    text = tokenizer.apply_chat_template(messages, **template_kwargs)
-    inputs = tokenizer(text, return_tensors="pt").to(model.device)
 
-    gen_kwargs: dict[str, Any] = {
-        "max_new_tokens": 32,
-        "pad_token_id": tokenizer.eos_token_id,
-    }
-    if temperature <= 0:
-        gen_kwargs["do_sample"] = False
-    else:
-        gen_kwargs["do_sample"] = True
-        gen_kwargs["temperature"] = temperature
-        gen_kwargs["top_p"] = 0.9
-
-    with torch.no_grad():
-        output = model.generate(**inputs, **gen_kwargs)
-    prompt_len = inputs["input_ids"].shape[1]
-    raw = tokenizer.decode(output[0][prompt_len:], skip_special_tokens=True)
-    return _strip_thinking(raw)
+def _complete_cases_batched(
+    model_id: str,
+    cases: list[ProbeCase],
+    *,
+    temperature: float,
+    prompt_variant: str,
+    batch_size: int,
+) -> list[str]:
+    specs = [_generation_spec(case, prompt_variant=prompt_variant) for case in cases]
+    return generate_chat_batch(
+        model_id,
+        specs,
+        temperature=temperature,
+        batch_size=batch_size,
+    )
 
 
 def score_response(case: ProbeCase, raw: str) -> dict[str, Any]:
@@ -363,6 +359,7 @@ def run_spike(
     prompt_variant: str = "default",
     user_template: str = USER_TEMPLATE,
     resume: bool = False,
+    batch_size: int = DEFAULT_HF_BATCH_SIZE,
 ) -> dict[str, Any]:
     payload: dict[str, Any] | None = None
     if resume and output_path is not None and output_path.is_file():
@@ -390,6 +387,7 @@ def run_spike(
             "n_probes": len(cases),
             "models": {k: QWEN_MODELS[k] for k in model_keys},
             "temperature": temperature,
+            "batch_size": batch_size,
             "probes": list({c.probe for c in cases}),
             "form_labels": FORM_LABELS,
             "prompt_variant": prompt_variant,
@@ -407,20 +405,32 @@ def run_spike(
         print(f"\n=== {key} ({model_id}) ===")
         rows: list[dict[str, Any]] = []
         t0 = time.perf_counter()
-        for i, case in enumerate(cases, 1):
-            print(f"  [{i}/{len(cases)}] {case.id}...", flush=True)
-            t_case = time.perf_counter()
-            raw = complete(
-                model_id, case, temperature=temperature, prompt_variant=prompt_variant
+        for batch_start in range(0, len(cases), batch_size):
+            batch_cases = cases[batch_start : batch_start + batch_size]
+            batch_end = batch_start + len(batch_cases)
+            print(
+                f"  [{batch_end}/{len(cases)}] batch {batch_start + 1}-{batch_end} "
+                f"(size={len(batch_cases)})...",
+                flush=True,
             )
-            scored = score_response(case, raw)
-            rows.append(
-                {
-                    "case": asdict(case),
-                    "latency_s": round(time.perf_counter() - t_case, 3),
-                    **scored,
-                }
+            t_batch = time.perf_counter()
+            raws = _complete_cases_batched(
+                model_id,
+                batch_cases,
+                temperature=temperature,
+                prompt_variant=prompt_variant,
+                batch_size=batch_size,
             )
+            per_case_latency = (time.perf_counter() - t_batch) / len(batch_cases)
+            for case, raw in zip(batch_cases, raws):
+                scored = score_response(case, raw)
+                rows.append(
+                    {
+                        "case": asdict(case),
+                        "latency_s": round(per_case_latency, 3),
+                        **scored,
+                    }
+                )
         payload["by_model"][key] = {
             "model_id": model_id,
             "elapsed_s": round(time.perf_counter() - t0, 1),
@@ -491,6 +501,12 @@ def main() -> None:
         help="Prompt template variant (default: one-word reply).",
     )
     parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_HF_BATCH_SIZE,
+        help=f"Padded HF prompts per generate() call (default: {DEFAULT_HF_BATCH_SIZE}).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=None,
@@ -543,6 +559,7 @@ def main() -> None:
         prompt_variant=args.prompt_variant,
         user_template=user_template,
         resume=args.resume,
+        batch_size=args.batch_size,
     )
     _save_payload(data, args.output)
     print("\n--- Summary ---")

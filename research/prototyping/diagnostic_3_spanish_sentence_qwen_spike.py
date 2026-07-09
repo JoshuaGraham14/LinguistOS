@@ -56,9 +56,9 @@ from research.evaluation.length_bands import band_label
 from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
 from research.generation.baseline_hf import (
     BaselineHFGenerator,
-    _is_qwen3,
-    _load_model,
-    _strip_thinking,
+    ChatGenerationSpec,
+    DEFAULT_HF_BATCH_SIZE,
+    generate_chat_batch,
     parse_candidates_lenient,
     unload_model,
 )
@@ -698,53 +698,56 @@ def _prompt_for_remaining(case: SentenceCase, remaining: int) -> str:
     )
 
 
-def _run_generation(
-    model_id: str,
-    case: SentenceCase,
-    *,
-    prompt: str,
-    max_new_tokens: int,
-    temperature: float,
-) -> str:
-    import torch
-
-    tokenizer, model = _load_model(model_id)
-    messages = [
-        {"role": "system", "content": system_message(case.variant)},
-        {"role": "user", "content": prompt},
-    ]
-    template_kwargs: dict[str, Any] = {"add_generation_prompt": True, "tokenize": False}
-    if _is_qwen3(model_id):
-        template_kwargs["enable_thinking"] = False
-    text = tokenizer.apply_chat_template(messages, **template_kwargs)
-    inputs = tokenizer(text, return_tensors="pt").to(model.device)
-
-    gen_kwargs: dict[str, Any] = {
-        "max_new_tokens": max_new_tokens,
-        "pad_token_id": tokenizer.eos_token_id,
-    }
-    if temperature <= 0:
-        gen_kwargs["do_sample"] = False
-    else:
-        gen_kwargs["do_sample"] = True
-        gen_kwargs["temperature"] = temperature
-        gen_kwargs["top_p"] = 0.9
-
-    with torch.no_grad():
-        output = model.generate(**inputs, **gen_kwargs)
-    prompt_len = inputs["input_ids"].shape[1]
-    raw = tokenizer.decode(output[0][prompt_len:], skip_special_tokens=True)
-    return _strip_thinking(raw)
+def _generation_spec(case: SentenceCase, *, prompt: str, max_new_tokens: int) -> ChatGenerationSpec:
+    return ChatGenerationSpec(
+        system=system_message(case.variant),
+        user=prompt,
+        max_new_tokens=max_new_tokens,
+    )
 
 
 def complete(model_id: str, case: SentenceCase, *, temperature: float) -> str:
     prompt = build_prompt_for_case(case)
-    return _run_generation(
+    return generate_chat_batch(
         model_id,
-        case,
-        prompt=prompt,
-        max_new_tokens=_max_new_tokens_for_candidates(case.num_candidates, variant=case.variant),
+        [
+            _generation_spec(
+                case,
+                prompt=prompt,
+                max_new_tokens=_max_new_tokens_for_candidates(
+                    case.num_candidates,
+                    variant=case.variant,
+                ),
+            )
+        ],
         temperature=temperature,
+        batch_size=1,
+    )[0]
+
+
+def _complete_cases_batched(
+    model_id: str,
+    cases: list[SentenceCase],
+    *,
+    temperature: float,
+    batch_size: int,
+) -> list[str]:
+    specs = [
+        _generation_spec(
+            case,
+            prompt=build_prompt_for_case(case),
+            max_new_tokens=_max_new_tokens_for_candidates(
+                case.num_candidates,
+                variant=case.variant,
+            ),
+        )
+        for case in cases
+    ]
+    return generate_chat_batch(
+        model_id,
+        specs,
+        temperature=temperature,
+        batch_size=batch_size,
     )
 
 
@@ -755,38 +758,81 @@ def complete_with_topup(
     temperature: float,
 ) -> dict[str, Any]:
     """Batched JSON generation with top-up calls when parsing returns too few candidates."""
-    collected: list[dict[str, str]] = []
-    raw_calls: list[str] = []
-    parse_modes: list[str] = []
+    return _complete_with_topup_batched(
+        model_id,
+        [case],
+        temperature=temperature,
+        batch_size=1,
+    )[0]
+
+
+def _complete_with_topup_batched(
+    model_id: str,
+    cases: list[SentenceCase],
+    *,
+    temperature: float,
+    batch_size: int,
+) -> list[dict[str, Any]]:
+    collected: list[list[dict[str, str]]] = [[] for _ in cases]
+    raw_calls: list[list[str]] = [[] for _ in cases]
+    parse_modes: list[list[str]] = [[] for _ in cases]
+    active = list(range(len(cases)))
 
     for call_idx in range(MAX_TOPUP_CALLS):
-        remaining = case.num_candidates - len(collected)
-        if remaining <= 0:
+        if not active:
             break
-        prompt = _prompt_for_remaining(case, remaining)
-        raw = _run_generation(
-            model_id,
-            case,
-            prompt=prompt,
-            max_new_tokens=_max_new_tokens_for_candidates(remaining, variant=case.variant),
-            temperature=temperature,
-        )
-        raw_calls.append(raw.strip())
-        cands, mode = parse_candidates_lenient(raw)
-        parse_modes.append(mode)
-        print(
-            f"      [top-up call {call_idx + 1}/{MAX_TOPUP_CALLS}] "
-            f"requested={remaining} parsed={len(cands)} mode={mode}",
-            flush=True,
-        )
-        collected.extend(cands)
+        specs: list[ChatGenerationSpec] = []
+        for idx in active:
+            case = cases[idx]
+            remaining = case.num_candidates - len(collected[idx])
+            prompt = _prompt_for_remaining(case, remaining)
+            specs.append(
+                _generation_spec(
+                    case,
+                    prompt=prompt,
+                    max_new_tokens=_max_new_tokens_for_candidates(
+                        remaining,
+                        variant=case.variant,
+                    ),
+                )
+            )
 
-    return {
-        "candidates": collected[: case.num_candidates],
-        "raw_calls": raw_calls,
-        "parse_modes": parse_modes,
-        "n_generation_calls": len(raw_calls),
-    }
+        raws = generate_chat_batch(
+            model_id,
+            specs,
+            temperature=temperature,
+            batch_size=batch_size,
+        )
+
+        next_active: list[int] = []
+        for idx, raw in zip(active, raws):
+            case = cases[idx]
+            raw_calls[idx].append(raw.strip())
+            cands, mode = parse_candidates_lenient(raw)
+            parse_modes[idx].append(mode)
+            remaining = case.num_candidates - len(collected[idx])
+            print(
+                f"      [{case.id} top-up {call_idx + 1}/{MAX_TOPUP_CALLS}] "
+                f"requested={remaining} parsed={len(cands)} mode={mode}",
+                flush=True,
+            )
+            collected[idx].extend(cands)
+            if (
+                len(collected[idx]) < case.num_candidates
+                and call_idx + 1 < MAX_TOPUP_CALLS
+            ):
+                next_active.append(idx)
+        active = next_active
+
+    return [
+        {
+            "candidates": collected[idx][: cases[idx].num_candidates],
+            "raw_calls": raw_calls[idx],
+            "parse_modes": parse_modes[idx],
+            "n_generation_calls": len(raw_calls[idx]),
+        }
+        for idx in range(len(cases))
+    ]
 
 
 def _join_raw_calls(raw_calls: list[str]) -> str:
@@ -819,6 +865,7 @@ def run_spike(
     output_path: Path,
     d2a_results_path: Path,
     resume: bool = False,
+    batch_size: int = DEFAULT_HF_BATCH_SIZE,
 ) -> dict[str, Any]:
     meta = variant_config(variant)
     d2a_index_by_model = load_2a_strict_index(d2a_results_path)
@@ -857,6 +904,7 @@ def run_spike(
             "models": {k: QWEN_MODELS[k] for k in model_keys},
             "temperature": temperature,
             "samples_per_cell": samples_per_cell,
+            "batch_size": batch_size,
             "generation_topup_calls_max": (
                 MAX_TOPUP_CALLS if samples_per_cell > 1 else None
             ),
@@ -895,26 +943,56 @@ def run_spike(
         rows: list[dict[str, Any]] = []
         t0 = time.perf_counter()
         use_topup = samples_per_cell > 1
-        for i, case in enumerate(cases, 1):
-            print(f"  [{i}/{len(cases)}] {case.id}...", flush=True)
-            t_case = time.perf_counter()
-            if use_topup:
-                batch = complete_with_topup(model_id, case, temperature=temperature)
-                scored = _score_json_candidates(case, batch["candidates"])
-                scored["raw"] = _join_raw_calls(batch["raw_calls"])
-                scored["raw_calls"] = batch["raw_calls"]
-                scored["parse_modes"] = batch["parse_modes"]
-                scored["n_generation_calls"] = batch["n_generation_calls"]
-            else:
-                raw = complete(model_id, case, temperature=temperature)
-                scored = score_output(case, raw)
-            rows.append(
-                {
-                    "case": asdict(case),
-                    "latency_s": round(time.perf_counter() - t_case, 3),
-                    **scored,
-                }
+        for batch_start in range(0, len(cases), batch_size):
+            batch_cases = cases[batch_start : batch_start + batch_size]
+            batch_end = batch_start + len(batch_cases)
+            print(
+                f"  [{batch_end}/{len(cases)}] batch {batch_start + 1}-{batch_end} "
+                f"(size={len(batch_cases)})...",
+                flush=True,
             )
+            t_batch = time.perf_counter()
+            if use_topup:
+                batches = _complete_with_topup_batched(
+                    model_id,
+                    batch_cases,
+                    temperature=temperature,
+                    batch_size=batch_size,
+                )
+                for case, batch in zip(batch_cases, batches):
+                    scored = _score_json_candidates(case, batch["candidates"])
+                    scored["raw"] = _join_raw_calls(batch["raw_calls"])
+                    scored["raw_calls"] = batch["raw_calls"]
+                    scored["parse_modes"] = batch["parse_modes"]
+                    scored["n_generation_calls"] = batch["n_generation_calls"]
+                    rows.append(
+                        {
+                            "case": asdict(case),
+                            "latency_s": round(
+                                (time.perf_counter() - t_batch) / len(batch_cases),
+                                3,
+                            ),
+                            **scored,
+                        }
+                    )
+            else:
+                raws = _complete_cases_batched(
+                    model_id,
+                    batch_cases,
+                    temperature=temperature,
+                    batch_size=batch_size,
+                )
+                batch_elapsed = time.perf_counter() - t_batch
+                per_case_latency = batch_elapsed / len(batch_cases)
+                for case, raw in zip(batch_cases, raws):
+                    scored = score_output(case, raw)
+                    rows.append(
+                        {
+                            "case": asdict(case),
+                            "latency_s": round(per_case_latency, 3),
+                            **scored,
+                        }
+                    )
         payload["by_model"][key] = {
             "model_id": model_id,
             "elapsed_s": round(time.perf_counter() - t0, 1),
@@ -952,6 +1030,12 @@ def main() -> None:
         default=None,
     )
     parser.add_argument("--temperature", type=float, default=None)
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_HF_BATCH_SIZE,
+        help=f"Padded HF prompts per generate() call (default: {DEFAULT_HF_BATCH_SIZE}).",
+    )
     parser.add_argument(
         "--samples-per-cell",
         type=int,
@@ -1012,6 +1096,7 @@ def main() -> None:
         output_path=output_path,
         d2a_results_path=args.d2a_results,
         resume=args.resume,
+        batch_size=args.batch_size,
     )
     print(f"\n--- Summary ({variant}) ---")
     print(json.dumps(data["summary"], indent=2, ensure_ascii=False))
