@@ -36,8 +36,11 @@ fi
 cd "${PROJECT}"
 # shellcheck disable=SC1091
 source "${PROJECT}/research/scripts/cluster/research_cache_env.sh"
+# shellcheck disable=SC1091
+source "${PROJECT}/research/scripts/cluster/qwen_batch_env.sh"
 export RESEARCH_DB="${RUNS_DIR}/diagnostic_5a.db"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
+export HF_BATCH_SIZE="${HF_BATCH_SIZE:-${BATCH_HEAVY_17B}}"
 
 echo "=== Diagnostic 5A n=150 (baseline, T=0.7, n=10) — $(date -Is) ==="
 echo "RESEARCH_DB=${RESEARCH_DB}"

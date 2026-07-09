@@ -33,6 +33,8 @@ if [[ -f /vol/cuda/12.0.0/setup.sh ]]; then
 fi
 
 cd "${PROJECT}"
+# shellcheck disable=SC1091
+source "${PROJECT}/research/scripts/cluster/qwen_batch_env.sh"
 export HF_HOME="${PROJECT}/.cache/huggingface"
 export TRANSFORMERS_CACHE="${HF_HOME}"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
@@ -45,20 +47,33 @@ python3 -c "import torch; print('cuda:', torch.cuda.is_available(), torch.cuda.g
 
 run_model() {
   local model="$1"
+  local batch_2a batch_2b
+  case "${model}" in
+    qwen4b)
+      batch_2a="${BATCH_MEDIUM_4B}"
+      batch_2b="${BATCH_SHORT_4B}"
+      ;;
+    *)
+      batch_2a="${BATCH_MEDIUM_17B}"
+      batch_2b="${BATCH_SHORT_17B}"
+      ;;
+  esac
   echo ""
-  echo "=== ${model}: diagnostic_2a (full paradigm) ==="
+  echo "=== ${model}: diagnostic_2a (full paradigm, batch=${batch_2a}) ==="
   python3 -m research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike \
     --probe-mode diagnostic_2a \
     --models "${model}" \
     --output "${OUTPUT_2A}" \
+    --batch-size "${batch_2a}" \
     --resume
 
   echo ""
-  echo "=== ${model}: diagnostic_2b (single slot) ==="
+  echo "=== ${model}: diagnostic_2b (single slot, batch=${batch_2b}) ==="
   python3 -m research.prototyping.diagnostic_2_spanish_paradigm_qwen_spike \
     --probe-mode diagnostic_2b \
     --models "${model}" \
     --output "${OUTPUT_2B}" \
+    --batch-size "${batch_2b}" \
     --resume
 }
 

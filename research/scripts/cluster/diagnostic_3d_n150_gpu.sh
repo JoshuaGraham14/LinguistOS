@@ -33,6 +33,8 @@ if [[ -f /vol/cuda/12.0.0/setup.sh ]]; then
 fi
 
 cd "${PROJECT}"
+# shellcheck disable=SC1091
+source "${PROJECT}/research/scripts/cluster/qwen_batch_env.sh"
 export HF_HOME="${PROJECT}/.cache/huggingface"
 export TRANSFORMERS_CACHE="${HF_HOME}"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
@@ -52,6 +54,7 @@ python3 -m research.prototyping.diagnostic_3_spanish_sentence_qwen_spike \
   --models qwen17b \
   --output "${OUTPUT_3D}" \
   --d2a-results "${D2A}" \
+  --batch-size "${BATCH_HEAVY_17B}" \
   --resume
 
 echo ""

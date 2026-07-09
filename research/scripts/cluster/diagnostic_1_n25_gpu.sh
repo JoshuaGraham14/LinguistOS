@@ -32,6 +32,8 @@ if [[ -f /vol/cuda/12.0.0/setup.sh ]]; then
 fi
 
 cd "${PROJECT}"
+# shellcheck disable=SC1091
+source "${PROJECT}/research/scripts/cluster/qwen_batch_env.sh"
 export HF_HOME="${PROJECT}/.cache/huggingface"
 export TRANSFORMERS_CACHE="${HF_HOME}"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
@@ -47,8 +49,11 @@ run_model() {
   local model="$1"
   echo ""
   echo "=== Running ${model} ==="
+  local batch
+  case "${model}" in qwen4b) batch="${BATCH_SHORT_4B}" ;; *) batch="${BATCH_SHORT_17B}" ;; esac
   python3 -m research.prototyping.diagnostic_1_freq_validated_isolation_qwen_spike \
     --models "${model}" \
+    --batch-size "${batch}" \
     --output "${OUTPUT}" \
     --resume
 }

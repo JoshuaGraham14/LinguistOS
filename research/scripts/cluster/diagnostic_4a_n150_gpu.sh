@@ -34,6 +34,8 @@ if [[ -f /vol/cuda/12.0.0/setup.sh ]]; then
 fi
 
 cd "${PROJECT}"
+# shellcheck disable=SC1091
+source "${PROJECT}/research/scripts/cluster/qwen_batch_env.sh"
 export HF_HOME="${PROJECT}/.cache/huggingface"
 export TRANSFORMERS_CACHE="${HF_HOME}"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
@@ -53,6 +55,11 @@ fi
 
 run_model() {
   local model="$1"
+  local batch
+  case "${model}" in
+    qwen4b) batch="${BATCH_JSON_4B}" ;;
+    *) batch="${BATCH_JSON_17B}" ;;
+  esac
   echo ""
   echo "=== ${model}: diagnostic_4a (explicit overlay) ==="
   python3 -m research.prototyping.diagnostic_4_spanish_prompt_ablation_qwen_spike \
@@ -61,6 +68,7 @@ run_model() {
     --output "${OUTPUT_4A}" \
     --d2a-results "${D2A}" \
     --d3c-results "${D3C}" \
+    --batch-size "${batch}" \
     --resume
 }
 
