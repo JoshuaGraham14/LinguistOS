@@ -225,3 +225,57 @@ def test_find_method_yaml_by_name():
     path = find_method_yaml("individual_random")
     assert path is not None
     assert path.name == "random.yaml"
+
+
+def test_generate_chat_batch_chunks_requests(monkeypatch):
+    from research.generation.baseline_hf import ChatGenerationSpec, generate_chat_batch
+
+    calls: list[int] = []
+    counter = {"n": 0}
+
+    def fake_once(model_id, specs, *, temperature):
+        calls.append(len(specs))
+        out = []
+        for _ in specs:
+            out.append(f"out-{counter['n']}")
+            counter["n"] += 1
+        return out
+
+    monkeypatch.setattr(
+        "research.generation.baseline_hf._generate_chat_batch_once",
+        fake_once,
+    )
+
+    specs = [
+        ChatGenerationSpec(system="sys", user=f"u{i}", max_new_tokens=32)
+        for i in range(5)
+    ]
+    out = generate_chat_batch("fake-model", specs, batch_size=2)
+
+    assert out == ["out-0", "out-1", "out-2", "out-3", "out-4"]
+    assert calls == [2, 2, 1]
+
+
+def test_generate_chat_batch_rejects_non_positive_batch_size():
+    from research.generation.baseline_hf import ChatGenerationSpec, generate_chat_batch
+
+    with pytest.raises(ValueError, match="batch_size must be positive"):
+        generate_chat_batch(
+            "fake-model",
+            [ChatGenerationSpec(system="s", user="u", max_new_tokens=8)],
+            batch_size=0,
+        )
+
+
+def test_resolve_hf_batch_size_prefers_env(monkeypatch):
+    from research.generation.cluster_batch_sizes import resolve_hf_batch_size
+
+    monkeypatch.setenv("HF_BATCH_SIZE", "12")
+    assert resolve_hf_batch_size(model_id="Qwen/Qwen3-1.7B", profile="json") == 12
+
+
+def test_batch_size_for_profile():
+    from research.generation.cluster_batch_sizes import batch_size_for_profile
+
+    assert batch_size_for_profile("short", model_key="qwen17b") == 32
+    assert batch_size_for_profile("heavy", model_key="qwen4b") == 4
