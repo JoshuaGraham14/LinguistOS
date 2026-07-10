@@ -2,7 +2,8 @@
 
 > Status: operational guide (Jul 2026)  
 > Scope: running LinguistOS research experiments on the DoC GPU cluster  
-> Related: `research/scripts/cluster/research_cache_env.sh`, `research/scripts/cluster/qwen_batch_env.sh`
+> Related: `research/scripts/cluster/research_cache_env.sh`, `research/scripts/cluster/qwen_batch_env.sh`  
+> **Playbook:** [Cluster research playbook](cluster_research_playbook.md) (databases, metrics, Mac vs cluster)
 
 ---
 

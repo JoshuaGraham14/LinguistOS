@@ -19,6 +19,7 @@
 - [Product direction](specs/product_direction.md)
 - [Implementation spec](specs/implementation_spec.md)
 - [GPU cluster access](specs/gpu_cluster_access.md)
+- [Cluster research playbook](specs/cluster_research_playbook.md) — Mac vs cluster DBs, metrics, D5 lessons
 
 **Research**
 - [Research mode plan](plans/research_mode_implementation_plan.md)
