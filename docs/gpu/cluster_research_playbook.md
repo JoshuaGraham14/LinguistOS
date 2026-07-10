@@ -5,7 +5,9 @@
 > **Scope:** Mac vs cluster workflow, databases, metrics, and lessons from large pipeline runs (especially Diagnostic 5, July 2026)  
 > **See also:** [GPU cluster access](gpu_cluster_access.md) (SSH, Slurm, env setup) · [Diagnostic 5 handoff](../handoff/diagnostic_5_handoff.md)
 
-For arm design and how to re-run Diagnostic 5, see the handoff doc. For headline science numbers, query `research/runs/diagnostic_5*.db` on the cluster or run `research/scripts/analyze_diagnostic_5_results.py`.
+**Context:** Three pipeline arms (5A baseline / 5B form-injected / 5C inject+explicit) on `spanish_diagnostic_n150` — 150 verbs × 31 cells = 4,650 constraint sets, 10 sentences per cell, Qwen3-1.7B, T=0.7. Cluster jobs completed July 2026 after several failed attempts.
+
+For arm design and how to re-run, see the handoff doc. For headline science numbers, query `research/runs/diagnostic_5*.db` on the cluster (authoritative after grammar rescore), or run `research/scripts/analyze_diagnostic_5_results.py` / `research/scripts/export_diagnostic_5_canvas_data.py`.
 
 ---
 
@@ -48,6 +50,7 @@ N parallel jobs  →  N files under research/runs/  →  optional merge into res
 ```bash
 export RESEARCH_DB=research/runs/my_arm.db
 python3 -m research.run_experiment ... --live
+python3 -m research.merge_databases research/runs/arm_*.db
 ```
 
 ### Rsync checklist (code only)
@@ -67,32 +70,43 @@ rsync -az \
 
 ### What happened
 
-Each Diagnostic 5 arm took **~20–24 hours** wall time on an A30. Roughly half was generation (~9–11 h); the other half was **post-generation scoring** (~10 h), dominated by one metric.
+Each arm took **~20–24 hours** wall time on an A30 GPU node. Roughly half was generation (~9–11 h); the other half was **post-generation scoring** (~10 h), dominated by one metric.
+
+The pipeline registers **18 group metrics** — 9 at `constraint_set` scope (per cell) and 9 at `experiment` scope (all sentences pooled). The bottleneck was:
 
 | Metric | Scope | Cost at n=150 |
 |--------|--------|----------------|
-| **`self_bleu_experiment`** | All 46,500 sentences | **O(n²)** |
-| `self_bleu` (per cell) | 10 sentences × 4,650 cells | O(10²) per cell — minutes |
-| Other experiment-wide metrics | Linear in n | Seconds to minutes |
+| **`self_bleu_experiment`** | All 46,500 sentences | **O(n²)** — each sentence scored against ~46,499 references via sacrebleu |
+| `self_bleu` (per cell) | 10 sentences × 4,650 cells | O(10²) per cell — minutes total |
+| All other experiment-wide metrics | Linear in n or tokens | Seconds to minutes |
+
+At 46,500 sentences, experiment-wide Self-BLEU implies on the order of **2×10⁹** reference comparisons. That alone accounts for most of the post-gen wall time. The job was not stuck: CPU sat at ~96% while `experiment_metrics` row count stayed at 0 until a single batch commit at the end.
+
+### Why it was hard to diagnose
+
+- Group metrics had **no incremental commits or progress logs** during the first run (later fixed with per-metric logging and commits every 500 cells).
+- Slurm `.out` logs were **buffered** — tail looked idle long after generation finished.
+- Monitoring query `SELECT COUNT(*) FROM experiment_metrics` showed **0 for hours** by design (one commit at end), not because the process had crashed.
 
 ### Fixes in place
 
 | Fix | Purpose |
 |-----|---------|
-| **`--skip-experiment-group-metrics`** | Skip pooled experiment-scope metrics on large benchmarks |
-| **`SELF_BLEU_EXPERIMENT_CAP=500`** | Subsample if experiment Self-BLEU is enabled |
-| Incremental metric commits | Progress visibility during long metric phases |
-| `PYTHONUNBUFFERED=1` | Real-time Slurm logs |
+| **`--skip-experiment-group-metrics`** | Skip all 9 pooled experiment-scope metrics; keep per-cell metrics + sentence roll-ups. **Use on any large multi-cell benchmark.** |
+| **`SELF_BLEU_EXPERIMENT_CAP=500`** | If experiment Self-BLEU is enabled, subsample to 500 sentences (deterministic seed). |
+| Incremental commits in `_compute_and_store_group_metrics` | Visibility + smaller WAL spikes. |
+| `PYTHONUNBUFFERED=1` in cluster env | Logs flush in real time. |
+| Diagnostic 5 cluster scripts | `--skip-experiment-group-metrics` enabled by default. |
 
-### Rule of thumb
+### Rule of thumb for future runs
 
 | Scale | Experiment-wide group metrics? |
 |-------|--------------------------------|
-| ≤500 sentences | Optional |
-| 4,650+ cells / 46k+ sentences | **Skip** |
-| Need corpus Self-BLEU | Enable with cap, or compute offline |
+| ≤500 sentences (e.g. Exp 9 grid) | Optional — fast enough |
+| 4,650+ cells / 46k+ sentences | **Skip** (`--skip-experiment-group-metrics`) |
+| Need corpus-level Self-BLEU anyway | Enable with cap, or compute offline on a sample |
 
-**Expected post-gen after fixes:** ~30–60 minutes, not ~10 hours.
+**Expected post-gen time after fixes:** ~30–60 minutes (sentence eval + per-cell metrics + roll-ups), not ~10 hours.
 
 ---
 
@@ -100,16 +114,19 @@ Each Diagnostic 5 arm took **~20–24 hours** wall time on an A30. Roughly half 
 
 ### What happened
 
-First cluster attempt **crashed ~50%** with `disk I/O error` — **`rsync` replaced `research.db` while three jobs were writing.** All three arms had also shared one `research.db`.
+The first cluster attempt (jobs 258146–258148) **crashed around 50%** with `sqlite3.OperationalError: disk I/O error`. Cause: **`rsync` replaced `research/research.db` on the shared filesystem while three GPU jobs were writing to it.** SQLite does not tolerate the DB file being swapped out from under an open connection.
+
+All three arms had been pointed at the **same** canonical `research.db`, so they also contended on one file even without rsync.
 
 ### Fixes in place
 
 | Practice | Detail |
 |----------|--------|
-| **Per-arm `RESEARCH_DB`** | e.g. `research/runs/diagnostic_5a.db` |
-| **Merge after completion** | `merge_databases.py` / `diagnostic_5_merge.sh` |
-| **Never rsync `*.db` while jobs run** | Sync code only |
-| **`--resume`** | Safe restart without regenerating finished cells |
+| **Per-arm `RESEARCH_DB`** | Each job writes to an isolated file, e.g. `research/runs/diagnostic_5a.db`. Set via `RESEARCH_DB` env in cluster scripts; supported in `research/db/database.py`. |
+| **Merge after completion** | `research/merge_databases.py` / `diagnostic_5_merge.sh` copies completed experiments into canonical `research.db` by stable names. |
+| **Never rsync `*.db` while jobs run** | Sync code only; copy DBs read-only for analysis, or merge after jobs finish. |
+| **WAL mode + 60s busy timeout** | Reduces (but does not eliminate) pain from concurrent readers; does **not** fix overwrite-from-rsync. |
+| **`--resume`** | Safe restart after crash without regenerating finished cells. |
 
 ### Merge is additive, not a sync
 
@@ -125,80 +142,146 @@ Example (Diagnostic 5, July 2026):
 
 To refresh `research.db`: run rescore against it directly, or delete the D5 experiment rows and re-merge.
 
-### Safe monitoring
+### Safe monitoring (read-only)
 
 ```bash
-sqlite3 "file:/path/to/diagnostic_5a.db?mode=ro" \
-  "SELECT status, completed_at FROM experiments;"
+# Read-only open — do not copy over the file a job is writing
+sqlite3 "file:/path/to/diagnostic_5a.db?mode=ro" "SELECT status, completed_at FROM experiments;"
 ```
+
+Check process CPU on the compute node (`ps`) rather than assuming a stalled log means a dead job.
+
+### Rule of thumb
+
+- **N parallel arms → N database files** until merge.
+- Treat `research.db` and `research/runs/*.db` on the **cluster** as production; keep the Mac out of the write path.
+- Treat DB files as **immutable from rsync/deploy** while any `run_experiment` process is alive.
 
 ---
 
-## 3. Experiment-wide group metrics
+## 3. Experiment-wide group metrics — what they are and when to use them
 
-Two scopes: **`constraint_set`** (per cell) and **`experiment`** (all sentences pooled). Sentence **roll-ups** (`pass_rate::…`) are separate — always report EF/length/grammar from roll-ups.
+The pipeline runs two **scopes** of distribution metrics:
 
-For Diagnostic 5–style census grids:
+| Scope | Unit | Stored as |
+|-------|------|-----------|
+| **`constraint_set`** | 10 sentences for **one** verb + morphological form | One row per cell per metric |
+| **`experiment`** | All sentences in the run pooled | One row per metric |
 
-- **Do** report mean per-cell uniqueness, Self-BLEU, template rate.
-- **Do not** headline `uniqueness_ratio_experiment` or `self_bleu_experiment` on 150-verb grids.
+Sentence **roll-ups** (`pass_rate::expected_form_match`, etc.) are separate: they aggregate sentence evaluator scores and are always experiment-level (and per-cell). **Do not confuse roll-ups with group metrics.**
+
+### Experiment-wide metrics (9 total)
+
+| Metric | What it measures | Useful at n=150? | Runtime |
+|--------|------------------|------------------|---------|
+| `uniqueness_ratio_experiment` | Distinct strings / 46,500 | **Poor headline** — different lemmas ⇒ mostly distinct by construction | Fast |
+| `self_bleu_experiment` | Mean sentence BLEU vs all other sentences | Cross-verb similarity only; **prohibitively slow** | **O(n²)** |
+| `template_rate_experiment` | Share of sentences sharing a 3-token opening with *any* other sentence in run | Niche (global template reuse) | Fast |
+| `distinct_1_experiment`, `distinct_2_experiment` | Corpus lexical diversity (type/token on n-grams) | Optional footnote | Fast |
+| `mean_token_count_experiment`, `length_cv_experiment` | Global length distribution | Partially redundant with `length_in_band` roll-ups | Fast |
+| `mean_clauses_experiment` | Global mean clause count | Optional | Fast |
+| `lt_error_breakdown_experiment` | Pooled grammar-error histogram | Only when LT works | Fast |
+
+### What you lose by skipping experiment-wide metrics
+
+You **keep**:
+
+- Sentence-level evals and **roll-ups** (EF, length, grammar pass rates).
+- All **per-cell** diversity metrics (uniqueness, Self-BLEU, template rate, distinct-n, …).
+- Any analysis that **means per-cell scores** (correct for morphological benchmarks).
+
+You **lose**:
+
+- Single-number **corpus-pooled** diversity stats across unrelated target forms.
+- Detection of **cross-cell** template reuse (same scaffold for different verbs).
+- Pooled LT error histogram at experiment scope (per-cell LT breakdown still exists when grammar runs).
+
+For Diagnostic 5–style census grids, **per-cell → mean** is the right unit of analysis. Experiment-pooled uniqueness was actively misleading as a headline (and experiment-pooled uniqueness for 5A was **lower** than mean per-cell uniqueness because cross-cell duplicate strings deflate the ratio).
+
+### Correct diversity aggregation for multi-cell benchmarks
+
+**Do:**
+
+1. Compute uniqueness / Self-BLEU / template rate **per constraint set** (10 samples, same target form).
+2. Report **mean (or median) over cells**, optionally grouped by tense.
+3. Use sentence roll-ups for EF and length pass rates.
+
+**Do not:**
+
+- Headline `uniqueness_ratio_experiment` or `self_bleu_experiment` on 150-verb grids.
+- Assume high experiment-wide uniqueness means “creative” output — it often just means different lemmas.
 
 ---
 
 ## 4. LanguageTool and grammar rescore
 
-### First pass failure
+### What happened (first D5 eval pass)
 
-Grammar was **0% on all sentences** — LanguageTool hit home-disk quota:
+**Grammar was 0% on all 46,500 sentences in every arm** — not a model result. LanguageTool failed on init:
 
 ```text
-Disk quota exceeded: '/homes/jjg25/.cache/language_tool_python'
+[Errno 122] Disk quota exceeded: '/homes/jjg25/.cache/language_tool_python'
 ```
 
-### Fixes
+The evaluator catches the exception and scores 0.0. On the first failure path, init may be retried per sentence, adding eval overhead.
+
+### Fixes in place
 
 | Fix | Detail |
 |-----|--------|
-| **`LTP_PATH`** on project volume | `research_cache_env.sh` |
-| **Grammar rescore** | `python3 -m research.scripts.rescore_diagnostic_5_grammar` |
+| **`LTP_PATH`** on project volume | `research/scripts/cluster/research_cache_env.sh` sets `LTP_PATH="${PROJECT}/.cache/language_tool_python"`. |
+| **LT init failure cache** | After first init failure for a language, do not retry on every sentence. |
+| **Pre-flight check** | Before long runs: `python -c "import language_tool_python; language_tool_python.LanguageTool('es')"` on a compute node with cluster env sourced. |
+| **Grammar rescore** | `python3 -m research.scripts.rescore_diagnostic_5_grammar` re-runs LT only (no regeneration). |
 
-### Rescore results (job 258917, ~34 min all arms)
+**Diagnostic 5 EF and length results were always valid.** Grammar from the first pass was not; rescore fixed it.
 
-| Arm | Grammar pass |
-|-----|-------------|
+### Grammar rescore results (July 2026, job 258917, ~34 min all arms)
+
+| Arm | Grammar pass (sentence mean) |
+|-----|------------------------------|
 | 5A | 99.46% |
 | 5B | 98.60% |
 | 5C | 98.97% |
 
-Rescore updates eval rows **in place** in whichever DB you point at (`RESEARCH_DB`). No regeneration needed.
+Rescore updates eval rows **in place** in whichever DB you point at (`RESEARCH_DB`).
 
 ---
 
-## 5. Scientific takeaways (Diagnostic 5)
+## 5. Scientific and methodological takeaways (for future diagnostics)
 
-**Setup:** Qwen3-1.7B, T=0.7, 10 sentences/cell, `short` length, 4,650 cells, 46,500 sentences/arm.
+These affect how you design and report experiments, not just cluster ops.
 
-| Arm | EF | Length in band | Mean per-cell uniqueness | Grammar |
-|-----|---:|---------------:|-------------------------:|--------:|
-| 5A baseline | 24% | 45% | 81.5% | ~99% |
-| 5B form-injected | 89.5% | 44% | 90.4% | ~99% |
-| 5C inject + explicit | 93.6% | **65%** | 92.2% | ~99% |
+### Generation and scoring unit
 
-- Form injection: **+65 pp EF** (5A → 5B).
-- Explicit overlay (5C): **+20 pp length**, +4 pp EF.
-- **Participle** weakest tense (~77% EF on 5C).
-- High per-cell uniqueness often = slot-filling variation (*Él X la Y*), not structural diversity.
+- **10 sentences per cell** via one (or two) JSON calls with `samples_per_case: 10`.
+- **Headline metric = sentence-level pass rate** over all sentences, not pass@k per cell.
+- **Length is in the prompt:** `sentence_length: short` → 2–5 **tokens** in constraints; 5C explicit overlay says “words” but evaluator uses tokens.
 
-### Common failure modes (5C spot-check)
+### Main findings (Qwen 1.7B, n=150)
 
-| Failure | Example |
-|---------|---------|
-| Wrong tense | `sobrepasarán` for conditional `sobrepasarían` |
-| Paraphrase | `estarían ausentes` instead of `ausentarían` |
-| Infinitive | `comer helado` for `comería` |
-| Participle | finite verb instead of participle token |
-| Too long | Correct form in 6–12 token sentence (band 2–5) |
-| Too short | Bare verb only (`vertido`) |
+| Arm | EF (sentence) | Length in band | Mean per-cell uniqueness | Grammar (after rescore) |
+|-----|--------------:|---------------:|-------------------------:|------------------------:|
+| 5A baseline | 24% | 45% | 81.5% | 99.5% |
+| 5B form-injected | 89.5% | 44% | 90.4% | 98.6% |
+| 5C inject + explicit | 93.6% | **65%** | 92.2% | 99.0% |
+
+- Form injection replicates Exp 9 at scale (+65 pp EF).
+- Explicit overlay (5C) mainly adds **length compliance**, not EF.
+- **Participle** remains weakest tense even with injection (~77% EF for 5C).
+- High per-cell uniqueness often reflects **slot-filling variation** (*Él X la Y*), not structural diversity — read alongside Self-BLEU and template rate.
+
+### Common failure modes (from spot-checking 5C outputs)
+
+| Failure | Example pattern |
+|---------|-----------------|
+| EF fail — wrong tense | `sobrepasarán` for conditional `sobrepasarían` |
+| EF fail — paraphrase | `estarían ausentes` instead of `ausentarían` |
+| EF fail — infinitive | `comer helado` for `comería` |
+| EF fail — participle | finite verb or nominalization instead of participle token |
+| Length fail — too long | Correct form in 6–12 token sentence (band is 2–5) |
+| Length fail — too short | Bare verb token only (`vertido`, `mazaríamos`) |
+| Low uniqueness cell | Identical string repeated 10× |
 
 ---
 
@@ -206,46 +289,70 @@ Rescore updates eval rows **in place** in whichever DB you point at (`RESEARCH_D
 
 ### Before submit
 
-- [ ] Estimate cells × samples_per_case.
-- [ ] If **>5,000 sentences**, `--skip-experiment-group-metrics`.
-- [ ] Parallel arms → separate `RESEARCH_DB` on cluster.
-- [ ] Source `research_cache_env.sh`; verify LanguageTool (grammar ≠ 0%).
+- [ ] Benchmark size estimate: cells × samples_per_case = total sentences.
+- [ ] If **>5,000 sentences**, add `--skip-experiment-group-metrics`.
+- [ ] Parallel arms use **separate `RESEARCH_DB`** files on the **cluster**.
+- [ ] Cluster script sources `research_cache_env.sh` (`LTP_PATH`, `HF_HOME`, `PYTHONUNBUFFERED`).
+- [ ] Smoke run on `spanish_diagnostic_n150_smoke` (2 verbs) end-to-end including metrics.
+- [ ] Verify LanguageTool on cluster (grammar not all-zero).
 - [ ] Deploy **code only** (`git pull` or rsync excluding `*.db`).
 
 ### During run
 
-- [ ] Monitor with `ps` + read-only SQLite.
-- [ ] Do not rsync or edit the DB a job is writing.
+- [ ] Use `ps` + read-only SQLite (`mode=ro`) for progress.
+- [ ] Do not interpret `experiment_metrics` count = 0 as crash during metrics phase (check CPU; logs after `PYTHONUNBUFFERED` fix).
+- [ ] Do not rsync or edit the DB file the job is writing.
 
 ### After run
 
 - [ ] Query per-arm DBs for authoritative results.
 - [ ] Merge into `research.db` only if you need one combined file (first time).
 - [ ] Rescore grammar in place if LT failed on first pass.
-- [ ] Report diversity as **mean per-cell**; EF/length/grammar as sentence roll-ups.
+- [ ] Report diversity as **mean per-cell** metrics; EF/length/grammar as **sentence roll-ups**.
+- [ ] Validate grammar evals (spot-check `sentence_evaluations.details` for LT `error` field).
+- [ ] Document invalid evaluators explicitly in results write-ups.
 
 ### CLI reference
 
 ```bash
+# Large benchmark (recommended)
 python3 -m research.run_experiment \
   --benchmark spanish_diagnostic_n150 \
   --method diagnostic_5b_hf_qwen3_17b_n10 \
-  --live --resume --skip-experiment-group-metrics
+  --live --resume \
+  --skip-experiment-group-metrics
 
+# Small benchmark (Exp 9 scale) — experiment-wide metrics optional
+python3 -m research.run_experiment \
+  --benchmark spanish_basic_grid \
+  --method baseline_hf_qwen3_17b_n10 \
+  --live
+
+# Grammar rescore only (after LT fix)
 export RESEARCH_DB=research/runs/diagnostic_5a.db
 python3 -m research.scripts.rescore_diagnostic_5_grammar --arm 5a
+
+# Isolated DB for cluster arm
+export RESEARCH_DB=research/runs/my_arm.db
 ```
 
 ---
 
-## 7. Related code
+## 7. Related code and docs
 
 | Item | Location |
 |------|----------|
-| Skip experiment metrics | `research/run_experiment.py`, `research/pipeline.py` |
+| SSH / Slurm / first-time setup | [gpu_cluster_access.md](gpu_cluster_access.md) |
+| Skip experiment metrics flag | `research/run_experiment.py`, `research/pipeline.py` |
+| Metric scope filter | `research/evaluation/distribution/__init__.py` → `group_metrics_for_run()` |
+| Self-BLEU cap | `research/evaluation/distribution/self_bleu.py` |
 | Per-arm DB + merge | `research/db/database.py`, `research/merge_databases.py` |
 | Grammar rescore | `research/evaluation/rescore.py`, `research/scripts/rescore_diagnostic_5_grammar.py` |
 | Cluster env | `research/scripts/cluster/research_cache_env.sh` |
+| Diagnostic 5 cluster scripts | `research/scripts/cluster/diagnostic_5{a,b,c}_n150_gpu.sh` |
+| D5 merge | `research/scripts/cluster/diagnostic_5_merge.sh` |
+| Results export / canvas data | `research/scripts/export_diagnostic_5_canvas_data.py` |
+| Sentence spot-check | `research/scripts/sample_diagnostic_5c_sentences.py` |
 | D5 analysis | `research/scripts/analyze_diagnostic_5_results.py` |
 
 ---
@@ -254,6 +361,8 @@ python3 -m research.scripts.rescore_diagnostic_5_grammar --arm 5a
 
 1. **Code via git; databases on cluster** — never treat Mac and cluster DBs as synced.
 2. **Per-arm DBs are authoritative** after rescore; merge does not refresh existing evals.
-3. **Skip experiment-wide metrics** on 46k+ sentence runs.
-4. **Mean per-cell uniqueness** — not experiment-pooled ratios.
-5. **Grammar rescore in place** — no regeneration needed when LT cache was wrong.
+3. **~10 h post-gen delay** → experiment-wide Self-BLEU at 46k sentences; use `--skip-experiment-group-metrics`.
+4. **Mid-run DB corruption** → rsync overwrote `research.db`; use per-arm `RESEARCH_DB` and never sync DBs during jobs.
+5. **Experiment-wide uniqueness** → wrong aggregation for census grids; use mean per-cell uniqueness.
+6. **Grammar 0% (first pass)** → home-directory LT cache quota; rescore with `LTP_PATH` on project volume.
+7. **Looks stuck but isn't** → metrics batch commit + log buffering; check CPU, not just row counts.
