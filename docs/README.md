@@ -18,6 +18,7 @@
 - [Hybrid system spec](specs/hybrid_system_spec.md)
 - [Product direction](specs/product_direction.md)
 - [Implementation spec](specs/implementation_spec.md)
+- [GPU cluster access](specs/gpu_cluster_access.md)
 
 **Research**
 - [Research mode plan](plans/research_mode_implementation_plan.md)
