@@ -89,6 +89,17 @@ Each arm is ~46,500 sentences. Prefer `--resume` after any interruption.
 
 Cluster scripts set `RESEARCH_DB` to an isolated file under `research/runs/` (merge into `research.db` after all arms finish). They also set `LTP_PATH` on the project volume so LanguageTool does not hit home-directory disk quota.
 
+**Grammar rescore** (if the original run has grammar 0% due to LT quota failure):
+
+```bash
+source research/scripts/cluster/research_cache_env.sh
+export RESEARCH_DB=research/runs/diagnostic_5a.db
+python3 -m research.scripts.rescore_diagnostic_5_grammar --arm 5a
+# Or all arms: sbatch research/scripts/cluster/rescore_diagnostic_5_grammar.sh
+```
+
+Re-merge per-arm DBs after rescore: `bash research/scripts/cluster/diagnostic_5_merge.sh`.
+
 **Runtime:** generation is ~10 h on A30; post-generation scoring was ~10 h on the first n=150 run because experiment-wide Self-BLEU was O(n²) over 46,500 sentences. Use `--skip-experiment-group-metrics` on large benchmarks (per-cell metrics + roll-ups only). Experiment Self-BLEU is also subsampled when enabled (`SELF_BLEU_EXPERIMENT_CAP`, default 500).
 
 Smoke first with the small benchmark + any of the Diag 5 methods (or regenerate method YAML pointing at smoke if needed by using `--benchmark spanish_diagnostic_n150_smoke` after loading that YAML).
