@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import random
 from typing import TYPE_CHECKING, Literal
 
 from sacrebleu.metrics import BLEU
@@ -12,6 +14,17 @@ if TYPE_CHECKING:
     from research.db.models import GeneratedSentence
 
 _BLEU = BLEU(tokenize="intl", effective_order=True, smooth_method="exp")
+
+# Experiment-wide Self-BLEU is O(n²); cap subsampling for large runs (e.g. n=150).
+_DEFAULT_EXPERIMENT_CAP = 500
+
+
+def _experiment_self_bleu_cap() -> int:
+    raw = os.environ.get("SELF_BLEU_EXPERIMENT_CAP", str(_DEFAULT_EXPERIMENT_CAP))
+    try:
+        return max(2, int(raw))
+    except ValueError:
+        return _DEFAULT_EXPERIMENT_CAP
 
 
 class SelfBleuMetric(BaseGroupMetric):
@@ -42,6 +55,14 @@ class SelfBleuMetric(BaseGroupMetric):
         if len(texts) < 2:
             return GroupMetricResult(0.0, {"n": n, "skipped": True})
 
+        details: dict[str, object] = {"n": len(texts)}
+        if self._scope == "experiment" and len(texts) > _experiment_self_bleu_cap():
+            cap = _experiment_self_bleu_cap()
+            texts = random.Random(0).sample(texts, cap)
+            details["sampled"] = True
+            details["sample_n"] = cap
+            details["pool_n"] = n
+
         scores: list[float] = []
         for i, hypothesis in enumerate(texts):
             references = [texts[j] for j in range(len(texts)) if j != i]
@@ -49,7 +70,8 @@ class SelfBleuMetric(BaseGroupMetric):
             scores.append(bleu_score)
 
         mean_score = sum(scores) / len(scores)
+        details["mean"] = round(mean_score, 4)
         return GroupMetricResult(
             round(mean_score, 4),
-            {"n": len(texts), "mean": round(mean_score, 4)},
+            details,
         )

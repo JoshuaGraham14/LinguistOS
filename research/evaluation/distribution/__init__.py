@@ -33,8 +33,26 @@ DEFAULT_GROUP_METRICS: list[BaseGroupMetric] = [
     LtErrorBreakdownMetric("experiment"),
 ]
 
+EXPERIMENT_GROUP_METRIC_NAMES: tuple[str, ...] = tuple(
+    m.name for m in DEFAULT_GROUP_METRICS if m.scope == "experiment"
+)
+
+
+def group_metrics_for_run(*, include_experiment_scope: bool = True) -> list[BaseGroupMetric]:
+    """Return group metrics to compute for a run.
+
+    Large multi-cell benchmarks should often set ``include_experiment_scope=False``
+    to skip pooled metrics (especially experiment-wide Self-BLEU).
+    """
+    if include_experiment_scope:
+        return list(DEFAULT_GROUP_METRICS)
+    return [m for m in DEFAULT_GROUP_METRICS if m.scope == "constraint_set"]
+
+
 __all__ = [
     "DEFAULT_GROUP_METRICS",
+    "EXPERIMENT_GROUP_METRIC_NAMES",
+    "group_metrics_for_run",
     "BaseGroupMetric",
     "DistinctNgramMetric",
     "GroupMetricResult",

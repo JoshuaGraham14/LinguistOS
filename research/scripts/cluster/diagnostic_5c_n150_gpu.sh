@@ -13,8 +13,9 @@ PROJECT=/vol/bitbucket/jjg25/LinguistOS
 VENV="${PROJECT}/.venv"
 BENCHMARK=spanish_diagnostic_n150
 METHOD=diagnostic_5c_hf_qwen3_17b_n10
+RUNS_DIR="${PROJECT}/research/runs"
 
-mkdir -p "${PROJECT}/logs" "${PROJECT}/docs/spike-results"
+mkdir -p "${PROJECT}/logs" "${PROJECT}/docs/spike-results" "${RUNS_DIR}"
 
 if [[ -f "${VENV}/bin/activate" ]]; then
   # shellcheck disable=SC1091
@@ -33,11 +34,14 @@ if [[ -f /vol/cuda/12.0.0/setup.sh ]]; then
 fi
 
 cd "${PROJECT}"
-export HF_HOME="${PROJECT}/.cache/huggingface"
-export TRANSFORMERS_CACHE="${HF_HOME}"
+# shellcheck disable=SC1091
+source "${PROJECT}/research/scripts/cluster/research_cache_env.sh"
+export RESEARCH_DB="${RUNS_DIR}/diagnostic_5c.db"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
 
-echo "=== Diagnostic 5C n=150 (inject + explicit, T=0.7, n=10) — $(date -Is) ==="
+echo "=== Diagnostic 5C n=150 (inject+explicit, T=0.7, n=10) — $(date -Is) ==="
+echo "RESEARCH_DB=${RESEARCH_DB}"
+echo "LTP_PATH=${LTP_PATH}"
 echo "Host: $(hostname)"
 echo "Job: ${SLURM_JOB_ID:-interactive}"
 nvidia-smi || true
@@ -49,7 +53,8 @@ python3 -m research.run_experiment \
   --benchmark "${BENCHMARK}" \
   --method "${METHOD}" \
   --live \
-  --resume
+  --resume \
+  --skip-experiment-group-metrics
 
 echo ""
 echo "=== Done $(date -Is) ==="

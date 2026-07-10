@@ -23,6 +23,7 @@ GRAMMAR_CATEGORIES: frozenset[str] = frozenset(
 )
 
 _LT_CACHE: dict[str, Any] = {}
+_LT_INIT_ERRORS: dict[str, str] = {}
 
 
 class LanguageToolLike(Protocol):
@@ -33,9 +34,15 @@ def _get_languagetool(language: str) -> LanguageToolLike:
     """Lazy-load and cache a LanguageTool server for *language*."""
     if language in _LT_CACHE:
         return _LT_CACHE[language]
+    if language in _LT_INIT_ERRORS:
+        raise RuntimeError(_LT_INIT_ERRORS[language])
     import language_tool_python
 
-    tool = language_tool_python.LanguageTool(language)
+    try:
+        tool = language_tool_python.LanguageTool(language)
+    except Exception as exc:  # pragma: no cover - environment-dependent
+        _LT_INIT_ERRORS[language] = str(exc)
+        raise
     _LT_CACHE[language] = tool
     return tool
 

@@ -5,6 +5,7 @@ Usage:
     python -m research.run_experiment --benchmark spanish_basic --method individual_default --live
     python -m research.run_experiment --benchmark spanish_basic --method baseline_default --no-eval
     python -m research.run_experiment --benchmark spanish_basic --method baseline_default --no-metrics
+    python -m research.run_experiment --benchmark spanish_diagnostic_n150 --method diagnostic_5a_hf_qwen3_17b_n10 --live --skip-experiment-group-metrics
 """
 
 from __future__ import annotations
@@ -33,6 +34,14 @@ def main():
     parser.add_argument("--no-eval", action="store_true", help="Skip per-sentence evaluation (still runs group metrics)")
     parser.add_argument("--no-metrics", action="store_true", help="Skip group metrics and roll-ups")
     parser.add_argument(
+        "--skip-experiment-group-metrics",
+        action="store_true",
+        help=(
+            "Compute per-cell (constraint_set) distribution metrics only; "
+            "skip pooled experiment-scope metrics (faster on large benchmarks)"
+        ),
+    )
+    parser.add_argument(
         "--resume",
         action="store_true",
         help=(
@@ -57,6 +66,7 @@ def main():
         live=args.live,
         evaluate=not args.no_eval,
         metrics=not args.no_metrics,
+        experiment_group_metrics=not args.skip_experiment_group_metrics,
         resume=args.resume,
         resume_experiment_id=args.resume_experiment_id,
     )

@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from research.db.models import GeneratedSentence, SentenceEvaluation
-from research.evaluation.distribution import DEFAULT_GROUP_METRICS
+from research.evaluation.distribution import (
+    DEFAULT_GROUP_METRICS,
+    EXPERIMENT_GROUP_METRIC_NAMES,
+    group_metrics_for_run,
+)
 from research.evaluation.distribution.distinct_ngram import DistinctNgramMetric
 from research.evaluation.distribution.lt_error_breakdown import LtErrorBreakdownMetric
 from research.evaluation.distribution.self_bleu import SelfBleuMetric
@@ -70,6 +74,15 @@ def test_uniqueness_ratio_duplicates():
     assert r.value == 0.5
 
 
+def test_group_metrics_for_run_filters_experiment_scope():
+    all_metrics = group_metrics_for_run(include_experiment_scope=True)
+    cell_only = group_metrics_for_run(include_experiment_scope=False)
+    assert len(all_metrics) == len(DEFAULT_GROUP_METRICS)
+    assert len(cell_only) == len(DEFAULT_GROUP_METRICS) - len(EXPERIMENT_GROUP_METRIC_NAMES)
+    assert all(m.scope == "constraint_set" for m in cell_only)
+    assert not any(m.scope == "experiment" for m in cell_only)
+
+
 def test_self_bleu_skips_single_sentence_batch():
     m = SelfBleuMetric("constraint_set")
     r = m.compute(_sentences(["Solo."]))
@@ -88,6 +101,16 @@ def test_self_bleu_varied_sentences_score_lower():
     repetitive = m.compute(_sentences(BATCH_REPETITIVE)).value
     varied = m.compute(_sentences(BATCH_VARIED)).value
     assert repetitive > varied
+
+
+def test_self_bleu_experiment_subsamples_large_batches(monkeypatch):
+    monkeypatch.setenv("SELF_BLEU_EXPERIMENT_CAP", "3")
+    m = SelfBleuMetric("experiment")
+    texts = [f"Oración número {i} con palabras distintas." for i in range(20)]
+    r = m.compute(_sentences(texts))
+    assert r.details["sampled"] is True
+    assert r.details["sample_n"] == 3
+    assert r.details["pool_n"] == 20
 
 
 def test_template_rate_catches_shared_openings():

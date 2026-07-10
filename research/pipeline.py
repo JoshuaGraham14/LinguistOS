@@ -20,7 +20,10 @@ from research.db.models import (
     MethodConfig,
     SentenceEvaluation,
 )
-from research.evaluation.distribution import DEFAULT_GROUP_METRICS
+from research.evaluation.distribution import (
+    EXPERIMENT_GROUP_METRIC_NAMES,
+    group_metrics_for_run,
+)
 from research.evaluation.distribution.base import BaseGroupMetric
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.sentence import DEFAULT_EVALUATORS
@@ -139,6 +142,16 @@ def _evaluate_sentences(
     return total
 
 
+def _clear_experiment_group_metrics(session, experiment_id: int) -> None:
+    """Remove pooled experiment-scope group metrics (when skipped on a run)."""
+    if not EXPERIMENT_GROUP_METRIC_NAMES:
+        return
+    session.query(ExperimentMetric).filter(
+        ExperimentMetric.experiment_id == experiment_id,
+        ExperimentMetric.metric_name.in_(EXPERIMENT_GROUP_METRIC_NAMES),
+    ).delete(synchronize_session="fetch")
+
+
 def _compute_and_store_group_metrics(
     session,
     experiment: Experiment,
@@ -170,9 +183,17 @@ def _compute_and_store_group_metrics(
         by_cs[s.constraint_set_id].append(s)
 
     inserted = 0
-    for metric in group_metrics:
+    total_metrics = len(group_metrics)
+    cs_commit_every = 500
+    for metric_idx, metric in enumerate(group_metrics, start=1):
+        print(
+            f"    Group metric {metric_idx}/{total_metrics}: "
+            f"{metric.name} ({metric.scope})...",
+            flush=True,
+        )
         if metric.scope == "constraint_set":
-            for cs_id, group in by_cs.items():
+            total_cs = len(by_cs)
+            for cs_idx, (cs_id, group) in enumerate(by_cs.items(), start=1):
                 result = metric.compute(group)
                 session.add(
                     ExperimentMetric(
@@ -185,6 +206,13 @@ def _compute_and_store_group_metrics(
                     )
                 )
                 inserted += 1
+                if cs_idx % cs_commit_every == 0:
+                    session.commit()
+                    print(
+                        f"      {metric.name}: {cs_idx}/{total_cs} cells",
+                        flush=True,
+                    )
+            session.commit()
         else:
             result = metric.compute(sentences)
             session.add(
@@ -198,7 +226,7 @@ def _compute_and_store_group_metrics(
                 )
             )
             inserted += 1
-    session.commit()
+            session.commit()
     return inserted
 
 
@@ -330,6 +358,7 @@ def run_experiment(
     live: bool = False,
     evaluate: bool = True,
     metrics: bool = True,
+    experiment_group_metrics: bool = True,
     resume: bool = False,
     resume_experiment_id: int | None = None,
 ) -> None:
@@ -338,6 +367,10 @@ def run_experiment(
     When ``resume`` / ``resume_experiment_id`` is set, generation skips constraint
     sets that already have ``samples_per_case`` sentences stored, then re-runs
     evaluators and group metrics over the full experiment.
+
+    Set ``experiment_group_metrics=False`` on large multi-cell benchmarks to skip
+    pooled experiment-scope distribution metrics (notably experiment-wide Self-BLEU).
+    Per-cell (constraint_set) metrics and sentence roll-ups are unchanged.
     """
     init_db()
     session = SessionLocal()
@@ -491,9 +524,19 @@ def run_experiment(
             total_group_metrics = 0
             total_rollups = 0
             if metrics:
+                group_metrics = group_metrics_for_run(
+                    include_experiment_scope=experiment_group_metrics,
+                )
+                if not experiment_group_metrics:
+                    _clear_experiment_group_metrics(session, experiment.id)
+                    print(
+                        "  Skipping experiment-scope group metrics "
+                        "(per-cell metrics only)",
+                        flush=True,
+                    )
                 print("\n  Computing distribution metrics...")
                 total_group_metrics = _compute_and_store_group_metrics(
-                    session, experiment, DEFAULT_GROUP_METRICS
+                    session, experiment, group_metrics
                 )
                 print(f"  Stored {total_group_metrics} group metric rows")
                 if evaluate:

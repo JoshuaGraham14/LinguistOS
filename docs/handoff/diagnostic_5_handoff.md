@@ -51,17 +51,20 @@ python3 -m research.benchmarks.loader research/benchmarks/spanish_diagnostic_n15
 python3 -m research.run_experiment \
   --benchmark spanish_diagnostic_n150 \
   --method diagnostic_5a_hf_qwen3_17b_n10 \
-  --live --resume
+  --live --resume \
+  --skip-experiment-group-metrics
 
 python3 -m research.run_experiment \
   --benchmark spanish_diagnostic_n150 \
   --method diagnostic_5b_hf_qwen3_17b_n10 \
-  --live --resume
+  --live --resume \
+  --skip-experiment-group-metrics
 
 python3 -m research.run_experiment \
   --benchmark spanish_diagnostic_n150 \
   --method diagnostic_5c_hf_qwen3_17b_n10 \
-  --live --resume
+  --live --resume \
+  --skip-experiment-group-metrics
 ```
 
 Or resume a specific experiment id:
@@ -70,7 +73,8 @@ Or resume a specific experiment id:
 python3 -m research.run_experiment \
   --benchmark spanish_diagnostic_n150 \
   --method diagnostic_5a_hf_qwen3_17b_n10 \
-  --live --resume-experiment-id 42
+  --live --resume-experiment-id 42 \
+  --skip-experiment-group-metrics
 ```
 
 Cluster:
@@ -82,6 +86,10 @@ sbatch research/scripts/cluster/diagnostic_5c_n150_gpu.sh
 ```
 
 Each arm is ~46,500 sentences. Prefer `--resume` after any interruption.
+
+Cluster scripts set `RESEARCH_DB` to an isolated file under `research/runs/` (merge into `research.db` after all arms finish). They also set `LTP_PATH` on the project volume so LanguageTool does not hit home-directory disk quota.
+
+**Runtime:** generation is ~10 h on A30; post-generation scoring was ~10 h on the first n=150 run because experiment-wide Self-BLEU was O(n²) over 46,500 sentences. Use `--skip-experiment-group-metrics` on large benchmarks (per-cell metrics + roll-ups only). Experiment Self-BLEU is also subsampled when enabled (`SELF_BLEU_EXPERIMENT_CAP`, default 500).
 
 Smoke first with the small benchmark + any of the Diag 5 methods (or regenerate method YAML pointing at smoke if needed by using `--benchmark spanish_diagnostic_n150_smoke` after loading that YAML).
 
