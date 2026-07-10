@@ -9,17 +9,20 @@
 | [`spike-reports/`](spike-reports/) | Narrative write-ups for individual spikes |
 | [`plans/`](plans/) | Implementation and evaluation plans, session handoffs |
 | [`specs/`](specs/) | System design, product direction, implementation specs |
+| [`gpu/`](gpu/) | GPU cluster access and research playbook (operations, databases, D5 lessons) |
 | [`thesis/`](thesis/) | Thesis framing, claims, supervisor meeting notes |
 | [`archive/`](archive/) | Superseded or point-in-time snapshots |
 
 ## Quick links
 
+**GPU cluster**
+- [GPU cluster access](gpu/gpu_cluster_access.md) — SSH, Slurm, env setup
+- [Cluster research playbook](gpu/cluster_research_playbook.md) — Mac vs cluster DBs, metrics, D5 lessons
+
 **Specs**
 - [Hybrid system spec](specs/hybrid_system_spec.md)
 - [Product direction](specs/product_direction.md)
 - [Implementation spec](specs/implementation_spec.md)
-- [GPU cluster access](specs/gpu_cluster_access.md)
-- [Cluster research playbook](specs/cluster_research_playbook.md) — Mac vs cluster DBs, metrics, D5 lessons
 
 **Research**
 - [Research mode plan](plans/research_mode_implementation_plan.md)
