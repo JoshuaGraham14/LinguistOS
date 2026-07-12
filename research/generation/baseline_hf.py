@@ -37,6 +37,10 @@ _PAIR_RE = re.compile(
     re.DOTALL,
 )
 _THINKING_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
+# Defensive: strip any prefix up to and including a trailing `</think>`,
+# even when `<think>` never appeared (e.g. `enable_thinking=False` was
+# imperfectly applied under `custom_generate` constrained beam search).
+_TRAILING_THINK_END_RE = re.compile(r"^.*?</think>\s*", re.DOTALL)
 
 
 def _is_qwen3(model_id: str) -> bool:
@@ -45,6 +49,8 @@ def _is_qwen3(model_id: str) -> bool:
 
 def _strip_thinking(raw: str) -> str:
     cleaned = _THINKING_RE.sub("", raw)
+    if "</think>" in cleaned:
+        cleaned = _TRAILING_THINK_END_RE.sub("", cleaned, count=1)
     for token in ('<|im_end|>', '<|endoftext|>', '<|im_start|>'):
         cleaned = cleaned.replace(token, "")
     return cleaned.strip()
