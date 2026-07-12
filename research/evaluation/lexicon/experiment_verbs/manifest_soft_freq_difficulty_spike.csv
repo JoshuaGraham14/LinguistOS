@@ -1,0 +1,11 @@
+verb,lang,cell_id,zipf,tier,irregular_probed,in_census,probed_tense,probed_person,probed_number,gold_past_1sg,gold_past_1sg_alts,gold_participle,gold_participle_alts,ending,seed,experiment
+comer,es,high_regular,6.746,high,no,yes,preterite,1st,singular,comí,,comido,,er,42,diagnostic_2
+unir,es,high_regular,6.008,high,no,yes,preterite,1st,singular,uní,,unido,,ir,42,diagnostic_2
+seguir,es,high_regular,5.870,high,no,yes,preterite,1st,singular,seguí,,seguido,,ir,42,diagnostic_2
+poner,es,high_irregular,5.805,high,yes,yes,preterite,1st,singular,puse,,puesto,,er,42,diagnostic_2
+buscar,es,high_irregular,5.628,high,yes,yes,preterite,1st,singular,busqué,,buscado,,ar,42,diagnostic_2
+desobstruir,es,low_regular,1.100,low,no,yes,preterite,1st,singular,desobstruí,,desobstruido,,ir,42,diagnostic_2
+uncir,es,low_regular,1.111,low,no,yes,preterite,1st,singular,uncí,,uncido,,ir,42,diagnostic_2
+intelectualizar,es,low_irregular,1.161,low,yes,yes,preterite,1st,singular,intelectualicé,,intelectualizado,,ar,42,diagnostic_2
+apoquinar,es,low_regular,1.161,low,no,yes,preterite,1st,singular,apoquiné,,apoquinado,,ar,42,diagnostic_2
+desentumecer,es,low_regular,1.210,low,no,yes,preterite,1st,singular,desentumecí,,desentumecido,,er,42,diagnostic_2

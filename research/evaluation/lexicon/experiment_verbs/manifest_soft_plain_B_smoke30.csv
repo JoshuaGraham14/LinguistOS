@@ -1,0 +1,16 @@
+verb,lang,cell_id,zipf,tier,irregular_probed,in_census,probed_tense,probed_person,probed_number,gold_past_1sg,gold_past_1sg_alts,gold_participle,gold_participle_alts,ending,seed,experiment
+comer,es,high_regular,6.746,high,no,yes,preterite,1st,singular,comí,,comido,,er,42,diagnostic_2
+obtener,es,high_irregular,5.116,high,yes,yes,preterite,1st,singular,obtuve,,obtenido,,er,42,diagnostic_2
+esconder,es,high_regular,4.530,high,no,yes,preterite,1st,singular,escondí,,escondido,,er,42,diagnostic_2
+extraer,es,high_irregular,4.182,high,yes,yes,preterite,1st,singular,extraje,,extraído,,er,42,diagnostic_2
+avergonzar,es,high_irregular,3.839,high,yes,yes,preterite,1st,singular,avergoncé,,avergonzado,,ar,42,diagnostic_2
+culminar,es,mid_regular,3.798,mid,no,yes,preterite,1st,singular,culminé,,culminado,,ar,42,diagnostic_2
+posponer,es,mid_irregular,3.566,mid,yes,yes,preterite,1st,singular,pospuse,,pospuesto,,er,42,diagnostic_2
+roer,es,mid_regular,3.393,mid,no,yes,preterite,1st,singular,roí,,roído,,er,42,diagnostic_2
+suplantar,es,mid_regular,3.079,mid,no,yes,preterite,1st,singular,suplanté,,suplantado,,ar,42,diagnostic_2
+postrar,es,mid_regular,2.862,mid,no,yes,preterite,1st,singular,postré,,postrado,,ar,42,diagnostic_2
+empalmar,es,low_regular,2.831,low,no,yes,preterite,1st,singular,empalmé,,empalmado,,ar,42,diagnostic_2
+avenir,es,low_irregular,2.540,low,yes,yes,preterite,1st,singular,avine,,avenido,,ir,42,diagnostic_2
+descreer,es,low_regular,2.326,low,no,yes,preterite,1st,singular,descreí,,descreído,,er,42,diagnostic_2
+detraer,es,low_irregular,1.866,low,yes,yes,preterite,1st,singular,detraje,,detraído,,er,42,diagnostic_2
+uncir,es,low_regular,1.111,low,no,yes,preterite,1st,singular,uncí,,uncido,,ir,42,diagnostic_2
