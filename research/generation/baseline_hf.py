@@ -37,10 +37,6 @@ _PAIR_RE = re.compile(
     re.DOTALL,
 )
 _THINKING_RE = re.compile(r"<think>.*?</think>", re.DOTALL)
-# Defensive: strip any prefix up to and including a trailing `</think>`,
-# even when `<think>` never appeared (e.g. `enable_thinking=False` was
-# imperfectly applied under `custom_generate` constrained beam search).
-_TRAILING_THINK_END_RE = re.compile(r"^.*?</think>\s*", re.DOTALL)
 
 
 def _is_qwen3(model_id: str) -> bool:
@@ -49,8 +45,17 @@ def _is_qwen3(model_id: str) -> bool:
 
 def _strip_thinking(raw: str) -> str:
     cleaned = _THINKING_RE.sub("", raw)
-    if "</think>" in cleaned:
-        cleaned = _TRAILING_THINK_END_RE.sub("", cleaned, count=1)
+    # Defensive: bare `</think>` can leak in two shapes, both observed under
+    # constrained-beam decoding where `enable_thinking=False` is imperfectly
+    # honoured:
+    #   * prefix leak: "some reasoning</think>Real answer."  → keep "Real answer."
+    #   * suffix leak: "Real answer.</think>"                → keep "Real answer."
+    # Partition on the first `</think>` and pick whichever side has content.
+    if "</think>" in cleaned and "<think>" not in cleaned:
+        before, _, after = cleaned.partition("</think>")
+        after_stripped = after.strip()
+        cleaned = after_stripped if after_stripped else before
+    cleaned = cleaned.replace("</think>", "").replace("<think>", "")
     for token in ('<|im_end|>', '<|endoftext|>', '<|im_start|>'):
         cleaned = cleaned.replace(token, "")
     return cleaned.strip()
@@ -268,11 +273,19 @@ class BaselineHFGenerator(BaseGenerator):
         *,
         num_beams: int = 4,
         bias_strength: float = 5.0,
+        no_repeat_ngram_size: int = 0,
+        min_new_tokens: int = 0,
+        length_penalty: float = 1.0,
     ):
         self._model_id = model
         self._temperature = temperature
         self._num_beams = num_beams
         self._bias_strength = bias_strength
+        # Decode-time ablations (D1.2 Fix-A follow-ups). Defaults preserve
+        # prior behaviour: no n-gram ban, no min length, neutral length pen.
+        self._no_repeat_ngram_size = int(no_repeat_ngram_size)
+        self._min_new_tokens = int(min_new_tokens)
+        self._length_penalty = float(length_penalty)
 
     @property
     def name(self) -> str:
