@@ -1,4 +1,10 @@
-"""Hugging Face constrained decoding for Direction 1 (hard mask + soft bias)."""
+"""Hugging Face constrained decoding for Direction 1 (hard mask + soft bias).
+
+Emits per-cell **constraint firing** telemetry: whether the gold surface form
+appears (case-insensitive) somewhere in the decoded sentence. This separates
+"constraint fired but wrong syntactic role" from "constraint never fired at
+all" — two failure modes with very different implications.
+"""
 
 from __future__ import annotations
 
@@ -25,6 +31,13 @@ DEFAULT_NUM_BEAMS = 4
 DEFAULT_BIAS_STRENGTH = 5.0
 MAX_NEW_TOKENS_PLAIN = 80
 MAX_NEW_TOKENS_JSON = 280
+
+
+def _form_fired(raw: str, expected_form: str) -> bool:
+    """Case-insensitive substring check: did the gold form land in the output?"""
+    if not raw or not expected_form:
+        return False
+    return expected_form.strip().lower() in raw.lower()
 
 SCENE_HINTS: tuple[str, ...] = (
     "Topic: everyday life.",
@@ -351,7 +364,7 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                 sentence_length=sentence_length,
                 cefr_level=cefr_level,
                 explicit_subject_required=explicit_subject_required,
-                inject_expected_form=None,
+                inject_expected_form=self._resolve_inject_expected_form(constraints),
                 scene_hint=scene_hint,
             )
             raw = self._beam_generate(
@@ -360,9 +373,10 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                 expected_form=expected_form,
             )
             batch, mode = self._parse_raw(raw)
+            fired = _form_fired(raw, expected_form)
             print(
                 f"    [{self.name} sample {sample_idx + 1}] "
-                f"parsed={len(batch)} mode={mode}"
+                f"parsed={len(batch)} mode={mode} fired={int(fired)}"
             )
             collected.extend(batch)
             if len(collected) >= num_candidates:
@@ -415,7 +429,7 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                     explicit_subject_required=bool(
                         job.get("explicit_subject_required", False)
                     ),
-                    inject_expected_form=None,
+                    inject_expected_form=self._resolve_inject_expected_form(constraints),
                     scene_hint=scene_hint,
                 )
                 specs.append(
@@ -441,11 +455,15 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
             )
 
             next_active: list[int] = []
+            fired_count = 0
             for job_idx, raw in zip(spec_job_idx, raws):
                 batch, mode = self._parse_raw(raw)
+                expected = self._job_expected_form(jobs[job_idx]["constraints"])
+                fired = _form_fired(raw, expected)
+                fired_count += int(fired)
                 print(
                     f"    [{self.name} batch call {call_idx + 1} job {job_idx + 1}] "
-                    f"parsed={len(batch)} mode={mode}"
+                    f"parsed={len(batch)} mode={mode} fired={int(fired)}"
                 )
                 collected[job_idx].extend(batch)
                 if (
@@ -453,6 +471,11 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                     and call_idx + 1 < self.MAX_CALLS
                 ):
                     next_active.append(job_idx)
+            if spec_job_idx:
+                print(
+                    f"    [{self.name} batch call {call_idx + 1}] "
+                    f"firing_rate={fired_count}/{len(spec_job_idx)}"
+                )
             active = next_active
 
         return [
@@ -477,6 +500,23 @@ class ConstrainedHFHardJsonGenerator(ConstrainedHFGenerator):
     @property
     def name(self) -> str:
         return "constrained_hf_hard_json"
+
+
+class ConstrainedHFHardInjectPlainGenerator(ConstrainedHFGenerator):
+    """Hard beam constraint **plus** gold form injected in prompt (D1.2 combo arm).
+
+    Isolates: does explicit prompt guidance help beam+force at all, or is the
+    decode-time constraint already saturating what greedy would do with the
+    prompt-level cue?
+    """
+
+    USE_HARD_CONSTRAINT = True
+    OUTPUT_JSON = False
+    _INJECT_EXPECTED_FORM = True
+
+    @property
+    def name(self) -> str:
+        return "constrained_hf_hard_inject_plain"
 
 
 class ConstrainedHFSoftPlainGenerator(ConstrainedHFGenerator):

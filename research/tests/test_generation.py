@@ -483,3 +483,55 @@ def test_batch_size_for_beam_profile():
 
     assert batch_size_for_profile("beam", model_key="qwen17b") == 4
     assert batch_size_for_profile("beam", model_key="qwen4b") == 2
+
+
+def test_strip_thinking_removes_bare_trailing_think_end():
+    from research.generation.baseline_hf import _strip_thinking
+
+    # Full pair still stripped.
+    assert _strip_thinking("<think>plan</think>Hola.") == "Hola."
+    # Bare `</think>` (constrained-beam leak) stripped along with anything before.
+    assert _strip_thinking("garbage prelude</think>Hola.") == "Hola."
+    # No thinking → unchanged.
+    assert _strip_thinking("Hola mundo.") == "Hola mundo."
+
+
+def test_form_fired_helper():
+    from research.generation.constrained_hf import _form_fired
+
+    assert _form_fired("Yo Como manzanas.", "como") is True
+    assert _form_fired("Yo bebo agua.", "como") is False
+    assert _form_fired("", "como") is False
+    assert _form_fired("Yo como manzanas.", "") is False
+
+
+def test_constrained_hf_hard_inject_uses_form_in_prompt():
+    from research.generation.constrained_hf import ConstrainedHFHardInjectPlainGenerator
+
+    gen = ConstrainedHFHardInjectPlainGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    prompt = gen._build_user_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "como",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=gen._resolve_inject_expected_form(
+            {"expected_form": "como"}
+        ),
+    )
+    assert "como" in prompt
+    assert "Required surface form" in prompt
+
+
+def test_registry_contains_hard_inject():
+    assert "constrained_hf_hard_inject_plain" in GENERATOR_REGISTRY

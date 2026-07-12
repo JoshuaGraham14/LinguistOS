@@ -13,6 +13,7 @@ from research.generation.baseline_hf import (
     PlainHFGenerator,
 )
 from research.generation.constrained_hf import (
+    ConstrainedHFHardInjectPlainGenerator,
     ConstrainedHFHardJsonGenerator,
     ConstrainedHFHardPlainGenerator,
     ConstrainedHFSoftDiversePlainGenerator,
@@ -34,6 +35,7 @@ GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "baseline_hf_form_injected_explicit": FormInjectedExplicitHFGenerator,
     "constrained_hf_hard_plain": ConstrainedHFHardPlainGenerator,
     "constrained_hf_hard_json": ConstrainedHFHardJsonGenerator,
+    "constrained_hf_hard_inject_plain": ConstrainedHFHardInjectPlainGenerator,
     "constrained_hf_soft_plain": ConstrainedHFSoftPlainGenerator,
     "constrained_hf_soft_json": ConstrainedHFSoftJsonGenerator,
     "constrained_hf_soft_diverse_plain": ConstrainedHFSoftDiversePlainGenerator,
