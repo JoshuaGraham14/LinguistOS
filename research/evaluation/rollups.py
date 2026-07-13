@@ -4,12 +4,23 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
+from typing import Any
 
 from research.db.models import ExperimentMetric, GeneratedSentence, SentenceEvaluation
 
 DEFAULT_PASS_THRESHOLD = 0.5
 
 ROLLUP_PREFIXES = ("mean::", "min::", "std::", "pass_rate::", "errors_per_100w::")
+
+# Detail axes rolled up from ``naturalness_llm_judge`` (kept on the native
+# 1..5 Likert scale — distinct from ``mean::naturalness_llm_judge``, which
+# averages the primary score ``naturalness / 5`` in [0, 1]).
+JUDGE_DETAIL_AXES: tuple[str, ...] = (
+    "grammaticality",
+    "naturalness",
+    "semantic_coherence",
+)
+JUDGE_EVALUATOR_NAME = "naturalness_llm_judge"
 
 
 def _stats(scores: list[float], pass_threshold: float) -> dict[str, float]:
@@ -33,6 +44,17 @@ def _stats(scores: list[float], pass_threshold: float) -> dict[str, float]:
     }
 
 
+def _coerce_likert(value: Any) -> float | None:
+    """Accept int/float Likert values in 1..5; reject everything else."""
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, (int, float)):
+        v = float(value)
+        if 1.0 <= v <= 5.0:
+            return v
+    return None
+
+
 def aggregate_sentence_eval_rollups(
     session,
     experiment_id: int,
@@ -44,6 +66,16 @@ def aggregate_sentence_eval_rollups(
     Metric names are ``<kind>::<evaluator_name>`` for kind in mean, min, std,
     pass_rate. Scope is ``experiment`` for pooled stats (``constraint_set_id``
     NULL) and ``constraint_set`` for per-set stats.
+
+    For ``naturalness_llm_judge``, also writes detail-axis roll-ups on the
+    native 1..5 scale::
+
+        mean::naturalness_llm_judge.grammaticality
+        mean::naturalness_llm_judge.naturalness
+        mean::naturalness_llm_judge.semantic_coherence
+
+    (plus matching ``min::`` / ``std::``). Error rows (details.error set) and
+    missing axes are skipped for those detail metrics.
 
     Idempotent: existing rollup rows (any of the prefixes above) for this
     experiment are deleted first.
@@ -74,6 +106,9 @@ def aggregate_sentence_eval_rollups(
     by_evaluator: dict[str, list[float]] = defaultdict(list)
     density_cs: dict[tuple[str, int], tuple[int, int]] = defaultdict(lambda: (0, 0))
     density_evaluator: dict[str, tuple[int, int]] = defaultdict(lambda: (0, 0))
+    # (metric_suffix, cs_id) / metric_suffix → Likert values
+    detail_cs: dict[tuple[str, int], list[float]] = defaultdict(list)
+    detail_exp: dict[str, list[float]] = defaultdict(list)
 
     for evaluator_name, cs_id, score, details in rows:
         s = float(score)
@@ -93,28 +128,45 @@ def aggregate_sentence_eval_rollups(
                     et_sum + token_count,
                 )
 
+            if (
+                evaluator_name == JUDGE_EVALUATOR_NAME
+                and not details.get("error")
+            ):
+                for axis in JUDGE_DETAIL_AXES:
+                    likert = _coerce_likert(details.get(axis))
+                    if likert is None:
+                        continue
+                    suffix = f"{JUDGE_EVALUATOR_NAME}.{axis}"
+                    detail_cs[(suffix, int(cs_id))].append(likert)
+                    detail_exp[suffix].append(likert)
+
     inserted = 0
 
     def _add_row(
         *,
         kind: str,
-        evaluator_name: str,
+        metric_leaf: str,
         value: float,
         scope: str,
         constraint_set_id: int | None,
         count: int,
+        extra_breakdown: dict[str, object] | None = None,
     ) -> None:
         nonlocal inserted
         breakdown: dict[str, object] = {
-            "evaluator": evaluator_name,
+            "evaluator": metric_leaf.split(".", 1)[0],
             "count": count,
         }
+        if "." in metric_leaf:
+            breakdown["detail_axis"] = metric_leaf.split(".", 1)[1]
         if kind == "pass_rate":
             breakdown["pass_threshold"] = pass_threshold
+        if extra_breakdown:
+            breakdown.update(extra_breakdown)
         session.add(
             ExperimentMetric(
                 experiment_id=experiment_id,
-                metric_name=f"{kind}::{evaluator_name}",
+                metric_name=f"{kind}::{metric_leaf}",
                 value=round(value, 6),
                 scope=scope,
                 constraint_set_id=constraint_set_id,
@@ -127,7 +179,7 @@ def aggregate_sentence_eval_rollups(
         for kind, value in _stats(scores, pass_threshold).items():
             _add_row(
                 kind=kind,
-                evaluator_name=evaluator_name,
+                metric_leaf=evaluator_name,
                 value=value,
                 scope="constraint_set",
                 constraint_set_id=cs_id,
@@ -138,11 +190,43 @@ def aggregate_sentence_eval_rollups(
         for kind, value in _stats(scores, pass_threshold).items():
             _add_row(
                 kind=kind,
-                evaluator_name=evaluator_name,
+                metric_leaf=evaluator_name,
                 value=value,
                 scope="experiment",
                 constraint_set_id=None,
                 count=len(scores),
+            )
+
+    # Detail-axis roll-ups: mean/min/std only (pass_rate is not meaningful on
+    # a 1..5 Likert with the default 0.5 threshold).
+    for (suffix, cs_id), values in detail_cs.items():
+        stats = _stats(values, pass_threshold)
+        for kind in ("mean", "min", "std"):
+            if kind not in stats:
+                continue
+            _add_row(
+                kind=kind,
+                metric_leaf=suffix,
+                value=stats[kind],
+                scope="constraint_set",
+                constraint_set_id=cs_id,
+                count=len(values),
+                extra_breakdown={"scale": "1..5"},
+            )
+
+    for suffix, values in detail_exp.items():
+        stats = _stats(values, pass_threshold)
+        for kind in ("mean", "min", "std"):
+            if kind not in stats:
+                continue
+            _add_row(
+                kind=kind,
+                metric_leaf=suffix,
+                value=stats[kind],
+                scope="experiment",
+                constraint_set_id=None,
+                count=len(values),
+                extra_breakdown={"scale": "1..5"},
             )
 
     def _add_density_row(

@@ -189,3 +189,106 @@ def test_aggregate_rollups_errors_per_100w(session, sample_constraint_set, sampl
         .filter_by(metric_name="errors_per_100w::e1")
         .count()
     ) == 0
+
+
+def test_aggregate_rollups_judge_detail_axes_on_1_to_5_scale(
+    session, sample_constraint_set, sample_experiment
+):
+    s1 = GeneratedSentence(
+        experiment_id=sample_experiment.id,
+        constraint_set_id=sample_constraint_set.id,
+        sentence="A.",
+        translation="A.",
+        sample_index=0,
+    )
+    s2 = GeneratedSentence(
+        experiment_id=sample_experiment.id,
+        constraint_set_id=sample_constraint_set.id,
+        sentence="B.",
+        translation="B.",
+        sample_index=1,
+    )
+    session.add_all([s1, s2])
+    session.commit()
+
+    session.add_all(
+        [
+            SentenceEvaluation(
+                sentence_id=s1.id,
+                evaluator_name="naturalness_llm_judge",
+                score=1.0,  # naturalness/5
+                details={
+                    "grammaticality": 5,
+                    "naturalness": 5,
+                    "semantic_coherence": 4,
+                    "target_form_use": "correct_main_verb",
+                    "flags": [],
+                },
+            ),
+            SentenceEvaluation(
+                sentence_id=s2.id,
+                evaluator_name="naturalness_llm_judge",
+                score=0.4,
+                details={
+                    "grammaticality": 3,
+                    "naturalness": 2,
+                    "semantic_coherence": 2,
+                    "target_form_use": "absent",
+                    "flags": ["odd_collocation"],
+                },
+            ),
+            # Error row must not pollute detail means.
+            SentenceEvaluation(
+                sentence_id=s1.id,
+                evaluator_name="fluency_perplexity",
+                score=0.5,
+                details={"perplexity": 2.0},
+            ),
+        ]
+    )
+    session.commit()
+
+    n = aggregate_sentence_eval_rollups(session, sample_experiment.id)
+    # Primary scores: 2 evaluators × 4 kinds × 2 scopes = 16
+    # Judge detail: 3 axes × 3 kinds × 2 scopes = 18
+    assert n == 34
+
+    g_mean = (
+        session.query(ExperimentMetric)
+        .filter_by(
+            scope="experiment",
+            metric_name="mean::naturalness_llm_judge.grammaticality",
+        )
+        .one()
+    )
+    assert g_mean.value == pytest.approx(4.0)  # (5+3)/2 on 1..5
+    assert g_mean.breakdown["scale"] == "1..5"
+    assert g_mean.breakdown["detail_axis"] == "grammaticality"
+
+    n_mean = (
+        session.query(ExperimentMetric)
+        .filter_by(
+            scope="experiment",
+            metric_name="mean::naturalness_llm_judge.naturalness",
+        )
+        .one()
+    )
+    assert n_mean.value == pytest.approx(3.5)  # (5+2)/2
+
+    s_mean = (
+        session.query(ExperimentMetric)
+        .filter_by(
+            scope="experiment",
+            metric_name="mean::naturalness_llm_judge.semantic_coherence",
+        )
+        .one()
+    )
+    assert s_mean.value == pytest.approx(3.0)  # (4+2)/2
+
+    # Primary score roll-up stays on [0,1] (naturalness/5).
+    primary = (
+        session.query(ExperimentMetric)
+        .filter_by(scope="experiment", metric_name="mean::naturalness_llm_judge")
+        .one()
+    )
+    assert primary.value == pytest.approx(0.7)  # (1.0+0.4)/2
