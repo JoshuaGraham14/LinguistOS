@@ -45,6 +45,15 @@ export PROJECT
 source "${PROJECT}/research/scripts/cluster/research_cache_env.sh"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
 
+# Load research/.env into the shell so the bash preflight and Python both see
+# OPENAI_API_KEY (Python also load_dotenv's, but we fail fast here).
+if [[ -f "${PROJECT}/research/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${PROJECT}/research/.env"
+  set +a
+fi
+
 echo "=== Naturalness validation — $(date -Is) ==="
 echo "  EVALUATOR=${EVALUATOR}"
 echo "  TAG=${TAG}"
@@ -52,6 +61,7 @@ echo "  TAG=${TAG}"
 if [[ "${EVALUATOR}" == "judge" || "${EVALUATOR}" == "both" ]]; then
   if [[ -z "${OPENAI_API_KEY:-}" ]]; then
     echo "  ERROR: OPENAI_API_KEY not set — judge cannot run." >&2
+    echo "  Put it in ${PROJECT}/research/.env (rsync'd from Mac) or export it before sbatch." >&2
     exit 1
   fi
 fi

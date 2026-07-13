@@ -55,6 +55,13 @@ export PROJECT
 source "${PROJECT}/research/scripts/cluster/research_cache_env.sh"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
 
+if [[ -f "${PROJECT}/research/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "${PROJECT}/research/.env"
+  set +a
+fi
+
 echo "=== Direction 1.2 naturalness rescore — $(date -Is) ==="
 echo "  EVALUATOR=${EVALUATOR}"
 echo "  ARMS=${ARMS[*]}"
