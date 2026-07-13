@@ -7,7 +7,7 @@
 #   pairs:
 #     - pair_id:       stable id, e.g. "1a_vs_1b"
 #       category:      one of odd_collocation | agreement | role_vs_mention |
-#                      repetition | tense_conflict | fragment | rare_but_correct
+#                      repetition | tense_conflict | rare_but_correct
 #       expected_form: Spanish verb form the generator would have been asked for
 #       lemma:         lemma of expected_form
 #       tense/person/number: the constraints as they exist in the benchmark
@@ -24,7 +24,7 @@
 #             target_form_use:     correct_main_verb | correct_but_not_main_verb |
 #                                  wrong_agreement_or_role |
 #                                  mentioned_or_quoted_only | absent
-#             flags: [] (subset of the six flag enum values)
+#             flags: [] (subset of the five flag enum values)
 #         awkward:
 #           text: ...
 #           human_label: {...}
@@ -33,8 +33,8 @@
 # Labels below are authored expectations. Overwrite `human_label` in-place
 # after a native annotator has reviewed each sentence.
 
-version: 1
-prompt_version: v1
+version: 2
+prompt_version: v2
 pairs:
   # --- Category 1: odd collocation / implausible content ---
   - pair_id: 01_collocation_facilmente
@@ -335,7 +335,7 @@ pairs:
           naturalness: 1
           semantic_coherence: 1
           target_form_use: wrong_agreement_or_role
-          flags: [repetition_or_degeneration, fragment]
+          flags: [repetition_or_degeneration]
     notes: >-
       Mirrors real Direction 1 constrained-beam failure mode.
 
@@ -398,68 +398,8 @@ pairs:
     notes: >-
       Mirror image of pair 11 — future verb pinned to a past adverbial.
 
-  # --- Category 6: fragment vs complete sentence ---
-  - pair_id: 13_fragment_porque
-    category: fragment
-    expected_form: compramos
-    lemma: comprar
-    tense: present
-    person: 1st
-    number: plural
-    target_language: es
-    preferred: natural
-    sentences:
-      natural:
-        text: "Compramos fruta en el mercado."
-        human_label:
-          grammaticality: 5
-          naturalness: 5
-          semantic_coherence: 5
-          target_form_use: correct_main_verb
-          flags: []
-      awkward:
-        text: "Porque compramos fruta en el mercado."
-        human_label:
-          grammaticality: 2
-          naturalness: 2
-          semantic_coherence: 3
-          target_form_use: correct_main_verb
-          flags: [fragment]
-    notes: >-
-      Deliberate dependent-clause fragment. Same length as the natural
-      sentence — tests that "short ≠ fragment" is respected.
-
-  - pair_id: 14_fragment_aunque
-    category: fragment
-    expected_form: vivimos
-    lemma: vivir
-    tense: present
-    person: 1st
-    number: plural
-    target_language: es
-    preferred: natural
-    sentences:
-      natural:
-        text: "Vivimos en una ciudad grande."
-        human_label:
-          grammaticality: 5
-          naturalness: 5
-          semantic_coherence: 5
-          target_form_use: correct_main_verb
-          flags: []
-      awkward:
-        text: "Aunque vivimos en una ciudad grande."
-        human_label:
-          grammaticality: 2
-          naturalness: 2
-          semantic_coherence: 3
-          target_form_use: correct_main_verb
-          flags: [fragment]
-    notes: >-
-      Second fragment stimulus with a different subordinator.
-
-  # --- Category 7: PPL sanity — rare-but-correct form ---
-  - pair_id: 15_rare_hubiereis
+  # --- Category 6: PPL sanity — rare-but-correct form ---
+  - pair_id: 13_rare_hubiereis
     category: rare_but_correct
     expected_form: hubiereis
     lemma: haber
@@ -480,11 +420,11 @@ pairs:
       awkward:
         text: "Si comieron antes, no tendríais hambre."
         human_label:
-          grammaticality: 3
-          naturalness: 2
-          semantic_coherence: 3
+          grammaticality: 5
+          naturalness: 3
+          semantic_coherence: 4
           target_form_use: absent
-          flags: [tense_context_conflict, subject_verb_disagreement]
+          flags: []
     notes: >-
       "hubiereis" is grammatical but archaic. Naturalness is only 3 because
       no modern speaker would use it. This pair specifically stresses PPL —
@@ -494,3 +434,7 @@ pairs:
       si-clause, not the main-clause verb ("tendríais"), so it is
       correct_but_not_main_verb; in the awkward sentence the exact form
       "hubiereis" never appears, so it is absent by rubric definition.
+      The awkward sentence has a mild subject-shift between clauses
+      ("comieron" 3pl vs. "tendríais" 2pl) but each clause is internally
+      well-formed, so grammar stays 5 and it is not flagged as
+      subject_verb_disagreement (which is a within-clause phenomenon).

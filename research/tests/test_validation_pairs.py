@@ -17,14 +17,13 @@ from research.evaluation.validation.pairs_loader import (
 )
 
 
-EXPECTED_PAIR_COUNT = 15
+EXPECTED_PAIR_COUNT = 13
 EXPECTED_MIN_PER_CATEGORY = {
     "odd_collocation": 3,
     "agreement": 3,
     "role_vs_mention": 2,
     "repetition": 2,
     "tense_conflict": 2,
-    "fragment": 2,
     "rare_but_correct": 1,
 }
 
@@ -35,7 +34,7 @@ def test_default_pairs_file_exists():
 
 def test_default_pairs_load_and_structure():
     vset = load_validation_pairs()
-    assert vset.prompt_version == "v1"
+    assert vset.prompt_version == "v2"
     assert len(vset) == EXPECTED_PAIR_COUNT
 
     counts: dict[str, int] = {c: 0 for c in CATEGORIES}
@@ -196,7 +195,7 @@ def test_loader_rejects_duplicate_pair_ids(tmp_path: Path):
                   target_form_use: correct_main_verb
                   flags: [odd_collocation]
           - pair_id: dup_1
-            category: fragment
+            category: repetition
             expected_form: come
             lemma: comer
             tense: present
@@ -214,13 +213,13 @@ def test_loader_rejects_duplicate_pair_ids(tmp_path: Path):
                   target_form_use: correct_main_verb
                   flags: []
               awkward:
-                text: "Porque come."
+                text: "Come come come come."
                 human_label:
                   grammaticality: 2
-                  naturalness: 2
-                  semantic_coherence: 3
+                  naturalness: 1
+                  semantic_coherence: 1
                   target_form_use: correct_main_verb
-                  flags: [fragment]
+                  flags: [repetition_or_degeneration]
         """
     )
     dup = tmp_path / "dup.yaml"

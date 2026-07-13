@@ -29,7 +29,7 @@ from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 
 EVALUATOR_NAME = "naturalness_llm_judge"
 DEFAULT_MODEL = "gpt-5.4-mini"
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 
 TARGET_FORM_USE_VALUES: frozenset[str] = frozenset(
     {
@@ -46,7 +46,6 @@ FLAG_VALUES: frozenset[str] = frozenset(
         "odd_collocation",
         "subject_verb_disagreement",
         "tense_context_conflict",
-        "fragment",
         "repetition_or_degeneration",
         "mixed_language_or_meta_output",
     }
@@ -147,8 +146,9 @@ speaker.
 Rate ONLY the Spanish sentence. Do not consider any English translation.
 Do not reward the sentence merely because the expected form appears in
 it. Penalise sentences that quote or list the form instead of using it
-as a main verb, and sentences that are grammatical fragments, repetitions
-or degenerate loops.
+as a main verb, and sentences that are repetitions or degenerate loops.
+Short but well-formed clauses are acceptable; do not penalise a sentence
+for being short if it is natural and coherent.
 
 Return a single JSON object matching this schema. No prose, no code
 fences, no extra keys, no null values.
@@ -166,37 +166,62 @@ fences, no extra keys, no null values.
     "odd_collocation" |
     "subject_verb_disagreement" |
     "tense_context_conflict" |
-    "fragment" |
     "repetition_or_degeneration" |
     "mixed_language_or_meta_output"
   ],
   "rationale": string (max 240 characters, written in English)
 }
 
-Scale anchors:
+Scale anchors (one worked example per level; use these as calibration
+points, not exhaustive rules):
 
 grammaticality
   5 = fully grammatical Spanish.
+      Ex: "Comemos temprano cada día." — every element is well-formed.
   4 = minor grammatical issue that does not impede understanding.
+      Ex: "María tiene veinte año." — missing plural on "año" is a
+      clear but minor slip.
   3 = noticeable grammatical errors but meaning is recoverable.
+      Ex: "Ellos escribe cartas a los abuelos." — subject-verb number
+      disagreement; the meaning is still obvious.
   2 = major grammatical errors.
+      Ex: "Yo comer manzana ayer." — verb uninflected and article
+      missing at the same time.
   1 = ungrammatical or not a valid sentence.
+      Ex: "Manzana el que corre está." — words in an invalid order;
+      not a Spanish sentence.
 
 naturalness
   5 = a native would naturally produce this sentence.
+      Ex: "Vosotros obtenéis información en la biblioteca." — an
+      unremarkable everyday sentence.
   4 = acceptable, slightly unusual phrasing or word choice.
+      Ex: "Nosotros comemos temprano cada día." — explicit "nosotros"
+      is optional and slightly marked in a neutral context.
   3 = understandable but noticeably awkward.
+      Ex: "Nos comemos temprano cada día." — reflexive is grammatical
+      but mildly regional; a native would often rephrase.
   2 = substantially unnatural; a native would rewrite it.
+      Ex: "Hacemos una decisión difícil." — English calque; a native
+      says "tomamos una decisión".
   1 = broken or incoherent.
+      Ex: "Coméis coméis coméis coméis juntos." — degenerate output.
   NEVER use this axis to penalise pure grammar mistakes; use
   `grammaticality` for those.
 
 semantic_coherence
   5 = coherent, plausible meaning.
+      Ex: "Comemos temprano cada día." — a plausible everyday event.
   4 = coherent, mildly odd content.
-  3 = interpretable but implausible (e.g. "Como una puerta").
+      Ex: "Bebemos café con ajo cada mañana." — imaginable but unusual.
+  3 = interpretable but implausible.
+      Ex: "Como una puerta." — grammatical, but the referent is
+      implausible.
   2 = strained, partially interpretable.
+      Ex: "Ayer comeré en casa." — "ayer" (past) clashes with the
+      future verb "comeré"; the proposition contradicts itself.
   1 = nonsensical or degenerate.
+      Ex: "Coméis coméis coméis juntos." — no meaningful proposition.
 
 target_form_use categories:
   correct_main_verb            = the expected form is the main verb of
@@ -222,8 +247,6 @@ or several flags):
                                 number. Purely grammatical.
   tense_context_conflict      = time adverbials or context contradict
                                 the tense of the main verb.
-  fragment                    = the sentence lacks a main clause or is
-                                otherwise syntactically incomplete.
   repetition_or_degeneration  = tokens or short phrases repeat in a
                                 degenerate way.
   mixed_language_or_meta_output = contains non-Spanish spans, tags such

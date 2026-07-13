@@ -20,7 +20,6 @@ CATEGORIES: frozenset[str] = frozenset(
         "role_vs_mention",
         "repetition",
         "tense_conflict",
-        "fragment",
         "rare_but_correct",
     }
 )
@@ -40,7 +39,6 @@ FLAG_VALUES: frozenset[str] = frozenset(
         "odd_collocation",
         "subject_verb_disagreement",
         "tense_context_conflict",
-        "fragment",
         "repetition_or_degeneration",
         "mixed_language_or_meta_output",
     }
