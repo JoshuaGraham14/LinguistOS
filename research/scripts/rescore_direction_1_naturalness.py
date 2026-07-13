@@ -4,7 +4,7 @@
 Runs one or both of:
 
   fluency_perplexity        Salamandra-2b causal LM (BF16, CUDA if available)
-  naturalness_llm_judge     OpenAI Chat Completions (gpt-5.5-mini by default)
+  naturalness_llm_judge     OpenAI Chat Completions (gpt-5.4-mini by default)
 
 Uses the same per-arm DB layout as ``rescore_direction_1_grammar.py``.
 

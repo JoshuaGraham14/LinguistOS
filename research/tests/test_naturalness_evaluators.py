@@ -177,7 +177,7 @@ _VALID_JUDGE_RESPONSE = json.dumps(
 
 def test_judge_parses_valid_response():
     client = _RecordingClient([_VALID_JUDGE_RESPONSE])
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate(
         "Obtenéis información fácil.",
         "You get information easy.",
@@ -197,7 +197,7 @@ def test_judge_parses_valid_response():
     assert d["semantic_coherence"] == 4
     assert d["target_form_use"] == "correct_main_verb"
     assert d["flags"] == ["odd_collocation"]
-    assert d["model_id"] == "gpt-5.5-mini"
+    assert d["model_id"] == "gpt-5.4-mini"
     assert d["prompt_version"] == PROMPT_VERSION
     assert "rationale" in d and d["rationale"]
 
@@ -213,7 +213,7 @@ def test_judge_parses_valid_response():
 
 def test_judge_retries_once_on_parse_failure_then_succeeds():
     client = _RecordingClient(["not json at all", _VALID_JUDGE_RESPONSE])
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate(
         "Coméis juntos en casa.",
         "You eat together at home.",
@@ -227,7 +227,7 @@ def test_judge_retries_once_on_parse_failure_then_succeeds():
 
 def test_judge_gives_up_after_second_failure():
     client = _RecordingClient(["bad", "still bad"])
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate(
         "Vosotros escribís cartas.",
         "You write letters.",
@@ -251,7 +251,7 @@ def test_judge_rejects_bad_enum_value():
         }
     )
     client = _RecordingClient([payload, _VALID_JUDGE_RESPONSE])
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate(
         "Ella come una manzana.",
         "She eats an apple.",
@@ -275,7 +275,7 @@ def test_judge_rejects_out_of_range_axis():
         }
     )
     client = _RecordingClient([payload, payload])
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate(
         "Ella come una manzana.",
         "She eats an apple.",
@@ -297,7 +297,7 @@ def test_judge_rejects_non_english_rationale_then_retries():
         }
     )
     client = _RecordingClient([spanish_rationale, _VALID_JUDGE_RESPONSE])
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate(
         "Obtenéis información fácil.",
         "You get information easy.",
@@ -315,7 +315,7 @@ def test_judge_signalled_error_object_is_a_failure():
             json.dumps({"error": "no_english_rationale"}),
         ]
     )
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate(
         "Ella come una manzana.",
         "She eats an apple.",
@@ -327,7 +327,7 @@ def test_judge_signalled_error_object_is_a_failure():
 
 def test_judge_empty_sentence_returns_error_without_api_call():
     client = _RecordingClient([])
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     result = ev.evaluate("   ", "", {"expected_form": "come"})
     assert result.score == 0.0
     assert result.details["error"] == "empty_sentence"
@@ -344,9 +344,9 @@ def test_judge_model_falls_back_through_env(monkeypatch):
     ev2 = NaturalnessLlmJudgeEvaluator(client=_RecordingClient([]))
     assert ev2.model == "gpt-4o"
 
-    monkeypatch.setenv("OPENAI_JUDGE_MODEL", "gpt-5.5-mini")
+    monkeypatch.setenv("OPENAI_JUDGE_MODEL", "gpt-5.4-mini")
     ev3 = NaturalnessLlmJudgeEvaluator(client=_RecordingClient([]))
-    assert ev3.model == "gpt-5.5-mini"
+    assert ev3.model == "gpt-5.4-mini"
 
 
 def test_judge_not_in_default_evaluators():

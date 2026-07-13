@@ -230,7 +230,7 @@ def test_resume_with_no_existing_rows_scores_everything(rescore_env):
 def test_judge_rescore_writes_rows_and_preserves_flags(rescore_env):
     session, experiment = rescore_env
     client = _StubJudge()
-    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.5-mini")
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
     stats = rescore_naturalness_judge(
         session,
         experiment,
@@ -246,5 +246,5 @@ def test_judge_rescore_writes_rows_and_preserves_flags(rescore_env):
         assert r.details["naturalness"] == 4
         assert r.details["target_form_use"] == "correct_main_verb"
         assert r.details["flags"] == []
-        assert r.details["model_id"] == "gpt-5.5-mini"
+        assert r.details["model_id"] == "gpt-5.4-mini"
     assert len(client.calls) == 3

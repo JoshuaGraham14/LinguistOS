@@ -28,7 +28,7 @@ from typing import Any, Callable
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 
 EVALUATOR_NAME = "naturalness_llm_judge"
-DEFAULT_MODEL = "gpt-5.5-mini"
+DEFAULT_MODEL = "gpt-5.4-mini"
 PROMPT_VERSION = "v1"
 
 TARGET_FORM_USE_VALUES: frozenset[str] = frozenset(

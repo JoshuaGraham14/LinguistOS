@@ -1,7 +1,7 @@
 #!/bin/bash
 # Direction 1.2 — naturalness rescore across per-arm DBs (no regeneration).
 # Runs fluency_perplexity (Salamandra-2b, BF16, CUDA) and, when
-# OPENAI_API_KEY is present, naturalness_llm_judge (gpt-5.5-mini).
+# OPENAI_API_KEY is present, naturalness_llm_judge (gpt-5.4-mini).
 #
 # Usage: sbatch research/scripts/cluster/direction_1_naturalness_rescore.sh
 # Set EVALUATOR=perplexity|judge|both  (default: both)
