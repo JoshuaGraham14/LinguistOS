@@ -360,6 +360,8 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
     # Fix B (D1.2 soft-arm ablation): add an explicit sentence-length +
     # no-bare-form instruction to the prompt.
     _REQUIRE_FULL_SENTENCE = False
+    # Diagnostic 4A Spanish morphology overlay (named subject + tense gloss).
+    _MORPHOLOGY_HINTS = False
 
     def _system_prompt(self, lang: str) -> str:
         if self.OUTPUT_JSON:
@@ -413,6 +415,7 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
             inject_expected_form=inject_expected_form,
             scene_hint=scene_hint,
             require_full_sentence=self._REQUIRE_FULL_SENTENCE,
+            morphology_hints=self._MORPHOLOGY_HINTS,
         )
 
     def _beam_generate(
@@ -727,6 +730,16 @@ class ConstrainedHFSoftPlainBGenerator(ConstrainedHFSoftPlainGenerator):
     @property
     def name(self) -> str:
         return "constrained_hf_soft_plain_b"
+
+
+class ConstrainedHFSoftPlainBExplicitGenerator(ConstrainedHFSoftPlainBGenerator):
+    """Soft Fix B plus Diagnostic 4A Spanish morphology overlay."""
+
+    _MORPHOLOGY_HINTS = True
+
+    @property
+    def name(self) -> str:
+        return "constrained_hf_soft_plain_b_explicit"
 
 
 class ConstrainedHFSoftPlainABGenerator(ConstrainedHFSoftPlainGenerator):

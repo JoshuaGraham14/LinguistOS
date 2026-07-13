@@ -535,6 +535,9 @@ class FormInjectedExplicitHFGenerator(FormInjectedHFGenerator):
 class PlainHFGenerator(BaselineHFGenerator):
     """``baseline_hf`` with plain-text output (no JSON scaffold)."""
 
+    _REQUIRE_FULL_SENTENCE = False
+    _MORPHOLOGY_HINTS = False
+
     @property
     def name(self) -> str:
         return "baseline_hf_plain"
@@ -584,7 +587,38 @@ class PlainHFGenerator(BaselineHFGenerator):
             explicit_subject_required=explicit_subject_required,
             inject_expected_form=inject_expected_form,
             scene_hint=scene_hint,
+            require_full_sentence=self._REQUIRE_FULL_SENTENCE,
+            morphology_hints=self._MORPHOLOGY_HINTS,
         )
+
+
+class PlainHFBGenerator(PlainHFGenerator):
+    """Greedy/plain decode with the Fix B full-sentence prompt (no form inject).
+
+    Fair no-constraint baseline for comparing against soft_plain_B: same
+    sentence-length instructions, but no soft bias and no beam search.
+    """
+
+    _REQUIRE_FULL_SENTENCE = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_plain_b"
+
+
+class PlainHFBExplicitGenerator(PlainHFBGenerator):
+    """Fix B full-sentence prompt plus Diagnostic 4A Spanish morphology overlay.
+
+    Named subject/tense hints (e.g. vosotros/vosotras, presente de indicativo)
+    without leaking the gold surface form. Keeps Fix B sentence-shape rules so
+    it remains comparable to ``baseline_hf_plain_b`` / soft_plain_B.
+    """
+
+    _MORPHOLOGY_HINTS = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_plain_b_explicit"
 
 
 class FormInjectedPlainHFGenerator(PlainHFGenerator):
@@ -595,3 +629,13 @@ class FormInjectedPlainHFGenerator(PlainHFGenerator):
     @property
     def name(self) -> str:
         return "baseline_hf_form_injected_plain"
+
+
+class FormInjectedPlainHFBGenerator(FormInjectedPlainHFGenerator):
+    """Form injection + Fix B full-sentence prompt (greedy; no soft/hard beam)."""
+
+    _REQUIRE_FULL_SENTENCE = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_form_injected_plain_b"

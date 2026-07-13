@@ -317,8 +317,14 @@ def build_prompt_plain(
     inject_expected_form: str | None = None,
     scene_hint: str | None = None,
     require_full_sentence: bool = False,
+    morphology_hints: bool = False,
 ) -> str:
-    """Plain-text output scaffold with the same constraints as :func:`build_prompt`."""
+    """Plain-text output scaffold with the same constraints as :func:`build_prompt`.
+
+    When ``morphology_hints`` is true and ``target_language`` is Spanish, append
+    the same Diagnostic 4A / ``build_prompt_explicit`` overlay (named subject +
+    tense gloss; no gold form).
+    """
     lang = language_display_name(target_language)
     length_desc = band_label(sentence_length)
 
@@ -357,7 +363,7 @@ def build_prompt_plain(
         )
 
     count_label = "sentence" if num_candidates == 1 else "sentences"
-    return (
+    prompt = (
         f"You generate {lang} example sentences for vocabulary practice.\n"
         f'Target word (lemma): "{keyword}" (English: "{translation}")\n'
         f"{constraint_block}"
@@ -373,3 +379,8 @@ def build_prompt_plain(
         f"Reply with ONLY the {lang} sentence(s), one per line. "
         "No JSON, no English translation, no quotes, no extra commentary."
     )
+    if morphology_hints and target_language == "es":
+        prompt += "\n" + _spanish_explicit_overlay(
+            keyword, constraints, sentence_length=sentence_length
+        )
+    return prompt

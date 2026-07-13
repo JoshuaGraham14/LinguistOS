@@ -585,6 +585,69 @@ def test_registry_contains_soft_inject():
     assert "constrained_hf_soft_inject_plain" in GENERATOR_REGISTRY
 
 
+def test_plain_b_explicit_baseline_uses_4a_morphology_overlay():
+    from research.generation.baseline_hf import PlainHFBExplicitGenerator
+
+    assert "baseline_hf_plain_b_explicit" in GENERATOR_REGISTRY
+    gen = PlainHFBExplicitGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    assert gen._REQUIRE_FULL_SENTENCE is True
+    assert gen._MORPHOLOGY_HINTS is True
+    prompt = gen._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "buscáis",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=None,
+    )
+    assert "vosotros/vosotras" in prompt
+    assert "presente de indicativo" in prompt
+    assert "2–5 words" in prompt
+    assert "buscáis" not in prompt
+
+
+def test_soft_plain_b_explicit_uses_4a_morphology_overlay():
+    from research.generation.constrained_hf import (
+        ConstrainedHFSoftPlainBExplicitGenerator,
+    )
+
+    assert "constrained_hf_soft_plain_b_explicit" in GENERATOR_REGISTRY
+    gen = ConstrainedHFSoftPlainBExplicitGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    assert gen._REQUIRE_FULL_SENTENCE is True
+    assert gen._MORPHOLOGY_HINTS is True
+    assert gen.USE_HARD_CONSTRAINT is False
+    prompt = gen._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "buscáis",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=None,
+    )
+    assert "vosotros/vosotras" in prompt
+    assert "presente de indicativo" in prompt
+    assert "2–5 words" in prompt
+    assert "buscáis" not in prompt
+
+
 def test_registry_contains_d1p2_fix_ablation_arms():
     for key in (
         "constrained_hf_soft_plain_a",
