@@ -45,6 +45,17 @@ def _is_qwen3(model_id: str) -> bool:
 
 def _strip_thinking(raw: str) -> str:
     cleaned = _THINKING_RE.sub("", raw)
+    # Defensive: bare `</think>` can leak in two shapes, both observed under
+    # constrained-beam decoding where `enable_thinking=False` is imperfectly
+    # honoured:
+    #   * prefix leak: "some reasoning</think>Real answer."  → keep "Real answer."
+    #   * suffix leak: "Real answer.</think>"                → keep "Real answer."
+    # Partition on the first `</think>` and pick whichever side has content.
+    if "</think>" in cleaned and "<think>" not in cleaned:
+        before, _, after = cleaned.partition("</think>")
+        after_stripped = after.strip()
+        cleaned = after_stripped if after_stripped else before
+    cleaned = cleaned.replace("</think>", "").replace("<think>", "")
     for token in ('<|im_end|>', '<|endoftext|>', '<|im_start|>'):
         cleaned = cleaned.replace(token, "")
     return cleaned.strip()
@@ -262,11 +273,19 @@ class BaselineHFGenerator(BaseGenerator):
         *,
         num_beams: int = 4,
         bias_strength: float = 5.0,
+        no_repeat_ngram_size: int = 0,
+        min_new_tokens: int = 0,
+        length_penalty: float = 1.0,
     ):
         self._model_id = model
         self._temperature = temperature
         self._num_beams = num_beams
         self._bias_strength = bias_strength
+        # Decode-time ablations (D1.2 Fix-A follow-ups). Defaults preserve
+        # prior behaviour: no n-gram ban, no min length, neutral length pen.
+        self._no_repeat_ngram_size = int(no_repeat_ngram_size)
+        self._min_new_tokens = int(min_new_tokens)
+        self._length_penalty = float(length_penalty)
 
     @property
     def name(self) -> str:
@@ -516,6 +535,9 @@ class FormInjectedExplicitHFGenerator(FormInjectedHFGenerator):
 class PlainHFGenerator(BaselineHFGenerator):
     """``baseline_hf`` with plain-text output (no JSON scaffold)."""
 
+    _REQUIRE_FULL_SENTENCE = False
+    _MORPHOLOGY_HINTS = False
+
     @property
     def name(self) -> str:
         return "baseline_hf_plain"
@@ -565,7 +587,38 @@ class PlainHFGenerator(BaselineHFGenerator):
             explicit_subject_required=explicit_subject_required,
             inject_expected_form=inject_expected_form,
             scene_hint=scene_hint,
+            require_full_sentence=self._REQUIRE_FULL_SENTENCE,
+            morphology_hints=self._MORPHOLOGY_HINTS,
         )
+
+
+class PlainHFBGenerator(PlainHFGenerator):
+    """Greedy/plain decode with the Fix B full-sentence prompt (no form inject).
+
+    Fair no-constraint baseline for comparing against soft_plain_B: same
+    sentence-length instructions, but no soft bias and no beam search.
+    """
+
+    _REQUIRE_FULL_SENTENCE = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_plain_b"
+
+
+class PlainHFBExplicitGenerator(PlainHFBGenerator):
+    """Fix B full-sentence prompt plus Diagnostic 4A Spanish morphology overlay.
+
+    Named subject/tense hints (e.g. vosotros/vosotras, presente de indicativo)
+    without leaking the gold surface form. Keeps Fix B sentence-shape rules so
+    it remains comparable to ``baseline_hf_plain_b`` / soft_plain_B.
+    """
+
+    _MORPHOLOGY_HINTS = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_plain_b_explicit"
 
 
 class FormInjectedPlainHFGenerator(PlainHFGenerator):
@@ -576,3 +629,13 @@ class FormInjectedPlainHFGenerator(PlainHFGenerator):
     @property
     def name(self) -> str:
         return "baseline_hf_form_injected_plain"
+
+
+class FormInjectedPlainHFBGenerator(FormInjectedPlainHFGenerator):
+    """Form injection + Fix B full-sentence prompt (greedy; no soft/hard beam)."""
+
+    _REQUIRE_FULL_SENTENCE = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_hf_form_injected_plain_b"

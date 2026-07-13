@@ -234,3 +234,23 @@ def test_build_prompt_plain_matches_json_constraints():
         assert snippet in plain_prompt
     assert "Reply ONLY as JSON" in json_prompt
     assert "No JSON" in plain_prompt
+
+
+def test_build_prompt_plain_morphology_hints_matches_4a_overlay():
+    prompt = build_prompt_plain(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints={"tense": "present", "person": "2nd", "number": "plural"},
+        num_candidates=1,
+        sentence_length="short",
+        require_full_sentence=True,
+        morphology_hints=True,
+    )
+    assert "2–5 words" in prompt
+    assert "Do NOT output the target form on its own" in prompt
+    assert "Additional requirements:" in prompt
+    assert "vosotros/vosotras" in prompt
+    assert "presente de indicativo" in prompt
+    assert "buscáis" not in prompt
+    assert "No JSON" in prompt

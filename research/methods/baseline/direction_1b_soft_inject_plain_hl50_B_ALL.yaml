@@ -1,0 +1,11 @@
+name: direction_1b_soft_inject_plain_hl50_B_ALL
+method: constrained_hf_soft_inject_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short
+  num_beams: 4
+  no_repeat_ngram_size: 3
+  min_new_tokens: 6
+  length_penalty: 1.5

@@ -83,6 +83,12 @@ def _build_generator(run_config: MethodRunConfig, method_config: MethodConfig) -
         kwargs["num_beams"] = int(raw["num_beams"])
     if "bias_strength" in raw:
         kwargs["bias_strength"] = float(raw["bias_strength"])
+    if "no_repeat_ngram_size" in raw:
+        kwargs["no_repeat_ngram_size"] = int(raw["no_repeat_ngram_size"])
+    if "min_new_tokens" in raw:
+        kwargs["min_new_tokens"] = int(raw["min_new_tokens"])
+    if "length_penalty" in raw:
+        kwargs["length_penalty"] = float(raw["length_penalty"])
     return cls(**kwargs)
 
 

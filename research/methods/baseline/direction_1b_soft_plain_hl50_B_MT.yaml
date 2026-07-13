@@ -1,0 +1,9 @@
+name: direction_1b_soft_plain_hl50_B_MT
+method: constrained_hf_soft_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short
+  num_beams: 4
+  min_new_tokens: 6

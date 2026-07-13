@@ -50,8 +50,8 @@ if [[ -f /vol/cuda/12.0.0/setup.sh ]]; then
 fi
 
 cd "${PROJECT}"
-export HF_HOME="${PROJECT}/.cache/huggingface"
-export TRANSFORMERS_CACHE="${HF_HOME}"
+# shellcheck disable=SC1091
+source "${PROJECT}/research/scripts/cluster/research_cache_env.sh"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
 
 echo "=== Direction 1 pilot (6 core arms) — $(date -Is) ==="

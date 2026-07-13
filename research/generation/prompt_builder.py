@@ -316,8 +316,15 @@ def build_prompt_plain(
     exercise_type: str | None = None,
     inject_expected_form: str | None = None,
     scene_hint: str | None = None,
+    require_full_sentence: bool = False,
+    morphology_hints: bool = False,
 ) -> str:
-    """Plain-text output scaffold with the same constraints as :func:`build_prompt`."""
+    """Plain-text output scaffold with the same constraints as :func:`build_prompt`.
+
+    When ``morphology_hints`` is true and ``target_language`` is Spanish, append
+    the same Diagnostic 4A / ``build_prompt_explicit`` overlay (named subject +
+    tense gloss; no gold form).
+    """
     lang = language_display_name(target_language)
     length_desc = band_label(sentence_length)
 
@@ -346,8 +353,17 @@ def build_prompt_plain(
 
     scene_line = f"{scene_hint.strip()}\n" if scene_hint else ""
 
+    require_line = ""
+    if require_full_sentence:
+        require_line = (
+            "Output requirements: write a complete Spanish sentence of 2–5 words "
+            "(a leading subject pronoun such as \"yo\" or \"tú\" does not count "
+            "toward the length) that uses the target form as the main verb. "
+            "Do NOT output the target form on its own or repeat it.\n"
+        )
+
     count_label = "sentence" if num_candidates == 1 else "sentences"
-    return (
+    prompt = (
         f"You generate {lang} example sentences for vocabulary practice.\n"
         f'Target word (lemma): "{keyword}" (English: "{translation}")\n'
         f"{constraint_block}"
@@ -357,8 +373,14 @@ def build_prompt_plain(
         f"{cefr_line}"
         f"{form_line}"
         f"{scene_line}"
+        f"{require_line}"
         f"Produce {num_candidates} natural {lang} {count_label} within the length band. "
         f"Each sentence must contain the target verb inflected as specified above.\n"
         f"Reply with ONLY the {lang} sentence(s), one per line. "
         "No JSON, no English translation, no quotes, no extra commentary."
     )
+    if morphology_hints and target_language == "es":
+        prompt += "\n" + _spanish_explicit_overlay(
+            keyword, constraints, sentence_length=sentence_length
+        )
+    return prompt

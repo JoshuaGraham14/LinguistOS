@@ -113,6 +113,9 @@ def test_build_generator_passes_beam_config(session):
             "temperature": 0,
             "num_beams": 4,
             "bias_strength": 5.0,
+            "no_repeat_ngram_size": 3,
+            "min_new_tokens": 6,
+            "length_penalty": 1.5,
         },
     )
     session.add(mc)
@@ -124,6 +127,9 @@ def test_build_generator_passes_beam_config(session):
     assert isinstance(gen, ConstrainedHFHardPlainGenerator)
     assert gen._num_beams == 4
     assert gen._bias_strength == 5.0
+    assert gen._no_repeat_ngram_size == 3
+    assert gen._min_new_tokens == 6
+    assert gen._length_penalty == 1.5
 
 
 def test_form_injected_explicit_hf_prompt_uses_overlay_and_injection():
@@ -461,6 +467,10 @@ def test_constrained_hf_generate_many_batches_jobs(monkeypatch):
         use_hard_constraint,
         bias_strength,
         batch_size=8,
+        stop_bias_after_hit=False,
+        no_repeat_ngram_size=0,
+        min_new_tokens=0,
+        length_penalty=1.0,
     ):
         batch_sizes.append(len(specs))
         return ["Como pan.", "Bebes agua."][: len(specs)]
@@ -483,3 +493,269 @@ def test_batch_size_for_beam_profile():
 
     assert batch_size_for_profile("beam", model_key="qwen17b") == 4
     assert batch_size_for_profile("beam", model_key="qwen4b") == 2
+
+
+def test_strip_thinking_removes_bare_trailing_think_end():
+    from research.generation.baseline_hf import _strip_thinking
+
+    # Full pair still stripped.
+    assert _strip_thinking("<think>plan</think>Hola.") == "Hola."
+    # Bare `</think>` (constrained-beam leak) stripped along with anything before.
+    assert _strip_thinking("garbage prelude</think>Hola.") == "Hola."
+    # No thinking → unchanged.
+    assert _strip_thinking("Hola mundo.") == "Hola mundo."
+    # Trailing bare `</think>` (Qwen3 closing a tag it never opened at end
+    # of output — observed in hard-plain smoke on cells 11 and 29).
+    assert _strip_thinking("buscaríamos buscados.</think>") == "buscaríamos buscados."
+    # And a stray leading `<think>` on its own.
+    assert _strip_thinking("<think>Hola.") == "Hola."
+
+
+def test_form_fired_helper():
+    from research.generation.constrained_hf import _form_fired
+
+    assert _form_fired("Yo Como manzanas.", "como") is True
+    assert _form_fired("Yo bebo agua.", "como") is False
+    assert _form_fired("", "como") is False
+    assert _form_fired("Yo como manzanas.", "") is False
+
+
+def test_constrained_hf_hard_inject_uses_form_in_prompt():
+    from research.generation.constrained_hf import ConstrainedHFHardInjectPlainGenerator
+
+    gen = ConstrainedHFHardInjectPlainGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    prompt = gen._build_user_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "como",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=gen._resolve_inject_expected_form(
+            {"expected_form": "como"}
+        ),
+    )
+    assert "como" in prompt
+    assert "Required surface form" in prompt
+
+
+def test_registry_contains_hard_inject():
+    assert "constrained_hf_hard_inject_plain" in GENERATOR_REGISTRY
+
+
+def test_constrained_hf_soft_inject_uses_form_in_prompt_and_is_soft():
+    from research.generation.constrained_hf import ConstrainedHFSoftInjectPlainGenerator
+
+    gen = ConstrainedHFSoftInjectPlainGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    assert gen.USE_HARD_CONSTRAINT is False
+    prompt = gen._build_user_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "como",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=gen._resolve_inject_expected_form(
+            {"expected_form": "como"}
+        ),
+    )
+    assert "como" in prompt
+    assert "Required surface form" in prompt
+
+
+def test_registry_contains_soft_inject():
+    assert "constrained_hf_soft_inject_plain" in GENERATOR_REGISTRY
+
+
+def test_plain_b_explicit_baseline_uses_4a_morphology_overlay():
+    from research.generation.baseline_hf import PlainHFBExplicitGenerator
+
+    assert "baseline_hf_plain_b_explicit" in GENERATOR_REGISTRY
+    gen = PlainHFBExplicitGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    assert gen._REQUIRE_FULL_SENTENCE is True
+    assert gen._MORPHOLOGY_HINTS is True
+    prompt = gen._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "buscáis",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=None,
+    )
+    assert "vosotros/vosotras" in prompt
+    assert "presente de indicativo" in prompt
+    assert "2–5 words" in prompt
+    assert "buscáis" not in prompt
+
+
+def test_soft_plain_b_explicit_uses_4a_morphology_overlay():
+    from research.generation.constrained_hf import (
+        ConstrainedHFSoftPlainBExplicitGenerator,
+    )
+
+    assert "constrained_hf_soft_plain_b_explicit" in GENERATOR_REGISTRY
+    gen = ConstrainedHFSoftPlainBExplicitGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    assert gen._REQUIRE_FULL_SENTENCE is True
+    assert gen._MORPHOLOGY_HINTS is True
+    assert gen.USE_HARD_CONSTRAINT is False
+    prompt = gen._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "2nd",
+            "number": "plural",
+            "expected_form": "buscáis",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=None,
+    )
+    assert "vosotros/vosotras" in prompt
+    assert "presente de indicativo" in prompt
+    assert "2–5 words" in prompt
+    assert "buscáis" not in prompt
+
+
+def test_registry_contains_d1p2_fix_ablation_arms():
+    for key in (
+        "constrained_hf_soft_plain_a",
+        "constrained_hf_soft_plain_b",
+        "constrained_hf_soft_plain_ab",
+        "constrained_hf_soft_inject_plain_a",
+        "constrained_hf_soft_inject_plain_b",
+        "constrained_hf_soft_inject_plain_ab",
+    ):
+        assert key in GENERATOR_REGISTRY, f"missing {key}"
+
+
+def test_soft_plain_ab_toggles_both_fixes_and_prompt_reflects_b():
+    from research.generation.constrained_hf import ConstrainedHFSoftPlainABGenerator
+
+    gen = ConstrainedHFSoftPlainABGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    assert gen._STOP_BIAS_AFTER_HIT is True
+    assert gen._REQUIRE_FULL_SENTENCE is True
+    prompt = gen._build_user_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "expected_form": "como",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=None,
+    )
+    assert "2–5 words" in prompt
+    assert "Do NOT output the target form on its own" in prompt
+
+
+def test_soft_plain_a_only_has_no_prompt_change():
+    from research.generation.constrained_hf import ConstrainedHFSoftPlainAGenerator
+
+    gen = ConstrainedHFSoftPlainAGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    assert gen._STOP_BIAS_AFTER_HIT is True
+    assert gen._REQUIRE_FULL_SENTENCE is False
+    prompt = gen._build_user_prompt(
+        keyword="comer",
+        translation="to eat",
+        target_language="es",
+        constraints={"tense": "present", "person": "1st", "number": "singular"},
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=None,
+    )
+    assert "2–5 words" not in prompt
+
+
+def test_bias_processor_stops_biasing_after_target_appears():
+    import torch
+    from research.generation.constrained_hf import _BatchedFormBiasLogitsProcessor
+
+    proc = _BatchedFormBiasLogitsProcessor(
+        token_ids_per_row=[{10, 11}],
+        bias_strength=5.0,
+        num_beams=1,
+        variants_per_row=[[[10, 11]]],
+        prompt_width=2,
+        stop_after_hit=True,
+    )
+    # Prompt occupies the first 2 columns; the target sequence [10, 11] has
+    # already been emitted in the tail — bias must be suppressed.
+    input_ids = torch.tensor([[0, 0, 10, 11, 5]])
+    scores = torch.zeros((1, 20))
+    out = proc(input_ids, scores.clone())
+    assert out[0, 10].item() == 0.0
+    assert out[0, 11].item() == 0.0
+
+    # If the target has NOT been emitted yet, bias applies as before.
+    input_ids2 = torch.tensor([[0, 0, 5, 6, 7]])
+    out2 = proc(input_ids2, scores.clone())
+    assert out2[0, 10].item() == 5.0
+    assert out2[0, 11].item() == 5.0
+
+
+def test_generated_only_no_repeat_ignores_prompt_ngrams():
+    import math
+    import torch
+    from research.generation.constrained_hf import (
+        _GeneratedOnlyNoRepeatNGramLogitsProcessor,
+    )
+
+    # Prompt already contains the trigram (1, 2, 3). Generated-only ban must
+    # still allow emitting 3 after seeing (1, 2) in the *generated* tail for
+    # the first time.
+    proc = _GeneratedOnlyNoRepeatNGramLogitsProcessor(ngram_size=3, prompt_width=3)
+    # columns 0-2 = prompt [1,2,3]; columns 3-4 = generated [1,2]
+    input_ids = torch.tensor([[1, 2, 3, 1, 2]])
+    scores = torch.zeros((1, 10))
+    out = proc(input_ids, scores)
+    assert out[0, 3].item() == 0.0  # first completion of (1,2)->3 still allowed
+
+    # After (1,2,3) has already appeared in the generated tail, ban repeating it.
+    input_ids2 = torch.tensor([[1, 2, 3, 1, 2, 3, 1, 2]])
+    out2 = proc(input_ids2, scores.clone())
+    assert math.isinf(out2[0, 3].item()) and out2[0, 3].item() < 0
+
