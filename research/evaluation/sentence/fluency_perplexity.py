@@ -159,8 +159,10 @@ class FluencyPerplexityEvaluator(BaseEvaluator):
         if self._factory is not None:
             self._scorer = self._factory()
             return self._scorer
-        model_id = os.environ.get("NATURALNESS_PPL_MODEL", DEFAULT_MODEL_ID)
-        dtype = os.environ.get("NATURALNESS_PPL_DTYPE", DEFAULT_DTYPE)
+        # `or` (not .get(key, default)) so empty strings from a verbatim
+        # .env.example copy still fall through to the defaults.
+        model_id = os.environ.get("NATURALNESS_PPL_MODEL") or DEFAULT_MODEL_ID
+        dtype = os.environ.get("NATURALNESS_PPL_DTYPE") or DEFAULT_DTYPE
         revision = os.environ.get("NATURALNESS_PPL_REVISION") or None
         self._scorer = HuggingFacePerplexityScorer(
             model_id=model_id, dtype=dtype, revision=revision

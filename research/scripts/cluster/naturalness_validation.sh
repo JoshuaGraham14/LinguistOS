@@ -56,10 +56,12 @@ if [[ "${EVALUATOR}" == "judge" || "${EVALUATOR}" == "both" ]]; then
   fi
 fi
 
+# `|| GATE_EXIT=$?` keeps `set -e` from killing the script on a gate FAIL
+# (exit 2) so the summary line below still prints.
+GATE_EXIT=0
 python3 -m research.scripts.run_naturalness_validation \
   --evaluator "${EVALUATOR}" \
-  --tag "${TAG}"
-GATE_EXIT=$?
+  --tag "${TAG}" || GATE_EXIT=$?
 
 echo ""
 echo "=== Validation done — $(date -Is) (exit=${GATE_EXIT}) ==="

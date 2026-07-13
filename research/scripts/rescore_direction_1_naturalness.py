@@ -31,6 +31,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
+from research.db import database as db
 from research.db.database import SessionLocal, get_db_path, init_db
 from research.db.models import Experiment, GeneratedSentence, SentenceEvaluation
 from research.evaluation.rescore import (
@@ -39,6 +40,22 @@ from research.evaluation.rescore import (
     rescore_fluency_perplexity,
     rescore_naturalness_judge,
 )
+
+
+def _bind_database(db_path: Path) -> None:
+    """Point the global engine/session at *db_path*.
+
+    Setting ``RESEARCH_DB`` alone is NOT enough here: the engine in
+    ``research.db.database`` is created at import time, so an env change
+    made after import silently keeps the old binding. Rebind explicitly
+    so each ``--arm`` iteration writes to its own per-arm file.
+    """
+    resolved = db_path.resolve()
+    os.environ["RESEARCH_DB"] = str(resolved)  # keeps get_db_path() honest in logs
+    db.engine.dispose()
+    db.engine = db.create_engine_for_path(resolved)
+    db.SessionLocal.configure(bind=db.engine)
+    init_db()
 
 DIRECTION_1_ARMS: dict[str, str] = {
     "vanilla_plain": "direction_1_vanilla_plain_hl50",
@@ -81,6 +98,24 @@ def _count_evaluator_rows(session, experiment_id: int, evaluator_name: str) -> i
     )
 
 
+def _count_error_rows(session, experiment_id: int, evaluator_name: str) -> int:
+    """Rows whose details carry an ``error`` key (API/scorer failures, score 0.0)."""
+    rows = (
+        session.query(SentenceEvaluation.details)
+        .join(GeneratedSentence, SentenceEvaluation.sentence_id == GeneratedSentence.id)
+        .filter(
+            GeneratedSentence.experiment_id == experiment_id,
+            SentenceEvaluation.evaluator_name == evaluator_name,
+        )
+        .all()
+    )
+    return sum(
+        1
+        for (details,) in rows
+        if isinstance(details, dict) and details.get("error")
+    )
+
+
 def _run_arm(
     *,
     arm: str,
@@ -89,7 +124,7 @@ def _run_arm(
     which: str,
     ppl_commit_every: int,
     judge_commit_every: int,
-    limit: int | None,
+    resume: bool,
     dry_run: bool,
 ) -> None:
     method_name = DIRECTION_1_ARMS[arm]
@@ -98,8 +133,7 @@ def _run_arm(
     if not db_path.is_file():
         raise FileNotFoundError(f"Database not found: {db_path}")
 
-    os.environ["RESEARCH_DB"] = str(db_path.resolve())
-    init_db()
+    _bind_database(db_path)
     session = SessionLocal()
     try:
         experiment = _find_experiment(session, method_name)
@@ -112,14 +146,32 @@ def _run_arm(
             f"\n=== Direction 1.2 [{arm}] naturalness rescore ({which}) ===\n"
             f"  DB:         {get_db_path()}\n"
             f"  Experiment: {experiment.name} (id={experiment.id})\n"
-            f"  Sentences:  {n_sentences}",
+            f"  Sentences:  {n_sentences}"
+            + ("\n  Mode:       resume (keep good rows, re-run missing/error)" if resume else ""),
             flush=True,
         )
-        if limit is not None:
-            print(f"  Limit:      {limit} (dev sample)")
         if dry_run:
             print("  Dry run — no changes written.", flush=True)
             return
+
+        def _report(evaluator_name: str, stats: dict, t0: float) -> None:
+            elapsed = (time.perf_counter() - t0) / 60.0
+            written = _count_evaluator_rows(session, experiment.id, evaluator_name)
+            errors = _count_error_rows(session, experiment.id, evaluator_name)
+            print(
+                f"  Rows: {written} total, {errors} with errors "
+                f"(elapsed {elapsed:.1f} min)\n"
+                f"  Stats: {stats}",
+                flush=True,
+            )
+            if errors:
+                print(
+                    f"  WARNING: {errors} {evaluator_name} rows carry an error "
+                    "and scored 0.0 — re-run with --resume to retry them "
+                    "before trusting the roll-ups.",
+                    file=sys.stderr,
+                    flush=True,
+                )
 
         if which in ("perplexity", "both"):
             print("\n  -- fluency_perplexity --", flush=True)
@@ -128,14 +180,9 @@ def _run_arm(
                 session,
                 experiment,
                 commit_every=ppl_commit_every,
+                resume=resume,
             )
-            elapsed = (time.perf_counter() - t0) / 60.0
-            written = _count_evaluator_rows(session, experiment.id, PPL_EVALUATOR_NAME)
-            print(
-                f"  Written rows: {written} (elapsed {elapsed:.1f} min)\n"
-                f"  Stats: {stats}",
-                flush=True,
-            )
+            _report(PPL_EVALUATOR_NAME, stats, t0)
 
         if which in ("judge", "both"):
             if not os.environ.get("OPENAI_API_KEY"):
@@ -151,16 +198,9 @@ def _run_arm(
                     session,
                     experiment,
                     commit_every=judge_commit_every,
+                    resume=resume,
                 )
-                elapsed = (time.perf_counter() - t0) / 60.0
-                written = _count_evaluator_rows(
-                    session, experiment.id, JUDGE_EVALUATOR_NAME
-                )
-                print(
-                    f"  Written rows: {written} (elapsed {elapsed:.1f} min)\n"
-                    f"  Stats: {stats}",
-                    flush=True,
-                )
+                _report(JUDGE_EVALUATOR_NAME, stats, t0)
     finally:
         session.close()
 
@@ -209,13 +249,13 @@ def main() -> None:
         help="Commit progress every N sentences for the judge (default: 50)",
     )
     parser.add_argument(
-        "--limit",
-        type=int,
-        default=None,
+        "--resume",
+        action="store_true",
         help=(
-            "Optional cap on sentences per arm — reserved for dev; the actual "
-            "underlying scorer runs over every sentence, this flag is only for "
-            "display/reporting purposes today."
+            "Keep existing successful rows; only score sentences that are "
+            "missing a row or whose previous row carries an error. Use after "
+            "a crash or partial API failure instead of re-paying for the "
+            "whole arm."
         ),
     )
     parser.add_argument("--dry-run", action="store_true")
@@ -233,7 +273,7 @@ def main() -> None:
             which=args.evaluator,
             ppl_commit_every=args.ppl_commit_every,
             judge_commit_every=args.judge_commit_every,
-            limit=args.limit,
+            resume=args.resume,
             dry_run=args.dry_run,
         )
 

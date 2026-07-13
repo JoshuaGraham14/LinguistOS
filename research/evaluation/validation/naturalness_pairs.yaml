@@ -475,7 +475,7 @@ pairs:
           grammaticality: 5
           naturalness: 3
           semantic_coherence: 5
-          target_form_use: correct_main_verb
+          target_form_use: correct_but_not_main_verb
           flags: []
       awkward:
         text: "Si comieron antes, no tendríais hambre."
@@ -483,10 +483,14 @@ pairs:
           grammaticality: 3
           naturalness: 2
           semantic_coherence: 3
-          target_form_use: wrong_agreement_or_role
+          target_form_use: absent
           flags: [tense_context_conflict, subject_verb_disagreement]
     notes: >-
       "hubiereis" is grammatical but archaic. Naturalness is only 3 because
       no modern speaker would use it. This pair specifically stresses PPL —
       if Salamandra prefers the common-tokens-but-broken sentence, that is
-      the documented rare-form limitation.
+      the documented rare-form limitation. TFU labels: in the natural
+      sentence "hubiereis" is the (auxiliary) verb of the subordinate
+      si-clause, not the main-clause verb ("tendríais"), so it is
+      correct_but_not_main_verb; in the awkward sentence the exact form
+      "hubiereis" never appears, so it is absent by rubric definition.

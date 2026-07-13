@@ -58,22 +58,82 @@ def clear_sentence_evaluations_for_evaluator(
     ).delete(synchronize_session="fetch")
 
 
+def _split_existing_rows_for_resume(
+    session,
+    experiment_id: int,
+    evaluator_name: str,
+) -> tuple[set[int], list[int]]:
+    """Partition existing rows into (sentence_ids to keep, row ids to delete).
+
+    A row is kept when its details carry no ``error`` key; error rows
+    (API/scorer failures stored as score 0.0) are deleted so resume re-runs
+    them.
+    """
+    rows = (
+        session.query(
+            SentenceEvaluation.id,
+            SentenceEvaluation.sentence_id,
+            SentenceEvaluation.details,
+        )
+        .join(GeneratedSentence, SentenceEvaluation.sentence_id == GeneratedSentence.id)
+        .filter(
+            GeneratedSentence.experiment_id == experiment_id,
+            SentenceEvaluation.evaluator_name == evaluator_name,
+        )
+        .all()
+    )
+    keep_sentence_ids: set[int] = set()
+    error_row_ids: list[int] = []
+    for row_id, sentence_id, details in rows:
+        if isinstance(details, dict) and details.get("error"):
+            error_row_ids.append(row_id)
+        else:
+            keep_sentence_ids.add(sentence_id)
+    return keep_sentence_ids, error_row_ids
+
+
 def rescore_evaluator_for_experiment(
     session,
     experiment: Experiment,
     evaluator: BaseEvaluator,
     *,
     commit_every: int = 500,
+    resume: bool = False,
 ) -> int:
-    """Re-run *evaluator* on every stored sentence; leave other evaluators untouched."""
-    removed = clear_sentence_evaluations_for_evaluator(
-        session, experiment.id, evaluator.name
-    )
-    session.commit()
-    print(
-        f"  Cleared {removed} existing {evaluator.name} rows",
-        flush=True,
-    )
+    """Re-run *evaluator* on stored sentences; leave other evaluators untouched.
+
+    Default (``resume=False``): clear all existing rows for this evaluator
+    and score every sentence.
+
+    ``resume=True``: keep existing successful rows, delete rows whose details
+    carry an ``error`` key, and only score sentences that now lack a row.
+    Use after a crash or partial API failure — especially for the judge,
+    where every call costs money.
+    """
+    skip_sentence_ids: set[int] = set()
+    if resume:
+        skip_sentence_ids, error_row_ids = _split_existing_rows_for_resume(
+            session, experiment.id, evaluator.name
+        )
+        if error_row_ids:
+            session.query(SentenceEvaluation).filter(
+                SentenceEvaluation.id.in_(error_row_ids)
+            ).delete(synchronize_session="fetch")
+        session.commit()
+        print(
+            f"  Resume: keeping {len(skip_sentence_ids)} good {evaluator.name} rows, "
+            f"deleted {len(error_row_ids)} error rows",
+            flush=True,
+        )
+    else:
+        removed = clear_sentence_evaluations_for_evaluator(
+            session, experiment.id, evaluator.name
+        )
+        session.commit()
+        print(
+            f"  Cleared {removed} existing {evaluator.name} rows",
+            flush=True,
+        )
 
     sentences = (
         session.query(GeneratedSentence)
@@ -82,8 +142,11 @@ def rescore_evaluator_for_experiment(
         .order_by(GeneratedSentence.id)
         .all()
     )
+    if skip_sentence_ids:
+        sentences = [s for s in sentences if s.id not in skip_sentence_ids]
     total = len(sentences)
     if total == 0:
+        print(f"  Nothing to score for {evaluator.name}", flush=True)
         return 0
 
     inserted = 0
@@ -184,6 +247,7 @@ def rescore_fluency_perplexity(
     evaluator: FluencyPerplexityEvaluator | None = None,
     commit_every: int = 200,
     refresh_rollups: bool = True,
+    resume: bool = False,
 ) -> dict[str, int]:
     """Re-score fluency_perplexity only; optionally refresh sentence-eval roll-ups."""
     ev = evaluator or FluencyPerplexityEvaluator()
@@ -193,6 +257,7 @@ def rescore_fluency_perplexity(
         experiment,
         ev,
         commit_every=commit_every,
+        resume=resume,
     )
     if refresh_rollups:
         print("  Refreshing sentence-eval roll-ups...", flush=True)
@@ -208,6 +273,7 @@ def rescore_naturalness_judge(
     evaluator: NaturalnessLlmJudgeEvaluator | None = None,
     commit_every: int = 50,
     refresh_rollups: bool = True,
+    resume: bool = False,
 ) -> dict[str, int]:
     """Re-score naturalness_llm_judge only; optionally refresh sentence-eval roll-ups."""
     ev = evaluator or NaturalnessLlmJudgeEvaluator()
@@ -217,6 +283,7 @@ def rescore_naturalness_judge(
         experiment,
         ev,
         commit_every=commit_every,
+        resume=resume,
     )
     if refresh_rollups:
         print("  Refreshing sentence-eval roll-ups...", flush=True)

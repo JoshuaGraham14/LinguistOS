@@ -182,6 +182,51 @@ def test_perplexity_rescore_is_idempotent(rescore_env):
     assert len(rows) == 3
 
 
+def test_resume_skips_good_rows_and_reruns_error_rows(rescore_env):
+    session, experiment = rescore_env
+    # First pass: score everything with a stub.
+    first_scorer = _StubPPL()
+    ev = FluencyPerplexityEvaluator(scorer=first_scorer)
+    from research.evaluation.rescore import rescore_evaluator_for_experiment
+
+    rescore_evaluator_for_experiment(session, experiment, ev)
+    assert len(first_scorer.calls) == 3
+
+    # Corrupt one row into an error row (simulates a mid-run API/scorer failure).
+    rows = _rows(session, experiment.id, PPL_EVALUATOR_NAME)
+    victim = rows[0]
+    victim.details = {"error": "scorer_failure: simulated", "scorer_version": "v1"}
+    victim.score = 0.0
+    session.commit()
+    error_sentence_id = victim.sentence_id
+
+    # Resume: only the error row's sentence gets re-scored.
+    second_scorer = _StubPPL()
+    ev2 = FluencyPerplexityEvaluator(scorer=second_scorer)
+    rescore_evaluator_for_experiment(session, experiment, ev2, resume=True)
+
+    assert len(second_scorer.calls) == 1
+    rows_after = _rows(session, experiment.id, PPL_EVALUATOR_NAME)
+    assert len(rows_after) == 3
+    # No error rows remain; the re-scored row belongs to the right sentence.
+    for r in rows_after:
+        assert not (r.details or {}).get("error")
+    rescored = [r for r in rows_after if r.sentence_id == error_sentence_id]
+    assert len(rescored) == 1
+    assert rescored[0].details["model_id"] == "stub/ppl"
+
+
+def test_resume_with_no_existing_rows_scores_everything(rescore_env):
+    session, experiment = rescore_env
+    scorer = _StubPPL()
+    ev = FluencyPerplexityEvaluator(scorer=scorer)
+    stats = rescore_fluency_perplexity(
+        session, experiment, evaluator=ev, refresh_rollups=False, resume=True
+    )
+    assert stats["fluency_perplexity_evals"] == 3
+    assert len(scorer.calls) == 3
+
+
 def test_judge_rescore_writes_rows_and_preserves_flags(rescore_env):
     session, experiment = rescore_env
     client = _StubJudge()

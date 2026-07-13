@@ -122,6 +122,25 @@ def test_perplexity_default_model_id_env(monkeypatch):
     assert scorer.revision == "deadbeef"
 
 
+def test_perplexity_empty_env_vars_fall_back_to_defaults(monkeypatch):
+    # A verbatim copy of .env.example sets these to empty strings; the
+    # defaults must still win (regression test for .get(key, default)).
+    from research.evaluation.sentence.fluency_perplexity import (
+        DEFAULT_DTYPE,
+        HuggingFacePerplexityScorer,
+    )
+
+    monkeypatch.setenv("NATURALNESS_PPL_MODEL", "")
+    monkeypatch.setenv("NATURALNESS_PPL_DTYPE", "")
+    monkeypatch.setenv("NATURALNESS_PPL_REVISION", "")
+    ev = FluencyPerplexityEvaluator()
+    scorer = ev._get_scorer()  # type: ignore[attr-defined]
+    assert isinstance(scorer, HuggingFacePerplexityScorer)
+    assert scorer.model_id == DEFAULT_MODEL_ID
+    assert scorer.dtype_name == DEFAULT_DTYPE
+    assert scorer.revision is None
+
+
 def test_perplexity_not_in_default_evaluators():
     names = {ev.name for ev in DEFAULT_EVALUATORS}
     assert PPL_EVALUATOR_NAME not in names

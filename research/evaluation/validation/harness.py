@@ -563,7 +563,7 @@ def render_markdown(report: HarnessReport, gate: GateResult) -> str:
         f"(threshold {_fmt_pct(JUDGE_TFU_MIN_EXACT_MATCH)})"
     )
     lines.append("")
-    lines.append("| axis | mean|err| | within-one | exact |")
+    lines.append("| axis | mean abs err | within-one | exact |")
     lines.append("|---|---:|---:|---:|")
     for axis, r in report.judge.axis_results.items():
         mae = f"{r.mean_abs_err:.2f}" if isinstance(r.mean_abs_err, float) else "—"
