@@ -8,9 +8,17 @@ from research.db.models import Experiment, GeneratedSentence, SentenceEvaluation
 from research.evaluation.distribution.lt_error_breakdown import LtErrorBreakdownMetric
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.sentence.base import BaseEvaluator
+from research.evaluation.sentence.fluency_perplexity import (
+    EVALUATOR_NAME as PPL_EVALUATOR_NAME,
+    FluencyPerplexityEvaluator,
+)
 from research.evaluation.sentence.languagetool import (
     EVALUATOR_NAME as GRAMMAR_EVALUATOR_NAME,
     LanguageToolGrammarEvaluator,
+)
+from research.evaluation.sentence.naturalness_llm_judge import (
+    EVALUATOR_NAME as JUDGE_EVALUATOR_NAME,
+    NaturalnessLlmJudgeEvaluator,
 )
 from research.pipeline import (
     _compute_and_store_group_metrics,
@@ -169,12 +177,64 @@ def find_diagnostic_5_experiment(session, arm: str) -> Experiment:
     return experiment
 
 
+def rescore_fluency_perplexity(
+    session,
+    experiment: Experiment,
+    *,
+    evaluator: FluencyPerplexityEvaluator | None = None,
+    commit_every: int = 200,
+    refresh_rollups: bool = True,
+) -> dict[str, int]:
+    """Re-score fluency_perplexity only; optionally refresh sentence-eval roll-ups."""
+    ev = evaluator or FluencyPerplexityEvaluator()
+    stats: dict[str, int] = {}
+    stats["fluency_perplexity_evals"] = rescore_evaluator_for_experiment(
+        session,
+        experiment,
+        ev,
+        commit_every=commit_every,
+    )
+    if refresh_rollups:
+        print("  Refreshing sentence-eval roll-ups...", flush=True)
+        stats["rollup_rows"] = aggregate_sentence_eval_rollups(session, experiment.id)
+        print(f"  Stored {stats['rollup_rows']} rollup rows", flush=True)
+    return stats
+
+
+def rescore_naturalness_judge(
+    session,
+    experiment: Experiment,
+    *,
+    evaluator: NaturalnessLlmJudgeEvaluator | None = None,
+    commit_every: int = 50,
+    refresh_rollups: bool = True,
+) -> dict[str, int]:
+    """Re-score naturalness_llm_judge only; optionally refresh sentence-eval roll-ups."""
+    ev = evaluator or NaturalnessLlmJudgeEvaluator()
+    stats: dict[str, int] = {}
+    stats["naturalness_llm_judge_evals"] = rescore_evaluator_for_experiment(
+        session,
+        experiment,
+        ev,
+        commit_every=commit_every,
+    )
+    if refresh_rollups:
+        print("  Refreshing sentence-eval roll-ups...", flush=True)
+        stats["rollup_rows"] = aggregate_sentence_eval_rollups(session, experiment.id)
+        print(f"  Stored {stats['rollup_rows']} rollup rows", flush=True)
+    return stats
+
+
 __all__ = [
     "DIAGNOSTIC_5_ARMS",
     "DIAGNOSTIC_5_DB_FILES",
     "GRAMMAR_EVALUATOR_NAME",
+    "JUDGE_EVALUATOR_NAME",
+    "PPL_EVALUATOR_NAME",
     "clear_sentence_evaluations_for_evaluator",
     "find_diagnostic_5_experiment",
     "rescore_evaluator_for_experiment",
+    "rescore_fluency_perplexity",
     "rescore_grammar_languagetool",
+    "rescore_naturalness_judge",
 ]
