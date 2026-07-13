@@ -1,0 +1,492 @@
+# Naturalness validation stimuli — minimal pairs for smoke-testing the
+# fluency_perplexity and naturalness_llm_judge evaluators.
+#
+# Structure:
+#   version:           schema version (bump on any structural change)
+#   prompt_version:    judge prompt version this label set was authored against
+#   pairs:
+#     - pair_id:       stable id, e.g. "1a_vs_1b"
+#       category:      one of odd_collocation | agreement | role_vs_mention |
+#                      repetition | tense_conflict | fragment | rare_but_correct
+#       expected_form: Spanish verb form the generator would have been asked for
+#       lemma:         lemma of expected_form
+#       tense/person/number: the constraints as they exist in the benchmark
+#       target_language: usually "es"
+#       preferred:     "natural" — which of the two sentences a native prefers
+#                      (the harness uses this to compute PPL pairwise accuracy)
+#       sentences:
+#         natural:
+#           text:      Spanish sentence
+#           human_label:
+#             grammaticality:      1..5
+#             naturalness:         1..5
+#             semantic_coherence:  1..5
+#             target_form_use:     correct_main_verb | correct_but_not_main_verb |
+#                                  wrong_agreement_or_role |
+#                                  mentioned_or_quoted_only | absent
+#             flags: [] (subset of the six flag enum values)
+#         awkward:
+#           text: ...
+#           human_label: {...}
+#       notes:           optional (author intent, tricky cases)
+#
+# Labels below are authored expectations. Overwrite `human_label` in-place
+# after a native annotator has reviewed each sentence.
+
+version: 1
+prompt_version: v1
+pairs:
+  # --- Category 1: odd collocation / implausible content ---
+  - pair_id: 01_collocation_facilmente
+    category: odd_collocation
+    expected_form: obtenéis
+    lemma: obtener
+    tense: present
+    person: 2nd
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Obtenéis información fácilmente."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Obtenéis información fácil."
+        human_label:
+          grammaticality: 5
+          naturalness: 2
+          semantic_coherence: 4
+          target_form_use: correct_main_verb
+          flags: [odd_collocation]
+    notes: >-
+      Direction 1 motivating example. Grammar is intact; only naturalness
+      drops. Semantic coherence is mildly affected because "información fácil"
+      is understandable but odd.
+
+  - pair_id: 02_collocation_tomar_hacer
+    category: odd_collocation
+    expected_form: tomamos
+    lemma: tomar
+    tense: present
+    person: 1st
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Tomamos una decisión difícil."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Hacemos una decisión difícil."
+        human_label:
+          grammaticality: 5
+          naturalness: 2
+          semantic_coherence: 4
+          target_form_use: absent
+          flags: [odd_collocation]
+    notes: >-
+      English calque ("make a decision"). Awkward sentence uses the wrong
+      lemma so expected_form is absent — realistic Qwen failure mode.
+
+  - pair_id: 03_collocation_implausible
+    category: odd_collocation
+    expected_form: escribimos
+    lemma: escribir
+    tense: present
+    person: 1st
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Escribimos cartas a los abuelos."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Escribimos cartas a los edificios."
+        human_label:
+          grammaticality: 5
+          naturalness: 2
+          semantic_coherence: 2
+          target_form_use: correct_main_verb
+          flags: [odd_collocation]
+    notes: >-
+      Distinguishes naturalness (drops) from grammaticality (stays 5) from
+      semantic_coherence (also drops — implausible referent).
+
+  # --- Category 2: subject-verb agreement ---
+  - pair_id: 04_agreement_vosotros_nosotros
+    category: agreement
+    expected_form: escribís
+    lemma: escribir
+    tense: present
+    person: 2nd
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Vosotros escribís cartas."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Nosotros escribís cartas."
+        human_label:
+          grammaticality: 1
+          naturalness: 1
+          semantic_coherence: 3
+          target_form_use: wrong_agreement_or_role
+          flags: [subject_verb_disagreement]
+    notes: >-
+      Presence-vs-role: expected_form is present but the subject does not
+      agree with it. EF would pass; the judge should not.
+
+  - pair_id: 05_agreement_comeo
+    category: agreement
+    expected_form: come
+    lemma: comer
+    tense: present
+    person: 3rd
+    number: singular
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Ella come una manzana."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Ella comeo una manzana."
+        human_label:
+          grammaticality: 1
+          naturalness: 1
+          semantic_coherence: 5
+          target_form_use: absent
+          flags: [subject_verb_disagreement]
+    notes: >-
+      Rubric anchor from the plan: invented form. Grammar collapses but
+      the sentence is still perfectly interpretable (SC stays 5).
+
+  - pair_id: 06_agreement_corriste
+    category: agreement
+    expected_form: corrieron
+    lemma: correr
+    tense: preterite
+    person: 3rd
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Ellos corrieron ayer."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Ellos corriste ayer."
+        human_label:
+          grammaticality: 1
+          naturalness: 1
+          semantic_coherence: 3
+          target_form_use: wrong_agreement_or_role
+          flags: [subject_verb_disagreement]
+    notes: >-
+      Different agreement failure: 2sg form with 3pl subject.
+
+  # --- Category 3: correct role vs quoted mention ---
+  - pair_id: 07_mention_obtenéis
+    category: role_vs_mention
+    expected_form: obtenéis
+    lemma: obtener
+    tense: present
+    person: 2nd
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Vosotros obtenéis información en la biblioteca."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "La palabra «obtenéis» aparece en el libro."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: mentioned_or_quoted_only
+          flags: []
+    notes: >-
+      Numeric axes identical; only target_form_use distinguishes them.
+      PPL is expected to fail this pair (that is a documented limitation).
+
+  - pair_id: 08_mention_comemos
+    category: role_vs_mention
+    expected_form: comemos
+    lemma: comer
+    tense: present
+    person: 1st
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Comemos temprano cada día."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "«Comemos» es un verbo en primera persona plural."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: mentioned_or_quoted_only
+          flags: []
+    notes: >-
+      Metalinguistic mention. The judge must recognise this as
+      mentioned_or_quoted_only, not correct_main_verb.
+
+  # --- Category 4: repetition / degeneration ---
+  - pair_id: 09_repetition_coméis
+    category: repetition
+    expected_form: coméis
+    lemma: comer
+    tense: present
+    person: 2nd
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Coméis juntos en casa."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Coméis coméis coméis coméis juntos."
+        human_label:
+          grammaticality: 2
+          naturalness: 1
+          semantic_coherence: 1
+          target_form_use: correct_main_verb
+          flags: [repetition_or_degeneration]
+    notes: >-
+      Partial degeneration — form conjugation is fine, but the sentence
+      loops. PPL should punish this heavily.
+
+  - pair_id: 10_repetition_full_collapse
+    category: repetition
+    expected_form: escribimos
+    lemma: escribir
+    tense: present
+    person: 1st
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Escribimos correos rápidamente."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Com como un comes bebe bebe escribimos."
+        human_label:
+          grammaticality: 1
+          naturalness: 1
+          semantic_coherence: 1
+          target_form_use: wrong_agreement_or_role
+          flags: [repetition_or_degeneration, fragment]
+    notes: >-
+      Mirrors real Direction 1 constrained-beam failure mode.
+
+  # --- Category 5: tense / temporal context conflict ---
+  - pair_id: 11_tense_ayer_comere
+    category: tense_conflict
+    expected_form: comeré
+    lemma: comer
+    tense: future
+    person: 1st
+    number: singular
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Mañana comeré en casa."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Ayer comeré en casa."
+        human_label:
+          grammaticality: 5
+          naturalness: 1
+          semantic_coherence: 1
+          target_form_use: correct_main_verb
+          flags: [tense_context_conflict]
+    notes: >-
+      Grammar is intact; adverb conflicts with tense. LT is typically silent.
+
+  - pair_id: 12_tense_pasado_futuro
+    category: tense_conflict
+    expected_form: viviremos
+    lemma: vivir
+    tense: future
+    person: 1st
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "El año que viene viviremos en Madrid."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "El año pasado viviremos en Madrid."
+        human_label:
+          grammaticality: 5
+          naturalness: 1
+          semantic_coherence: 1
+          target_form_use: correct_main_verb
+          flags: [tense_context_conflict]
+    notes: >-
+      Mirror image of pair 11 — future verb pinned to a past adverbial.
+
+  # --- Category 6: fragment vs complete sentence ---
+  - pair_id: 13_fragment_porque
+    category: fragment
+    expected_form: compramos
+    lemma: comprar
+    tense: present
+    person: 1st
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Compramos fruta en el mercado."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Porque compramos fruta en el mercado."
+        human_label:
+          grammaticality: 2
+          naturalness: 2
+          semantic_coherence: 3
+          target_form_use: correct_main_verb
+          flags: [fragment]
+    notes: >-
+      Deliberate dependent-clause fragment. Same length as the natural
+      sentence — tests that "short ≠ fragment" is respected.
+
+  - pair_id: 14_fragment_aunque
+    category: fragment
+    expected_form: vivimos
+    lemma: vivir
+    tense: present
+    person: 1st
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Vivimos en una ciudad grande."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Aunque vivimos en una ciudad grande."
+        human_label:
+          grammaticality: 2
+          naturalness: 2
+          semantic_coherence: 3
+          target_form_use: correct_main_verb
+          flags: [fragment]
+    notes: >-
+      Second fragment stimulus with a different subordinator.
+
+  # --- Category 7: PPL sanity — rare-but-correct form ---
+  - pair_id: 15_rare_hubiereis
+    category: rare_but_correct
+    expected_form: hubiereis
+    lemma: haber
+    tense: future_subjunctive
+    person: 2nd
+    number: plural
+    target_language: es
+    preferred: natural
+    sentences:
+      natural:
+        text: "Si hubiereis comido antes, no tendríais hambre."
+        human_label:
+          grammaticality: 5
+          naturalness: 3
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Si comieron antes, no tendríais hambre."
+        human_label:
+          grammaticality: 3
+          naturalness: 2
+          semantic_coherence: 3
+          target_form_use: wrong_agreement_or_role
+          flags: [tense_context_conflict, subject_verb_disagreement]
+    notes: >-
+      "hubiereis" is grammatical but archaic. Naturalness is only 3 because
+      no modern speaker would use it. This pair specifically stresses PPL —
+      if Salamandra prefers the common-tokens-but-broken sentence, that is
+      the documented rare-form limitation.
