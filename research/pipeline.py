@@ -29,6 +29,23 @@ from research.evaluation.distribution.base import BaseGroupMetric
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
 from research.evaluation.sentence import DEFAULT_EVALUATORS
 from research.evaluation.sentence.base import BaseEvaluator
+
+
+def _merge_evaluators(
+    defaults: list[BaseEvaluator],
+    extras: list[BaseEvaluator] | None,
+) -> list[BaseEvaluator]:
+    """Concatenate defaults + extras, dropping duplicates by ``.name``."""
+    if not extras:
+        return list(defaults)
+    seen: set[str] = {ev.name for ev in defaults}
+    merged: list[BaseEvaluator] = list(defaults)
+    for ev in extras:
+        if ev.name in seen:
+            continue
+        merged.append(ev)
+        seen.add(ev.name)
+    return merged
 from research.fixtures.mock_outputs import get_mock_candidates
 from research.generation import GENERATOR_REGISTRY
 from research.generation.base import BaseGenerator
@@ -431,6 +448,7 @@ def run_experiment(
     experiment_group_metrics: bool = True,
     resume: bool = False,
     resume_experiment_id: int | None = None,
+    extra_evaluators: list[BaseEvaluator] | None = None,
 ) -> None:
     """Run a full experiment: generate, evaluate, compute metrics, print summary.
 
@@ -441,6 +459,11 @@ def run_experiment(
     Set ``experiment_group_metrics=False`` on large multi-cell benchmarks to skip
     pooled experiment-scope distribution metrics (notably experiment-wide Self-BLEU).
     Per-cell (constraint_set) metrics and sentence roll-ups are unchanged.
+
+    Pass ``extra_evaluators`` to run one or more opt-in per-sentence evaluators
+    alongside ``DEFAULT_EVALUATORS``. Optional evaluators are intended for
+    small dev/smoke runs only; the primary integration path for the
+    naturalness scorers is offline rescore against per-arm DBs.
     """
     init_db()
     session = SessionLocal()
@@ -631,11 +654,24 @@ def run_experiment(
 
             total_evals = 0
             if evaluate:
+                evaluators = _merge_evaluators(DEFAULT_EVALUATORS, extra_evaluators)
+                if extra_evaluators:
+                    extra_names = [
+                        ev.name
+                        for ev in extra_evaluators
+                        if ev.name not in {d.name for d in DEFAULT_EVALUATORS}
+                    ]
+                    if extra_names:
+                        print(
+                            "  Optional evaluators enabled: "
+                            + ", ".join(extra_names),
+                            flush=True,
+                        )
                 print("\n  Running per-sentence evaluators...")
                 total_evals = _evaluate_sentences(
                     session,
                     experiment,
-                    DEFAULT_EVALUATORS,
+                    evaluators,
                 )
                 print(f"  Stored {total_evals} sentence evaluations")
 
