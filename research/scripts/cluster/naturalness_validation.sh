@@ -1,5 +1,5 @@
 #!/bin/bash
-# Score the 15-pair naturalness validation set with the perplexity and/or
+# Score the 13-pair naturalness validation set with the perplexity and/or
 # judge evaluators. Writes raw.jsonl, summary.json, and report.md into
 # research/runs/naturalness_validation/<tag>/.
 #
