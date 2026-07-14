@@ -57,9 +57,17 @@ case "${ARM}" in
     METHOD=direction_1b_soft_plain_n150_B_beams8_qwen4b
     DEFAULT_HF_BATCH_SIZE=2
     ;;
+  vanilla_plain_B_qwen4b)
+    METHOD=direction_1_vanilla_plain_n150_B_qwen4b
+    DEFAULT_HF_BATCH_SIZE=8
+    ;;
+  hard_plain_B_qwen4b)
+    METHOD=direction_1a_hard_plain_n150_B_qwen4b
+    DEFAULT_HF_BATCH_SIZE=2
+    ;;
   *)
     echo "Unknown ARM='${ARM}'" >&2
-    echo "Known: vanilla_plain_B inject_plain_B soft_plain_B soft_plain_B_beams8 soft_inject_plain_B hard_plain_B soft_plain_B_beams8_qwen4b" >&2
+    echo "Known: vanilla_plain_B inject_plain_B soft_plain_B soft_plain_B_beams8 soft_inject_plain_B hard_plain_B soft_plain_B_beams8_qwen4b vanilla_plain_B_qwen4b hard_plain_B_qwen4b" >&2
     exit 1
     ;;
 esac

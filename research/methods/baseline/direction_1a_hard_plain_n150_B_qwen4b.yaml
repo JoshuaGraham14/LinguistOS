@@ -1,0 +1,8 @@
+name: direction_1a_hard_plain_n150_B_qwen4b
+method: constrained_hf_hard_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-4B
+  temperature: 0
+  sentence_length: short
+  num_beams: 4
