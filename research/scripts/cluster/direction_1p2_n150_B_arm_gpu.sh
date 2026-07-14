@@ -89,7 +89,13 @@ source "${PROJECT}/research/scripts/cluster/research_cache_env.sh"
 # shellcheck disable=SC1091
 source "${PROJECT}/research/scripts/cluster/qwen_batch_env.sh"
 export PYTHONPATH="${PROJECT}:${PYTHONPATH:-}"
-export HF_BATCH_SIZE="${HF_BATCH_SIZE:-${DEFAULT_HF_BATCH_SIZE}}"
+# qwen_batch_env defaults HF_BATCH_SIZE=8; prefer the per-arm A30 table unless
+# the submitter set HF_BATCH_SIZE_OVERRIDE explicitly.
+if [[ -n "${HF_BATCH_SIZE_OVERRIDE:-}" ]]; then
+  export HF_BATCH_SIZE="${HF_BATCH_SIZE_OVERRIDE}"
+else
+  export HF_BATCH_SIZE="${DEFAULT_HF_BATCH_SIZE}"
+fi
 export RESEARCH_DB="${PROJECT}/research/runs/direction_1p2_n150_${ARM}.db"
 
 echo "=== D1.2 Fix-B n150 arm — $(date -Is) ==="
