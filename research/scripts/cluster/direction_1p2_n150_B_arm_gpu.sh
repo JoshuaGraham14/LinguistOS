@@ -3,14 +3,12 @@
 # One Slurm job = one arm = one RESEARCH_DB (parallel-safe).
 #
 # Usage (usually via the submit wrapper):
-#   sbatch --export=ALL,ARM=vanilla_plain_B \
-#     research/scripts/cluster/direction_1p2_n150_B_arm_gpu.sh
+#   bash research/scripts/cluster/direction_1p2_n150_B_submit.sh
 #
 # Required env:
 #   ARM — short arm key (see case below)
 # Optional env:
 #   HF_BATCH_SIZE — override padded HF batch (defaults set per arm below)
-#   INCLUDE_QWEN4B — unused here; 4B has its own ARM key
 
 #SBATCH --job-name=d1p2_n150
 #SBATCH --gres=gpu:1
