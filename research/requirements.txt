@@ -22,3 +22,8 @@ sacrebleu>=2.4  # self_bleu distribution metric
 
 # future phases
 streamlit>=1.38
+
+# LoRA SFT (Direction 2)
+peft>=0.13
+trl>=0.12
+datasets>=2.20
