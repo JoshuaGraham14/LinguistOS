@@ -52,6 +52,11 @@ export HF_BATCH_SIZE
 if [[ -n "${LORA_ADAPTER_PATH:-}" ]]; then
   export LORA_ADAPTER_PATH
   echo "Using LoRA adapter: ${LORA_ADAPTER_PATH}"
+  python - <<'PY'
+import importlib.util, subprocess, sys
+if importlib.util.find_spec("peft") is None:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "peft"])
+PY
 fi
 
 mkdir -p "$(dirname "${RESEARCH_DB}")" "${PROJECT}/logs"
