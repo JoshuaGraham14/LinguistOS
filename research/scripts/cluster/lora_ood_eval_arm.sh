@@ -55,6 +55,7 @@ if [[ -n "${LORA_ADAPTER_PATH:-}" ]]; then
 fi
 
 mkdir -p "$(dirname "${RESEARCH_DB}")" "${PROJECT}/logs"
+export RESEARCH_DB
 
 echo "ARM=${ARM} METHOD=${METHOD} DB=${RESEARCH_DB}"
 python -m research.run_experiment \
