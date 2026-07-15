@@ -27,28 +27,17 @@ if [[ ! -f "${ADAPTER}/adapter_model.safetensors" ]]; then
 fi
 
 submit_gen() {
-  local name="$1" arm="$2" db="$3" lora="${4:-}"
-  local deps=()
-  deps+=(--job-name="lora_${name}")
-  deps+=(--output="${PROJECT}/logs/lora_ood_${name}_%j.out")
-  deps+=(--export=ALL,ARM="${arm}",RESEARCH_DB="${db}")
-  if [[ -n "${lora}" ]]; then
-    deps+=(--export=ALL,ARM="${arm}",RESEARCH_DB="${db}",LORA_ADAPTER_PATH="${ADAPTER}")
+  local name="$1" arm="$2" db="$3"
+  local export_vars="ARM=${arm},RESEARCH_DB=${db}"
+  if [[ $# -ge 4 ]]; then
+    export_vars="${export_vars},LORA_ADAPTER_PATH=${ADAPTER}"
   fi
-  # sbatch --export last wins if duplicated; build carefully
-  if [[ -n "${lora}" ]]; then
-    sbatch \
-      --job-name="lora_${name}" \
-      --output="${PROJECT}/logs/lora_ood_${name}_%j.out" \
-      --export=ALL,ARM="${arm}",RESEARCH_DB="${db}",LORA_ADAPTER_PATH="${ADAPTER}" \
-      "${GEN_SCRIPT}"
-  else
-    sbatch \
-      --job-name="lora_${name}" \
-      --output="${PROJECT}/logs/lora_ood_${name}_%j.out" \
-      --export=ALL,ARM="${arm}",RESEARCH_DB="${db}" \
-      "${GEN_SCRIPT}"
-  fi
+  # Do not use --export=ALL — Slurm can fail with "user env retrieval failed".
+  sbatch \
+    --job-name="lora_${name}" \
+    --output="${PROJECT}/logs/lora_ood_${name}_%j.out" \
+    --export="${export_vars}" \
+    "${GEN_SCRIPT}"
 }
 
 echo "Submitting OOD generation arms..."
@@ -57,8 +46,8 @@ echo "Submitting OOD generation arms..."
 OUT_INJ_BASE=$(submit_gen inj_base inject "${RUNS}/lora_ood_inject_base.db")
 OUT_VAN_BASE=$(submit_gen van_base vanilla "${RUNS}/lora_ood_vanilla_base.db")
 OUT_SOFT_BASE=$(submit_gen soft_base soft "${RUNS}/lora_ood_soft_base.db")
-OUT_INJ_LORA=$(submit_gen inj_lora inject "${RUNS}/lora_ood_inject_lora.db" 1)
-OUT_VAN_LORA=$(submit_gen van_lora vanilla "${RUNS}/lora_ood_vanilla_lora.db" 1)
+OUT_INJ_LORA=$(submit_gen inj_lora inject "${RUNS}/lora_ood_inject_lora.db" lora)
+OUT_VAN_LORA=$(submit_gen van_lora vanilla "${RUNS}/lora_ood_vanilla_lora.db" lora)
 
 jid() { echo "$1" | awk '{print $NF}'; }
 
@@ -80,14 +69,14 @@ OUT_NAT_BASE=$(sbatch \
   --job-name=lora_nat_inj_b \
   --dependency=afterok:"${J_INJ_BASE}" \
   --output="${PROJECT}/logs/lora_ood_nat_inject_base_%j.out" \
-  --export=ALL,DB_PATH="${RUNS}/lora_ood_inject_base.db",METHOD_NAME=direction_2_lora_inject_ood_n36,LABEL=inject_base,EVALUATOR=both,RESUME=1 \
+  --export=DB_PATH="${RUNS}/lora_ood_inject_base.db",METHOD_NAME=direction_2_lora_inject_ood_n36,LABEL=inject_base,EVALUATOR=both,RESUME=1 \
   "${NAT_SCRIPT}")
 
 OUT_NAT_LORA=$(sbatch \
   --job-name=lora_nat_inj_l \
   --dependency=afterok:"${J_INJ_LORA}" \
   --output="${PROJECT}/logs/lora_ood_nat_inject_lora_%j.out" \
-  --export=ALL,DB_PATH="${RUNS}/lora_ood_inject_lora.db",METHOD_NAME=direction_2_lora_inject_ood_n36,LABEL=inject_lora,EVALUATOR=both,RESUME=1 \
+  --export=DB_PATH="${RUNS}/lora_ood_inject_lora.db",METHOD_NAME=direction_2_lora_inject_ood_n36,LABEL=inject_lora,EVALUATOR=both,RESUME=1 \
   "${NAT_SCRIPT}")
 
 J_NAT_BASE=$(jid "${OUT_NAT_BASE}")
