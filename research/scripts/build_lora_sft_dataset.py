@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build form-given LoRA SFT JSONL from scored n150 Fix-B DBs (primary A_strict).
+"""Build LoRA SFT JSONL from scored n150 Fix-B DBs (primary A_strict filter).
+
+Experiments:
+  - ``lora-form`` (A): Fix-B prompt **with** gold surface-form injection
+  - ``lora-no-inject`` (B): same Fix-B prompt **without** form injection
+    (identical text to soft/vanilla Fix-B); same completions as A
 
 Default pool: soft_plain_B_beams8_qwen4b → vanilla_plain_B_qwen4b →
 inject_plain_B → soft_plain_B_beams8 → soft_inject_plain_B
@@ -9,7 +14,8 @@ Keep rule: EF match + target_form_use==correct_main_verb + G,N,S ≥ 4.
 
 Usage (on cluster, where research/runs/*.db exist)::
 
-    python -m research.scripts.build_lora_sft_dataset
+    python -m research.scripts.build_lora_sft_dataset --experiment lora-form
+    python -m research.scripts.build_lora_sft_dataset --experiment lora-no-inject
 """
 
 from __future__ import annotations
@@ -33,7 +39,13 @@ MANIFEST = (
     / "experiment_verbs"
     / "manifest_diagnostic_2_paradigm_n150.csv"
 )
-DEFAULT_OUT = ROOT / "research" / "runs" / "lora" / "sft_form_given_n150.jsonl"
+LORA_DIR = ROOT / "research" / "runs" / "lora"
+DEFAULT_OUT_BY_EXPERIMENT = {
+    "lora-form": LORA_DIR / "sft_lora_form_n150.jsonl",
+    "lora-no-inject": LORA_DIR / "sft_lora_no_inject_n150.jsonl",
+}
+# Legacy alias still written for LoRA-form if --output omitted via old path callers
+LEGACY_FORM_OUT = LORA_DIR / "sft_form_given_n150.jsonl"
 
 PRIMARY_ARMS = [
     "soft_plain_B_beams8_qwen4b",
@@ -98,7 +110,7 @@ def _passes(row: dict, *, gmin: float, nmin: float, smin: float) -> bool:
     return g >= gmin and n >= nmin and s >= smin
 
 
-def _build_prompt(row: dict) -> str:
+def _build_prompt(row: dict, *, inject_form: bool) -> str:
     constraints: dict = {"expected_form": row["expected_form"]}
     if row["tense"]:
         constraints["tense"] = row["tense"]
@@ -113,7 +125,7 @@ def _build_prompt(row: dict) -> str:
         constraints=constraints,
         num_candidates=1,
         sentence_length="short",
-        inject_expected_form=row["expected_form"],
+        inject_expected_form=row["expected_form"] if inject_form else None,
         require_full_sentence=True,
     )
 
@@ -163,14 +175,30 @@ def _tier_map(manifest: Path) -> dict[str, str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--experiment",
+        choices=sorted(DEFAULT_OUT_BY_EXPERIMENT),
+        default="lora-form",
+        help="lora-form = inject gold form in train prompt; "
+        "lora-no-inject = Fix-B slot prompt only (Experiment B)",
+    )
     parser.add_argument("--runs-dir", type=Path, default=RUNS)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="JSONL path (defaults by --experiment)",
+    )
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
     parser.add_argument("--min-pairs", type=int, default=2000)
     parser.add_argument("--g-min", type=float, default=4.0)
     parser.add_argument("--n-min", type=float, default=4.0)
     parser.add_argument("--s-min", type=float, default=4.0)
     args = parser.parse_args()
+
+    inject_form = args.experiment == "lora-form"
+    if args.output is None:
+        args.output = DEFAULT_OUT_BY_EXPERIMENT[args.experiment]
 
     tiers = _tier_map(args.manifest)
     best = build_pool(
@@ -196,8 +224,9 @@ def main() -> None:
             best.items(), key=lambda kv: (kv[0][0], kv[0][1], str(kv[0][2]), str(kv[0][3]))
         ):
             g, n, s, tfu = _parse_judge(row["details"])  # type: ignore[misc]
-            prompt = _build_prompt(row)
+            prompt = _build_prompt(row, inject_form=inject_form)
             rec = {
+                "experiment": args.experiment,
                 "verb": row["verb"],
                 "constraints": {
                     "tense": row["tense"],
@@ -211,6 +240,7 @@ def main() -> None:
                 "scores": {"G": g, "N": n, "S": s, "tfu": tfu},
                 "tier": tiers.get(row["verb"], "UNK"),
                 "oversample_tags": [],
+                "inject_form": inject_form,
             }
             person = _slot(row["person"], row["number"])
             tense = row["tense"] or "participle"
@@ -231,6 +261,8 @@ def main() -> None:
             by_tier[rec["tier"]] += 1
 
     meta = {
+        "experiment": args.experiment,
+        "inject_form": inject_form,
         "n_pairs": len(best),
         "filter": "A_strict EF+corrMV+GNS>=4",
         "arms": PRIMARY_ARMS,
@@ -242,6 +274,15 @@ def main() -> None:
     }
     meta_path = args.output.with_suffix(".meta.json")
     meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+
+    # Keep legacy path in sync for LoRA-form so older train jobs still find data.
+    if args.experiment == "lora-form" and args.output.resolve() != LEGACY_FORM_OUT.resolve():
+        LEGACY_FORM_OUT.parent.mkdir(parents=True, exist_ok=True)
+        LEGACY_FORM_OUT.write_text(args.output.read_text(encoding="utf-8"), encoding="utf-8")
+        LEGACY_FORM_OUT.with_suffix(".meta.json").write_text(
+            json.dumps(meta, indent=2), encoding="utf-8"
+        )
+
     print(json.dumps(meta, indent=2))
     print(f"Wrote {len(best)} pairs → {args.output}")
 

@@ -1,18 +1,18 @@
 #!/bin/bash
-# Build LoRA-form SFT JSONL (Experiment A) from scored n150 DBs, then train
-# Qwen3-1.7B LoRA. Train prompts are Fix-B inject (gold surface form given).
+# Build LoRA-no-inject SFT JSONL (Experiment B) from scored n150 DBs, then train
+# Qwen3-1.7B LoRA. Train prompts are Fix-B vanilla/soft text (no gold form).
 #
 # Usage:
-#   sbatch research/scripts/cluster/lora_sft_form_given.sh
+#   sbatch research/scripts/cluster/lora_sft_no_inject.sh
 
-#SBATCH --job-name=lora_form
+#SBATCH --job-name=lora_no_inj
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=6
 #SBATCH --partition=a30
 #SBATCH --time=12:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jjg25
-#SBATCH --output=/vol/bitbucket/jjg25/LinguistOS/logs/lora_sft_form_given_%j.out
+#SBATCH --output=/vol/bitbucket/jjg25/LinguistOS/logs/lora_sft_no_inject_%j.out
 
 set -euo pipefail
 
@@ -53,18 +53,16 @@ else:
     print("deps ok")
 PY
 
-# Canonical LoRA-form paths; legacy form_given tree holds the published A adapter
-DATA="${PROJECT}/research/runs/lora/sft_lora_form_n150.jsonl"
-OUT="${PROJECT}/research/runs/lora/qwen3_1p7b_lora_form"
-LEGACY_OUT="${PROJECT}/research/runs/lora/qwen3_1p7b_form_given"
+DATA="${PROJECT}/research/runs/lora/sft_lora_no_inject_n150.jsonl"
+OUT="${PROJECT}/research/runs/lora/qwen3_1p7b_lora_no_inject"
 
-echo "=== Building SFT dataset (LoRA-form) ==="
+echo "=== Building SFT dataset (LoRA-no-inject) ==="
 python -m research.scripts.build_lora_sft_dataset \
-  --experiment lora-form \
+  --experiment lora-no-inject \
   --runs-dir "${PROJECT}/research/runs" \
   --output "${DATA}"
 
-echo "=== Training LoRA-form ==="
+echo "=== Training LoRA-no-inject ==="
 python -m research.scripts.train_lora_sft \
   --data "${DATA}" \
   --output-dir "${OUT}" \
@@ -75,6 +73,3 @@ python -m research.scripts.train_lora_sft \
 
 echo "=== Done ==="
 ls -lh "${OUT}" | head
-if [[ -d "${LEGACY_OUT}" ]]; then
-  echo "(legacy LoRA-form adapter still at ${LEGACY_OUT})"
-fi

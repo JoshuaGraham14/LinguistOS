@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""LoRA SFT for Qwen3-1.7B form-given Spanish sentence generation (Experiment A).
+"""LoRA SFT for Qwen3-1.7B Spanish sentence generation.
 
-Expects JSONL from ``build_lora_sft_dataset.py`` with ``prompt`` / ``completion``.
-Uses peft + trl SFTTrainer. Oversamples hard tags (vosotros/conditional/participle/low_zipf).
+Supports both Experiment A (``LoRA-form``) and B (``LoRA-no-inject``): the
+script only needs JSONL with ``prompt`` / ``completion`` from
+``build_lora_sft_dataset.py``.
 
 Usage::
 
     python -m research.scripts.train_lora_sft \\
-        --data research/runs/lora/sft_form_given_n150.jsonl \\
-        --output-dir research/runs/lora/qwen3_1p7b_form_given
+        --data research/runs/lora/sft_lora_form_n150.jsonl \\
+        --output-dir research/runs/lora/qwen3_1p7b_lora_form
+
+    python -m research.scripts.train_lora_sft \\
+        --data research/runs/lora/sft_lora_no_inject_n150.jsonl \\
+        --output-dir research/runs/lora/qwen3_1p7b_lora_no_inject
 """
 
 from __future__ import annotations
