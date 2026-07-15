@@ -1,0 +1,7 @@
+name: direction_1_inject_plain_n150_B
+method: baseline_hf_form_injected_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short

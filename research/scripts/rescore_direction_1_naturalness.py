@@ -69,12 +69,12 @@ DIRECTION_1_ARMS: dict[str, str] = {
 
 @dataclass(frozen=True)
 class HeadlineArm:
-    """One row of the D1.2 smoke5 headline table."""
+    """One locked rescore arm (smoke5 headline or n150 Fix-B headline)."""
 
     key: str
     method_name: str
     db_name: str
-    experiment_id: int
+    experiment_id: int | None
     note: str = ""
 
 
@@ -129,6 +129,54 @@ HEADLINE_SMOKE5_ARMS: tuple[HeadlineArm, ...] = (
         db_name="direction_1p2_smoke_hard_plain.db",
         experiment_id=1,
         note="Hard force (2-verb smoke; smoke5 hard DB empty)",
+    ),
+)
+
+# Full spanish_diagnostic_n150 Fix-B headline (all arms share the Fix-B prompt).
+# soft_plain_B = beams 4; soft_plain_B_beams8 = beams 8. Optional 4B probe omitted
+# by default — add its DB path when that arm finishes.
+HEADLINE_N150_B_ARMS: tuple[HeadlineArm, ...] = (
+    HeadlineArm(
+        key="vanilla_plain_B",
+        method_name="direction_1_vanilla_plain_n150_B",
+        db_name="direction_1p2_n150_vanilla_plain_B.db",
+        experiment_id=None,
+        note="Greedy control (Fix B prompt)",
+    ),
+    HeadlineArm(
+        key="inject_plain_B",
+        method_name="direction_1_inject_plain_n150_B",
+        db_name="direction_1p2_n150_inject_plain_B.db",
+        experiment_id=None,
+        note="Prompt injection (Fix B prompt)",
+    ),
+    HeadlineArm(
+        key="soft_plain_B",
+        method_name="direction_1b_soft_plain_n150_B",
+        db_name="direction_1p2_n150_soft_plain_B.db",
+        experiment_id=None,
+        note="Soft bias + Fix B (beams=4)",
+    ),
+    HeadlineArm(
+        key="soft_plain_B_beams8",
+        method_name="direction_1b_soft_plain_n150_B_beams8",
+        db_name="direction_1p2_n150_soft_plain_B_beams8.db",
+        experiment_id=None,
+        note="Soft bias + Fix B (beams=8)",
+    ),
+    HeadlineArm(
+        key="soft_inject_plain_B",
+        method_name="direction_1b_soft_inject_plain_n150_B",
+        db_name="direction_1p2_n150_soft_inject_plain_B.db",
+        experiment_id=None,
+        note="Soft + inject + Fix B (beams=4)",
+    ),
+    HeadlineArm(
+        key="hard_plain_B",
+        method_name="direction_1a_hard_plain_n150_B",
+        db_name="direction_1p2_n150_hard_plain_B.db",
+        experiment_id=None,
+        note="Hard force + Fix B (beams=4)",
     ),
 )
 
@@ -333,11 +381,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--preset",
-        choices=("headline_smoke5",),
+        choices=("headline_smoke5", "headline_n150_B"),
         default=None,
         help=(
-            "Rescore a locked arm set. headline_smoke5 = the D1.2 Form/LT "
-            "headline table (6 smoke5 arms + 1 hard-force smoke arm)."
+            "Rescore a locked arm set. headline_smoke5 = D1.2 Form/LT smoke5 "
+            "table; headline_n150_B = Fix-B n150 core arms (vanilla/inject/"
+            "soft beams4/soft beams8/soft+inject/hard)."
         ),
     )
     parser.add_argument(
@@ -395,15 +444,20 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    if args.preset == "headline_smoke5":
+    if args.preset in ("headline_smoke5", "headline_n150_B"):
         if args.arm or args.db is not None or args.experiment_id is not None:
             parser.error("--preset cannot be combined with --arm/--db/--experiment-id")
+        preset_arms = (
+            HEADLINE_SMOKE5_ARMS
+            if args.preset == "headline_smoke5"
+            else HEADLINE_N150_B_ARMS
+        )
         print(
-            f"Preset headline_smoke5 — {len(HEADLINE_SMOKE5_ARMS)} arms "
+            f"Preset {args.preset} — {len(preset_arms)} arms "
             f"(evaluator={args.evaluator})",
             flush=True,
         )
-        for arm in HEADLINE_SMOKE5_ARMS:
+        for arm in preset_arms:
             _run_one(
                 label=arm.key,
                 method_name=arm.method_name,
