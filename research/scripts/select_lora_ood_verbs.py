@@ -236,6 +236,7 @@ CURATED_SWAPS: dict[str, str] = {
     "esquilar": "tararear",
     "ingeniar": "elogiar",
     "despuntar": "reanimar",
+    "saber": "hablar",  # rebalance: drop deep multi-tense irregular from high OOD
 }
 
 
