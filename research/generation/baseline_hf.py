@@ -81,6 +81,8 @@ def _load_model(model_id: str) -> tuple[Any, Any]:
     if model_id in _MODEL_CACHE:
         return _MODEL_CACHE[model_id]
 
+    import os
+
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -98,6 +100,12 @@ def _load_model(model_id: str) -> tuple[Any, Any]:
         dtype=torch.float16 if use_fp16 else torch.float32,
         attn_implementation="eager",
     )
+    adapter = os.environ.get("LORA_ADAPTER_PATH", "").strip()
+    if adapter:
+        from peft import PeftModel
+
+        model = PeftModel.from_pretrained(model, adapter)
+        print(f"[baseline_hf] loaded LoRA adapter from {adapter}")
     model.to(device)
     model.eval()
     _MODEL_CACHE[model_id] = (tokenizer, model)
