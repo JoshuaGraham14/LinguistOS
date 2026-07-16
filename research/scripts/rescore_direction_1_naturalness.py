@@ -180,6 +180,38 @@ HEADLINE_N150_B_ARMS: tuple[HeadlineArm, ...] = (
     ),
 )
 
+# Soft logit-bias λ sweep on Fix B + beams=8 (smoke5).
+BIAS_SWEEP_SMOKE5_ARMS: tuple[HeadlineArm, ...] = (
+    HeadlineArm(
+        key="soft_plain_B_beams8_bias2",
+        method_name="direction_1b_soft_plain_hl50_B_beams8_bias2",
+        db_name="direction_1p2_smoke5_soft_plain_B_beams8_bias2.db",
+        experiment_id=1,
+        note="Soft + Fix B beams8, λ=2",
+    ),
+    HeadlineArm(
+        key="soft_plain_B_beams8_bias5",
+        method_name="direction_1b_soft_plain_hl50_B_beams8_bias5",
+        db_name="direction_1p2_smoke5_soft_plain_B_beams8_bias5.db",
+        experiment_id=1,
+        note="Soft + Fix B beams8, λ=5",
+    ),
+    HeadlineArm(
+        key="soft_plain_B_beams8_bias8",
+        method_name="direction_1b_soft_plain_hl50_B_beams8_bias8",
+        db_name="direction_1p2_smoke5_soft_plain_B_beams8_bias8.db",
+        experiment_id=1,
+        note="Soft + Fix B beams8, λ=8",
+    ),
+    HeadlineArm(
+        key="soft_plain_B_beams8_bias12",
+        method_name="direction_1b_soft_plain_hl50_B_beams8_bias12",
+        db_name="direction_1p2_smoke5_soft_plain_B_beams8_bias12.db",
+        experiment_id=1,
+        note="Soft + Fix B beams8, λ=12",
+    ),
+)
+
 EVALUATOR_CHOICES = ("perplexity", "judge", "both")
 
 
@@ -381,12 +413,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--preset",
-        choices=("headline_smoke5", "headline_n150_B"),
+        choices=("headline_smoke5", "headline_n150_B", "bias_sweep_smoke5"),
         default=None,
         help=(
             "Rescore a locked arm set. headline_smoke5 = D1.2 Form/LT smoke5 "
             "table; headline_n150_B = Fix-B n150 core arms (vanilla/inject/"
-            "soft beams4/soft beams8/soft+inject/hard)."
+            "soft beams4/soft beams8/soft+inject/hard); bias_sweep_smoke5 = "
+            "soft_plain_B beams8 with λ∈{2,5,8,12}."
         ),
     )
     parser.add_argument(
@@ -444,14 +477,15 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    if args.preset in ("headline_smoke5", "headline_n150_B"):
+    if args.preset in ("headline_smoke5", "headline_n150_B", "bias_sweep_smoke5"):
         if args.arm or args.db is not None or args.experiment_id is not None:
             parser.error("--preset cannot be combined with --arm/--db/--experiment-id")
-        preset_arms = (
-            HEADLINE_SMOKE5_ARMS
-            if args.preset == "headline_smoke5"
-            else HEADLINE_N150_B_ARMS
-        )
+        if args.preset == "headline_smoke5":
+            preset_arms = HEADLINE_SMOKE5_ARMS
+        elif args.preset == "headline_n150_B":
+            preset_arms = HEADLINE_N150_B_ARMS
+        else:
+            preset_arms = BIAS_SWEEP_SMOKE5_ARMS
         print(
             f"Preset {args.preset} — {len(preset_arms)} arms "
             f"(evaluator={args.evaluator})",
