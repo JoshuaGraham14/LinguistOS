@@ -19,6 +19,7 @@ from research.generation.baseline_hf import (
     _load_model,
     _strip_thinking,
     parse_candidates_lenient,
+    record_cost_telemetry,
 )
 from research.generation.plain_output import candidate_from_plain
 from research.generation.prompt_builder import (
@@ -242,6 +243,10 @@ def _beam_generate_batch_once(
             for spec in batch_specs
         ]
         inputs = tokenizer(texts, return_tensors="pt", padding=True).to(model.device)
+        prompt_token_counts = [
+            int(v)
+            for v in inputs["attention_mask"].sum(dim=1).detach().cpu().tolist()
+        ]
         prompt_width = inputs["input_ids"].shape[1]
         max_new_tokens = max(spec.max_new_tokens for spec in batch_specs)
         gen_kwargs: dict[str, Any] = {
@@ -295,6 +300,7 @@ def _beam_generate_batch_once(
             ]
 
         with torch.no_grad():
+            record_cost_telemetry(prompt_token_counts)
             output = model.generate(**inputs, **gen_kwargs)
 
         results = [""] * len(specs)

@@ -31,6 +31,34 @@ from research.generation.prompt_builder import (
 
 # One model per process; cached across constraint sets.
 _MODEL_CACHE: dict[str, tuple[Any, Any]] = {}
+_COST_PROMPT_TOKEN_COUNTS: list[int] = []
+_COST_MODEL_GENERATE_CALLS = 0
+
+
+def reset_cost_telemetry() -> None:
+    """Clear per-process HF prompt-token and generate-call telemetry."""
+    global _COST_MODEL_GENERATE_CALLS
+    _COST_PROMPT_TOKEN_COUNTS.clear()
+    _COST_MODEL_GENERATE_CALLS = 0
+
+
+def record_cost_telemetry(prompt_token_counts: list[int]) -> None:
+    """Record one underlying ``model.generate`` call."""
+    global _COST_MODEL_GENERATE_CALLS
+    _COST_PROMPT_TOKEN_COUNTS.extend(prompt_token_counts)
+    _COST_MODEL_GENERATE_CALLS += 1
+
+
+def get_cost_telemetry() -> dict[str, Any]:
+    """Return telemetry accumulated since the last reset."""
+    total = sum(_COST_PROMPT_TOKEN_COUNTS)
+    count = len(_COST_PROMPT_TOKEN_COUNTS)
+    return {
+        "model_generate_calls": _COST_MODEL_GENERATE_CALLS,
+        "prompt_sequences": count,
+        "prompt_tokens_total": total,
+        "prompt_tokens_mean": (total / count) if count else None,
+    }
 
 _PAIR_RE = re.compile(
     r'"sentence"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"translation"\s*:\s*"((?:[^"\\]|\\.)*)"',
@@ -214,6 +242,10 @@ def _generate_chat_batch_once(
     try:
         texts = [_chat_template_text(tokenizer, model_id, spec) for spec in specs]
         inputs = tokenizer(texts, return_tensors="pt", padding=True).to(model.device)
+        prompt_token_counts = [
+            int(v)
+            for v in inputs["attention_mask"].sum(dim=1).detach().cpu().tolist()
+        ]
         max_new_tokens = max(spec.max_new_tokens for spec in specs)
         gen_kwargs = {
             "max_new_tokens": max_new_tokens,
@@ -221,6 +253,7 @@ def _generate_chat_batch_once(
             **_sample_kwargs(temperature),
         }
         with torch.no_grad():
+            record_cost_telemetry(prompt_token_counts)
             output = model.generate(**inputs, **gen_kwargs)
 
         prompt_width = inputs["input_ids"].shape[1]
