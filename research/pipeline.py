@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
+import os
 import random
+import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,7 +52,11 @@ def _merge_evaluators(
 from research.fixtures.mock_outputs import get_mock_candidates
 from research.generation import GENERATOR_REGISTRY
 from research.generation.base import BaseGenerator
-from research.generation.baseline_hf import BaselineHFGenerator
+from research.generation.baseline_hf import (
+    BaselineHFGenerator,
+    get_cost_telemetry,
+    reset_cost_telemetry,
+)
 from research.generation.cluster_batch_sizes import resolve_hf_batch_size
 from research.generation.constrained_hf import ConstrainedHFGenerator
 from research.methods.loader import load_method_config_by_name
@@ -438,6 +445,89 @@ def _resolve_resume_experiment(
     )
 
 
+def _write_cost_log(
+    *,
+    path: Path,
+    experiment: Experiment,
+    benchmark_name: str,
+    method_config: MethodConfig,
+    run_config: MethodRunConfig,
+    session,
+    cells: int,
+    newly_stored: int,
+    gen_wall_s: float,
+    gen_calls: int,
+    hf_batch_size: int,
+) -> None:
+    """Write generation-only cost summary JSON (latency + token means)."""
+    sentences = (
+        session.query(GeneratedSentence)
+        .filter_by(experiment_id=experiment.id)
+        .order_by(GeneratedSentence.id)
+        .all()
+    )
+    texts = [s.sentence or "" for s in sentences]
+    gen_tokens_mean = None
+    gen_tokens_total = None
+    telemetry = get_cost_telemetry()
+    try:
+        from transformers import AutoTokenizer
+
+        tok = AutoTokenizer.from_pretrained(run_config.model, trust_remote_code=True)
+        if texts:
+            enc = tok(texts, add_special_tokens=False)
+            lengths = [len(ids) for ids in enc["input_ids"]]
+            gen_tokens_total = int(sum(lengths))
+            gen_tokens_mean = float(gen_tokens_total) / len(lengths)
+    except Exception as exc:  # pragma: no cover - best-effort on cluster
+        print(f"  Cost tokenisation skipped: {exc}", flush=True)
+
+    raw_cfg = method_config.config or {}
+    beams = int(raw_cfg.get("num_beams") or 1)
+    n = max(newly_stored, 1)
+    payload = {
+        "arm_label": os.environ.get("COST_ARM_LABEL", "").strip() or None,
+        "benchmark": benchmark_name,
+        "method": method_config.name,
+        "generator": method_config.method,
+        "model": run_config.model,
+        "num_beams": beams,
+        "lora_adapter": os.environ.get("LORA_ADAPTER_PATH", "").strip() or None,
+        "hf_batch_size": hf_batch_size,
+        "experiment_id": experiment.id,
+        "cells": cells,
+        "sentences": len(sentences),
+        "newly_stored": newly_stored,
+        "gen_calls": gen_calls,
+        "gen_wall_s": round(gen_wall_s, 4),
+        "ms_per_sentence": round(1000.0 * gen_wall_s / n, 2),
+        "sentences_per_s": round(n / gen_wall_s, 4) if gen_wall_s > 0 else None,
+        "gen_tokens_mean": None if gen_tokens_mean is None else round(gen_tokens_mean, 3),
+        "gen_tokens_total": gen_tokens_total,
+        "prompt_tokens_mean": (
+            None
+            if telemetry["prompt_tokens_mean"] is None
+            else round(telemetry["prompt_tokens_mean"], 3)
+        ),
+        "prompt_tokens_per_sentence": (
+            round(telemetry["prompt_tokens_total"] / n, 3)
+            if telemetry["prompt_tokens_total"]
+            else None
+        ),
+        "prompt_tokens_total": telemetry["prompt_tokens_total"],
+        "prompt_sequences": telemetry["prompt_sequences"],
+        "model_generate_calls": telemetry["model_generate_calls"],
+        "calls_per_cell": 1,
+        "decode_work_proxy": None,
+    }
+    if gen_tokens_mean is not None:
+        payload["decode_work_proxy"] = round(float(beams) * gen_tokens_mean, 3)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    print(f"  Wrote cost log → {path}", flush=True)
+
+
 def run_experiment(
     *,
     benchmark_name: str,
@@ -575,6 +665,14 @@ def run_experiment(
                     flush=True,
                 )
 
+            cost_log_path = os.environ.get("RESEARCH_COST_LOG", "").strip()
+            cost_warmup = (
+                os.environ.get("RESEARCH_COST_WARMUP", "").strip().lower()
+                in {"1", "true", "yes"}
+            )
+            gen_wall_s = 0.0
+            gen_calls = 0
+
             def _process_candidate_pairs(
                 cs: ConstraintSet,
                 label: str,
@@ -600,6 +698,24 @@ def run_experiment(
 
             if use_hf_batch:
                 resolved = run_config.sentence_length
+                if cost_warmup and work_queue:
+                    warm_chunk = work_queue[: min(hf_batch_size, len(work_queue))]
+                    warm_jobs = [
+                        _constraint_generation_job(
+                            cs,
+                            run_config=run_config,
+                            samples_per_case=samples_needed,
+                        )
+                        for cs, _ in warm_chunk
+                    ]
+                    print(
+                        f"\n  Cost warm-up: {len(warm_jobs)} cells "
+                        "(excluded from timing and storage)",
+                        flush=True,
+                    )
+                    generator.generate_many(warm_jobs, batch_size=hf_batch_size)
+                # Exclude warm-up telemetry and begin the measured region.
+                reset_cost_telemetry()
                 for batch_start in range(0, len(work_queue), hf_batch_size):
                     chunk = work_queue[batch_start : batch_start + hf_batch_size]
                     batch_end = batch_start + len(chunk)
@@ -616,16 +732,20 @@ def run_experiment(
                         )
                         for cs, _ in chunk
                     ]
+                    t_gen = time.perf_counter()
                     batches = generator.generate_many(
                         jobs,
                         batch_size=hf_batch_size,
                     )
+                    gen_wall_s += time.perf_counter() - t_gen
+                    gen_calls += 1
                     for (cs, label), candidates in zip(chunk, batches):
                         pairs = [(cand, resolved) for cand in candidates]
                         _process_candidate_pairs(cs, label, pairs)
             else:
                 for cs, label in work_queue:
                     if live:
+                        t_gen = time.perf_counter()
                         candidate_pairs = _generate_live_candidates(
                             generator,
                             cs=cs,
@@ -633,6 +753,8 @@ def run_experiment(
                             samples_per_case=samples_needed,
                             rng=rng,
                         )
+                        gen_wall_s += time.perf_counter() - t_gen
+                        gen_calls += 1
                     else:
                         mock_batch = get_mock_candidates(benchmark.name, cs.keyword)[
                             : samples_needed
@@ -651,6 +773,13 @@ def run_experiment(
                 f"\n  Generation done: skipped_complete_sets={skipped_sets} "
                 f"newly_stored={newly_stored} total_sentences={total_stored}"
             )
+            if cost_log_path and newly_stored > 0:
+                ms_per = 1000.0 * gen_wall_s / newly_stored
+                print(
+                    f"  Cost timing: gen_wall_s={gen_wall_s:.3f} "
+                    f"gen_calls={gen_calls} ms/sentence={ms_per:.1f}",
+                    flush=True,
+                )
 
             total_evals = 0
             if evaluate:
@@ -701,6 +830,21 @@ def run_experiment(
             experiment.status = "completed"
             experiment.completed_at = datetime.now(timezone.utc)
             session.commit()
+
+            if cost_log_path:
+                _write_cost_log(
+                    path=Path(cost_log_path),
+                    experiment=experiment,
+                    benchmark_name=benchmark.name,
+                    method_config=method_config,
+                    run_config=run_config,
+                    session=session,
+                    cells=len(constraint_sets),
+                    newly_stored=newly_stored,
+                    gen_wall_s=gen_wall_s,
+                    gen_calls=gen_calls,
+                    hf_batch_size=hf_batch_size if use_hf_batch else 1,
+                )
 
         except Exception:
             experiment.status = "failed"
