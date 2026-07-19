@@ -179,6 +179,23 @@ def test_select_diverse_beam_round_robins_groups():
     assert groups[True] and groups[False]
 
 
+def test_rich_grouping_splits_partial_neg_states():
+    from research.generation.neurologic_hf import group_by_clause_state
+
+    a = _tracker(gold=[[1, 2]], negatives=[[9, 9]], ids=[9])
+    b = _tracker(gold=[[1, 2]], negatives=[[9, 9]], ids=[])
+    assert "neg_partial:0" in a.irreversible_sat_key
+    assert a.irreversible_sat_key != b.irreversible_sat_key
+    cands = [
+        ScoredHypothesis((9,), -0.2, 0.5, a),
+        ScoredHypothesis((3,), -0.1, 0.8, b),
+    ]
+    groups = group_by_clause_state(cands)
+    assert len(groups) == 2
+    selected = select_diverse_beam(cands, num_beams=2, rich_grouping=True)
+    assert len(selected) == 2
+
+
 def test_pick_final_prefers_satisfied_then_likelihood():
     a = ScoredHypothesis(
         (1,),

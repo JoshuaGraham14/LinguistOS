@@ -262,21 +262,41 @@ def group_by_gold_fired(
     return groups
 
 
+def group_by_clause_state(
+    candidates: Sequence[ScoredHypothesis],
+) -> dict[frozenset[str], list[ScoredHypothesis]]:
+    """Group by irreversible/partial clause-state key (Neurologic-style)."""
+    groups: dict[frozenset[str], list[ScoredHypothesis]] = {}
+    for c in candidates:
+        key = c.tracker.irreversible_sat_key
+        groups.setdefault(key, []).append(c)
+    return groups
+
+
 def select_diverse_beam(
     candidates: Sequence[ScoredHypothesis],
     *,
     num_beams: int,
+    rich_grouping: bool = False,
 ) -> list[ScoredHypothesis]:
-    """Round-robin across gold-fired groups, ranked by score within each group."""
+    """Round-robin across constraint-state groups, ranked by score within each."""
     if num_beams <= 0 or not candidates:
         return []
 
-    groups = group_by_gold_fired(candidates)
-    ordered_groups: list[list[ScoredHypothesis]] = []
-    for key in (True, False):
-        bucket = sorted(groups[key], key=lambda c: c.score, reverse=True)
-        if bucket:
-            ordered_groups.append(bucket)
+    if rich_grouping:
+        raw_groups = group_by_clause_state(candidates)
+        ordered_groups = [
+            sorted(bucket, key=lambda c: c.score, reverse=True)
+            for bucket in raw_groups.values()
+            if bucket
+        ]
+    else:
+        groups = group_by_gold_fired(candidates)
+        ordered_groups = []
+        for key in (True, False):
+            bucket = sorted(groups[key], key=lambda c: c.score, reverse=True)
+            if bucket:
+                ordered_groups.append(bucket)
 
     if not ordered_groups:
         return []
@@ -350,6 +370,9 @@ def neurologic_generate_one(
     max_new_tokens: int = 80,
     neurologic_lambda: float = DEFAULT_NEUROLOGIC_LAMBDA,
     neurologic_alpha: int = DEFAULT_NEUROLOGIC_ALPHA,
+    rich_grouping: bool = False,
+    use_prefix_automaton: bool = True,
+    min_new_tokens: int = 0,
 ) -> str:
     """Run clause-aware beam search for a single chat prompt (no cross-cell batching)."""
     import torch
@@ -383,7 +406,15 @@ def neurologic_generate_one(
     prompt_width = int(prompt_ids.shape[1])
     record_cost_telemetry([prompt_width])
 
-    base_tracker = ClauseTracker.from_forms(tokenizer, expected_form, morph_ban_set)
+    base_tracker = ClauseTracker.from_forms(
+        tokenizer,
+        expected_form,
+        morph_ban_set,
+        use_prefix_automaton=use_prefix_automaton,
+    )
+
+    def _eos_allowed(gen_len: int) -> bool:
+        return gen_len >= max(0, int(min_new_tokens))
 
     with torch.no_grad():
         out = model(input_ids=prompt_ids, use_cache=True)
@@ -397,6 +428,8 @@ def neurologic_generate_one(
         live_by_key: dict[tuple[int, ...], _LiveBeam] = {}
         for val, idx in zip(values.tolist(), indices.tolist()):
             token_id = int(idx)
+            if token_id == eos_id and not _eos_allowed(1):
+                continue
             tracker = base_tracker.clone()
             tracker.append(token_id)
             hyp = _LiveBeam(
@@ -414,7 +447,9 @@ def neurologic_generate_one(
         if not pruned:
             # Empty-beam fallback: keep best pre-prune candidate.
             pruned = sorted(expansions, key=lambda c: c.score, reverse=True)[:1]
-        selected = select_diverse_beam(pruned, num_beams=num_beams)
+        selected = select_diverse_beam(
+            pruned, num_beams=num_beams, rich_grouping=rich_grouping
+        )
         beam: list[_LiveBeam] = []
         for scored in selected:
             live = live_by_key[scored.token_ids]
@@ -449,8 +484,11 @@ def neurologic_generate_one(
                 log_probs = parent._next_log_probs  # type: ignore[attr-defined]
                 top_alpha = min(neurologic_alpha, log_probs.shape[-1])
                 values, indices = torch.topk(log_probs, k=top_alpha)
+                next_len = len(parent.generated_ids) + 1
                 for val, idx in zip(values.tolist(), indices.tolist()):
                     token_id = int(idx)
+                    if token_id == eos_id and not _eos_allowed(next_len):
+                        continue
                     tracker = parent.tracker.clone()
                     tracker.append(token_id)
                     child = _LiveBeam(
@@ -469,7 +507,9 @@ def neurologic_generate_one(
             if not pruned:
                 pruned = sorted(fallback_pool, key=lambda c: c.score, reverse=True)[:num_beams]
 
-            selected = select_diverse_beam(pruned, num_beams=num_beams)
+            selected = select_diverse_beam(
+                pruned, num_beams=num_beams, rich_grouping=rich_grouping
+            )
             new_beam: list[_LiveBeam] = []
             for scored in selected:
                 live = live_by_key[scored.token_ids]
