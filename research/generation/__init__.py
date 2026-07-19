@@ -35,6 +35,9 @@ from research.generation.constrained_hf import (
     ConstrainedHFSoftMorphInjectPlainBGenerator,
     ConstrainedHFSoftMorphPlainBGenerator,
     ConstrainedHFSoftMorphPronPlainBGenerator,
+    ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator,
+    ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator,
+    ConstrainedHFSoftMorphSoftnegThinPlainBGenerator,
     ConstrainedHFSoftPlainABGenerator,
     ConstrainedHFSoftPlainAGenerator,
     ConstrainedHFSoftPlainBExplicitGenerator,
@@ -81,5 +84,8 @@ GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "constrained_hf_soft_morph_inject_plain_b": ConstrainedHFSoftMorphInjectPlainBGenerator,
     "constrained_hf_soft_morph_forms_plain_b": ConstrainedHFSoftMorphFormsPlainBGenerator,
     "constrained_hf_soft_morph_pron_plain_b": ConstrainedHFSoftMorphPronPlainBGenerator,
+    "constrained_hf_soft_morph_softneg_thin_plain_b": ConstrainedHFSoftMorphSoftnegThinPlainBGenerator,
+    "constrained_hf_soft_morph_softneg_thin_inject_plain_b": ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator,
+    "constrained_hf_soft_morph_softneg_thin_inject_role_plain_b": ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator,
     "individual_gpt": IndividualGPTGenerator,
 }

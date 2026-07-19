@@ -28,7 +28,9 @@ from research.generation.morph_bans import (
     banned_surfaces_in_text,
     build_morph_ban_set,
     encode_bad_words,
+    encode_surfaces,
 )
+from research.generation.morph_role import expected_form_is_main_verb
 from research.generation.prompt_builder import (
     build_prompt,
     build_prompt_plain,
@@ -37,8 +39,13 @@ from research.generation.prompt_builder import (
 
 DEFAULT_NUM_BEAMS = 4
 DEFAULT_BIAS_STRENGTH = 5.0
+DEFAULT_MORPH_BAN_PENALTY = 5.0
 MAX_NEW_TOKENS_PLAIN = 80
 MAX_NEW_TOKENS_JSON = 280
+ROLE_RETRY_HINT = (
+    "Constraint: use the target verb form as the main finite verb "
+    "of the sentence, not as a quote, list item, or side mention."
+)
 
 
 def _form_fired(raw: str, expected_form: str) -> bool:
@@ -68,6 +75,8 @@ class ConstrainedBeamSpec:
     expected_form: str
     max_new_tokens: int
     morph_ban_set: MorphBanSet | None = None
+    morph_ban_soft: bool = False
+    morph_ban_penalty: float = DEFAULT_MORPH_BAN_PENALTY
 
 
 def encode_force_variants(tokenizer, form: str) -> list[list[int]]:
@@ -244,6 +253,159 @@ class _BatchedBadWordsLogitsProcessor:
         return scores
 
 
+class _BatchedSoftBanLogitsProcessor:
+    """Soft-negative morphology bans with optional subject gating.
+
+    Pronoun sequences are always penalised. Competing verb forms are only
+    penalised after an allowed subject pronoun has appeared in the generated
+    tail (when the ban set requests subject gating). Unlike hard bans, this
+    subtracts a finite penalty so soft positive bias can still compete.
+    """
+
+    def __init__(
+        self,
+        always_ids_per_row: list[list[list[int]]],
+        gated_ids_per_row: list[list[list[int]]],
+        subject_ids_per_row: list[list[list[int]]],
+        gate_per_row: list[bool],
+        *,
+        penalty: float,
+        num_beams: int,
+        prompt_width: int,
+    ) -> None:
+        self._always_ids_per_row = always_ids_per_row
+        self._gated_ids_per_row = gated_ids_per_row
+        self._subject_ids_per_row = subject_ids_per_row
+        self._gate_per_row = gate_per_row
+        self._penalty = float(penalty)
+        self._num_beams = num_beams
+        self._prompt_width = prompt_width
+
+    @staticmethod
+    def _tail_contains_sequence(tail: list[int], sequence: list[int]) -> bool:
+        n = len(sequence)
+        if n == 0 or len(tail) < n:
+            return False
+        for i in range(len(tail) - n + 1):
+            if tail[i : i + n] == sequence:
+                return True
+        return False
+
+    def _subject_seen(self, tail: list[int], row: int) -> bool:
+        for sequence in self._subject_ids_per_row[row]:
+            if self._tail_contains_sequence(tail, sequence):
+                return True
+        return False
+
+    def _penalize_sequences(self, scores, idx: int, tail: list[int], sequences):
+        for sequence in sequences:
+            if not sequence:
+                continue
+            prefix = sequence[:-1]
+            if prefix and (
+                len(tail) < len(prefix) or tail[-len(prefix) :] != prefix
+            ):
+                continue
+            token_id = sequence[-1]
+            if token_id < scores.shape[-1]:
+                scores[idx, token_id] = scores[idx, token_id] - self._penalty
+
+    def __call__(self, input_ids, scores):
+        scores = scores.clone()
+        for idx in range(scores.shape[0]):
+            row = idx // self._num_beams
+            if row >= len(self._always_ids_per_row):
+                continue
+            tail = input_ids[idx, self._prompt_width :].tolist()
+            self._penalize_sequences(
+                scores, idx, tail, self._always_ids_per_row[row]
+            )
+            if self._gate_per_row[row] and not self._subject_seen(tail, row):
+                continue
+            self._penalize_sequences(
+                scores, idx, tail, self._gated_ids_per_row[row]
+            )
+        return scores
+
+
+def _morph_ban_processors_for_batch(
+    tokenizer,
+    batch_specs: list[ConstrainedBeamSpec],
+    *,
+    num_beams: int,
+    prompt_width: int,
+) -> list[Any]:
+    """Build hard or soft morph-ban processors for one padded batch."""
+    soft_rows = [
+        spec
+        for spec in batch_specs
+        if spec.morph_ban_set is not None and spec.morph_ban_soft
+    ]
+    hard_rows = [
+        spec
+        for spec in batch_specs
+        if spec.morph_ban_set is not None and not spec.morph_ban_soft
+    ]
+    processors: list[Any] = []
+    if hard_rows:
+        bad_word_ids_per_row = [
+            encode_bad_words(tokenizer, spec.morph_ban_set)
+            if spec.morph_ban_set is not None and not spec.morph_ban_soft
+            else []
+            for spec in batch_specs
+        ]
+        if any(bad_word_ids_per_row):
+            processors.append(
+                _BatchedBadWordsLogitsProcessor(
+                    bad_word_ids_per_row,
+                    num_beams=num_beams,
+                    prompt_width=prompt_width,
+                )
+            )
+    if soft_rows:
+        always_ids_per_row: list[list[list[int]]] = []
+        gated_ids_per_row: list[list[list[int]]] = []
+        subject_ids_per_row: list[list[list[int]]] = []
+        gate_per_row: list[bool] = []
+        penalty = DEFAULT_MORPH_BAN_PENALTY
+        for spec in batch_specs:
+            ban = spec.morph_ban_set
+            if ban is None or not spec.morph_ban_soft:
+                always_ids_per_row.append([])
+                gated_ids_per_row.append([])
+                subject_ids_per_row.append([])
+                gate_per_row.append(False)
+                continue
+            penalty = spec.morph_ban_penalty
+            if ban.gate_forms_on_subject:
+                always_ids_per_row.append(encode_surfaces(tokenizer, ban.pronouns))
+                gated_ids_per_row.append(
+                    encode_surfaces(tokenizer, ban.competing_forms)
+                )
+                subject_ids_per_row.append(
+                    encode_surfaces(tokenizer, ban.allowed_subjects)
+                )
+                gate_per_row.append(True)
+            else:
+                always_ids_per_row.append(encode_bad_words(tokenizer, ban))
+                gated_ids_per_row.append([])
+                subject_ids_per_row.append([])
+                gate_per_row.append(False)
+        if any(always_ids_per_row) or any(gated_ids_per_row):
+            processors.append(
+                _BatchedSoftBanLogitsProcessor(
+                    always_ids_per_row,
+                    gated_ids_per_row,
+                    subject_ids_per_row,
+                    gate_per_row,
+                    penalty=penalty,
+                    num_beams=num_beams,
+                    prompt_width=prompt_width,
+                )
+            )
+    return processors
+
+
 def _beam_generate_batch_once(
     model_id: str,
     specs: list[ConstrainedBeamSpec],
@@ -321,21 +483,12 @@ def _beam_generate_batch_once(
                     no_repeat_ngram_size, prompt_width
                 )
             )
-        bad_word_ids_per_row = [
-            encode_bad_words(tokenizer, spec.morph_ban_set)
-            if spec.morph_ban_set is not None
-            else []
-            for spec in batch_specs
-        ]
-        if any(bad_word_ids_per_row):
-            extra_processors.insert(
-                0,
-                _BatchedBadWordsLogitsProcessor(
-                    bad_word_ids_per_row,
-                    num_beams=num_beams,
-                    prompt_width=prompt_width,
-                ),
-            )
+        extra_processors[0:0] = _morph_ban_processors_for_batch(
+            tokenizer,
+            batch_specs,
+            num_beams=num_beams,
+            prompt_width=prompt_width,
+        )
 
         if use_hard_constraint:
             gen_kwargs["force_words_ids"] = [variants for _, _, variants in valid_rows]
@@ -443,6 +596,12 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
     _USE_MORPH_BANS = False
     _MORPH_BAN_MODE: MorphBanMode = "full"
     _USE_SOFT_BIAS = True
+    # Direction 3b soft-negative / subject-gated refinements (opt-in).
+    _MORPH_BAN_SOFT = False
+    _MORPH_BAN_PENALTY = DEFAULT_MORPH_BAN_PENALTY
+    _MORPH_BAN_SUBJECT_GATE = False
+    _ROLE_RESAMPLE = False
+    _ROLE_RESAMPLE_MAX = 3
 
     def _system_prompt(self, lang: str) -> str:
         if self.OUTPUT_JSON:
@@ -516,6 +675,8 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                     expected_form=expected_form,
                     max_new_tokens=self._max_new_tokens_for_mode(),
                     morph_ban_set=morph_ban_set,
+                    morph_ban_soft=self._MORPH_BAN_SOFT,
+                    morph_ban_penalty=self._MORPH_BAN_PENALTY,
                 )
             ],
             num_beams=self._num_beams,
@@ -554,7 +715,23 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
             str(constraints.get("number") or ""),
             self._job_expected_form(constraints),
             mode=self._MORPH_BAN_MODE,
+            gate_forms_on_subject=self._MORPH_BAN_SUBJECT_GATE,
         )
+
+    def _role_ok(self, sentence: str, expected_form: str) -> bool:
+        if not self._ROLE_RESAMPLE:
+            return True
+        return expected_form_is_main_verb(sentence, expected_form)
+
+    def _scene_hint_for_attempt(self, attempt_idx: int) -> str | None:
+        if self.SCENE_VARIATION:
+            return SCENE_HINTS[attempt_idx % len(SCENE_HINTS)]
+        if self._ROLE_RESAMPLE and attempt_idx > 0:
+            # Deterministic beam needs a prompt change to explore alternatives.
+            if attempt_idx == 1:
+                return ROLE_RETRY_HINT
+            return SCENE_HINTS[(attempt_idx - 1) % len(SCENE_HINTS)]
+        return None
 
     def generate(
         self,
@@ -577,11 +754,14 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
         system = self._system_prompt(lang)
         morph_ban_set = self._job_morph_ban_set(keyword, constraints)
         collected: list[dict[str, str]] = []
+        max_attempts = (
+            max(num_candidates, self._ROLE_RESAMPLE_MAX)
+            if self._ROLE_RESAMPLE
+            else num_candidates
+        )
 
-        for sample_idx in range(num_candidates):
-            scene_hint = None
-            if self.SCENE_VARIATION:
-                scene_hint = SCENE_HINTS[sample_idx % len(SCENE_HINTS)]
+        for sample_idx in range(max_attempts):
+            scene_hint = self._scene_hint_for_attempt(sample_idx)
 
             prompt = self._build_user_prompt(
                 keyword=keyword,
@@ -608,17 +788,30 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                 if morph_ban_set is not None
                 else frozenset()
             )
+            role_ok = True
+            if batch and self._ROLE_RESAMPLE:
+                role_ok = self._role_ok(batch[0].get("sentence", ""), expected_form)
+                if not role_ok and sample_idx + 1 < max_attempts:
+                    print(
+                        f"    [{self.name} sample {sample_idx + 1}] "
+                        f"role_reject retrying mode={mode} fired={int(fired)}"
+                    )
+                    continue
             morph_telemetry = (
                 f" banned_hit={int(bool(banned_hits))}"
                 f" ban_count={len(morph_ban_set.surfaces)}"
                 f" ban_mode={morph_ban_set.mode}"
+                f" soft_ban={int(self._MORPH_BAN_SOFT)}"
                 if morph_ban_set is not None
                 else ""
+            )
+            role_telemetry = (
+                f" role_ok={int(role_ok)}" if self._ROLE_RESAMPLE else ""
             )
             print(
                 f"    [{self.name} sample {sample_idx + 1}] "
                 f"parsed={len(batch)} mode={mode} fired={int(fired)}"
-                f"{morph_telemetry}"
+                f"{morph_telemetry}{role_telemetry}"
             )
             collected.extend(batch)
             if len(collected) >= num_candidates:
@@ -638,9 +831,13 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
 
         n_jobs = len(jobs)
         collected: list[list[dict[str, str]]] = [[] for _ in range(n_jobs)]
+        role_attempts: list[int] = [0] * n_jobs
         active = list(range(n_jobs))
+        max_calls = self.MAX_CALLS
+        if self._ROLE_RESAMPLE:
+            max_calls = max(max_calls, self._ROLE_RESAMPLE_MAX)
 
-        for call_idx in range(self.MAX_CALLS):
+        for call_idx in range(max_calls):
             if not active:
                 break
 
@@ -656,10 +853,12 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                 if not expected_form:
                     continue
                 lang = language_display_name(job.get("target_language", "es"))
-                scene_hint = None
-                if self.SCENE_VARIATION:
-                    sample_idx = len(collected[idx])
-                    scene_hint = SCENE_HINTS[sample_idx % len(SCENE_HINTS)]
+                attempt_idx = (
+                    role_attempts[idx]
+                    if self._ROLE_RESAMPLE
+                    else len(collected[idx])
+                )
+                scene_hint = self._scene_hint_for_attempt(attempt_idx)
                 prompt = self._build_user_prompt(
                     keyword=job["keyword"],
                     translation=job["translation"],
@@ -684,6 +883,8 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                             str(job["keyword"]),
                             constraints,
                         ),
+                        morph_ban_soft=self._MORPH_BAN_SOFT,
+                        morph_ban_penalty=self._MORPH_BAN_PENALTY,
                     )
                 )
                 spec_job_idx.append(idx)
@@ -707,6 +908,7 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
             next_active: list[int] = []
             fired_count = 0
             banned_hit_count = 0
+            role_reject_count = 0
             for job_idx, spec, raw in zip(spec_job_idx, specs, raws):
                 batch, mode = self._parse_raw(raw)
                 expected = self._job_expected_form(jobs[job_idx]["constraints"])
@@ -718,22 +920,45 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                     else frozenset()
                 )
                 banned_hit_count += int(bool(banned_hits))
+                role_ok = True
+                if batch and self._ROLE_RESAMPLE:
+                    role_ok = self._role_ok(
+                        batch[0].get("sentence", ""), expected
+                    )
+                    if not role_ok:
+                        role_attempts[job_idx] += 1
+                        role_reject_count += 1
+                        if (
+                            role_attempts[job_idx] < self._ROLE_RESAMPLE_MAX
+                            and call_idx + 1 < max_calls
+                        ):
+                            print(
+                                f"    [{self.name} batch call {call_idx + 1} "
+                                f"job {job_idx + 1}] role_reject retrying "
+                                f"attempt={role_attempts[job_idx]}"
+                            )
+                            next_active.append(job_idx)
+                            continue
                 morph_telemetry = (
                     f" banned_hit={int(bool(banned_hits))}"
                     f" ban_count={len(spec.morph_ban_set.surfaces)}"
                     f" ban_mode={spec.morph_ban_set.mode}"
+                    f" soft_ban={int(spec.morph_ban_soft)}"
                     if spec.morph_ban_set is not None
                     else ""
+                )
+                role_telemetry = (
+                    f" role_ok={int(role_ok)}" if self._ROLE_RESAMPLE else ""
                 )
                 print(
                     f"    [{self.name} batch call {call_idx + 1} job {job_idx + 1}] "
                     f"parsed={len(batch)} mode={mode} fired={int(fired)}"
-                    f"{morph_telemetry}"
+                    f"{morph_telemetry}{role_telemetry}"
                 )
                 collected[job_idx].extend(batch)
                 if (
                     len(collected[job_idx]) < jobs[job_idx]["num_candidates"]
-                    and call_idx + 1 < self.MAX_CALLS
+                    and call_idx + 1 < max_calls
                 ):
                     next_active.append(job_idx)
             if spec_job_idx:
@@ -742,10 +967,15 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                     if self._USE_MORPH_BANS
                     else ""
                 )
+                role_summary = (
+                    f" role_rejects={role_reject_count}/{len(spec_job_idx)}"
+                    if self._ROLE_RESAMPLE
+                    else ""
+                )
                 print(
                     f"    [{self.name} batch call {call_idx + 1}] "
                     f"firing_rate={fired_count}/{len(spec_job_idx)}"
-                    f"{morph_summary}"
+                    f"{morph_summary}{role_summary}"
                 )
             active = next_active
 
@@ -1005,3 +1235,49 @@ class ConstrainedHFSoftMorphPronPlainBGenerator(
     @property
     def name(self) -> str:
         return "constrained_hf_soft_morph_pron_plain_b"
+
+
+# --- Direction 3b soft-negative thin + subject-gated refinements -------------
+
+
+class ConstrainedHFSoftMorphSoftnegThinPlainBGenerator(
+    ConstrainedHFSoftPlainBGenerator
+):
+    """Soft λ=5 + soft-negative thin bans with subject gating."""
+
+    _USE_MORPH_BANS = True
+    _MORPH_BAN_MODE: MorphBanMode = "thin"
+    _MORPH_BAN_SOFT = True
+    _MORPH_BAN_SUBJECT_GATE = True
+
+    @property
+    def name(self) -> str:
+        return "constrained_hf_soft_morph_softneg_thin_plain_b"
+
+
+class ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator(
+    ConstrainedHFSoftInjectPlainBGenerator
+):
+    """Soft λ=5 + inject + soft-negative thin bans with subject gating."""
+
+    _USE_MORPH_BANS = True
+    _MORPH_BAN_MODE: MorphBanMode = "thin"
+    _MORPH_BAN_SOFT = True
+    _MORPH_BAN_SUBJECT_GATE = True
+
+    @property
+    def name(self) -> str:
+        return "constrained_hf_soft_morph_softneg_thin_inject_plain_b"
+
+
+class ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator(
+    ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator
+):
+    """Soft + inject + softneg thin + spaCy ROOT role resample."""
+
+    _ROLE_RESAMPLE = True
+    _ROLE_RESAMPLE_MAX = 3
+
+    @property
+    def name(self) -> str:
+        return "constrained_hf_soft_morph_softneg_thin_inject_role_plain_b"

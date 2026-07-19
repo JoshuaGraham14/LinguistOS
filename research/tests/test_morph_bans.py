@@ -132,6 +132,35 @@ def test_participle_bans_finite_forms_but_not_gold(monkeypatch):
     assert not ban_set.pronouns
 
 
+def test_thin_bans_only_habitual_competitors_and_wrong_pronouns(monkeypatch):
+    def fake_actual(lemma, tense, person, number):
+        table = {
+            ("1st", "singular"): "busco",
+            ("2nd", "singular"): "buscas",
+            ("3rd", "singular"): "busca",
+        }
+        return table.get((person, number))
+
+    monkeypatch.setattr(morph_bans, "_actual_es_form", fake_actual)
+    ban_set = build_morph_ban_set(
+        "buscar",
+        "present",
+        "2nd",
+        "singular",
+        "buscas",
+        mode="thin",
+        gate_forms_on_subject=True,
+    )
+
+    assert ban_set.mode == "thin"
+    assert ban_set.competing_forms == frozenset({"busco", "busca"})
+    assert "buscar" not in ban_set.surfaces
+    assert "buscas" not in ban_set.surfaces
+    assert "yo" in ban_set.pronouns
+    assert ban_set.gate_forms_on_subject is True
+    assert {"tú", "tu"} <= ban_set.allowed_subjects
+
+
 class _FakeTokenizer:
     def encode(self, text, add_special_tokens=False):
         return [ord(char) for char in text]

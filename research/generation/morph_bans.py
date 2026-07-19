@@ -16,7 +16,7 @@ from typing import Literal
 
 from research.evaluation.lexicon.frequency import _actual_es_form
 
-MorphBanMode = Literal["full", "forms_only", "pronouns_only"]
+MorphBanMode = Literal["full", "forms_only", "pronouns_only", "thin"]
 
 INDICATIVE_TENSES: tuple[str, ...] = (
     "present",
@@ -32,6 +32,11 @@ PERSON_NUMBER_SLOTS: tuple[tuple[str, str], ...] = (
     ("1st", "plural"),
     ("2nd", "plural"),
     ("3rd", "plural"),
+)
+# High-frequency habitual fallbacks only — used by the thin grammar.
+_THIN_COMPETITOR_SLOTS: tuple[tuple[str, str], ...] = (
+    ("1st", "singular"),
+    ("3rd", "singular"),
 )
 
 # Include polite Spanish subject pronouns in the same agreement group.  Do not
@@ -60,6 +65,8 @@ class MorphBanSet:
     mode: MorphBanMode
     competing_forms: frozenset[str]
     pronouns: frozenset[str]
+    allowed_subjects: frozenset[str] = frozenset()
+    gate_forms_on_subject: bool = False
 
     @property
     def surfaces(self) -> frozenset[str]:
@@ -83,6 +90,27 @@ def _wrong_pronouns(person: str, number: str) -> frozenset[str]:
     return frozenset(_ALL_SUBJECT_PRONOUNS - allowed)
 
 
+def _thin_competitors(
+    lemma: str,
+    tense: str,
+    person: str,
+    number: str,
+    expected_norm: str,
+) -> frozenset[str]:
+    """Wrong-pronoun partners only: 1sg/3sg habitual fallbacks, no infinitive."""
+    if tense not in INDICATIVE_TENSES:
+        return frozenset()
+    forms: set[str] = set()
+    for slot_person, slot_number in _THIN_COMPETITOR_SLOTS:
+        if (slot_person, slot_number) == (person, number):
+            continue
+        form = _actual_es_form(lemma, tense, slot_person, slot_number)
+        if form:
+            forms.add(normalize_surface(form))
+    forms.discard(expected_norm)
+    return frozenset(forms)
+
+
 def build_morph_ban_set(
     lemma: str,
     tense: str,
@@ -91,16 +119,23 @@ def build_morph_ban_set(
     expected_form: str,
     *,
     mode: MorphBanMode = "full",
+    gate_forms_on_subject: bool = False,
 ) -> MorphBanSet:
     """Build form/pronoun bans for a single Spanish morphology cell."""
-    if mode not in ("full", "forms_only", "pronouns_only"):
+    if mode not in ("full", "forms_only", "pronouns_only", "thin"):
         raise ValueError(f"Unknown morphology ban mode: {mode!r}")
 
     lemma_norm = normalize_surface(lemma)
     expected_norm = normalize_surface(expected_form)
     form_bans: set[str] = set()
 
-    if mode in ("full", "forms_only"):
+    if mode == "thin":
+        form_bans.update(
+            _thin_competitors(
+                lemma_norm, tense, person, number, expected_norm
+            )
+        )
+    elif mode in ("full", "forms_only"):
         if tense == "participle":
             for indicative_tense in INDICATIVE_TENSES:
                 form_bans.update(_paradigm_forms(lemma_norm, indicative_tense))
@@ -122,13 +157,16 @@ def build_morph_ban_set(
 
     pronoun_bans = (
         _wrong_pronouns(person, number)
-        if mode in ("full", "pronouns_only") and tense != "participle"
+        if mode in ("full", "pronouns_only", "thin") and tense != "participle"
         else frozenset()
     )
+    allowed = _SUBJECT_GROUPS.get((person, number), frozenset())
     return MorphBanSet(
         mode=mode,
         competing_forms=frozenset(form_bans),
         pronouns=pronoun_bans,
+        allowed_subjects=frozenset(allowed) if gate_forms_on_subject else frozenset(),
+        gate_forms_on_subject=bool(gate_forms_on_subject and form_bans),
     )
 
 
@@ -140,10 +178,10 @@ def _case_variants(surface: str) -> tuple[str, ...]:
     return tuple(variants)
 
 
-def encode_bad_words(tokenizer, ban_set: MorphBanSet) -> list[list[int]]:
-    """Encode bare/space-prefixed and sentence-initial variants."""
+def encode_surfaces(tokenizer, surfaces: frozenset[str] | set[str]) -> list[list[int]]:
+    """Encode bare/space-prefixed and sentence-initial variants for *surfaces*."""
     encoded: list[list[int]] = []
-    for surface in sorted(ban_set.surfaces):
+    for surface in sorted(surfaces):
         for case_variant in _case_variants(surface):
             for prefix in ("", " "):
                 token_ids = tokenizer.encode(
@@ -153,6 +191,11 @@ def encode_bad_words(tokenizer, ban_set: MorphBanSet) -> list[list[int]]:
                 if token_ids and token_ids not in encoded:
                     encoded.append(token_ids)
     return encoded
+
+
+def encode_bad_words(tokenizer, ban_set: MorphBanSet) -> list[list[int]]:
+    """Encode bare/space-prefixed and sentence-initial variants."""
+    return encode_surfaces(tokenizer, ban_set.surfaces)
 
 
 def banned_surfaces_in_text(text: str, ban_set: MorphBanSet) -> frozenset[str]:

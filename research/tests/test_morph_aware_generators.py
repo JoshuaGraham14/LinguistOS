@@ -9,7 +9,11 @@ from research.generation.constrained_hf import (
     ConstrainedHFSoftMorphFormsPlainBGenerator,
     ConstrainedHFSoftMorphInjectPlainBGenerator,
     ConstrainedHFSoftMorphPronPlainBGenerator,
+    ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator,
+    ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator,
+    ConstrainedHFSoftMorphSoftnegThinPlainBGenerator,
     _BatchedBadWordsLogitsProcessor,
+    _BatchedSoftBanLogitsProcessor,
 )
 from research.generation.morph_bans import MorphBanSet
 
@@ -23,6 +27,9 @@ NEW_GENERATORS = {
     "constrained_hf_soft_morph_inject_plain_b",
     "constrained_hf_soft_morph_forms_plain_b",
     "constrained_hf_soft_morph_pron_plain_b",
+    "constrained_hf_soft_morph_softneg_thin_plain_b",
+    "constrained_hf_soft_morph_softneg_thin_inject_plain_b",
+    "constrained_hf_soft_morph_softneg_thin_inject_role_plain_b",
 }
 
 
@@ -140,3 +147,90 @@ def test_batched_bad_words_processor_is_sequence_aware_and_per_row():
     assert out[0, 30] == 0
     assert torch.isneginf(out[1, 30])
     assert out[1, 10] == 0
+
+
+def test_softneg_thin_generators_enable_soft_bans_and_subject_gate():
+    soft = ConstrainedHFSoftMorphSoftnegThinPlainBGenerator
+    inject = ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator
+    role = ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator
+
+    assert soft._MORPH_BAN_MODE == "thin"
+    assert soft._MORPH_BAN_SOFT is True
+    assert soft._MORPH_BAN_SUBJECT_GATE is True
+    assert soft._USE_MORPH_BANS is True
+    assert inject._INJECT_EXPECTED_FORM is True
+    assert role._ROLE_RESAMPLE is True
+    assert role._ROLE_RESAMPLE_MAX == 3
+
+
+def test_soft_ban_processor_gates_verb_forms_until_subject_appears():
+    proc = _BatchedSoftBanLogitsProcessor(
+        always_ids_per_row=[[[10]]],  # wrong pronoun
+        gated_ids_per_row=[[[20]]],  # competing verb form
+        subject_ids_per_row=[[[99]]],  # allowed subject
+        gate_per_row=[True],
+        penalty=5.0,
+        num_beams=1,
+        prompt_width=1,
+    )
+    scores = torch.zeros((1, 40))
+
+    # No subject yet: only pronoun penalty applies.
+    out = proc(torch.tensor([[0, 5]]), scores.clone())
+    assert out[0, 10].item() == -5.0
+    assert out[0, 20].item() == 0.0
+
+    # Subject token 99 has appeared: verb competitor is now penalised.
+    out2 = proc(torch.tensor([[0, 99]]), scores.clone())
+    assert out2[0, 10].item() == -5.0
+    assert out2[0, 20].item() == -5.0
+
+
+def test_role_resample_retries_when_form_is_not_main_verb(monkeypatch):
+    import research.generation.constrained_hf as constrained
+
+    calls = {"n": 0}
+
+    def fake_beam_batch(
+        model_id,
+        specs,
+        *,
+        num_beams,
+        use_hard_constraint,
+        bias_strength,
+        batch_size=8,
+        stop_bias_after_hit=False,
+        no_repeat_ngram_size=0,
+        min_new_tokens=0,
+        length_penalty=1.0,
+    ):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return ["La forma es buscas."]
+        return ["Tú buscas libros."]
+
+    monkeypatch.setattr(constrained, "beam_generate_batch", fake_beam_batch)
+    monkeypatch.setattr(
+        constrained,
+        "expected_form_is_main_verb",
+        lambda sentence, expected_form: "Tú buscas" in sentence,
+    )
+    gen = ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator(
+        model="Qwen/Qwen3-1.7B",
+        temperature=0.0,
+        num_beams=8,
+    )
+    result = gen.generate_many(
+        [
+            {
+                "keyword": "buscar",
+                "translation": "to search",
+                "constraints": _constraints(),
+                "num_candidates": 1,
+                "target_language": "es",
+                "sentence_length": "short",
+            }
+        ]
+    )
+    assert calls["n"] == 2
+    assert result[0][0]["sentence"] == "Tú buscas libros."
