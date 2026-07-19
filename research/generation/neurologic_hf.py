@@ -559,6 +559,8 @@ class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
         num_beams: int = 8,
         neurologic_lambda: float = DEFAULT_NEUROLOGIC_LAMBDA,
         neurologic_alpha: int = DEFAULT_NEUROLOGIC_ALPHA,
+        rich_grouping: bool = False,
+        use_prefix_automaton: bool = True,
         **kwargs: Any,
     ) -> None:
         super().__init__(
@@ -569,6 +571,8 @@ class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
         )
         self._neurologic_lambda = float(neurologic_lambda)
         self._neurologic_alpha = int(neurologic_alpha)
+        self._rich_grouping = bool(rich_grouping)
+        self._use_prefix_automaton = bool(use_prefix_automaton)
 
     @property
     def name(self) -> str:
@@ -592,6 +596,9 @@ class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
             max_new_tokens=self._max_new_tokens_for_mode(),
             neurologic_lambda=self._neurologic_lambda,
             neurologic_alpha=self._neurologic_alpha,
+            rich_grouping=self._rich_grouping,
+            use_prefix_automaton=self._use_prefix_automaton,
+            min_new_tokens=self._min_new_tokens,
         )
 
     def generate_many(

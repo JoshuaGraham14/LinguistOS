@@ -111,6 +111,10 @@ def _build_generator(run_config: MethodRunConfig, method_config: MethodConfig) -
         kwargs["neurologic_lambda"] = float(raw["neurologic_lambda"])
     if "neurologic_alpha" in raw:
         kwargs["neurologic_alpha"] = int(raw["neurologic_alpha"])
+    if "rich_grouping" in raw:
+        kwargs["rich_grouping"] = bool(raw["rich_grouping"])
+    if "use_prefix_automaton" in raw:
+        kwargs["use_prefix_automaton"] = bool(raw["use_prefix_automaton"])
     if "no_repeat_ngram_size" in raw:
         kwargs["no_repeat_ngram_size"] = int(raw["no_repeat_ngram_size"])
     if "min_new_tokens" in raw:

@@ -1,0 +1,10 @@
+name: direction_4_neurologic_thin_b4_a50_hl50_B
+method: neurologic_hf_thin_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short
+  num_beams: 4
+  neurologic_lambda: 0.1
+  neurologic_alpha: 50
