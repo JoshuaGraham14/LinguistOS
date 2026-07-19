@@ -1,0 +1,8 @@
+name: direction_1c_hard_morph_inject_hl50_B
+method: constrained_hf_hard_morph_inject_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short
+  num_beams: 8
