@@ -40,8 +40,12 @@ for ARM in "${ARMS[@]}"; do
     --mail-type=ALL \
     --mail-user=jjg25 \
     --output="${PROJECT}/logs/direction_4_ablate_${ARM}_%j.out" \
-    --export=ALL,ARM="${ARM}" \
-    "${ARM_SCRIPT}"
+    <<EOF
+#!/bin/bash
+set -euo pipefail
+export ARM=${ARM}
+bash ${ARM_SCRIPT}
+EOF
   )"
   JID="${OUT##* }"
   echo "  ARM=${ARM} -> job ${JID}"
@@ -53,14 +57,6 @@ echo ""
 echo "Submitting naturalness rescore afterok:${DEP_LIST}"
 NAT_OUT="$(sbatch \
   --dependency="afterok:${DEP_LIST}" \
-  --job-name="d4_abl_nat" \
-  --gres=gpu:1 \
-  --cpus-per-task=4 \
-  --partition=a30 \
-  --time=12:00:00 \
-  --mail-type=ALL \
-  --mail-user=jjg25 \
-  --output="${PROJECT}/logs/direction_4_ablate_natural_%j.out" \
   "${NAT_SCRIPT}"
 )"
 echo "  naturalness -> ${NAT_OUT}"
