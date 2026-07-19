@@ -50,7 +50,7 @@ SOFTNEG_ARMS: tuple[RescoreArm, ...] = (
             "direction_1c_soft_morph_softneg_thin_inject_role_hl50_B",
             "direction_3b_smoke5_softneg_thin_inject_role_B.db",
             None,
-            "Soft + inject + softneg thin + ROOT role resample",
+            "Soft + inject + softneg thin + local role resample",
         )
     ),
 )

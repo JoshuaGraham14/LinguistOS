@@ -1273,7 +1273,7 @@ class ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator(
 class ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator(
     ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator
 ):
-    """Soft + inject + softneg thin + spaCy ROOT role resample."""
+    """Soft + inject + softneg thin + local main-verb role resample."""
 
     _ROLE_RESAMPLE = True
     _ROLE_RESAMPLE_MAX = 3
