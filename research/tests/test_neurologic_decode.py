@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from research.generation.neurologic_hf import (
     ClauseTracker,
+    NeurologicHFThinInjectPlainBGenerator,
+    NeurologicHFThinPlainBGenerator,
     ScoredHypothesis,
     group_by_gold_fired,
     neurologic_score,
@@ -11,6 +13,79 @@ from research.generation.neurologic_hf import (
     prune_irreversible,
     select_diverse_beam,
 )
+from research.generation import GENERATOR_REGISTRY
+
+
+def test_registry_adds_neurologic_generators():
+    assert "neurologic_hf_thin_plain_b" in GENERATOR_REGISTRY
+    assert "neurologic_hf_thin_inject_plain_b" in GENERATOR_REGISTRY
+    assert NeurologicHFThinPlainBGenerator._USE_MORPH_BANS is True
+    assert NeurologicHFThinPlainBGenerator._MORPH_BAN_MODE == "thin"
+    assert NeurologicHFThinPlainBGenerator._USE_SOFT_BIAS is False
+    assert NeurologicHFThinPlainBGenerator.USE_HARD_CONSTRAINT is False
+    assert NeurologicHFThinInjectPlainBGenerator._INJECT_EXPECTED_FORM is True
+
+
+def test_neurologic_fix_b_prompt_and_inject():
+    plain = NeurologicHFThinPlainBGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    inject = NeurologicHFThinInjectPlainBGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    constraints = {
+        "tense": "present",
+        "person": "2nd",
+        "number": "singular",
+        "expected_form": "buscas",
+    }
+    plain_prompt = plain._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints=constraints,
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=plain._resolve_inject_expected_form(constraints),
+    )
+    inject_prompt = inject._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints=constraints,
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=inject._resolve_inject_expected_form(constraints),
+    )
+    assert "2–5 words" in plain_prompt
+    assert "Required surface form" not in plain_prompt
+    assert "Required surface form" in inject_prompt
+    assert '"buscas"' in inject_prompt
+
+
+def test_neurologic_beam_generate_is_not_force_words(monkeypatch):
+    calls: list[str] = []
+
+    def fake_neuro(*args, **kwargs):
+        calls.append("neurologic")
+        return "Buscas el libro."
+
+    monkeypatch.setattr(
+        "research.generation.neurologic_hf.neurologic_generate_one",
+        fake_neuro,
+    )
+    gen = NeurologicHFThinPlainBGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    out = gen._beam_generate(
+        prompt="Write a sentence.",
+        system="You are a tutor.",
+        expected_form="buscas",
+        morph_ban_set=None,
+    )
+    assert out == "Buscas el libro."
+    assert calls == ["neurologic"]
+
 
 
 def _tracker(

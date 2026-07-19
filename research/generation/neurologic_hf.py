@@ -14,7 +14,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Sequence
 
-from research.generation.constrained_hf import encode_force_variants
+from research.generation.constrained_hf import (
+    ConstrainedHFSoftPlainBGenerator,
+    encode_force_variants,
+)
 from research.generation.morph_bans import MorphBanSet, encode_bad_words
 
 DEFAULT_NEUROLOGIC_LAMBDA = 0.1
@@ -399,3 +402,95 @@ def neurologic_generate_one(
         return ""
     raw = tokenizer.decode(list(final.token_ids), skip_special_tokens=True)
     return _strip_thinking(raw)
+
+
+class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
+    """Fix B + thin morph CNF via Neurologic-inspired search (no soft λ / hard force)."""
+
+    USE_HARD_CONSTRAINT = False
+    _USE_SOFT_BIAS = False
+    _USE_MORPH_BANS = True
+    _MORPH_BAN_MODE = "thin"
+    _MORPH_BAN_SUBJECT_GATE = False
+    _MORPH_BAN_SOFT = False
+    _REQUIRE_FULL_SENTENCE = True
+
+    def __init__(
+        self,
+        model: str = "Qwen/Qwen3-1.7B",
+        temperature: float = 0.0,
+        *,
+        num_beams: int = 8,
+        neurologic_lambda: float = DEFAULT_NEUROLOGIC_LAMBDA,
+        neurologic_alpha: int = DEFAULT_NEUROLOGIC_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            model=model,
+            temperature=temperature,
+            num_beams=num_beams,
+            **kwargs,
+        )
+        self._neurologic_lambda = float(neurologic_lambda)
+        self._neurologic_alpha = int(neurologic_alpha)
+
+    @property
+    def name(self) -> str:
+        return "neurologic_hf_thin_plain_b"
+
+    def _beam_generate(
+        self,
+        *,
+        prompt: str,
+        system: str,
+        expected_form: str,
+        morph_ban_set: MorphBanSet | None = None,
+    ) -> str:
+        return neurologic_generate_one(
+            self._model_id,
+            system=system,
+            user=prompt,
+            expected_form=expected_form,
+            morph_ban_set=morph_ban_set,
+            num_beams=self._num_beams,
+            max_new_tokens=self._max_new_tokens_for_mode(),
+            neurologic_lambda=self._neurologic_lambda,
+            neurologic_alpha=self._neurologic_alpha,
+        )
+
+    def generate_many(
+        self,
+        jobs: list[dict[str, Any]],
+        *,
+        batch_size: int = 1,
+    ) -> list[list[dict[str, str]]]:
+        """Sequential per-cell decode (no cross-cell batching in v1)."""
+        del batch_size  # unused; Neurologic is single-cell only
+        results: list[list[dict[str, str]]] = []
+        for job in jobs:
+            results.append(
+                self.generate(
+                    keyword=job["keyword"],
+                    translation=job["translation"],
+                    constraints=dict(job["constraints"]),
+                    num_candidates=int(job["num_candidates"]),
+                    target_language=job.get("target_language", "es"),
+                    cefr_level=job.get("cefr_level"),
+                    sentence_length=job.get("sentence_length", "short"),
+                    explicit_subject_required=bool(
+                        job.get("explicit_subject_required", False)
+                    ),
+                )
+            )
+        return results
+
+
+class NeurologicHFThinInjectPlainBGenerator(NeurologicHFThinPlainBGenerator):
+    """Neurologic thin CNF + gold-form injection + Fix B."""
+
+    _INJECT_EXPECTED_FORM = True
+
+    @property
+    def name(self) -> str:
+        return "neurologic_hf_thin_inject_plain_b"
+

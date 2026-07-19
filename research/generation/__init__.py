@@ -45,6 +45,10 @@ from research.generation.constrained_hf import (
     ConstrainedHFSoftPlainGenerator,
 )
 from research.generation.individual_gpt import IndividualGPTGenerator
+from research.generation.neurologic_hf import (
+    NeurologicHFThinInjectPlainBGenerator,
+    NeurologicHFThinPlainBGenerator,
+)
 
 if TYPE_CHECKING:
     from research.generation.base import BaseGenerator
@@ -87,5 +91,7 @@ GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "constrained_hf_soft_morph_softneg_thin_plain_b": ConstrainedHFSoftMorphSoftnegThinPlainBGenerator,
     "constrained_hf_soft_morph_softneg_thin_inject_plain_b": ConstrainedHFSoftMorphSoftnegThinInjectPlainBGenerator,
     "constrained_hf_soft_morph_softneg_thin_inject_role_plain_b": ConstrainedHFSoftMorphSoftnegThinInjectRolePlainBGenerator,
+    "neurologic_hf_thin_plain_b": NeurologicHFThinPlainBGenerator,
+    "neurologic_hf_thin_inject_plain_b": NeurologicHFThinInjectPlainBGenerator,
     "individual_gpt": IndividualGPTGenerator,
 }
