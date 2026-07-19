@@ -24,6 +24,75 @@ DEFAULT_NEUROLOGIC_LAMBDA = 0.1
 DEFAULT_NEUROLOGIC_ALPHA = 50
 
 
+@dataclass
+class PrefixAutomaton:
+    """Incremental multi-token sequence matcher (prefix progress + completions).
+
+    Tracks every target sequence in parallel. On each fed token, advances any
+    active prefix, restarts on a fresh start-token match, and records newly
+    completed sequence indices. Used for gold forms and banned competitors.
+    """
+
+    sequences: list[list[int]]
+    progress: list[int] = field(default_factory=list)
+    completed: set[int] = field(default_factory=set)
+
+    def __post_init__(self) -> None:
+        if not self.progress:
+            self.progress = [0] * len(self.sequences)
+
+    def clone(self) -> PrefixAutomaton:
+        return PrefixAutomaton(
+            sequences=self.sequences,
+            progress=list(self.progress),
+            completed=set(self.completed),
+        )
+
+    def feed(self, token_id: int) -> set[int]:
+        """Consume one token; return indices newly completed on this step."""
+        newly: set[int] = set()
+        tok = int(token_id)
+        for i, seq in enumerate(self.sequences):
+            if not seq or i in self.completed:
+                continue
+            matched = self.progress[i]
+            if matched < len(seq) and seq[matched] == tok:
+                matched += 1
+                self.progress[i] = matched
+                if matched == len(seq):
+                    self.completed.add(i)
+                    newly.add(i)
+                continue
+            # Restart if this token begins the sequence.
+            if seq[0] == tok:
+                self.progress[i] = 1
+                if len(seq) == 1:
+                    self.completed.add(i)
+                    newly.add(i)
+            else:
+                self.progress[i] = 0
+        return newly
+
+    @property
+    def max_prefix_fraction(self) -> float:
+        best = 0.0
+        for i, seq in enumerate(self.sequences):
+            if not seq:
+                continue
+            if i in self.completed:
+                return 1.0
+            best = max(best, self.progress[i] / len(seq))
+        return best
+
+    @property
+    def partial_indices(self) -> frozenset[int]:
+        return frozenset(
+            i
+            for i, p in enumerate(self.progress)
+            if p > 0 and i not in self.completed
+        )
+
+
 def _is_contiguous_subsequence(haystack: Sequence[int], needle: Sequence[int]) -> bool:
     if not needle:
         return False
@@ -38,33 +107,12 @@ def _is_contiguous_subsequence(haystack: Sequence[int], needle: Sequence[int]) -
 
 def _max_prefix_fraction(haystack: Sequence[int], variants: Sequence[Sequence[int]]) -> float:
     """Largest matched prefix length / |variant| over positive variants."""
-    best = 0.0
-    if not haystack:
-        return 0.0
-    for variant in variants:
-        if not variant:
-            continue
-        matched = 0
-        # Prefer a suffix of haystack that is a prefix of variant (ongoing emit).
-        max_k = min(len(haystack), len(variant))
-        for k in range(max_k, 0, -1):
-            if list(haystack[-k:]) == list(variant[:k]):
-                matched = k
-                break
-        # Also allow an earlier full match start mid-sequence.
-        if matched == 0:
-            for i in range(len(haystack)):
-                k = 0
-                while (
-                    i + k < len(haystack)
-                    and k < len(variant)
-                    and haystack[i + k] == variant[k]
-                ):
-                    k += 1
-                if k > matched:
-                    matched = k
-        best = max(best, matched / len(variant))
-    return best
+    auto = PrefixAutomaton(sequences=[list(v) for v in variants])
+    for tok in haystack:
+        auto.feed(tok)
+        if auto.completed:
+            return 1.0
+    return auto.max_prefix_fraction
 
 
 @dataclass
@@ -76,6 +124,16 @@ class ClauseTracker:
     generated_ids: list[int] = field(default_factory=list)
     gold_satisfied: bool = False
     irreversibly_unsatisfied: bool = False
+    gold_auto: PrefixAutomaton | None = None
+    neg_auto: PrefixAutomaton | None = None
+    use_prefix_automaton: bool = True
+
+    def __post_init__(self) -> None:
+        if self.use_prefix_automaton:
+            if self.gold_auto is None:
+                self.gold_auto = PrefixAutomaton(sequences=self.gold_variants)
+            if self.neg_auto is None:
+                self.neg_auto = PrefixAutomaton(sequences=self.negative_variants)
 
     @classmethod
     def from_forms(
@@ -83,12 +141,18 @@ class ClauseTracker:
         tokenizer: Any,
         expected_form: str,
         morph_ban_set: MorphBanSet | None,
+        *,
+        use_prefix_automaton: bool = True,
     ) -> ClauseTracker:
         gold = encode_force_variants(tokenizer, expected_form) if expected_form else []
         negatives: list[list[int]] = []
         if morph_ban_set is not None:
             negatives = encode_bad_words(tokenizer, morph_ban_set)
-        return cls(gold_variants=gold, negative_variants=negatives)
+        return cls(
+            gold_variants=gold,
+            negative_variants=negatives,
+            use_prefix_automaton=use_prefix_automaton,
+        )
 
     def clone(self) -> ClauseTracker:
         return ClauseTracker(
@@ -97,13 +161,29 @@ class ClauseTracker:
             generated_ids=list(self.generated_ids),
             gold_satisfied=self.gold_satisfied,
             irreversibly_unsatisfied=self.irreversibly_unsatisfied,
+            gold_auto=self.gold_auto.clone() if self.gold_auto is not None else None,
+            neg_auto=self.neg_auto.clone() if self.neg_auto is not None else None,
+            use_prefix_automaton=self.use_prefix_automaton,
         )
 
     def append(self, token_id: int) -> None:
         self.generated_ids.append(int(token_id))
-        self._refresh()
+        if self.use_prefix_automaton and self.gold_auto is not None and self.neg_auto is not None:
+            self._refresh_automaton(int(token_id))
+        else:
+            self._refresh_scan()
 
-    def _refresh(self) -> None:
+    def _refresh_automaton(self, token_id: int) -> None:
+        assert self.gold_auto is not None and self.neg_auto is not None
+        if self.irreversibly_unsatisfied:
+            return
+        if self.neg_auto.feed(token_id):
+            self.irreversibly_unsatisfied = True
+            return
+        if not self.gold_satisfied and self.gold_auto.feed(token_id):
+            self.gold_satisfied = True
+
+    def _refresh_scan(self) -> None:
         if self.irreversibly_unsatisfied:
             return
         for neg in self.negative_variants:
@@ -120,6 +200,8 @@ class ClauseTracker:
     def prefix_frac(self) -> float:
         if self.gold_satisfied:
             return 1.0
+        if self.use_prefix_automaton and self.gold_auto is not None:
+            return self.gold_auto.max_prefix_fraction
         return _max_prefix_fraction(self.generated_ids, self.gold_variants)
 
     @property
@@ -131,6 +213,20 @@ class ClauseTracker:
         if not self.irreversibly_unsatisfied:
             count += 1
         return count
+
+    @property
+    def irreversible_sat_key(self) -> frozenset[str]:
+        """State key for diverse beam grouping (richer than gold_fired alone)."""
+        keys: set[str] = set()
+        if self.gold_satisfied:
+            keys.add("gold")
+        if self.use_prefix_automaton and self.neg_auto is not None:
+            for i in self.neg_auto.partial_indices:
+                keys.add(f"neg_partial:{i}")
+        elif not self.use_prefix_automaton:
+            # Scan fallback: approximate with gold-only key.
+            pass
+        return frozenset(keys)
 
 
 def neurologic_score(log_prob: float, tracker: ClauseTracker, lambda_: float) -> float:

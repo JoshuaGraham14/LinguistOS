@@ -6,6 +6,7 @@ from research.generation.neurologic_hf import (
     ClauseTracker,
     NeurologicHFThinInjectPlainBGenerator,
     NeurologicHFThinPlainBGenerator,
+    PrefixAutomaton,
     ScoredHypothesis,
     group_by_gold_fired,
     neurologic_score,
@@ -14,6 +15,21 @@ from research.generation.neurologic_hf import (
     select_diverse_beam,
 )
 from research.generation import GENERATOR_REGISTRY
+
+
+def test_prefix_automaton_advances_and_completes():
+    auto = PrefixAutomaton(sequences=[[1, 2, 3], [9]])
+    assert auto.feed(1) == set()
+    assert abs(auto.max_prefix_fraction - 1 / 3) < 1e-9
+    assert auto.feed(2) == set()
+    assert auto.feed(3) == {0}
+    assert 0 in auto.completed
+    assert auto.max_prefix_fraction == 1.0
+
+
+def test_prefix_automaton_detects_single_token_ban():
+    auto = PrefixAutomaton(sequences=[[7]])
+    assert auto.feed(7) == {0}
 
 
 def test_registry_adds_neurologic_generators():
