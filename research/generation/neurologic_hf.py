@@ -321,13 +321,39 @@ def select_diverse_beam(
     return selected
 
 
-def pick_final_hypothesis(beam: Sequence[ScoredHypothesis]) -> ScoredHypothesis | None:
-    """Among max satisfied-clause count, pick highest likelihood."""
+def pick_final_hypothesis(
+    beam: Sequence[ScoredHypothesis],
+    *,
+    diverse: bool = False,
+) -> ScoredHypothesis | None:
+    """Among max satisfied-clause count, pick highest likelihood.
+
+    When *diverse* is True, break ties toward hypotheses that differ most from
+    the max-likelihood member of the satisfied pool (anti-template collapse).
+    """
     if not beam:
         return None
     best_sat = max(h.tracker.satisfied_clause_count for h in beam)
     pool = [h for h in beam if h.tracker.satisfied_clause_count == best_sat]
-    return max(pool, key=lambda h: h.log_prob)
+    primary = max(pool, key=lambda h: h.log_prob)
+    if not diverse or len(pool) == 1:
+        return primary
+    primary_set = set(primary.token_ids)
+
+    def _diverse_key(h: ScoredHypothesis) -> tuple[int, int, float]:
+        # Prefer token-set distance from the greedy pick, then length, then LP.
+        novel = len(set(h.token_ids) - primary_set)
+        return (novel, len(h.token_ids), h.log_prob)
+
+    # Exclude primary so we actually explore an alternative when one exists.
+    others = [h for h in pool if h.token_ids != primary.token_ids]
+    if not others:
+        return primary
+    alt = max(others, key=_diverse_key)
+    # Only accept the alternative if it differs in at least one token type.
+    if len(set(alt.token_ids) - primary_set) == 0:
+        return primary
+    return alt
 
 
 @dataclass
@@ -373,6 +399,7 @@ def neurologic_generate_one(
     rich_grouping: bool = False,
     use_prefix_automaton: bool = True,
     min_new_tokens: int = 0,
+    diverse_final: bool = False,
 ) -> str:
     """Run clause-aware beam search for a single chat prompt (no cross-cell batching)."""
     import torch
@@ -533,7 +560,10 @@ def neurologic_generate_one(
                 new_beam.append(live)
             beam = new_beam
 
-    final = pick_final_hypothesis([h.to_scored(neurologic_lambda) for h in beam])
+    final = pick_final_hypothesis(
+        [h.to_scored(neurologic_lambda) for h in beam],
+        diverse=diverse_final,
+    )
     if final is None:
         return ""
     raw = tokenizer.decode(list(final.token_ids), skip_special_tokens=True)
@@ -550,6 +580,8 @@ class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
     _MORPH_BAN_SUBJECT_GATE = False
     _MORPH_BAN_SOFT = False
     _REQUIRE_FULL_SENTENCE = True
+    # L5 spike: stable per-cell topic hints (hash of morphology cell).
+    _CELL_HASHED_SCENE = False
 
     def __init__(
         self,
@@ -561,6 +593,8 @@ class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
         neurologic_alpha: int = DEFAULT_NEUROLOGIC_ALPHA,
         rich_grouping: bool = False,
         use_prefix_automaton: bool = True,
+        diverse_final: bool = False,
+        cell_scene_variation: bool = False,
         **kwargs: Any,
     ) -> None:
         super().__init__(
@@ -573,10 +607,31 @@ class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
         self._neurologic_alpha = int(neurologic_alpha)
         self._rich_grouping = bool(rich_grouping)
         self._use_prefix_automaton = bool(use_prefix_automaton)
+        self._diverse_final = bool(diverse_final)
+        if cell_scene_variation:
+            self._CELL_HASHED_SCENE = True
 
     @property
     def name(self) -> str:
         return "neurologic_hf_thin_plain_b"
+
+    def _scene_hint_for_attempt(
+        self,
+        attempt_idx: int,
+        *,
+        constraints: dict[str, Any] | None = None,
+    ) -> str | None:
+        if self._CELL_HASHED_SCENE and constraints is not None:
+            from research.generation.constrained_hf import SCENE_HINTS
+
+            key = "|".join(
+                str(constraints.get(k) or "")
+                for k in ("keyword", "expected_form", "tense", "person", "number")
+            )
+            # Stable across processes (hash() is salted per Python process).
+            idx = sum(ord(c) for c in key) % len(SCENE_HINTS)
+            return SCENE_HINTS[(idx + attempt_idx) % len(SCENE_HINTS)]
+        return super()._scene_hint_for_attempt(attempt_idx, constraints=constraints)
 
     def _beam_generate(
         self,
@@ -599,6 +654,7 @@ class NeurologicHFThinPlainBGenerator(ConstrainedHFSoftPlainBGenerator):
             rich_grouping=self._rich_grouping,
             use_prefix_automaton=self._use_prefix_automaton,
             min_new_tokens=self._min_new_tokens,
+            diverse_final=self._diverse_final,
         )
 
     def generate_many(
@@ -636,4 +692,40 @@ class NeurologicHFThinInjectPlainBGenerator(NeurologicHFThinPlainBGenerator):
     @property
     def name(self) -> str:
         return "neurologic_hf_thin_inject_plain_b"
+
+
+class NeurologicHFAgreePlainBGenerator(NeurologicHFThinPlainBGenerator):
+    """L3 spike: full same-tense paradigm competitors + wrong pronouns."""
+
+    _MORPH_BAN_MODE = "agree"
+
+    @property
+    def name(self) -> str:
+        return "neurologic_hf_agree_plain_b"
+
+
+class NeurologicHFThinScenePlainBGenerator(NeurologicHFThinPlainBGenerator):
+    """L5 spike: per-cell scene hints + diverse final beam pick."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("diverse_final", True)
+        kwargs.setdefault("cell_scene_variation", True)
+        super().__init__(*args, **kwargs)
+
+    @property
+    def name(self) -> str:
+        return "neurologic_hf_thin_scene_plain_b"
+
+
+class NeurologicHFAgreeScenePlainBGenerator(NeurologicHFAgreePlainBGenerator):
+    """L3+L5 combo: agree bans + cell scenes + diverse final."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("diverse_final", True)
+        kwargs.setdefault("cell_scene_variation", True)
+        super().__init__(*args, **kwargs)
+
+    @property
+    def name(self) -> str:
+        return "neurologic_hf_agree_scene_plain_b"
 

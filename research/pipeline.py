@@ -121,6 +121,10 @@ def _build_generator(run_config: MethodRunConfig, method_config: MethodConfig) -
         kwargs["min_new_tokens"] = int(raw["min_new_tokens"])
     if "length_penalty" in raw:
         kwargs["length_penalty"] = float(raw["length_penalty"])
+    if "diverse_final" in raw:
+        kwargs["diverse_final"] = bool(raw["diverse_final"])
+    if "cell_scene_variation" in raw:
+        kwargs["cell_scene_variation"] = bool(raw["cell_scene_variation"])
     return cls(**kwargs)
 
 

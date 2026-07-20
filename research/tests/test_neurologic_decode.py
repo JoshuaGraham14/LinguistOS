@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from research.generation.neurologic_hf import (
     ClauseTracker,
+    NeurologicHFAgreePlainBGenerator,
+    NeurologicHFAgreeScenePlainBGenerator,
     NeurologicHFThinInjectPlainBGenerator,
     NeurologicHFThinPlainBGenerator,
+    NeurologicHFThinScenePlainBGenerator,
     PrefixAutomaton,
     ScoredHypothesis,
     group_by_gold_fired,
@@ -211,3 +214,61 @@ def test_pick_final_prefers_satisfied_then_likelihood():
     )
     chosen = pick_final_hypothesis([a, b])
     assert chosen is a
+
+
+def test_pick_final_diverse_prefers_novel_tokens_among_satisfied():
+    primary = ScoredHypothesis(
+        (1, 2, 3),
+        -0.1,
+        1.0,
+        _tracker(gold=[[1]], negatives=[], ids=[1]),
+    )
+    alt = ScoredHypothesis(
+        (1, 9, 8, 7),
+        -0.5,
+        0.5,
+        _tracker(gold=[[1]], negatives=[], ids=[1]),
+    )
+    chosen = pick_final_hypothesis([primary, alt], diverse=True)
+    assert chosen is alt
+
+
+def test_l3_l5_spike_generators_registered():
+    assert NeurologicHFAgreePlainBGenerator._MORPH_BAN_MODE == "agree"
+    scene = NeurologicHFThinScenePlainBGenerator(model="Qwen/Qwen3-1.7B")
+    assert scene._diverse_final is True
+    assert scene._CELL_HASHED_SCENE is True
+    combo = NeurologicHFAgreeScenePlainBGenerator(model="Qwen/Qwen3-1.7B")
+    assert combo._MORPH_BAN_MODE == "agree"
+    assert combo._diverse_final is True
+    for key in (
+        "neurologic_hf_agree_plain_b",
+        "neurologic_hf_thin_scene_plain_b",
+        "neurologic_hf_agree_scene_plain_b",
+    ):
+        assert key in GENERATOR_REGISTRY
+
+
+def test_cell_hashed_scene_is_stable_per_cell():
+    gen = NeurologicHFThinScenePlainBGenerator(model="Qwen/Qwen3-1.7B")
+    c1 = {
+        "keyword": "buscar",
+        "expected_form": "busco",
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+    }
+    c2 = {
+        "keyword": "buscar",
+        "expected_form": "buscas",
+        "tense": "present",
+        "person": "2nd",
+        "number": "singular",
+    }
+    h1 = gen._scene_hint_for_attempt(0, constraints=c1)
+    h1b = gen._scene_hint_for_attempt(0, constraints=c1)
+    h2 = gen._scene_hint_for_attempt(0, constraints=c2)
+    assert h1 == h1b
+    assert h1 is not None and h2 is not None
+    # Different cells should usually differ; if hash collides, at least non-empty.
+    assert "Topic:" in h1

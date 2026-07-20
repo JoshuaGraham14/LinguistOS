@@ -16,7 +16,7 @@ from typing import Literal
 
 from research.evaluation.lexicon.frequency import _actual_es_form
 
-MorphBanMode = Literal["full", "forms_only", "pronouns_only", "thin"]
+MorphBanMode = Literal["full", "forms_only", "pronouns_only", "thin", "agree"]
 
 INDICATIVE_TENSES: tuple[str, ...] = (
     "present",
@@ -111,6 +111,33 @@ def _thin_competitors(
     return frozenset(forms)
 
 
+def _agree_competitors(
+    lemma: str,
+    tense: str,
+    person: str,
+    number: str,
+    expected_norm: str,
+) -> frozenset[str]:
+    """All wrong person/number forms for *tense*; no infinitive.
+
+    Stronger than thin (only 1sg/3sg habituals): for a 1sg cell this bans
+    ``buscas/buscamos/...`` as well as ``busca``, so wrong-subject + wrong-form
+    pairs like ``tú buscas`` / ``nosotros buscamos`` are blocked when gold is
+    ``busco``.
+    """
+    if tense not in INDICATIVE_TENSES:
+        return frozenset()
+    forms: set[str] = set()
+    for slot_person, slot_number in PERSON_NUMBER_SLOTS:
+        if (slot_person, slot_number) == (person, number):
+            continue
+        form = _actual_es_form(lemma, tense, slot_person, slot_number)
+        if form:
+            forms.add(normalize_surface(form))
+    forms.discard(expected_norm)
+    return frozenset(forms)
+
+
 def build_morph_ban_set(
     lemma: str,
     tense: str,
@@ -122,7 +149,7 @@ def build_morph_ban_set(
     gate_forms_on_subject: bool = False,
 ) -> MorphBanSet:
     """Build form/pronoun bans for a single Spanish morphology cell."""
-    if mode not in ("full", "forms_only", "pronouns_only", "thin"):
+    if mode not in ("full", "forms_only", "pronouns_only", "thin", "agree"):
         raise ValueError(f"Unknown morphology ban mode: {mode!r}")
 
     lemma_norm = normalize_surface(lemma)
@@ -132,6 +159,12 @@ def build_morph_ban_set(
     if mode == "thin":
         form_bans.update(
             _thin_competitors(
+                lemma_norm, tense, person, number, expected_norm
+            )
+        )
+    elif mode == "agree":
+        form_bans.update(
+            _agree_competitors(
                 lemma_norm, tense, person, number, expected_norm
             )
         )
@@ -157,7 +190,8 @@ def build_morph_ban_set(
 
     pronoun_bans = (
         _wrong_pronouns(person, number)
-        if mode in ("full", "pronouns_only", "thin") and tense != "participle"
+        if mode in ("full", "pronouns_only", "thin", "agree")
+        and tense != "participle"
         else frozenset()
     )
     allowed = _SUBJECT_GROUPS.get((person, number), frozenset())
