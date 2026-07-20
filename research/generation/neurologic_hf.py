@@ -377,12 +377,87 @@ class _LiveBeam:
 
 
 def _clone_past(past_key_values: Any) -> Any:
-    """Clone a HF past_key_values / DynamicCache tree for branching beam children."""
+    """Clone a HF cache so sibling beams can branch without corrupting parents.
+
+    Prefer tensor ``.clone()`` via ``DynamicCache``'s legacy round-trip over
+    ``copy.deepcopy``: same isolation, much less Python overhead on large K/V.
+    """
     if past_key_values is None:
         return None
+
+    import torch
+
+    to_legacy = getattr(past_key_values, "to_legacy_cache", None)
+    from_legacy = getattr(type(past_key_values), "from_legacy_cache", None)
+    if callable(to_legacy) and callable(from_legacy):
+        legacy = to_legacy()
+        if legacy is None:
+            return None
+        cloned = tuple(
+            tuple(
+                tensor.clone() if torch.is_tensor(tensor) else tensor
+                for tensor in layer
+            )
+            for layer in legacy
+        )
+        return from_legacy(cloned)
+
+    if isinstance(past_key_values, tuple):
+        return tuple(
+            tuple(
+                tensor.clone() if torch.is_tensor(tensor) else tensor
+                for tensor in layer
+            )
+            for layer in past_key_values
+        )
+
     import copy
 
     return copy.deepcopy(past_key_values)
+
+
+def _advance_live_beams(
+    model: Any,
+    lives: Sequence[_LiveBeam],
+    *,
+    device: Any,
+) -> None:
+    """Run one decode step for unfinished beams with copy-on-write KV caches.
+
+    Beams that still share a parent cache object only clone when more than one
+    sibling needs the same past; the last sibling reuses the cache in place.
+    """
+    import torch
+    import torch.nn.functional as F
+    from collections import defaultdict
+
+    unfinished = [live for live in lives if not live.finished]
+    if not unfinished:
+        return
+
+    groups: dict[int, list[_LiveBeam]] = defaultdict(list)
+    for live in unfinished:
+        groups[id(live.past_key_values)].append(live)
+
+    for siblings in groups.values():
+        for index, live in enumerate(siblings):
+            # Last sibling may consume the shared past; earlier ones clone.
+            if index < len(siblings) - 1:
+                past = _clone_past(live.past_key_values)
+            else:
+                past = live.past_key_values
+            token_tensor = torch.tensor(
+                [[live.generated_ids[-1]]], device=device
+            )
+            step_out = model(
+                input_ids=token_tensor,
+                past_key_values=past,
+                use_cache=True,
+            )
+            live.past_key_values = step_out.past_key_values
+            live._next_log_probs = F.log_softmax(  # type: ignore[attr-defined]
+                step_out.logits[0, -1].float(), dim=-1
+            )
 
 
 def neurologic_generate_one(
@@ -459,11 +534,12 @@ def neurologic_generate_one(
                 continue
             tracker = base_tracker.clone()
             tracker.append(token_id)
+            # Defer KV clones until a hypothesis is selected into the beam.
             hyp = _LiveBeam(
                 generated_ids=[token_id],
                 log_prob=float(val),
                 tracker=tracker,
-                past_key_values=_clone_past(past),
+                past_key_values=past,
                 finished=(token_id == eos_id),
             )
             scored = hyp.to_scored(neurologic_lambda)
@@ -477,20 +553,8 @@ def neurologic_generate_one(
         selected = select_diverse_beam(
             pruned, num_beams=num_beams, rich_grouping=rich_grouping
         )
-        beam: list[_LiveBeam] = []
-        for scored in selected:
-            live = live_by_key[scored.token_ids]
-            # Advance KV cache with the chosen first token.
-            token_tensor = torch.tensor([[scored.token_ids[-1]]], device=model.device)
-            step_out = model(
-                input_ids=token_tensor,
-                past_key_values=live.past_key_values,
-                use_cache=True,
-            )
-            live.past_key_values = step_out.past_key_values
-            # Stash next-step logits on the object for the loop below.
-            live._next_log_probs = F.log_softmax(step_out.logits[0, -1].float(), dim=-1)  # type: ignore[attr-defined]
-            beam.append(live)
+        beam = [live_by_key[scored.token_ids] for scored in selected]
+        _advance_live_beams(model, beam, device=model.device)
 
         for _step in range(1, max_new_tokens):
             if all(h.finished for h in beam):
@@ -522,6 +586,7 @@ def neurologic_generate_one(
                         generated_ids=[*parent.generated_ids, token_id],
                         log_prob=parent.log_prob + float(val),
                         tracker=tracker,
+                        # Share parent cache until selected siblings advance.
                         past_key_values=parent.past_key_values,
                         finished=(token_id == eos_id),
                     )
@@ -537,28 +602,8 @@ def neurologic_generate_one(
             selected = select_diverse_beam(
                 pruned, num_beams=num_beams, rich_grouping=rich_grouping
             )
-            new_beam: list[_LiveBeam] = []
-            for scored in selected:
-                live = live_by_key[scored.token_ids]
-                if live.finished:
-                    new_beam.append(live)
-                    continue
-                # Branch KV: clone parent past then feed the new token.
-                # Children that share a parent currently share the same past
-                # reference until we clone on consume.
-                past = _clone_past(live.past_key_values)
-                token_tensor = torch.tensor([[scored.token_ids[-1]]], device=model.device)
-                step_out = model(
-                    input_ids=token_tensor,
-                    past_key_values=past,
-                    use_cache=True,
-                )
-                live.past_key_values = step_out.past_key_values
-                live._next_log_probs = F.log_softmax(  # type: ignore[attr-defined]
-                    step_out.logits[0, -1].float(), dim=-1
-                )
-                new_beam.append(live)
-            beam = new_beam
+            beam = [live_by_key[scored.token_ids] for scored in selected]
+            _advance_live_beams(model, beam, device=model.device)
 
     final = pick_final_hypothesis(
         [h.to_scored(neurologic_lambda) for h in beam],

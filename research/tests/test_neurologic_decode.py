@@ -233,6 +233,84 @@ def test_pick_final_diverse_prefers_novel_tokens_among_satisfied():
     assert chosen is alt
 
 
+def test_clone_past_isolates_dynamic_cache_tensors():
+    import torch
+    from transformers import DynamicCache
+
+    from research.generation.neurologic_hf import _clone_past
+
+    cache = DynamicCache()
+    for layer in range(2):
+        cache.update(torch.randn(1, 2, 3, 4), torch.randn(1, 2, 3, 4), layer)
+
+    cloned = _clone_past(cache)
+    assert cloned is not cache
+    orig = cache.to_legacy_cache()[0][0].clone()
+    cloned.to_legacy_cache()[0][0].zero_()
+    assert torch.equal(cache.to_legacy_cache()[0][0], orig)
+    assert float(cloned.to_legacy_cache()[0][0].abs().sum()) == 0.0
+
+
+def test_clone_past_supports_legacy_tuple_cache():
+    import torch
+
+    from research.generation.neurologic_hf import _clone_past
+
+    legacy = (
+        (torch.randn(1, 1, 2, 2), torch.randn(1, 1, 2, 2)),
+        (torch.randn(1, 1, 2, 2), torch.randn(1, 1, 2, 2)),
+    )
+    cloned = _clone_past(legacy)
+    assert cloned is not legacy
+    orig = legacy[0][0].clone()
+    cloned[0][0].zero_()
+    assert torch.equal(legacy[0][0], orig)
+
+
+def test_advance_live_beams_copy_on_write_clones_shared_past(monkeypatch):
+    """Siblings sharing one past must not feed the same cache object twice."""
+    import torch
+
+    import research.generation.neurologic_hf as neuro
+    from research.generation.neurologic_hf import _LiveBeam, _advance_live_beams
+
+    shared = object()
+    seen_past_ids: list[int] = []
+
+    class _FakeOut:
+        def __init__(self, past):
+            self.past_key_values = past
+            self.logits = torch.zeros(1, 1, 4)
+
+    class _FakeModel:
+        def __call__(self, input_ids, past_key_values=None, use_cache=True):
+            seen_past_ids.append(id(past_key_values))
+            return _FakeOut(object())
+
+    def fake_clone(past):
+        if past is shared:
+            return object()
+        return past
+
+    monkeypatch.setattr(neuro, "_clone_past", fake_clone)
+    lives = [
+        _LiveBeam([1], 0.0, _tracker(gold=[[1]], negatives=[], ids=[1]), shared),
+        _LiveBeam([2], 0.0, _tracker(gold=[[1]], negatives=[], ids=[1]), shared),
+        _LiveBeam(
+            [3],
+            0.0,
+            _tracker(gold=[[1]], negatives=[], ids=[1]),
+            shared,
+            finished=True,
+        ),
+    ]
+    _advance_live_beams(_FakeModel(), lives, device="cpu")
+    # Two unfinished siblings: one cloned past + one in-place shared past.
+    assert len(seen_past_ids) == 2
+    assert len(set(seen_past_ids)) == 2
+    assert id(shared) in seen_past_ids
+
+
 def test_l3_l5_spike_generators_registered():
     assert NeurologicHFAgreePlainBGenerator._MORPH_BAN_MODE == "agree"
     scene = NeurologicHFThinScenePlainBGenerator(model="Qwen/Qwen3-1.7B")
