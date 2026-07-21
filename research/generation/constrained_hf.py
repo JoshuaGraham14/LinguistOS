@@ -723,7 +723,13 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
             return True
         return expected_form_is_main_verb(sentence, expected_form)
 
-    def _scene_hint_for_attempt(self, attempt_idx: int) -> str | None:
+    def _scene_hint_for_attempt(
+        self,
+        attempt_idx: int,
+        *,
+        constraints: dict[str, Any] | None = None,
+    ) -> str | None:
+        del constraints  # base class ignores cell metadata
         if self.SCENE_VARIATION:
             return SCENE_HINTS[attempt_idx % len(SCENE_HINTS)]
         if self._ROLE_RESAMPLE and attempt_idx > 0:
@@ -761,7 +767,9 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
         )
 
         for sample_idx in range(max_attempts):
-            scene_hint = self._scene_hint_for_attempt(sample_idx)
+            scene_hint = self._scene_hint_for_attempt(
+                sample_idx, constraints=constraints
+            )
 
             prompt = self._build_user_prompt(
                 keyword=keyword,
@@ -858,7 +866,9 @@ class ConstrainedHFGenerator(BaselineHFGenerator):
                     if self._ROLE_RESAMPLE
                     else len(collected[idx])
                 )
-                scene_hint = self._scene_hint_for_attempt(attempt_idx)
+                scene_hint = self._scene_hint_for_attempt(
+                    attempt_idx, constraints=constraints
+                )
                 prompt = self._build_user_prompt(
                     keyword=job["keyword"],
                     translation=job["translation"],

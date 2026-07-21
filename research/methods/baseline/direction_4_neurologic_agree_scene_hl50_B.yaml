@@ -1,0 +1,12 @@
+name: direction_4_neurologic_agree_scene_hl50_B
+method: neurologic_hf_agree_scene_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short
+  num_beams: 8
+  neurologic_lambda: 0.1
+  neurologic_alpha: 50
+  diverse_final: true
+  cell_scene_variation: true

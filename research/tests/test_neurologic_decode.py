@@ -1,0 +1,352 @@
+"""Unit tests for Direction 4 Neurologic clause tracking / beam selection."""
+
+from __future__ import annotations
+
+from research.generation.neurologic_hf import (
+    ClauseTracker,
+    NeurologicHFAgreePlainBGenerator,
+    NeurologicHFAgreeScenePlainBGenerator,
+    NeurologicHFThinInjectPlainBGenerator,
+    NeurologicHFThinPlainBGenerator,
+    NeurologicHFThinScenePlainBGenerator,
+    PrefixAutomaton,
+    ScoredHypothesis,
+    group_by_gold_fired,
+    neurologic_score,
+    pick_final_hypothesis,
+    prune_irreversible,
+    select_diverse_beam,
+)
+from research.generation import GENERATOR_REGISTRY
+
+
+def test_prefix_automaton_advances_and_completes():
+    auto = PrefixAutomaton(sequences=[[1, 2, 3], [9]])
+    assert auto.feed(1) == set()
+    assert abs(auto.max_prefix_fraction - 1 / 3) < 1e-9
+    assert auto.feed(2) == set()
+    assert auto.feed(3) == {0}
+    assert 0 in auto.completed
+    assert auto.max_prefix_fraction == 1.0
+
+
+def test_prefix_automaton_detects_single_token_ban():
+    auto = PrefixAutomaton(sequences=[[7]])
+    assert auto.feed(7) == {0}
+
+
+def test_registry_adds_neurologic_generators():
+    assert "neurologic_hf_thin_plain_b" in GENERATOR_REGISTRY
+    assert "neurologic_hf_thin_inject_plain_b" in GENERATOR_REGISTRY
+    assert NeurologicHFThinPlainBGenerator._USE_MORPH_BANS is True
+    assert NeurologicHFThinPlainBGenerator._MORPH_BAN_MODE == "thin"
+    assert NeurologicHFThinPlainBGenerator._USE_SOFT_BIAS is False
+    assert NeurologicHFThinPlainBGenerator.USE_HARD_CONSTRAINT is False
+    assert NeurologicHFThinInjectPlainBGenerator._INJECT_EXPECTED_FORM is True
+
+
+def test_neurologic_fix_b_prompt_and_inject():
+    plain = NeurologicHFThinPlainBGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    inject = NeurologicHFThinInjectPlainBGenerator(
+        model="Qwen/Qwen3-1.7B", temperature=0.0
+    )
+    constraints = {
+        "tense": "present",
+        "person": "2nd",
+        "number": "singular",
+        "expected_form": "buscas",
+    }
+    plain_prompt = plain._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints=constraints,
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=plain._resolve_inject_expected_form(constraints),
+    )
+    inject_prompt = inject._build_user_prompt(
+        keyword="buscar",
+        translation="to search",
+        target_language="es",
+        constraints=constraints,
+        num_candidates=1,
+        sentence_length="short",
+        cefr_level=None,
+        explicit_subject_required=False,
+        inject_expected_form=inject._resolve_inject_expected_form(constraints),
+    )
+    assert "2–5 words" in plain_prompt
+    assert "Required surface form" not in plain_prompt
+    assert "Required surface form" in inject_prompt
+    assert '"buscas"' in inject_prompt
+
+
+def test_neurologic_beam_generate_is_not_force_words(monkeypatch):
+    calls: list[str] = []
+
+    def fake_neuro(*args, **kwargs):
+        calls.append("neurologic")
+        return "Buscas el libro."
+
+    monkeypatch.setattr(
+        "research.generation.neurologic_hf.neurologic_generate_one",
+        fake_neuro,
+    )
+    gen = NeurologicHFThinPlainBGenerator(model="Qwen/Qwen3-1.7B", temperature=0.0)
+    out = gen._beam_generate(
+        prompt="Write a sentence.",
+        system="You are a tutor.",
+        expected_form="buscas",
+        morph_ban_set=None,
+    )
+    assert out == "Buscas el libro."
+    assert calls == ["neurologic"]
+
+
+
+def _tracker(
+    *,
+    gold: list[list[int]] | None = None,
+    negatives: list[list[int]] | None = None,
+    ids: list[int] | None = None,
+) -> ClauseTracker:
+    t = ClauseTracker(
+        gold_variants=gold or [[10, 11]],
+        negative_variants=negatives or [[20]],
+    )
+    for token_id in ids or []:
+        t.append(token_id)
+    return t
+
+
+def test_clause_tracker_gold_prefix_and_satisfy():
+    t = _tracker(gold=[[1, 2, 3]], negatives=[])
+    t.append(1)
+    assert not t.gold_satisfied
+    assert 0.3 < t.prefix_frac < 0.4
+    t.append(2)
+    assert abs(t.prefix_frac - 2 / 3) < 1e-9
+    t.append(3)
+    assert t.gold_satisfied
+    assert t.prefix_frac == 1.0
+    assert t.satisfied_clause_count == 2
+
+
+def test_clause_tracker_competitor_is_irreversible_fail():
+    t = _tracker(gold=[[1]], negatives=[[9, 9]])
+    t.append(9)
+    assert not t.irreversibly_unsatisfied
+    t.append(9)
+    assert t.irreversibly_unsatisfied
+    assert t.satisfied_clause_count == 0
+
+
+def test_neurologic_score_rewards_prefix():
+    t = _tracker(gold=[[1, 2]], negatives=[], ids=[1])
+    assert neurologic_score(-1.0, t, 0.1) == -1.0 + 0.1 * 0.5
+
+
+def test_prune_drops_irreversible_only():
+    ok = ScoredHypothesis(
+        token_ids=(1,),
+        log_prob=-0.5,
+        score=-0.4,
+        tracker=_tracker(ids=[1]),
+    )
+    bad = ScoredHypothesis(
+        token_ids=(20,),
+        log_prob=-0.1,
+        score=0.0,
+        tracker=_tracker(ids=[20]),
+    )
+    assert bad.tracker.irreversibly_unsatisfied
+    kept = prune_irreversible([ok, bad])
+    assert kept == [ok]
+
+
+def test_select_diverse_beam_round_robins_groups():
+    fired = [
+        ScoredHypothesis((1,), -0.1, 1.0, _tracker(gold=[[1]], negatives=[], ids=[1])),
+        ScoredHypothesis((2,), -0.2, 0.9, _tracker(gold=[[1]], negatives=[], ids=[1])),
+    ]
+    unfired = [
+        ScoredHypothesis((3,), -0.05, 0.95, _tracker(gold=[[1]], negatives=[], ids=[])),
+        ScoredHypothesis((4,), -0.3, 0.5, _tracker(gold=[[1]], negatives=[], ids=[])),
+    ]
+    selected = select_diverse_beam([*fired, *unfired], num_beams=2)
+    assert len(selected) == 2
+    groups = group_by_gold_fired(selected)
+    assert groups[True] and groups[False]
+
+
+def test_rich_grouping_splits_partial_neg_states():
+    from research.generation.neurologic_hf import group_by_clause_state
+
+    a = _tracker(gold=[[1, 2]], negatives=[[9, 9]], ids=[9])
+    b = _tracker(gold=[[1, 2]], negatives=[[9, 9]], ids=[])
+    assert "neg_partial:0" in a.irreversible_sat_key
+    assert a.irreversible_sat_key != b.irreversible_sat_key
+    cands = [
+        ScoredHypothesis((9,), -0.2, 0.5, a),
+        ScoredHypothesis((3,), -0.1, 0.8, b),
+    ]
+    groups = group_by_clause_state(cands)
+    assert len(groups) == 2
+    selected = select_diverse_beam(cands, num_beams=2, rich_grouping=True)
+    assert len(selected) == 2
+
+
+def test_pick_final_prefers_satisfied_then_likelihood():
+    a = ScoredHypothesis(
+        (1,),
+        -1.0,
+        0.0,
+        _tracker(gold=[[1]], negatives=[], ids=[1]),
+    )
+    b = ScoredHypothesis(
+        (2,),
+        -0.1,
+        1.0,
+        _tracker(gold=[[1]], negatives=[], ids=[]),
+    )
+    chosen = pick_final_hypothesis([a, b])
+    assert chosen is a
+
+
+def test_pick_final_diverse_prefers_novel_tokens_among_satisfied():
+    primary = ScoredHypothesis(
+        (1, 2, 3),
+        -0.1,
+        1.0,
+        _tracker(gold=[[1]], negatives=[], ids=[1]),
+    )
+    alt = ScoredHypothesis(
+        (1, 9, 8, 7),
+        -0.5,
+        0.5,
+        _tracker(gold=[[1]], negatives=[], ids=[1]),
+    )
+    chosen = pick_final_hypothesis([primary, alt], diverse=True)
+    assert chosen is alt
+
+
+def test_clone_past_isolates_dynamic_cache_tensors():
+    import torch
+    from transformers import DynamicCache
+
+    from research.generation.neurologic_hf import _clone_past
+
+    cache = DynamicCache()
+    for layer in range(2):
+        cache.update(torch.randn(1, 2, 3, 4), torch.randn(1, 2, 3, 4), layer)
+
+    cloned = _clone_past(cache)
+    assert cloned is not cache
+    orig = cache.to_legacy_cache()[0][0].clone()
+    cloned.to_legacy_cache()[0][0].zero_()
+    assert torch.equal(cache.to_legacy_cache()[0][0], orig)
+    assert float(cloned.to_legacy_cache()[0][0].abs().sum()) == 0.0
+
+
+def test_clone_past_supports_legacy_tuple_cache():
+    import torch
+
+    from research.generation.neurologic_hf import _clone_past
+
+    legacy = (
+        (torch.randn(1, 1, 2, 2), torch.randn(1, 1, 2, 2)),
+        (torch.randn(1, 1, 2, 2), torch.randn(1, 1, 2, 2)),
+    )
+    cloned = _clone_past(legacy)
+    assert cloned is not legacy
+    orig = legacy[0][0].clone()
+    cloned[0][0].zero_()
+    assert torch.equal(legacy[0][0], orig)
+
+
+def test_advance_live_beams_copy_on_write_clones_shared_past(monkeypatch):
+    """Siblings sharing one past must not feed the same cache object twice."""
+    import torch
+
+    import research.generation.neurologic_hf as neuro
+    from research.generation.neurologic_hf import _LiveBeam, _advance_live_beams
+
+    shared = object()
+    seen_past_ids: list[int] = []
+
+    class _FakeOut:
+        def __init__(self, past):
+            self.past_key_values = past
+            self.logits = torch.zeros(1, 1, 4)
+
+    class _FakeModel:
+        def __call__(self, input_ids, past_key_values=None, use_cache=True):
+            seen_past_ids.append(id(past_key_values))
+            return _FakeOut(object())
+
+    def fake_clone(past):
+        if past is shared:
+            return object()
+        return past
+
+    monkeypatch.setattr(neuro, "_clone_past", fake_clone)
+    lives = [
+        _LiveBeam([1], 0.0, _tracker(gold=[[1]], negatives=[], ids=[1]), shared),
+        _LiveBeam([2], 0.0, _tracker(gold=[[1]], negatives=[], ids=[1]), shared),
+        _LiveBeam(
+            [3],
+            0.0,
+            _tracker(gold=[[1]], negatives=[], ids=[1]),
+            shared,
+            finished=True,
+        ),
+    ]
+    _advance_live_beams(_FakeModel(), lives, device="cpu")
+    # Two unfinished siblings: one cloned past + one in-place shared past.
+    assert len(seen_past_ids) == 2
+    assert len(set(seen_past_ids)) == 2
+    assert id(shared) in seen_past_ids
+
+
+def test_l3_l5_spike_generators_registered():
+    assert NeurologicHFAgreePlainBGenerator._MORPH_BAN_MODE == "agree"
+    scene = NeurologicHFThinScenePlainBGenerator(model="Qwen/Qwen3-1.7B")
+    assert scene._diverse_final is True
+    assert scene._CELL_HASHED_SCENE is True
+    combo = NeurologicHFAgreeScenePlainBGenerator(model="Qwen/Qwen3-1.7B")
+    assert combo._MORPH_BAN_MODE == "agree"
+    assert combo._diverse_final is True
+    for key in (
+        "neurologic_hf_agree_plain_b",
+        "neurologic_hf_thin_scene_plain_b",
+        "neurologic_hf_agree_scene_plain_b",
+    ):
+        assert key in GENERATOR_REGISTRY
+
+
+def test_cell_hashed_scene_is_stable_per_cell():
+    gen = NeurologicHFThinScenePlainBGenerator(model="Qwen/Qwen3-1.7B")
+    c1 = {
+        "keyword": "buscar",
+        "expected_form": "busco",
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+    }
+    c2 = {
+        "keyword": "buscar",
+        "expected_form": "buscas",
+        "tense": "present",
+        "person": "2nd",
+        "number": "singular",
+    }
+    h1 = gen._scene_hint_for_attempt(0, constraints=c1)
+    h1b = gen._scene_hint_for_attempt(0, constraints=c1)
+    h2 = gen._scene_hint_for_attempt(0, constraints=c2)
+    assert h1 == h1b
+    assert h1 is not None and h2 is not None
+    # Different cells should usually differ; if hash collides, at least non-empty.
+    assert "Topic:" in h1

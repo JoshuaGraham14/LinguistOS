@@ -107,12 +107,24 @@ def _build_generator(run_config: MethodRunConfig, method_config: MethodConfig) -
         kwargs["num_beams"] = int(raw["num_beams"])
     if "bias_strength" in raw:
         kwargs["bias_strength"] = float(raw["bias_strength"])
+    if "neurologic_lambda" in raw:
+        kwargs["neurologic_lambda"] = float(raw["neurologic_lambda"])
+    if "neurologic_alpha" in raw:
+        kwargs["neurologic_alpha"] = int(raw["neurologic_alpha"])
+    if "rich_grouping" in raw:
+        kwargs["rich_grouping"] = bool(raw["rich_grouping"])
+    if "use_prefix_automaton" in raw:
+        kwargs["use_prefix_automaton"] = bool(raw["use_prefix_automaton"])
     if "no_repeat_ngram_size" in raw:
         kwargs["no_repeat_ngram_size"] = int(raw["no_repeat_ngram_size"])
     if "min_new_tokens" in raw:
         kwargs["min_new_tokens"] = int(raw["min_new_tokens"])
     if "length_penalty" in raw:
         kwargs["length_penalty"] = float(raw["length_penalty"])
+    if "diverse_final" in raw:
+        kwargs["diverse_final"] = bool(raw["diverse_final"])
+    if "cell_scene_variation" in raw:
+        kwargs["cell_scene_variation"] = bool(raw["cell_scene_variation"])
     return cls(**kwargs)
 
 

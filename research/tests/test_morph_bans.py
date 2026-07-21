@@ -161,6 +161,39 @@ def test_thin_bans_only_habitual_competitors_and_wrong_pronouns(monkeypatch):
     assert {"tú", "tu"} <= ban_set.allowed_subjects
 
 
+def test_agree_bans_all_wrong_slots_and_pronouns_not_infinitive(monkeypatch):
+    def fake_actual(lemma, tense, person, number):
+        table = {
+            ("1st", "singular"): "busco",
+            ("2nd", "singular"): "buscas",
+            ("3rd", "singular"): "busca",
+            ("1st", "plural"): "buscamos",
+            ("2nd", "plural"): "buscáis",
+            ("3rd", "plural"): "buscan",
+        }
+        return table.get((person, number))
+
+    monkeypatch.setattr(morph_bans, "_actual_es_form", fake_actual)
+    ban_set = build_morph_ban_set(
+        "buscar",
+        "present",
+        "1st",
+        "singular",
+        "busco",
+        mode="agree",
+    )
+
+    assert ban_set.mode == "agree"
+    assert ban_set.competing_forms == frozenset(
+        {"buscas", "busca", "buscamos", "buscáis", "buscan"}
+    )
+    assert "buscar" not in ban_set.surfaces
+    assert "busco" not in ban_set.surfaces
+    assert "tú" in ban_set.pronouns
+    assert "nosotros" in ban_set.pronouns
+    assert "yo" not in ban_set.pronouns
+
+
 class _FakeTokenizer:
     def encode(self, text, add_special_tokens=False):
         return [ord(char) for char in text]

@@ -164,3 +164,43 @@ directions:
     benchmark: spanish_diagnostic_n150
     runner: research.run_experiment
     status: planned
+
+  # --- Direction 4: Neurologic-inspired morphology search ---
+
+  - id: direction_4
+    number: 4
+    title: Neurologic-inspired morphology CNF search
+    question: >-
+      On smoke5, does clause-aware prune/group/select beam search over
+      D(gold) AND NOT D(competitors) improve form+naturalness vs soft logit
+      bias / softneg morph processors, and how does it contrast LoRA
+      train-time adaptation?
+    benchmark_pilot: spanish_direction_hl50_smoke5
+    runner: research.run_experiment
+    samples_per_cell: 1
+    status: planned
+    pilot_variants:
+      - direction_4_neurologic_thin
+      - direction_4_neurologic_thin_inject
+
+  - id: direction_4_neurologic_thin
+    number: 4-thin
+    series: direction_4
+    phase: pilot
+    title: Neurologic thin morph CNF — plain Fix B
+    benchmark: spanish_direction_hl50_smoke5
+    method: neurologic_hf_thin_plain_b
+    inject: false
+    decode: {num_beams: 8, neurologic_lambda: 0.1, neurologic_alpha: 50}
+    status: planned
+
+  - id: direction_4_neurologic_thin_inject
+    number: 4-thin-inject
+    series: direction_4
+    phase: pilot
+    title: Neurologic thin morph CNF — inject + Fix B
+    benchmark: spanish_direction_hl50_smoke5
+    method: neurologic_hf_thin_inject_plain_b
+    inject: true
+    decode: {num_beams: 8, neurologic_lambda: 0.1, neurologic_alpha: 50}
+    status: planned
