@@ -1,0 +1,251 @@
+# Few-shot in-context-learning exemplar pool (Spanish morphology).
+#
+# Worked (constraint -> natural sentence) demonstrations for Direction 5
+# few-shot prompting. Verbs here are deliberately DISJOINT from the
+# spanish_direction_hl50_smoke5 test verbs (buscar, cercar, desplazar,
+# esperanzar, fincar) so exemplars never leak the answer for a test cell.
+#
+# Coverage: 5 indicative tenses x 6 person/number slots (one exemplar per
+# slot, rotating common verbs) + a handful of past participles. This gives
+# >=3 exemplars per tense so dynamic tense-matched selection can fill K=3.
+language: es
+description: >-
+  Curated natural Spanish exemplars for few-shot morphology prompting.
+  Disjoint from smoke5 test verbs. Used by research.generation.fewshot.
+exemplars:
+  # --- present (presente de indicativo) ---
+  - verb: hablar
+    translation: to speak
+    tense: present
+    person: 1st
+    number: singular
+    expected_form: hablo
+    sentence: "Yo hablo español con mis amigos."
+  - verb: comer
+    translation: to eat
+    tense: present
+    person: 2nd
+    number: singular
+    expected_form: comes
+    sentence: "Tú comes fruta todos los días."
+  - verb: vivir
+    translation: to live
+    tense: present
+    person: 3rd
+    number: singular
+    expected_form: vive
+    sentence: "Ella vive en una ciudad tranquila."
+  - verb: trabajar
+    translation: to work
+    tense: present
+    person: 1st
+    number: plural
+    expected_form: trabajamos
+    sentence: "Nosotros trabajamos en la misma oficina."
+  - verb: aprender
+    translation: to learn
+    tense: present
+    person: 2nd
+    number: plural
+    expected_form: aprendéis
+    sentence: "Vosotros aprendéis muy rápido."
+  - verb: escribir
+    translation: to write
+    tense: present
+    person: 3rd
+    number: plural
+    expected_form: escriben
+    sentence: "Ellos escriben cartas a su familia."
+  # --- preterite (pretérito indefinido) ---
+  - verb: estudiar
+    translation: to study
+    tense: preterite
+    person: 1st
+    number: singular
+    expected_form: estudié
+    sentence: "Ayer estudié toda la tarde."
+  - verb: correr
+    translation: to run
+    tense: preterite
+    person: 2nd
+    number: singular
+    expected_form: corriste
+    sentence: "Tú corriste hasta el parque."
+  - verb: beber
+    translation: to drink
+    tense: preterite
+    person: 3rd
+    number: singular
+    expected_form: bebió
+    sentence: "Él bebió un vaso de agua."
+  - verb: comer
+    translation: to eat
+    tense: preterite
+    person: 1st
+    number: plural
+    expected_form: comimos
+    sentence: "Nosotros comimos paella el domingo."
+  - verb: viajar
+    translation: to travel
+    tense: preterite
+    person: 2nd
+    number: plural
+    expected_form: viajasteis
+    sentence: "Vosotros viajasteis por Europa."
+  - verb: leer
+    translation: to read
+    tense: preterite
+    person: 3rd
+    number: plural
+    expected_form: leyeron
+    sentence: "Ellos leyeron el libro entero."
+  # --- imperfect (pretérito imperfecto) ---
+  - verb: cantar
+    translation: to sing
+    tense: imperfect
+    person: 1st
+    number: singular
+    expected_form: cantaba
+    sentence: "De niño yo cantaba en el coro."
+  - verb: trabajar
+    translation: to work
+    tense: imperfect
+    person: 2nd
+    number: singular
+    expected_form: trabajabas
+    sentence: "Antes tú trabajabas los sábados."
+  - verb: vivir
+    translation: to live
+    tense: imperfect
+    person: 3rd
+    number: singular
+    expected_form: vivía
+    sentence: "Ella vivía cerca del mar."
+  - verb: hablar
+    translation: to speak
+    tense: imperfect
+    person: 1st
+    number: plural
+    expected_form: hablábamos
+    sentence: "Nosotros hablábamos durante horas."
+  - verb: comer
+    translation: to eat
+    tense: imperfect
+    person: 2nd
+    number: plural
+    expected_form: comíais
+    sentence: "Vosotros comíais juntos cada semana."
+  - verb: estudiar
+    translation: to study
+    tense: imperfect
+    person: 3rd
+    number: plural
+    expected_form: estudiaban
+    sentence: "Ellos estudiaban en la biblioteca."
+  # --- future (futuro simple) ---
+  - verb: viajar
+    translation: to travel
+    tense: future
+    person: 1st
+    number: singular
+    expected_form: viajaré
+    sentence: "Yo viajaré a México el año próximo."
+  - verb: aprender
+    translation: to learn
+    tense: future
+    person: 2nd
+    number: singular
+    expected_form: aprenderás
+    sentence: "Tú aprenderás mucho en este curso."
+  - verb: escribir
+    translation: to write
+    tense: future
+    person: 3rd
+    number: singular
+    expected_form: escribirá
+    sentence: "Ella escribirá una novela el año que viene."
+  - verb: comer
+    translation: to eat
+    tense: future
+    person: 1st
+    number: plural
+    expected_form: comeremos
+    sentence: "Nosotros comeremos en ese restaurante."
+  - verb: cantar
+    translation: to sing
+    tense: future
+    person: 2nd
+    number: plural
+    expected_form: cantaréis
+    sentence: "Vosotros cantaréis en el concierto."
+  - verb: correr
+    translation: to run
+    tense: future
+    person: 3rd
+    number: plural
+    expected_form: correrán
+    sentence: "Ellos correrán la maratón el domingo."
+  # --- conditional (condicional simple) ---
+  - verb: hablar
+    translation: to speak
+    tense: conditional
+    person: 1st
+    number: singular
+    expected_form: hablaría
+    sentence: "Yo hablaría con él si pudiera."
+  - verb: vivir
+    translation: to live
+    tense: conditional
+    person: 2nd
+    number: singular
+    expected_form: vivirías
+    sentence: "Tú vivirías mejor en el campo."
+  - verb: trabajar
+    translation: to work
+    tense: conditional
+    person: 3rd
+    number: singular
+    expected_form: trabajaría
+    sentence: "Ella trabajaría menos horas si pudiera."
+  - verb: aprender
+    translation: to learn
+    tense: conditional
+    person: 1st
+    number: plural
+    expected_form: aprenderíamos
+    sentence: "Nosotros aprenderíamos otro idioma con gusto."
+  - verb: beber
+    translation: to drink
+    tense: conditional
+    person: 2nd
+    number: plural
+    expected_form: beberíais
+    sentence: "Vosotros beberíais más agua en verano."
+  - verb: leer
+    translation: to read
+    tense: conditional
+    person: 3rd
+    number: plural
+    expected_form: leerían
+    sentence: "Ellos leerían toda la noche sin cansarse."
+  # --- past participle (participio) ---
+  - verb: comer
+    translation: to eat
+    tense: participle
+    expected_form: comido
+    sentence: "He comido demasiado hoy."
+  - verb: viajar
+    translation: to travel
+    tense: participle
+    expected_form: viajado
+    sentence: "Hemos viajado por todo el país."
+  - verb: escribir
+    translation: to write
+    tense: participle
+    expected_form: escrito
+    sentence: "Ha escrito tres libros importantes."
+  - verb: aprender
+    translation: to learn
+    tense: participle
+    expected_form: aprendido
+    sentence: "Han aprendido la lección rápidamente."

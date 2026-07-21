@@ -1,0 +1,7 @@
+name: direction_5_fewshot_static_k3_smoke5
+method: fewshot_hf_static_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short

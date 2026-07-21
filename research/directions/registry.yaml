@@ -204,3 +204,54 @@ directions:
     inject: true
     decode: {num_beams: 8, neurologic_lambda: 0.1, neurologic_alpha: 50}
     status: planned
+
+  # --- Direction 5: Few-shot in-context learning (prompt-time conditioning) ---
+
+  - id: direction_5
+    number: 5
+    title: Few-shot in-context learning
+    question: >-
+      On smoke5, how does prompt-time conditioning (K worked
+      demonstrations) compare to decode-time constrained decoding (D1) and
+      train-time LoRA (D2) on expected-form match and naturalness — and does
+      tense-matched (dynamic) exemplar retrieval beat a fixed (static) set?
+      Exemplars are disjoint from the smoke5 test verbs (no leakage).
+    benchmark_pilot: spanish_direction_hl50_smoke5
+    runner: research.run_experiment
+    samples_per_cell: 1
+    status: planned
+    pilot_variants:
+      - direction_5_fewshot_static
+      - direction_5_fewshot_dynamic
+      - direction_5_fewshot_dynamic_soft
+
+  - id: direction_5_fewshot_static
+    number: 5-static
+    series: direction_5
+    phase: pilot
+    title: Few-shot static K=3 — fixed demos, Fix B greedy
+    benchmark: spanish_direction_hl50_smoke5
+    method: fewshot_hf_static_plain_b
+    inject: false
+    status: planned
+
+  - id: direction_5_fewshot_dynamic
+    number: 5-dynamic
+    series: direction_5
+    phase: pilot
+    title: Few-shot dynamic K=3 — tense-matched demos, Fix B greedy
+    benchmark: spanish_direction_hl50_smoke5
+    method: fewshot_hf_dynamic_plain_b
+    inject: false
+    status: planned
+
+  - id: direction_5_fewshot_dynamic_soft
+    number: 5-dynamic-soft
+    series: direction_5
+    phase: pilot
+    title: Few-shot dynamic K=3 + soft logit bias (cross-mechanism combo)
+    benchmark: spanish_direction_hl50_smoke5
+    method: fewshot_hf_dynamic_soft_plain_b
+    inject: false
+    decode: {num_beams: 8, constraint: soft_bias, bias_strength: 5.0}
+    status: planned
