@@ -11,6 +11,8 @@
 # Important: do NOT use --export=ALL or --export=VAR=val for these jobs.
 # Slurm on this cluster can hold jobs with "user env retrieval failed".
 # Env is set inside a heredoc wrapper instead (same pattern as Neurologic n150).
+# QOS retry rewrites a temp job script each attempt so the heredoc is not
+# consumed empty on retry.
 
 set -euo pipefail
 
@@ -20,8 +22,8 @@ NAT_SCRIPT="${PROJECT}/research/scripts/cluster/lora_ood_naturalness_arm.sh"
 LORA_A="${PROJECT}/research/runs/lora/qwen3_1p7b_form_given"
 LORA_B="${PROJECT}/research/runs/lora/qwen3_1p7b_lora_no_inject"
 RUNS="${PROJECT}/research/runs"
-
-mkdir -p "${PROJECT}/logs" "${RUNS}"
+TMPDIR_JOBS="${PROJECT}/logs/sbatch_tmp"
+mkdir -p "${PROJECT}/logs" "${RUNS}" "${TMPDIR_JOBS}"
 
 for adapter in "${LORA_A}" "${LORA_B}"; do
   if [[ ! -f "${adapter}/adapter_model.safetensors" ]]; then
@@ -43,12 +45,14 @@ ARMS=(
   "neuro_inject_lora_no_inject|neuro_inject|${RUNS}/lora_ood_neuro_inject_lora_no_inject.db|${LORA_B}|direction_2_lora_neuro_inject_ood_n36"
 )
 
-sbatch_with_retry() {
+sbatch_script_with_retry() {
+  local job_script="$1"
+  shift
   local attempt=0
   while true; do
     attempt=$((attempt + 1))
     set +e
-    OUT="$("$@")"
+    OUT="$(sbatch "$@" "${job_script}" 2>&1)"
     RC=$?
     set -e
     if [[ $RC -eq 0 ]]; then
@@ -61,55 +65,36 @@ sbatch_with_retry() {
   done
 }
 
-sbatch_gen() {
-  local name="$1" arm="$2" db="$3" adapter="$4"
-  local adapter_line=""
-  if [[ -n "${adapter}" ]]; then
-    adapter_line="export LORA_ADAPTER_PATH=${adapter}"
-  else
-    adapter_line="unset LORA_ADAPTER_PATH || true"
-  fi
-  sbatch_with_retry sbatch \
-    --job-name="lora_${name}" \
-    --gres=gpu:1 \
-    --cpus-per-task=4 \
-    --partition=a30 \
-    --time=24:00:00 \
-    --mail-type=ALL \
-    --mail-user=jjg25 \
-    --output="${PROJECT}/logs/lora_ood_${name}_%j.out" \
-    <<EOF
-#!/bin/bash
-set -euo pipefail
-export ARM=${arm}
-export RESEARCH_DB=${db}
-${adapter_line}
-bash ${GEN_SCRIPT}
-EOF
+write_gen_script() {
+  local path="$1" arm="$2" db="$3" adapter="$4"
+  {
+    echo '#!/bin/bash'
+    echo 'set -euo pipefail'
+    echo "export ARM=${arm}"
+    echo "export RESEARCH_DB=${db}"
+    if [[ -n "${adapter}" ]]; then
+      echo "export LORA_ADAPTER_PATH=${adapter}"
+    else
+      echo 'unset LORA_ADAPTER_PATH || true'
+    fi
+    echo "bash ${GEN_SCRIPT}"
+  } >"${path}"
+  chmod +x "${path}"
 }
 
-sbatch_nat() {
-  local jid="$1" name="$2" db="$3" method="$4"
-  sbatch_with_retry sbatch \
-    --job-name="lora_nat_${name}" \
-    --dependency="afterany:${jid}" \
-    --gres=gpu:1 \
-    --cpus-per-task=4 \
-    --partition=a30 \
-    --time=06:00:00 \
-    --mail-type=ALL \
-    --mail-user=jjg25 \
-    --output="${PROJECT}/logs/lora_ood_nat_${name}_%j.out" \
-    <<EOF
-#!/bin/bash
-set -euo pipefail
-export DB_PATH=${db}
-export METHOD_NAME=${method}
-export LABEL=${name}
-export EVALUATOR=both
-export RESUME=1
-bash ${NAT_SCRIPT}
-EOF
+write_nat_script() {
+  local path="$1" name="$2" db="$3" method="$4"
+  {
+    echo '#!/bin/bash'
+    echo 'set -euo pipefail'
+    echo "export DB_PATH=${db}"
+    echo "export METHOD_NAME=${method}"
+    echo "export LABEL=${name}"
+    echo 'export EVALUATOR=both'
+    echo 'export RESUME=1'
+    echo "bash ${NAT_SCRIPT}"
+  } >"${path}"
+  chmod +x "${path}"
 }
 
 echo "Submitting LoRA OOD soft_inject B8 + Neurologic B16 (+inject) matrix arms..."
@@ -117,7 +102,18 @@ JOB_IDS=()
 NAT_SPECS=()
 for row in "${ARMS[@]}"; do
   IFS='|' read -r name arm db adapter method <<<"${row}"
-  OUT="$(sbatch_gen "${name}" "${arm}" "${db}" "${adapter}")"
+  SCRIPT="${TMPDIR_JOBS}/gen_${name}.sh"
+  write_gen_script "${SCRIPT}" "${arm}" "${db}" "${adapter}"
+  OUT="$(sbatch_script_with_retry "${SCRIPT}" \
+    --job-name="lora_${name}" \
+    --gres=gpu:1 \
+    --cpus-per-task=4 \
+    --partition=a30 \
+    --time=24:00:00 \
+    --mail-type=ALL \
+    --mail-user=jjg25 \
+    --output="${PROJECT}/logs/lora_ood_${name}_%j.out"
+  )"
   JID="${OUT##* }"
   echo "  ${name} -> job ${JID}  DB=$(basename "${db}")"
   JOB_IDS+=("${JID}")
@@ -128,7 +124,19 @@ echo ""
 echo "Submitting naturalness after each gen (afterany)..."
 for spec in "${NAT_SPECS[@]}"; do
   IFS='|' read -r jid name db method <<<"${spec}"
-  OUT="$(sbatch_nat "${jid}" "${name}" "${db}" "${method}")"
+  SCRIPT="${TMPDIR_JOBS}/nat_${name}.sh"
+  write_nat_script "${SCRIPT}" "${name}" "${db}" "${method}"
+  OUT="$(sbatch_script_with_retry "${SCRIPT}" \
+    --job-name="lora_nat_${name}" \
+    --dependency="afterany:${jid}" \
+    --gres=gpu:1 \
+    --cpus-per-task=4 \
+    --partition=a30 \
+    --time=06:00:00 \
+    --mail-type=ALL \
+    --mail-user=jjg25 \
+    --output="${PROJECT}/logs/lora_ood_nat_${name}_%j.out"
+  )"
   echo "  nat ${name} -> ${OUT##* } (after ${jid})"
 done
 
