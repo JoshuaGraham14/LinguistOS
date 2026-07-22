@@ -1,6 +1,6 @@
 #!/bin/bash
-# Submit LoRA OOD soft_inject B8 + Neurologic B16 arms (Base / LoRA-A / LoRA-B)
-# in parallel, then queue naturalness (PPL + LLM judge) after generation.
+# Submit LoRA OOD soft_inject B8 + Neurologic B16 (+inject) arms
+# (Base / LoRA-A / LoRA-B) in parallel, then queue naturalness after generation.
 #
 # Usage (cluster head node, after code sync):
 #   bash research/scripts/cluster/lora_ood_matrix_softneuro_submit.sh
@@ -34,6 +34,9 @@ ARMS=(
   "neuro_base|neuro|${RUNS}/lora_ood_neuro_base.db||direction_2_lora_neuro_ood_n36"
   "neuro_lora|neuro|${RUNS}/lora_ood_neuro_lora.db|${LORA_A}|direction_2_lora_neuro_ood_n36"
   "neuro_lora_no_inject|neuro|${RUNS}/lora_ood_neuro_lora_no_inject.db|${LORA_B}|direction_2_lora_neuro_ood_n36"
+  "neuro_inject_base|neuro_inject|${RUNS}/lora_ood_neuro_inject_base.db||direction_2_lora_neuro_inject_ood_n36"
+  "neuro_inject_lora|neuro_inject|${RUNS}/lora_ood_neuro_inject_lora.db|${LORA_A}|direction_2_lora_neuro_inject_ood_n36"
+  "neuro_inject_lora_no_inject|neuro_inject|${RUNS}/lora_ood_neuro_inject_lora_no_inject.db|${LORA_B}|direction_2_lora_neuro_inject_ood_n36"
 )
 
 sbatch_gen() {
@@ -56,7 +59,7 @@ sbatch_gen() {
     "${GEN_SCRIPT}"
 }
 
-echo "Submitting LoRA OOD soft_inject B8 + Neurologic B16 matrix arms..."
+echo "Submitting LoRA OOD soft_inject B8 + Neurologic B16 (+inject) matrix arms..."
 JOB_IDS=()
 NAT_SPECS=()
 for row in "${ARMS[@]}"; do

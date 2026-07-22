@@ -1,0 +1,10 @@
+name: direction_2_lora_neuro_inject_ood_n36
+method: neurologic_hf_thin_inject_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short
+  num_beams: 16
+  neurologic_lambda: 0.1
+  neurologic_alpha: 50
