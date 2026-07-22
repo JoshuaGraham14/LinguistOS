@@ -44,6 +44,11 @@ from research.generation.constrained_hf import (
     ConstrainedHFSoftPlainBGenerator,
     ConstrainedHFSoftPlainGenerator,
 )
+from research.generation.fewshot_hf import (
+    FewShotDynamicHFGenerator,
+    FewShotDynamicSoftHFGenerator,
+    FewShotStaticHFGenerator,
+)
 from research.generation.individual_gpt import IndividualGPTGenerator
 from research.generation.neurologic_hf import (
     NeurologicHFAgreePlainBGenerator,
@@ -99,5 +104,8 @@ GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "neurologic_hf_agree_plain_b": NeurologicHFAgreePlainBGenerator,
     "neurologic_hf_thin_scene_plain_b": NeurologicHFThinScenePlainBGenerator,
     "neurologic_hf_agree_scene_plain_b": NeurologicHFAgreeScenePlainBGenerator,
+    "fewshot_hf_static_plain_b": FewShotStaticHFGenerator,
+    "fewshot_hf_dynamic_plain_b": FewShotDynamicHFGenerator,
+    "fewshot_hf_dynamic_soft_plain_b": FewShotDynamicSoftHFGenerator,
     "individual_gpt": IndividualGPTGenerator,
 }

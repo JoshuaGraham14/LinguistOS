@@ -1,0 +1,8 @@
+name: direction_5_fewshot_dynamic_soft_k3_smoke5
+method: fewshot_hf_dynamic_soft_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short
+  num_beams: 8
