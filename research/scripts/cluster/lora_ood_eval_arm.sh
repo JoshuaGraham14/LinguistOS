@@ -2,7 +2,7 @@
 # OOD n36 eval for base or LoRA-adapted Qwen3-1.7B (Fix-B decode arms).
 #
 # Env:
-#   ARM = inject | vanilla | soft | soft_inject
+#   ARM = inject | vanilla | soft | soft_inject | neuro
 #   LORA_ADAPTER_PATH = optional path to peft adapter (omit for base)
 #   RESEARCH_DB = output db path
 #
@@ -25,7 +25,7 @@ PROJECT=/vol/bitbucket/jjg25/LinguistOS
 VENV="${PROJECT}/.venv"
 cd "${PROJECT}"
 
-: "${ARM:?Set ARM=inject|vanilla|soft|soft_inject}"
+: "${ARM:?Set ARM=inject|vanilla|soft|soft_inject|neuro}"
 : "${RESEARCH_DB:?Set RESEARCH_DB path}"
 
 case "${ARM}" in
@@ -33,6 +33,7 @@ case "${ARM}" in
   vanilla) METHOD=direction_2_lora_vanilla_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-16}" ;;
   soft) METHOD=direction_2_lora_soft_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-4}" ;;
   soft_inject) METHOD=direction_2_lora_soft_inject_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-4}" ;;
+  neuro) METHOD=direction_2_lora_neuro_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-1}" ;;
   *) echo "Unknown ARM=${ARM}" >&2; exit 1 ;;
 esac
 
