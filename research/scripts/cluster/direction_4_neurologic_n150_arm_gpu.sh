@@ -27,8 +27,9 @@ BENCHMARK=spanish_diagnostic_n150
 case "${ARM}" in
   thin_B) METHOD=direction_4_neurologic_thin_n150_B ;;
   b16_a50) METHOD=direction_4_neurologic_thin_b16_a50_n150_B ;;
+  inject_b16) METHOD=direction_4_neurologic_thin_inject_b16_a50_n150_B ;;
   *)
-    echo "Unknown ARM='${ARM}' (expected thin_B or b16_a50)" >&2
+    echo "Unknown ARM='${ARM}' (expected thin_B, b16_a50 or inject_b16)" >&2
     exit 1
     ;;
 esac

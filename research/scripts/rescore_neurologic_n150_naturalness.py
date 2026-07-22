@@ -29,7 +29,8 @@ NEURO_ARMS: tuple[RescoreArm, ...] = (
             "direction_4_n150_thin_B.db",
             None,
             "Neurologic thin baseline (beams=8)",
-        )
+        ),
+        required=False,
     ),
     RescoreArm(
         HeadlineArm(
@@ -38,6 +39,16 @@ NEURO_ARMS: tuple[RescoreArm, ...] = (
             "direction_4_n150_b16_a50.db",
             None,
             "Neurologic thin beams=16 alpha=50",
+        ),
+        required=False,
+    ),
+    RescoreArm(
+        HeadlineArm(
+            "inject_b16",
+            "direction_4_neurologic_thin_inject_b16_a50_n150_B",
+            "direction_4_n150_inject_b16.db",
+            None,
+            "Neurologic thin + inject beams=16 alpha=50",
         )
     ),
 )
