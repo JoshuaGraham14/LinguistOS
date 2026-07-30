@@ -17,6 +17,7 @@ class MethodRunConfig:
     sentence_length: str = "short"
     explicit_subject_required: bool = False
     hf_batch_size: int | None = None
+    reasoning_effort: str | None = None
 
     @classmethod
     def from_method_config(cls, method_config: MethodConfig) -> MethodRunConfig:
@@ -26,12 +27,14 @@ class MethodRunConfig:
         if sentence_length != RANDOM_LENGTH:
             resolve_length_band(sentence_length)
         hf_batch_size = raw.get("hf_batch_size")
+        reasoning_effort = raw.get("reasoning_effort")
         return cls(
             model=str(raw.get("model", "gpt-5.4-nano")),
             temperature=float(raw.get("temperature", 0.7)),
             sentence_length=sentence_length,
             explicit_subject_required=bool(raw.get("explicit_subject_required", False)),
             hf_batch_size=int(hf_batch_size) if hf_batch_size is not None else None,
+            reasoning_effort=str(reasoning_effort) if reasoning_effort is not None else None,
         )
 
     @property

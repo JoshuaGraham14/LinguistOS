@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from research.generation.baseline_gpt import BaselineGPTGenerator, FormInjectedGPTGenerator
+from research.generation.baseline_gpt_plain import PlainGPTBGenerator
 from research.generation.baseline_hf import (
     BaselineHFGenerator,
     FormInjectedExplicitHFGenerator,
@@ -64,6 +65,7 @@ if TYPE_CHECKING:
 GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "baseline_gpt": BaselineGPTGenerator,
     "baseline_gpt_form_injected": FormInjectedGPTGenerator,
+    "baseline_gpt_plain_b": PlainGPTBGenerator,
     "baseline_hf": BaselineHFGenerator,
     "baseline_hf_plain": PlainHFGenerator,
     "baseline_hf_plain_b": PlainHFBGenerator,
