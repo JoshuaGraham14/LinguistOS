@@ -18,7 +18,7 @@
 set -euo pipefail
 
 PROJECT=/vol/bitbucket/jjg25/LinguistOS-frontier-gpt55
-VENV="${PROJECT}/.venv"
+MAIN=/vol/bitbucket/jjg25/LinguistOS
 METHOD_NAME=frontier_ceiling_gpt55_vanilla_ood_n36
 DB_PATH="${DB_PATH:-${PROJECT}/research/runs/frontier_ceiling_gpt55_vanilla_ood_n36.db}"
 LABEL="${LABEL:-$(basename "${DB_PATH}" .db)}"
@@ -27,16 +27,20 @@ RESUME="${RESUME:-1}"
 
 mkdir -p "${PROJECT}/logs"
 
-if [[ -f "${VENV}/bin/activate" ]]; then
+if [[ -f "${MAIN}/.venv/bin/activate" ]]; then
   # shellcheck disable=SC1091
-  source "${VENV}/bin/activate"
-elif [[ -f /vol/bitbucket/jjg25/LinguistOS/research/.venv/bin/activate ]]; then
+  source "${MAIN}/.venv/bin/activate"
+elif [[ -f "${PROJECT}/.venv/bin/activate" ]]; then
   # shellcheck disable=SC1091
-  source /vol/bitbucket/jjg25/LinguistOS/research/.venv/bin/activate
-elif [[ -f /vol/bitbucket/jjg25/LinguistOS/.venv/bin/activate ]]; then
-  # shellcheck disable=SC1091
-  source /vol/bitbucket/jjg25/LinguistOS/.venv/bin/activate
+  source "${PROJECT}/.venv/bin/activate"
+else
+  echo "ERROR: no usable venv found" >&2
+  exit 1
 fi
+python -c "import wordfreq, openai, torch" || {
+  echo "ERROR: active venv missing deps" >&2
+  exit 1
+}
 
 cd "${PROJECT}"
 export PROJECT

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Frontier ceiling: GPT-5.5 Fix-B plain vanilla on spanish_lora_ood_n36.
-# Phase A — generation + EF / length / LT (API-bound; GPU unused but required
-# by Slurm partitions). Prefer partition=t4 to avoid a30 QOS contention.
+# Phase A — generation + EF / length / LT (API-bound). Uses MAIN .venv.
+# Partition a30 for availability; GPU mostly unused during API gen.
 #
 # Writes ONLY to RESEARCH_DB (default under research/runs/).
 #
@@ -12,7 +12,7 @@
 #SBATCH --job-name=gpt55_ood_gen
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=2
-#SBATCH --partition=t4
+#SBATCH --partition=a30
 #SBATCH --time=12:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jjg25
@@ -21,7 +21,7 @@
 set -euo pipefail
 
 PROJECT=/vol/bitbucket/jjg25/LinguistOS-frontier-gpt55
-VENV="${PROJECT}/.venv"
+MAIN=/vol/bitbucket/jjg25/LinguistOS
 cd "${PROJECT}"
 
 METHOD=frontier_ceiling_gpt55_vanilla_ood_n36
@@ -30,16 +30,22 @@ RESEARCH_DB="${RESEARCH_DB:-${PROJECT}/research/runs/frontier_ceiling_gpt55_vani
 
 mkdir -p "$(dirname "${RESEARCH_DB}")" "${PROJECT}/logs"
 
-if [[ -f "${VENV}/bin/activate" ]]; then
+# Prefer the full MAIN project venv (has wordfreq/openai). Do not use
+# MAIN/research/.venv — it is incomplete.
+if [[ -f "${MAIN}/.venv/bin/activate" ]]; then
   # shellcheck disable=SC1091
-  source "${VENV}/bin/activate"
-elif [[ -f /vol/bitbucket/jjg25/LinguistOS/research/.venv/bin/activate ]]; then
+  source "${MAIN}/.venv/bin/activate"
+elif [[ -f "${PROJECT}/.venv/bin/activate" ]]; then
   # shellcheck disable=SC1091
-  source /vol/bitbucket/jjg25/LinguistOS/research/.venv/bin/activate
-elif [[ -f /vol/bitbucket/jjg25/LinguistOS/.venv/bin/activate ]]; then
-  # shellcheck disable=SC1091
-  source /vol/bitbucket/jjg25/LinguistOS/.venv/bin/activate
+  source "${PROJECT}/.venv/bin/activate"
+else
+  echo "ERROR: no usable venv found" >&2
+  exit 1
 fi
+python -c "import wordfreq, openai" || {
+  echo "ERROR: active venv missing wordfreq/openai" >&2
+  exit 1
+}
 
 # shellcheck disable=SC1091
 source "${PROJECT}/research/scripts/cluster/research_cache_env.sh"
