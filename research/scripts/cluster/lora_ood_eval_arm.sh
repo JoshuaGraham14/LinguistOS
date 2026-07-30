@@ -1,8 +1,8 @@
 #!/bin/bash
-# OOD n36 eval for base or LoRA-adapted Qwen3-1.7B (Fix-B inject / vanilla / soft).
+# OOD n36 eval for base or LoRA-adapted Qwen3-1.7B (Fix-B decode arms).
 #
 # Env:
-#   ARM = inject | vanilla | soft
+#   ARM = inject | vanilla | soft | soft_inject | neuro | neuro_inject
 #   LORA_ADAPTER_PATH = optional path to peft adapter (omit for base)
 #   RESEARCH_DB = output db path
 #
@@ -14,7 +14,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=a30
-#SBATCH --time=06:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jjg25
 #SBATCH --output=/vol/bitbucket/jjg25/LinguistOS/logs/lora_ood_eval_%j.out
@@ -25,13 +25,16 @@ PROJECT=/vol/bitbucket/jjg25/LinguistOS
 VENV="${PROJECT}/.venv"
 cd "${PROJECT}"
 
-: "${ARM:?Set ARM=inject|vanilla|soft}"
+: "${ARM:?Set ARM=inject|vanilla|soft|soft_inject|neuro|neuro_inject}"
 : "${RESEARCH_DB:?Set RESEARCH_DB path}"
 
 case "${ARM}" in
   inject) METHOD=direction_2_lora_inject_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-16}" ;;
   vanilla) METHOD=direction_2_lora_vanilla_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-16}" ;;
   soft) METHOD=direction_2_lora_soft_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-4}" ;;
+  soft_inject) METHOD=direction_2_lora_soft_inject_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-4}" ;;
+  neuro) METHOD=direction_2_lora_neuro_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-1}" ;;
+  neuro_inject) METHOD=direction_2_lora_neuro_inject_ood_n36; HF_BATCH_SIZE="${HF_BATCH_SIZE:-1}" ;;
   *) echo "Unknown ARM=${ARM}" >&2; exit 1 ;;
 esac
 

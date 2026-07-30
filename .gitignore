@@ -45,3 +45,5 @@ data/local/
 # Local agent / editor configs
 .claude/
 .cursor/
+
+docs/report-writing/
