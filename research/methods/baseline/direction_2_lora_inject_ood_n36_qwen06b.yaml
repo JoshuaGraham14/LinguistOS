@@ -1,0 +1,7 @@
+name: direction_2_lora_inject_ood_n36_qwen06b
+method: baseline_hf_form_injected_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-0.6B
+  temperature: 0
+  sentence_length: short
