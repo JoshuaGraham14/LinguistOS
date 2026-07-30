@@ -24,6 +24,7 @@ VENV="${PROJECT}/.venv"
 cd "${PROJECT}"
 
 DATA="${PROJECT}/research/runs/lora/sft_lora_form_n150.jsonl"
+LEGACY_DATA="${PROJECT}/research/runs/lora/sft_form_given_n150.jsonl"
 OUT="${PROJECT}/research/runs/lora_06b/adapters/lora_form"
 
 mkdir -p "${PROJECT}/logs" "${OUT}"
@@ -59,14 +60,17 @@ else:
     print("deps ok")
 PY
 
-if [[ ! -f "${DATA}" ]]; then
+if [[ -f "${DATA}" ]]; then
+  echo "=== Reusing existing SFT JSONL (read-only): ${DATA} ==="
+elif [[ -f "${LEGACY_DATA}" ]]; then
+  DATA="${LEGACY_DATA}"
+  echo "=== Reusing legacy SFT JSONL (read-only): ${DATA} ==="
+else
   echo "=== Building SFT dataset (LoRA-form) — missing ${DATA} ==="
   python -m research.scripts.build_lora_sft_dataset \
     --experiment lora-form \
     --runs-dir "${PROJECT}/research/runs" \
     --output "${DATA}"
-else
-  echo "=== Reusing existing SFT JSONL (read-only): ${DATA} ==="
 fi
 
 echo "=== Training LoRA-form on Qwen3-0.6B ==="
