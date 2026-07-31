@@ -13,6 +13,7 @@
 #SBATCH --time=06:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jjg25
+#SBATCH --export=NONE
 #SBATCH --output=/vol/bitbucket/jjg25/LinguistOS-frontier-gpt55/logs/frontier_ceiling_gpt55_ood_nat_%j.out
 
 set -euo pipefail
@@ -20,8 +21,9 @@ set -euo pipefail
 PROJECT=/vol/bitbucket/jjg25/LinguistOS-frontier-gpt55
 MAIN=/vol/bitbucket/jjg25/LinguistOS
 METHOD_NAME=frontier_ceiling_gpt55_vanilla_ood_n36
+# Hardcoded defaults so --export=NONE still works (avoids Slurm user-env retrieval).
 DB_PATH="${DB_PATH:-${PROJECT}/research/runs/frontier_ceiling_gpt55_vanilla_ood_n36.db}"
-LABEL="${LABEL:-$(basename "${DB_PATH}" .db)}"
+LABEL="${LABEL:-frontier_ceiling_gpt55_vanilla_ood_n36}"
 EVALUATOR="${EVALUATOR:-both}"
 RESUME="${RESUME:-1}"
 
