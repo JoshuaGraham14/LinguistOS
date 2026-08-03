@@ -22,6 +22,11 @@ GRAMMAR_CATEGORIES: frozenset[str] = frozenset(
     }
 )
 
+# LanguageTool has no Welsh grammar data. Prefer omitting via
+# ``default_evaluators_for_language("cy")``; this guard avoids accidental
+# Spanish-rule scoring if the evaluator is still invoked on Welsh text.
+UNSUPPORTED_LANGUAGETOOL_LANGS: frozenset[str] = frozenset({"cy"})
+
 _LT_CACHE: dict[str, Any] = {}
 _LT_INIT_ERRORS: dict[str, str] = {}
 
@@ -114,6 +119,20 @@ class LanguageToolGrammarEvaluator(BaseEvaluator):
         constraints: dict[str, Any],
     ) -> EvaluationResult:
         language = (constraints.get("target_language") or "es").strip() or "es"
+        if language in UNSUPPORTED_LANGUAGETOOL_LANGS:
+            return EvaluationResult(
+                score=0.0,
+                details={
+                    "passed": False,
+                    "match_count": 0,
+                    "total_match_count": 0,
+                    "token_count": len(tokenize(sentence)),
+                    "matches": [],
+                    "skipped": True,
+                    "reason": "unsupported_language_for_languagetool",
+                    "language": language,
+                },
+            )
 
         try:
             tool = self._tool_factory(language)

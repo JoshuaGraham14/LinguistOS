@@ -13,6 +13,11 @@ from research.evaluation.sentence.naturalness_llm_judge import (
 )
 from research.evaluation.sentence.verb_morphology import VerbMorphologyEvaluator
 
+# LanguageTool has no Welsh grammar pack. Do not run ``grammar_languagetool`` for
+# ``cy`` (omit rather than fail-open against Spanish rules). Cysill integration
+# is a future optional replacement — see research/welsh/README.md.
+_LANGUAGES_WITHOUT_LANGUAGETOOL: frozenset[str] = frozenset({"cy"})
+
 # NOTE: VerbMorphologyEvaluator is intentionally *not* in DEFAULT_EVALUATORS.
 # It depends on spaCy's `es_core_news_sm`, which mis-tags common Spanish verb
 # forms (e.g. `busqué` labelled Mood=Sub/Pres/3sg instead of Ind/Pret/1sg).
@@ -35,6 +40,14 @@ OPTIONAL_EVALUATORS: dict[str, Callable[[], BaseEvaluator]] = {
     FluencyPerplexityEvaluator().name: FluencyPerplexityEvaluator,
     NaturalnessLlmJudgeEvaluator().name: NaturalnessLlmJudgeEvaluator,
 }
+
+
+def default_evaluators_for_language(language: str) -> list[BaseEvaluator]:
+    """Default per-sentence evaluators for a benchmark language code."""
+    code = (language or "").strip().lower()
+    if code in _LANGUAGES_WITHOUT_LANGUAGETOOL:
+        return [ev for ev in DEFAULT_EVALUATORS if ev.name != "grammar_languagetool"]
+    return list(DEFAULT_EVALUATORS)
 
 
 def build_optional_evaluators(names: list[str]) -> list[BaseEvaluator]:
@@ -64,4 +77,5 @@ __all__ = [
     "DEFAULT_EVALUATORS",
     "OPTIONAL_EVALUATORS",
     "build_optional_evaluators",
+    "default_evaluators_for_language",
 ]

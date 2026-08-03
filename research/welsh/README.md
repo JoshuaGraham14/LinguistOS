@@ -92,6 +92,14 @@ sbatch research/scripts/cluster/welsh_smoke_gpu.sh
 Results land on the cluster at
 `research/welsh/manifests/welsh_smoke_results.json` (not on the Mac).
 
+## Evaluation note (LanguageTool)
+
+LanguageTool has **no Welsh pack**. Pipeline runs for `language: cy` omit
+`grammar_languagetool` (see `default_evaluators_for_language`). Headline Welsh
+metrics are expected-form match (+ length/clause); naturalness judge / PPL can
+still be added offline. **Cysill** is the natural future grammar-tool swap-in
+but is not wired yet.
+
 Auxiliaries used in periphrastic templates (`bod`, `gwneud`) are excluded from
 the target-verb pool.
 

@@ -30,7 +30,7 @@ from research.evaluation.distribution import (
 )
 from research.evaluation.distribution.base import BaseGroupMetric
 from research.evaluation.rollups import aggregate_sentence_eval_rollups
-from research.evaluation.sentence import DEFAULT_EVALUATORS
+from research.evaluation.sentence import default_evaluators_for_language
 from research.evaluation.sentence.base import BaseEvaluator
 
 
@@ -565,7 +565,8 @@ def run_experiment(
     Per-cell (constraint_set) metrics and sentence roll-ups are unchanged.
 
     Pass ``extra_evaluators`` to run one or more opt-in per-sentence evaluators
-    alongside ``DEFAULT_EVALUATORS``. Optional evaluators are intended for
+    alongside the language-appropriate defaults (see
+    ``default_evaluators_for_language``). Optional evaluators are intended for
     small dev/smoke runs only; the primary integration path for the
     naturalness scorers is offline rescore against per-arm DBs.
     """
@@ -797,12 +798,19 @@ def run_experiment(
 
             total_evals = 0
             if evaluate:
-                evaluators = _merge_evaluators(DEFAULT_EVALUATORS, extra_evaluators)
+                base_evaluators = default_evaluators_for_language(benchmark.language)
+                if benchmark.language.strip().lower() in {"cy"}:
+                    print(
+                        "  Skipping grammar_languagetool for Welsh "
+                        "(no LanguageTool pack; Cysill not wired)",
+                        flush=True,
+                    )
+                evaluators = _merge_evaluators(base_evaluators, extra_evaluators)
                 if extra_evaluators:
                     extra_names = [
                         ev.name
                         for ev in extra_evaluators
-                        if ev.name not in {d.name for d in DEFAULT_EVALUATORS}
+                        if ev.name not in {d.name for d in base_evaluators}
                     ]
                     if extra_names:
                         print(
