@@ -103,6 +103,8 @@ def _build_generator(run_config: MethodRunConfig, method_config: MethodConfig) -
         "model": run_config.model,
         "temperature": run_config.temperature,
     }
+    if run_config.reasoning_effort is not None:
+        kwargs["reasoning_effort"] = run_config.reasoning_effort
     if "num_beams" in raw:
         kwargs["num_beams"] = int(raw["num_beams"])
     if "bias_strength" in raw:
