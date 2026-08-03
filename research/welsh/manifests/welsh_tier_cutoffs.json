@@ -2,14 +2,14 @@
   "lang": "cy",
   "frequency_source": "CorCenCC lemma frequencies (Yr Amliadur); not wordfreq",
   "zipf_formula": "log10(per_million) + 3  (= log10(f * 1e9), f = per_million/1e6)",
-  "n_pool": 2490,
+  "n_pool": 2486,
   "tier_cutoffs_zipf": [
     3.149,
     3.941
   ],
-  "high_rank_max": 830,
-  "mid_rank_max": 1660,
-  "low_rank_max": 2490,
+  "high_rank_max": 828,
+  "mid_rank_max": 1657,
+  "low_rank_max": 2486,
   "high_zipf_min": 3.941,
   "high_zipf_max": 6.779,
   "mid_zipf_min": 3.149,

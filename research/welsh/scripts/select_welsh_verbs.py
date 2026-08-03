@@ -76,6 +76,8 @@ BLOCKLIST = frozenset(
         "chwydu",
         "sgriwio",
         "gwallgofi",
+        "arteithio",
+        "sgrapio",
         # weak morphology probes (EN loans / calques / niche literary)
         "tanberfformio",
         "strapio",
@@ -104,6 +106,8 @@ BLOCKLIST = frozenset(
         "bidio",
         "misio",
         "presenoli",
+        "ebostio",
+        "siafio",
     }
 )
 
