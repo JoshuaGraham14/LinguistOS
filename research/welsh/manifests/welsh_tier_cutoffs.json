@@ -1,0 +1,13 @@
+{
+  "n_pool": 2755,
+  "high_rank_max": 918,
+  "mid_rank_max": 1836,
+  "low_rank_max": 2755,
+  "high_raw_min": 72.0,
+  "mid_raw_min": 9.0,
+  "low_raw_min": 1.0,
+  "high_raw_max": 32755.0,
+  "mid_raw_max": 72.0,
+  "low_raw_max": 9.0,
+  "note": "Terciles are equal-count splits on CorCenCC verb freq_rank (1 = most frequent). Synthetic future only requires Eurfa 3sg."
+}

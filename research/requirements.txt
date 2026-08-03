@@ -17,6 +17,7 @@ ipykernel>=6.0
 
 # analysis / notebooks
 pandas>=2.2
+openpyxl>=3.1  # CorCenCC lemma frequency workbooks (Welsh transfer)
 matplotlib>=3.8
 sacrebleu>=2.4  # self_bleu distribution metric
 
