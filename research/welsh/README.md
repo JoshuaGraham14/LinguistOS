@@ -59,6 +59,17 @@ Writes:
 - `manifests/manifest_welsh_n150.csv` — stratified sample (high/mid/low)
 - `manifests/welsh_coverage_pool.csv` — all lemmas passing coverage ∩ CorCenCC
 - `manifests/welsh_tier_cutoffs.json` — frozen frequency tercile cutoffs
+- `manifests/welsh_cases_n150.csv` — gold case table (150 × 42 = 6300 rows)
+
+```bash
+python -m research.welsh.scripts.build_welsh_cases
+```
+
+Each case row mirrors the Spanish experiment-verb pattern (`lang`, `zipf`,
+`tier`, `cell_id`, `gold` / `gold_alts`) with Welsh-specific fields:
+`construction`, `aux_gold`, `particle`, `requires_soft_mutation`,
+`match_forms`. Soft mutation for periphrastic past is applied by
+`research/welsh/mutation.py`.
 
 Auxiliaries used in periphrastic templates (`bod`, `gwneud`) are excluded from
 the target-verb pool.
