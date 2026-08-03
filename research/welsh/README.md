@@ -62,3 +62,9 @@ Writes:
 
 Auxiliaries used in periphrastic templates (`bod`, `gwneud`) are excluded from
 the target-verb pool.
+
+**QA filters (sampling):** a blocklist drops sensitive/awkward lemmas and verbs
+that are weak Welsh-morphology probes (transparent English loans/calques such
+as *tanberfformio*, *samplo*; ultra-niche literary items such as *englynu*).
+CorCenCC hapaxes (`raw < 2`) are also dropped so low-tier items are at least
+attested twice.

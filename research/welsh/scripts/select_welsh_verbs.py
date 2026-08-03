@@ -50,7 +50,43 @@ PERSONS = ("1s", "2s", "3s", "1p", "2p", "3p")
 SYNTHETIC_FULL = ("pres", "past", "imperf")
 
 # Auxiliaries used in periphrastic templates — not target vocabulary.
-EXCLUDED_LEMMAS = frozenset({"bod", "gwneud"})
+EXCLUDED_AUX = frozenset({"bod", "gwneud"})
+
+# Manual QA blocklist: sensitive / vulgar / awkward demo targets, plus verbs
+# that are weak probes of Welsh morphology (transparent EN loans/calques,
+# ultra-niche literary items). See research/welsh/README.md.
+BLOCKLIST = frozenset(
+    {
+        # sensitive / awkward
+        "cocio",
+        "dygnu",
+        "poenydio",
+        "dirboeni",
+        "terfysgu",
+        "cythryblu",
+        "gwreica",
+        "eilunaddoli",
+        # weak morphology probes (EN loans / calques / niche literary)
+        "tanberfformio",
+        "strapio",
+        "bysellu",
+        "trosysgrifo",
+        "samplo",
+        "codio",
+        "contractio",
+        "hwylfyrddio",
+        "trimio",
+        "englynu",
+        "cleio",
+        "pladuro",
+        "pererindota",
+    }
+)
+
+EXCLUDED_LEMMAS = EXCLUDED_AUX | BLOCKLIST
+
+# Drop CorCenCC hapaxes from the pool (raw count floor).
+MIN_RAW = 2
 
 TIERS = ("high", "mid", "low")
 EXPERIMENT_ID = "welsh_transfer"
@@ -209,7 +245,8 @@ def assign_terciles(pool: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
             "Tiers are equal-count splits on CorCenCC Zipf rank "
             "(1 = most frequent). Assignment is by rank, not hard Zipf "
             "thresholds (boundary ties). Lexical synthetic future is out of "
-            "grid; target coverage is infin + pres/past/imperf × 6."
+            "grid; target coverage is infin + pres/past/imperf × 6. "
+            f"Pool excludes auxiliaries, a QA blocklist, and raw < {MIN_RAW}."
         ),
     }
     return out, cutoffs
@@ -263,10 +300,13 @@ def main() -> None:
 
     merged = cov.merge(cor, on="lemma", how="inner", suffixes=("", "_cor"))
     pool = merged[merged["passes_coverage"]].copy()
+    pool = pool[~pool["lemma"].isin(EXCLUDED_LEMMAS)]
+    pool = pool[pool["raw"] >= MIN_RAW]
     pool["zipf"] = pool["per_million"].map(corcencc_zipf)
     pool = pool.sort_values(["zipf", "raw", "lemma"], ascending=[False, False, True])
     pool["freq_rank"] = range(1, len(pool) + 1)
-    print(f"Intersection with coverage: {len(pool)}")
+    print(f"Intersection with coverage (after blocklist, raw>={MIN_RAW}): {len(pool)}")
+    print(f"  blocklist size: {len(BLOCKLIST)}; aux excluded: {sorted(EXCLUDED_AUX)}")
 
     pool, cutoffs = assign_terciles(pool)
     for tier in TIERS:
