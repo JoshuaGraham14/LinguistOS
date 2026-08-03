@@ -57,7 +57,7 @@ EXCLUDED_AUX = frozenset({"bod", "gwneud"})
 # ultra-niche literary items). See research/welsh/README.md.
 BLOCKLIST = frozenset(
     {
-        # sensitive / awkward
+        # sensitive / awkward / violent / vulgar
         "cocio",
         "dygnu",
         "poenydio",
@@ -66,6 +66,16 @@ BLOCKLIST = frozenset(
         "cythryblu",
         "gwreica",
         "eilunaddoli",
+        "cyfogi",
+        "llurgunio",
+        "creuloni",
+        "mwrdro",
+        "rhechu",
+        "cydorwedd",
+        "brawychu",
+        "chwydu",
+        "sgriwio",
+        "gwallgofi",
         # weak morphology probes (EN loans / calques / niche literary)
         "tanberfformio",
         "strapio",
@@ -80,6 +90,20 @@ BLOCKLIST = frozenset(
         "cleio",
         "pladuro",
         "pererindota",
+        "mesmereiddio",
+        "paffio",
+        "sbwylio",
+        "bagio",
+        "parco",
+        "tostio",
+        "cyfrifiaduro",
+        "brwsio",
+        "bocsio",
+        "magneteiddio",
+        "blocio",
+        "bidio",
+        "misio",
+        "presenoli",
     }
 )
 
