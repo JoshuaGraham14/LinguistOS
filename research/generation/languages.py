@@ -25,6 +25,8 @@ SCAFFOLD_KEYS = frozenset({
     "target_language",
     "cell_id",
     "match_forms",
+    "tier",
+    "zipf",
 })
 
 

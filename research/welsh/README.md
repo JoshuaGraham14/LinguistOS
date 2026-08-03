@@ -71,6 +71,14 @@ Each case row mirrors the Spanish experiment-verb pattern (`lang`, `zipf`,
 `match_forms`. Soft mutation for periphrastic past is applied by
 `research/welsh/mutation.py`.
 
+## Full transfer benchmark
+
+```bash
+python -m research.welsh.scripts.build_welsh_benchmark
+```
+
+Writes `research/benchmarks/welsh_transfer_n150.yaml` (150 × 42 = 6300 cases).
+
 ## Smoke (cluster, Qwen3-1.7B)
 
 ```bash

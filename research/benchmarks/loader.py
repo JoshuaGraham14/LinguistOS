@@ -22,18 +22,27 @@ from research.generation.languages import extract_constraints, load_language_pro
 _REQUIRED_CS_FIELDS = ("keyword", "translation")
 
 
-def _constraint_set_key(cs: dict[str, Any]) -> tuple[str, str, str, str]:
+def _constraint_set_key(cs: dict[str, Any]) -> tuple[str, str, str, str, str]:
+    # Include construction so Welsh synthetic/periphrastic cells for the same
+    # lemma×tense×person×number do not collide (Spanish leaves it "").
     return (
         cs["keyword"],
         cs.get("tense", ""),
         cs.get("person", ""),
         cs.get("number", ""),
+        str(cs.get("construction", "") or ""),
     )
 
 
-def _constraint_set_row_key(cs: ConstraintSet) -> tuple[str, str, str, str]:
+def _constraint_set_row_key(cs: ConstraintSet) -> tuple[str, str, str, str, str]:
     c = cs.constraints
-    return (cs.keyword, c.get("tense", ""), c.get("person", ""), c.get("number", ""))
+    return (
+        cs.keyword,
+        c.get("tense", ""),
+        c.get("person", ""),
+        c.get("number", ""),
+        str(c.get("construction", "") or ""),
+    )
 
 
 def _mock_only_from_yaml(data: dict[str, Any]) -> bool:
