@@ -1,8 +1,15 @@
 """Stratified Welsh verb selection for the 4×2 transfer study.
 
-Ranks CorCenCC ``B (v.)`` lemmas by raw frequency, intersects with Eurfa
-lemmas that have usable synthetic coverage for the frozen 4×2 grid, splits
-into frequency terciles, and samples evenly.
+Ranks CorCenCC ``B (v.)`` lemmas by Zipf frequency (derived from CorCenCC
+``per_million``, not wordfreq — Welsh is absent from wordfreq), intersects
+with Eurfa lemmas that have usable synthetic coverage for the frozen 4×2
+grid, splits into Zipf terciles, and samples evenly.
+
+Zipf matches the thesis scale:
+
+    Zipf(w) = log10(f(w) * 1e9)
+    f(w)    = per_million / 1e6
+            => Zipf = log10(per_million) + 3
 
 Eurfa almost never lists a full 6-person synthetic future for lexical verbs
 (typically only spoken 3sg). Required coverage is therefore:
@@ -22,6 +29,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import random
 from pathlib import Path
 
@@ -144,17 +152,26 @@ def load_corcencc_verbs(path: Path) -> pd.DataFrame:
     ]
     verbs = lem[lem["pos"].astype(str).str.strip().eq("B (v.)")].copy()
     verbs["lemma"] = verbs["lemma"].astype(str)
-    verbs = verbs.sort_values(["raw", "per_million", "lemma"], ascending=[False, False, True])
+    verbs["zipf"] = verbs["per_million"].map(corcencc_zipf)
+    verbs = verbs.sort_values(["zipf", "raw", "lemma"], ascending=[False, False, True])
     verbs["freq_rank"] = range(1, len(verbs) + 1)
     return verbs.reset_index(drop=True)
 
 
+def corcencc_zipf(per_million: float) -> float:
+    """Zipf from CorCenCC rate: log10(f * 1e9) with f = per_million / 1e6."""
+    pm = float(per_million)
+    if pm <= 0:
+        return 0.0
+    return math.log10(pm) + 3.0
+
+
 def assign_terciles(pool: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Split by CorCenCC raw-frequency rank into high / mid / low."""
+    """Split by CorCenCC Zipf rank into high / mid / low (equal-count)."""
     n = len(pool)
     if n < 3:
         raise SystemExit(f"Need at least 3 coverage-passing verbs; got {n}")
-    # Equal-count terciles on freq_rank (1 = most frequent).
+    # Equal-count terciles on freq_rank (1 = highest Zipf).
     q1, q2 = n // 3, (2 * n) // 3
     out = pool.copy()
 
@@ -166,24 +183,38 @@ def assign_terciles(pool: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         return "low"
 
     out["tier"] = out["freq_rank"].map(tier_for_rank)
-    # Cutoffs in raw frequency space (inclusive edges for reporting).
     high = out[out["tier"] == "high"]
     mid = out[out["tier"] == "mid"]
     low = out[out["tier"] == "low"]
+    # Spanish-shaped tuple: Zipf < low_upper -> low; Zipf >= high_lower -> high.
+    # Boundary ties are assigned by rank (see note).
+    def r3(x: float | None) -> float | None:
+        return None if x is None else round(float(x), 3)
+
+    low_upper = r3(float(low["zipf"].max())) if len(low) else None
+    high_lower = r3(float(high["zipf"].min())) if len(high) else None
     cutoffs = {
+        "lang": "cy",
+        "frequency_source": "CorCenCC lemma frequencies (Yr Amliadur); not wordfreq",
+        "zipf_formula": "log10(per_million) + 3  (= log10(f * 1e9), f = per_million/1e6)",
         "n_pool": n,
+        "tier_cutoffs_zipf": [low_upper, high_lower],
         "high_rank_max": int(high["freq_rank"].max()) if len(high) else None,
         "mid_rank_max": int(mid["freq_rank"].max()) if len(mid) else None,
         "low_rank_max": int(low["freq_rank"].max()) if len(low) else None,
+        "high_zipf_min": r3(float(high["zipf"].min())) if len(high) else None,
+        "high_zipf_max": r3(float(high["zipf"].max())) if len(high) else None,
+        "mid_zipf_min": r3(float(mid["zipf"].min())) if len(mid) else None,
+        "mid_zipf_max": r3(float(mid["zipf"].max())) if len(mid) else None,
+        "low_zipf_min": r3(float(low["zipf"].min())) if len(low) else None,
+        "low_zipf_max": r3(float(low["zipf"].max())) if len(low) else None,
         "high_raw_min": float(high["raw"].min()) if len(high) else None,
         "mid_raw_min": float(mid["raw"].min()) if len(mid) else None,
         "low_raw_min": float(low["raw"].min()) if len(low) else None,
-        "high_raw_max": float(high["raw"].max()) if len(high) else None,
-        "mid_raw_max": float(mid["raw"].max()) if len(mid) else None,
-        "low_raw_max": float(low["raw"].max()) if len(low) else None,
         "note": (
-            "Terciles are equal-count splits on CorCenCC verb freq_rank "
-            "(1 = most frequent). Synthetic future only requires Eurfa 3sg."
+            "Tiers are equal-count splits on CorCenCC Zipf rank "
+            "(1 = most frequent). Assignment is by rank, not hard Zipf "
+            "thresholds (boundary ties). Synthetic future only requires Eurfa 3sg."
         ),
     }
     return out, cutoffs
@@ -205,6 +236,7 @@ def sample_tiers(pool: pd.DataFrame, per_tier: int, seed: int) -> pd.DataFrame:
     out["seed"] = seed
     out["experiment"] = EXPERIMENT_ID
     out["cell_id"] = out["tier"]  # frequency-only stratification
+    out["zipf"] = out["zipf"].map(lambda z: round(float(z), 3))
     return out.sort_values(["tier", "freq_rank", "lemma"]).reset_index(drop=True)
 
 
@@ -236,13 +268,18 @@ def main() -> None:
 
     merged = cov.merge(cor, on="lemma", how="inner", suffixes=("", "_cor"))
     pool = merged[merged["passes_coverage"]].copy()
-    pool = pool.sort_values(["raw", "per_million", "lemma"], ascending=[False, False, True])
+    pool["zipf"] = pool["per_million"].map(corcencc_zipf)
+    pool = pool.sort_values(["zipf", "raw", "lemma"], ascending=[False, False, True])
     pool["freq_rank"] = range(1, len(pool) + 1)
     print(f"Intersection with coverage: {len(pool)}")
 
     pool, cutoffs = assign_terciles(pool)
     for tier in TIERS:
         print(f"  {tier}: {int((pool['tier'] == tier).sum())}")
+    print(
+        f"  Zipf cutoffs [low_upper, high_lower]: "
+        f"{cutoffs['tier_cutoffs_zipf']}"
+    )
 
     sample = sample_tiers(pool, per_tier=args.per_tier, seed=args.seed)
     n = len(sample)
@@ -250,12 +287,15 @@ def main() -> None:
     pool_path = args.out_dir / "welsh_coverage_pool.csv"
     cutoffs_path = args.out_dir / "welsh_tier_cutoffs.json"
 
+    pool = pool.copy()
+    pool["zipf"] = pool["zipf"].map(lambda z: round(float(z), 3))
     pool_cols = [
         "lemma",
         "enlemma",
         "verbnoun",
         "tier",
         "freq_rank",
+        "zipf",
         "raw",
         "per_million",
         "rank",
@@ -273,6 +313,7 @@ def main() -> None:
         "verbnoun",
         "lang",
         "cell_id",
+        "zipf",
         "tier",
         "freq_rank",
         "raw",

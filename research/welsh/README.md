@@ -22,6 +22,15 @@ Persons: `1s 2s 3s 1p 2p 3p`. Prefer Eurfa `notes=spoken` (accept `short` / unma
 | `data/eurfa_cylist20131111.csv` | Gold synthetic forms + verbnouns | Eurfa (GPL/AGPL), Kevin Donnelly |
 | `data/corcencc_lemmas.xlsx` | Lemma frequency ranks | Yr Amliadur / CorCenCC (CC-BY-SA), Knight et al. 2020 |
 
+**Frequency / Zipf:** Spanish uses `wordfreq` Zipf; Welsh is not in wordfreq, so
+Zipf is derived from CorCenCC `per_million` on the same scale as the thesis:
+
+`Zipf(w) = log10(f(w) · 10⁹)` with `f = per_million / 10⁶`
+→ `Zipf = log10(per_million) + 3`.
+
+Tiers are equal-count Zipf terciles over the Eurfa∩CorCenCC pool (parallel to
+Spanish census terciles). Continuous `zipf` is kept on the manifest for analysis.
+
 **Important Eurfa limitation:** lexical verbs almost never have a full 6-person
 synthetic future in the CSV (typically only spoken 3sg). Coverage for sampling
 therefore requires:
