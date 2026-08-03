@@ -1,1 +1,1 @@
-"""Welsh transfer experiments (4×2 synthetic vs periphrastic slot grid)."""
+"""Welsh transfer experiments (synthetic ×3 + periphrastic ×4; future periphrastic-only)."""

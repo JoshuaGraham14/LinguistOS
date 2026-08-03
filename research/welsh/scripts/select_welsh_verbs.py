@@ -255,7 +255,7 @@ def main() -> None:
     eurfa_verbs = _load_eurfa(args.eurfa)
     cov = eurfa_coverage(eurfa_verbs)
     n_pass = int(cov["passes_coverage"].sum())
-    print(f"Eurfa verb lemmas: {len(cov)}; pass 4×2 coverage: {n_pass}")
+    print(f"Eurfa verb lemmas: {len(cov)}; pass coverage: {n_pass}")
 
     print(f"Loading CorCenCC lemmas from {args.corcencc} …")
     cor = load_corcencc_verbs(args.corcencc)
