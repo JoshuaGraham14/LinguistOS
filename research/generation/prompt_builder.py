@@ -106,8 +106,26 @@ def _inflection_line(keyword: str, constraints: dict[str, Any]) -> str:
     )
 
 
-def _form_injection_line(keyword: str, expected_form: str) -> str:
-    """Tell the model the exact gold surface form to bind in each sentence."""
+def _form_injection_line(
+    keyword: str,
+    expected_form: str,
+    *,
+    expected_aux: str | None = None,
+    particle: str | None = None,
+) -> str:
+    """Tell the model the exact gold surface form(s) to bind in each sentence."""
+    if expected_aux:
+        bits = [
+            f'the auxiliary "{expected_aux}"',
+            f'the verbnoun/form "{expected_form}"',
+        ]
+        if particle:
+            bits.append(f'the particle "{particle}"')
+        joined = ", ".join(bits[:-1]) + f", and {bits[-1]}" if len(bits) > 1 else bits[0]
+        return (
+            f'Required surface forms: each sentence must include {joined} '
+            f'for the target lemma "{keyword}" — use these surface forms verbatim.\n'
+        )
     return (
         f'Required surface form: the verb "{keyword}" must appear in each sentence '
         f'exactly as "{expected_form}" — use this conjugated surface form verbatim '
@@ -168,11 +186,16 @@ def build_prompt(
     if exercise_type:
         exercise_line = f"Exercise type: {exercise_type}.\n"
 
-    form_line = (
-        _form_injection_line(keyword, inject_expected_form)
-        if inject_expected_form
-        else ""
-    )
+    form_line = ""
+    if inject_expected_form:
+        aux = constraints.get("expected_aux")
+        particle = constraints.get("particle")
+        form_line = _form_injection_line(
+            keyword,
+            inject_expected_form,
+            expected_aux=str(aux) if aux else None,
+            particle=str(particle) if particle else None,
+        )
 
     return (
         f"You generate {lang} example sentences for vocabulary practice.\n"
@@ -345,11 +368,16 @@ def build_prompt_plain(
     if exercise_type:
         exercise_line = f"Exercise type: {exercise_type}.\n"
 
-    form_line = (
-        _form_injection_line(keyword, inject_expected_form)
-        if inject_expected_form
-        else ""
-    )
+    form_line = ""
+    if inject_expected_form:
+        aux = constraints.get("expected_aux")
+        particle = constraints.get("particle")
+        form_line = _form_injection_line(
+            keyword,
+            inject_expected_form,
+            expected_aux=str(aux) if aux else None,
+            particle=str(particle) if particle else None,
+        )
 
     scene_line = f"{scene_hint.strip()}\n" if scene_hint else ""
 

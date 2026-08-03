@@ -244,6 +244,62 @@ def test_expected_form_match_no_substring_inside_longer_word():
     assert result.score == 0.0
 
 
+def test_expected_form_match_accepts_alts_and_requires_aux():
+    ev = ExpectedFormMatchEvaluator()
+    # Primary alt match + aux present.
+    ok = ev.evaluate(
+        sentence="Gwnes i roi llyfr iddo.",
+        translation="I gave him a book.",
+        constraints={
+            "expected_form": "roi",
+            "expected_form_alts": "rhoi",
+            "expected_aux": "gwnes",
+        },
+    )
+    assert ok.score == 1.0
+    assert ok.details["matched_token"] == "roi"
+    assert ok.details["matched_aux"] == "Gwnes"
+
+    # Missing aux fails.
+    bad = ev.evaluate(
+        sentence="Roi llyfr iddo.",
+        translation="Gave him a book.",
+        constraints={
+            "expected_form": "roi",
+            "expected_aux": "gwnes",
+        },
+    )
+    assert bad.score == 0.0
+    assert bad.details["reason"] == "missing_expected_aux"
+
+
+def test_expected_form_match_requires_particle_when_set():
+    ev = ExpectedFormMatchEvaluator()
+    ok = ev.evaluate(
+        sentence="Rwyf yn rhoi anrheg.",
+        translation="I am giving a gift.",
+        constraints={
+            "expected_form": "rhoi",
+            "expected_aux": "rwyf",
+            "particle": "yn",
+        },
+    )
+    assert ok.score == 1.0
+    assert ok.details["matched_particle"] == "yn"
+
+    bad = ev.evaluate(
+        sentence="Rwyf rhoi anrheg.",
+        translation="I giving a gift.",
+        constraints={
+            "expected_form": "rhoi",
+            "expected_aux": "rwyf",
+            "particle": "yn",
+        },
+    )
+    assert bad.score == 0.0
+    assert bad.details["reason"] == "missing_particle"
+
+
 def test_expected_form_match_accent_sensitive():
     result = ExpectedFormMatchEvaluator().evaluate(
         sentence="Ayer comio pasta.",

@@ -16,9 +16,15 @@ _DEFAULT_REQUIRED = ("tense", "person", "number")
 SCAFFOLD_KEYS = frozenset({
     "keyword",
     "expected_form",
+    "expected_form_alts",
+    "expected_aux",
+    "expected_aux_alts",
+    "particle",
     "translation",
     "cefr_level",
     "target_language",
+    "cell_id",
+    "match_forms",
 })
 
 

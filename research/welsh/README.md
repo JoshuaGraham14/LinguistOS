@@ -71,6 +71,19 @@ Each case row mirrors the Spanish experiment-verb pattern (`lang`, `zipf`,
 `match_forms`. Soft mutation for periphrastic past is applied by
 `research/welsh/mutation.py`.
 
+## Smoke (cluster, Qwen3-1.7B)
+
+```bash
+python -m research.welsh.scripts.build_welsh_smoke_benchmark
+# dry-run prompts locally:
+python -m research.prototyping.welsh_form_injection_qwen_smoke --dry-run
+# live GPU smoke (cluster):
+sbatch research/scripts/cluster/welsh_smoke_gpu.sh
+```
+
+Results land on the cluster at
+`research/welsh/manifests/welsh_smoke_results.json` (not on the Mac).
+
 Auxiliaries used in periphrastic templates (`bod`, `gwneud`) are excluded from
 the target-verb pool.
 
