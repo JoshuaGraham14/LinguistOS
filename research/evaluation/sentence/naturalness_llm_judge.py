@@ -29,7 +29,7 @@ from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 
 EVALUATOR_NAME = "naturalness_llm_judge"
 DEFAULT_MODEL = "gpt-5.4-mini"
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v3"
 
 TARGET_FORM_USE_VALUES: frozenset[str] = frozenset(
     {
@@ -256,6 +256,17 @@ or several flags):
 Write `rationale` in English regardless of the sentence language. This
 field is read by an English-speaking annotator. If you cannot produce
 an English rationale, return {"error": "no_english_rationale"} instead.
+
+Spanish *haber*: he/has/ha/hemos/habéis/han (and past/future/conditional
+forms) are Spanish auxiliaries. Sentence-initial "He" is 1sg *haber*,
+NOT the English pronoun. Ex: "He comido pan." → correct_main_verb;
+never flag mixed_language for "He" alone.
+
+Participles: a past participle cannot stand alone as a predicate; it
+needs a finite auxiliary (*haber*, or *ser*/*estar* for passive/
+resultative). In a perfect/passive, the target participle under
+haber/ser/estar counts as correct_main_verb. Bare forms like
+"caminado en la calle" are NOT correct_main_verb.
 
 Be strict but fair. If unsure between two integers, pick the lower one
 for `grammaticality`, `naturalness`, and `semantic_coherence`.

@@ -18,12 +18,16 @@ from research.evaluation.sentence.languagetool import (
 )
 from research.evaluation.sentence.naturalness_llm_judge import (
     EVALUATOR_NAME as JUDGE_EVALUATOR_NAME,
+    PROMPT_VERSION as JUDGE_PROMPT_VERSION,
     NaturalnessLlmJudgeEvaluator,
 )
 from research.pipeline import (
     _compute_and_store_group_metrics,
     _resolved_length_from_sentence,
 )
+
+# Archived pre-correction judge rows (participle He/haber bug fix).
+SUPERSEDED_JUDGE_EVALUATOR_NAME = "naturalness_llm_judge_v2_superseded"
 
 DIAGNOSTIC_5_ARMS: dict[str, str] = {
     "5a": "diagnostic_5a_hf_qwen3_17b_n10",
@@ -292,16 +296,146 @@ def rescore_naturalness_judge(
     return stats
 
 
+def rescore_naturalness_judge_for_tense(
+    session,
+    experiment: Experiment,
+    *,
+    tense: str = "participle",
+    evaluator: NaturalnessLlmJudgeEvaluator | None = None,
+    commit_every: int = 25,
+    refresh_rollups: bool = True,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    """Re-judge only sentences whose constraint tense matches *tense*.
+
+    Safety contract (nothing else is touched):
+
+    - Finite / non-matching tense cells keep their live judge rows.
+    - Before replacing a live ``naturalness_llm_judge`` row, copy it to
+      ``naturalness_llm_judge_v2_superseded`` if that archive row is absent.
+    - Sentences already carrying ``details.prompt_version ==`` current
+      ``PROMPT_VERSION`` are skipped (idempotent resume).
+    - Other evaluators (EF, LT, PPL, …) are never modified.
+    """
+    ev = evaluator or NaturalnessLlmJudgeEvaluator()
+    stats = {
+        "candidate_sentences": 0,
+        "skipped_already_current": 0,
+        "archived_to_superseded": 0,
+        "deleted_live": 0,
+        "rescored": 0,
+        "missing_live_rescored": 0,
+        "rollup_rows": 0,
+    }
+
+    sentences = (
+        session.query(GeneratedSentence)
+        .options(joinedload(GeneratedSentence.constraint_set))
+        .filter_by(experiment_id=experiment.id)
+        .order_by(GeneratedSentence.id)
+        .all()
+    )
+    targets = [
+        s
+        for s in sentences
+        if str((s.constraint_set.constraints or {}).get("tense", "")) == tense
+    ]
+    stats["candidate_sentences"] = len(targets)
+    print(
+        f"  Tense filter {tense!r}: {len(targets)}/{len(sentences)} sentences",
+        flush=True,
+    )
+    if dry_run:
+        print("  dry_run=1 — no writes", flush=True)
+        return stats
+
+    for idx, sent in enumerate(targets, start=1):
+        live = (
+            session.query(SentenceEvaluation)
+            .filter_by(sentence_id=sent.id, evaluator_name=JUDGE_EVALUATOR_NAME)
+            .order_by(SentenceEvaluation.id.desc())
+            .first()
+        )
+        archived = (
+            session.query(SentenceEvaluation)
+            .filter_by(
+                sentence_id=sent.id,
+                evaluator_name=SUPERSEDED_JUDGE_EVALUATOR_NAME,
+            )
+            .first()
+        )
+
+        if live is not None:
+            details = live.details if isinstance(live.details, dict) else {}
+            if details.get("prompt_version") == JUDGE_PROMPT_VERSION:
+                stats["skipped_already_current"] += 1
+                continue
+            if archived is None:
+                session.add(
+                    SentenceEvaluation(
+                        sentence_id=sent.id,
+                        evaluator_name=SUPERSEDED_JUDGE_EVALUATOR_NAME,
+                        score=float(live.score),
+                        details=dict(details) if details else live.details,
+                    )
+                )
+                stats["archived_to_superseded"] += 1
+            session.delete(live)
+            stats["deleted_live"] += 1
+        else:
+            # Crash recovery: archived exists / live missing → re-judge.
+            stats["missing_live_rescored"] += 1
+
+        constraints = sent.constraint_set.to_constraints_dict()
+        constraints["sentence_length"] = _resolved_length_from_sentence(sent)
+        result = ev.evaluate(
+            sentence=sent.sentence,
+            translation=sent.translation,
+            constraints=constraints,
+        )
+        session.add(
+            SentenceEvaluation(
+                sentence_id=sent.id,
+                evaluator_name=JUDGE_EVALUATOR_NAME,
+                score=result.score,
+                details=result.details,
+            )
+        )
+        stats["rescored"] += 1
+        if idx % commit_every == 0:
+            session.commit()
+            print(
+                f"  {JUDGE_EVALUATOR_NAME} ({tense}): {idx}/{len(targets)}",
+                flush=True,
+            )
+
+    session.commit()
+    print(
+        f"  Rescored {stats['rescored']} {tense} sentences "
+        f"(archived={stats['archived_to_superseded']}, "
+        f"skipped_current={stats['skipped_already_current']})",
+        flush=True,
+    )
+
+    if refresh_rollups and stats["rescored"]:
+        print("  Refreshing sentence-eval roll-ups...", flush=True)
+        stats["rollup_rows"] = aggregate_sentence_eval_rollups(session, experiment.id)
+        print(f"  Stored {stats['rollup_rows']} rollup rows", flush=True)
+    return stats
+
+
 __all__ = [
     "DIAGNOSTIC_5_ARMS",
     "DIAGNOSTIC_5_DB_FILES",
     "GRAMMAR_EVALUATOR_NAME",
     "JUDGE_EVALUATOR_NAME",
     "PPL_EVALUATOR_NAME",
+    "SUPERSEDED_JUDGE_EVALUATOR_NAME",
     "clear_sentence_evaluations_for_evaluator",
     "find_diagnostic_5_experiment",
     "rescore_evaluator_for_experiment",
     "rescore_fluency_perplexity",
     "rescore_grammar_languagetool",
     "rescore_naturalness_judge",
+    "rescore_naturalness_judge_for_tense",
 ]
