@@ -17,10 +17,12 @@
 #SBATCH --time=04:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=jjg25
-#SBATCH --export=NONE
 #SBATCH --output=/vol/bitbucket/jjg25/LinguistOS/logs/rescore_participle_judge_v3_%j.out
 
 set -euo pipefail
+
+# Do NOT set --export=NONE / --export=ALL: this cluster can hold jobs with
+# "user env retrieval failed". Keep defaults; set everything below.
 
 CODE=/vol/bitbucket/jjg25/LinguistOS-participle-v3
 DB_PROJECT=/vol/bitbucket/jjg25/LinguistOS
