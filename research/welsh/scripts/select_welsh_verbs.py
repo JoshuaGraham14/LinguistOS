@@ -1,9 +1,9 @@
-"""Stratified Welsh verb selection for the 4×2 transfer study.
+"""Stratified Welsh verb selection for the transfer study.
 
 Ranks CorCenCC ``B (v.)`` lemmas by Zipf frequency (derived from CorCenCC
 ``per_million``, not wordfreq — Welsh is absent from wordfreq), intersects
-with Eurfa lemmas that have usable synthetic coverage for the frozen 4×2
-grid, splits into Zipf terciles, and samples evenly.
+with Eurfa lemmas that have usable synthetic coverage for the frozen grid,
+splits into Zipf terciles, and samples evenly.
 
 Zipf matches the thesis scale:
 
@@ -11,12 +11,15 @@ Zipf matches the thesis scale:
     f(w)    = per_million / 1e6
             => Zipf = log10(per_million) + 3
 
-Eurfa almost never lists a full 6-person synthetic future for lexical verbs
-(typically only spoken 3sg). Required coverage is therefore:
+Frozen grid: synthetic present / past / imperfect × 6 persons, plus
+periphrastic present / past / imperfect / future × 6 persons (person marked
+on the auxiliary). Lexical synthetic future is omitted — Eurfa only lists
+spoken 3sg for ordinary verbs.
+
+Required target-verb coverage:
 
   - ``infin`` (verbnoun; needed for all periphrastic cells)
   - ``pres`` / ``past`` / ``imperf`` × persons 1s–3p
-  - ``fut`` with at least 3s
 
 Usage::
 
@@ -45,14 +48,12 @@ DEFAULT_CORCENCC = DATA_DIR / "corcencc_lemmas.xlsx"
 
 PERSONS = ("1s", "2s", "3s", "1p", "2p", "3p")
 SYNTHETIC_FULL = ("pres", "past", "imperf")
-# Future is sparse in Eurfa for lexical verbs; require 3sg only.
-FUTURE_REQUIRED_PERSONS = ("3s",)
 
 # Auxiliaries used in periphrastic templates — not target vocabulary.
 EXCLUDED_LEMMAS = frozenset({"bod", "gwneud"})
 
 TIERS = ("high", "mid", "low")
-EXPERIMENT_ID = "welsh_4x2_transfer"
+EXPERIMENT_ID = "welsh_transfer"
 
 
 def _load_eurfa(path: Path) -> pd.DataFrame:
@@ -108,14 +109,8 @@ def eurfa_coverage(verbs: pd.DataFrame) -> pd.DataFrame:
 
         fut = by_tense.get("fut", empty)
         fut_have = _persons_present(fut)
-        fut_ok = all(p in fut_have for p in FUTURE_REQUIRED_PERSONS)
 
-        passes = bool(
-            has_infin
-            and verbnoun
-            and all(syn_ok.values())
-            and fut_ok
-        )
+        passes = bool(has_infin and verbnoun and all(syn_ok.values()))
         rows.append(
             {
                 "lemma": lemma,
@@ -125,7 +120,6 @@ def eurfa_coverage(verbs: pd.DataFrame) -> pd.DataFrame:
                 "pres6": syn_ok["pres"],
                 "past6": syn_ok["past"],
                 "imperf6": syn_ok["imperf"],
-                "fut_has_3s": fut_ok,
                 "fut_persons": ",".join(p for p in PERSONS if p in fut_have),
                 "passes_coverage": passes,
                 "n_eurfa_rows": int(len(g)),
@@ -214,7 +208,8 @@ def assign_terciles(pool: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         "note": (
             "Tiers are equal-count splits on CorCenCC Zipf rank "
             "(1 = most frequent). Assignment is by rank, not hard Zipf "
-            "thresholds (boundary ties). Synthetic future only requires Eurfa 3sg."
+            "thresholds (boundary ties). Lexical synthetic future is out of "
+            "grid; target coverage is infin + pres/past/imperf × 6."
         ),
     }
     return out, cutoffs
@@ -302,7 +297,6 @@ def main() -> None:
         "pres6",
         "past6",
         "imperf6",
-        "fut_has_3s",
         "fut_persons",
         "n_eurfa_rows",
         "passes_coverage",
@@ -318,7 +312,6 @@ def main() -> None:
         "freq_rank",
         "raw",
         "per_million",
-        "fut_persons",
         "seed",
         "experiment",
     ]

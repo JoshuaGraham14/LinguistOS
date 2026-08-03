@@ -2,16 +2,16 @@
   "lang": "cy",
   "frequency_source": "CorCenCC lemma frequencies (Yr Amliadur); not wordfreq",
   "zipf_formula": "log10(per_million) + 3  (= log10(f * 1e9), f = per_million/1e6)",
-  "n_pool": 2755,
+  "n_pool": 2797,
   "tier_cutoffs_zipf": [
     2.924,
     3.829
   ],
-  "high_rank_max": 918,
-  "mid_rank_max": 1836,
-  "low_rank_max": 2755,
+  "high_rank_max": 932,
+  "mid_rank_max": 1864,
+  "low_rank_max": 2797,
   "high_zipf_min": 3.829,
-  "high_zipf_max": 6.487,
+  "high_zipf_max": 6.779,
   "mid_zipf_min": 2.924,
   "mid_zipf_max": 3.829,
   "low_zipf_min": 1.954,
@@ -19,5 +19,5 @@
   "high_raw_min": 72.0,
   "mid_raw_min": 9.0,
   "low_raw_min": 1.0,
-  "note": "Tiers are equal-count splits on CorCenCC Zipf rank (1 = most frequent). Assignment is by rank, not hard Zipf thresholds (boundary ties). Synthetic future only requires Eurfa 3sg."
+  "note": "Tiers are equal-count splits on CorCenCC Zipf rank (1 = most frequent). Assignment is by rank, not hard Zipf thresholds (boundary ties). Lexical synthetic future is out of grid; target coverage is infin + pres/past/imperf \u00d7 6."
 }
