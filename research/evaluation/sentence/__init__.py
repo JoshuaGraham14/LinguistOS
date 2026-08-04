@@ -4,6 +4,10 @@ from typing import Callable
 
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence.clause_count import ClauseCountEvaluator
+from research.evaluation.sentence.cysill import (
+    CysillGrammarEvaluator,
+    cysill_available,
+)
 from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
 from research.evaluation.sentence.fluency_perplexity import FluencyPerplexityEvaluator
 from research.evaluation.sentence.length_in_band import LengthInBandEvaluator
@@ -13,9 +17,8 @@ from research.evaluation.sentence.naturalness_llm_judge import (
 )
 from research.evaluation.sentence.verb_morphology import VerbMorphologyEvaluator
 
-# LanguageTool has no Welsh grammar pack. Do not run ``grammar_languagetool`` for
-# ``cy`` (omit rather than fail-open against Spanish rules). Cysill integration
-# is a future optional replacement — see research/welsh/README.md.
+# LanguageTool has no Welsh grammar pack. For ``cy``, prefer Cysill Ar-lein when
+# ``CYSILL_API_KEY`` is set; otherwise omit grammar-tool scoring entirely.
 _LANGUAGES_WITHOUT_LANGUAGETOOL: frozenset[str] = frozenset({"cy"})
 
 # NOTE: VerbMorphologyEvaluator is intentionally *not* in DEFAULT_EVALUATORS.
@@ -46,7 +49,11 @@ def default_evaluators_for_language(language: str) -> list[BaseEvaluator]:
     """Default per-sentence evaluators for a benchmark language code."""
     code = (language or "").strip().lower()
     if code in _LANGUAGES_WITHOUT_LANGUAGETOOL:
-        return [ev for ev in DEFAULT_EVALUATORS if ev.name != "grammar_languagetool"]
+        out = [ev for ev in DEFAULT_EVALUATORS if ev.name != "grammar_languagetool"]
+        if cysill_available():
+            # Insert after expected_form_match (same slot LanguageTool occupies for ES).
+            out.insert(1, CysillGrammarEvaluator())
+        return out
     return list(DEFAULT_EVALUATORS)
 
 
@@ -67,6 +74,7 @@ def build_optional_evaluators(names: list[str]) -> list[BaseEvaluator]:
 __all__ = [
     "BaseEvaluator",
     "ClauseCountEvaluator",
+    "CysillGrammarEvaluator",
     "EvaluationResult",
     "ExpectedFormMatchEvaluator",
     "FluencyPerplexityEvaluator",
@@ -77,5 +85,6 @@ __all__ = [
     "DEFAULT_EVALUATORS",
     "OPTIONAL_EVALUATORS",
     "build_optional_evaluators",
+    "cysill_available",
     "default_evaluators_for_language",
 ]

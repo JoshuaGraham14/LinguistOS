@@ -799,12 +799,20 @@ def run_experiment(
             total_evals = 0
             if evaluate:
                 base_evaluators = default_evaluators_for_language(benchmark.language)
-                if benchmark.language.strip().lower() in {"cy"}:
-                    print(
-                        "  Skipping grammar_languagetool for Welsh "
-                        "(no LanguageTool pack; Cysill not wired)",
-                        flush=True,
-                    )
+                if benchmark.language.strip().lower() == "cy":
+                    from research.evaluation.sentence.cysill import cysill_available
+
+                    if cysill_available():
+                        print(
+                            "  Welsh grammar: grammar_cysill (Cysill Ar-lein API)",
+                            flush=True,
+                        )
+                    else:
+                        print(
+                            "  Skipping Welsh grammar tool "
+                            "(set CYSILL_API_KEY for Cysill; no LanguageTool pack)",
+                            flush=True,
+                        )
                 evaluators = _merge_evaluators(base_evaluators, extra_evaluators)
                 if extra_evaluators:
                     extra_names = [

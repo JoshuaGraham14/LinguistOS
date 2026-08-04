@@ -49,3 +49,6 @@ data/local/
 docs/report-writing/
 
 docs/chats/
+
+# Local eval caches (Cysill responses, etc.)
+research/.cache/
