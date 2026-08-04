@@ -1,9 +1,13 @@
-"""Naturalness judge for Spanish sentences via a hosted LLM (OpenAI Chat).
+"""Naturalness judge for constrained sentence generation via a hosted LLM.
+
+Spanish and Welsh share the same JSON schema and numeric axes; Welsh adds
+``wrong_construction`` so the judge can separate synthetic vs periphrastic
+failures from ordinary conjugation / agreement errors.
 
 Single structured JSON call per sentence with a rigorous rubric that
 separates:
 
-- ``grammaticality``    — is the Spanish structurally correct?
+- ``grammaticality``    — is the sentence structurally correct?
 - ``naturalness``       — would a native naturally say this?
 - ``semantic_coherence``— does it express a coherent proposition?
 - ``target_form_use``   — is the expected form used correctly as main verb?
@@ -29,13 +33,17 @@ from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 
 EVALUATOR_NAME = "naturalness_llm_judge"
 DEFAULT_MODEL = "gpt-5.4-mini"
+# Spanish production prompt (haber / participle clarifications).
 PROMPT_VERSION = "v3"
+# Welsh construction-aware prompt.
+WELSH_PROMPT_VERSION = "cy-v2"
 
 TARGET_FORM_USE_VALUES: frozenset[str] = frozenset(
     {
         "correct_main_verb",
         "correct_but_not_main_verb",
         "wrong_agreement_or_role",
+        "wrong_construction",
         "mentioned_or_quoted_only",
         "absent",
     }
@@ -48,6 +56,8 @@ FLAG_VALUES: frozenset[str] = frozenset(
         "tense_context_conflict",
         "repetition_or_degeneration",
         "mixed_language_or_meta_output",
+        "wrong_construction",
+        "mutation_error",
     }
 )
 
@@ -273,21 +283,270 @@ for `grammaticality`, `naturalness`, and `semantic_coherence`.
 """
 
 
+WELSH_SYSTEM_PROMPT = """\
+You are a rigorous evaluator of Welsh (Cymraeg) sentences produced by a
+language model that was asked to use a specific verb form in a specific
+construction. You are not the teacher or the generator; you are grading
+the sentence as a careful Welsh speaker / teacher.
+
+Rate ONLY the Welsh sentence. Do not consider any English translation.
+Do not reward the sentence merely because the expected form string
+appears in it. Penalise sentences that quote or list the form instead of
+using it as the main predicate, and sentences that are repetitions or
+degenerate loops. Short but well-formed clauses are acceptable.
+
+CRITICAL — construction (synthetic vs periphrastic):
+The user message states Required construction. Obey it strictly.
+
+  synthetic = the lexical verb itself is finite and carries person/tense.
+    Ex (past 1sg of credu): "Credais y stori." — expected form "credais".
+    For synthetic cells, a grammatical *bod*/*gwneud* + verbnoun sentence
+    is STILL wrong construction, even if meaning is fine.
+
+  periphrastic = person/tense sit on an auxiliary; the lexical verb stays
+    as a verbnoun (possibly soft-mutated). Typical patterns:
+      present:   bod-form + yn/'n + VN   — "Dw i'n credu'r stori."
+      imperfect: oedd-form + yn/'n + VN  — "Roeddwn i'n credu'r stori."
+      future:    bydd-form + yn/'n + VN  — "Bydda i'n credu'r stori."
+      past:      gwneud-form + (soft) VN — "Gwnes i gredu'r stori."
+    For periphrastic cells, a lone synthetic finite of the lemma is WRONG
+    construction even if it is a real Welsh sentence.
+
+Accept common spoken contractions and aux aliases when they match the
+required cell (e.g. dw/rwy/rwyf/ydwyf for 1sg present; mae/ydy for 3sg;
+'n for yn). Soft mutation on the verbnoun after gwneud past is expected
+when the lemma mutates (dangos → ddangos, credu → gredu, rhoi → roi).
+
+CRITICAL — mutations (treigladau):
+Initial consonant mutation is deterministic given the trigger. Treat a
+contextually correct mutated surface as the SAME target form (still
+correct_main_verb when the package/construction is right). Do NOT mark
+absent merely because the verbnoun is soft-mutated.
+
+  When soft mutation IS expected (apply soft table p→b, t→d, c→g, b→f,
+  d→dd, g→∅, m→f, ll→l, rh→r; unchanged if the consonant has no soft form):
+    • periphrastic past after gwneud-type aux: VN soft-mutates
+      ("Gwnes i gredu…" / "Wnes i ddarllen…").
+    • Other explicit soft triggers if present in the sentence (e.g. dy +
+      noun, i + place name) — grade grammar accordingly.
+
+  When soft mutation is NOT expected on the lexical VN:
+    • periphrastic present / imperfect / future after yn/'n:
+      ("Dw i'n credu…" — not *gredu*; "Bydda i'n darllen…" — not *ddarllen*).
+
+  If the required construction needs soft mutation and the model keeps the
+  radical where a soft form is required (or soft-mutates where the
+  construction forbids it), prefer a lower grammaticality and set the
+  flag mutation_error. Spoken omission of an expected soft mutation may
+  sit at grammaticality 4 rather than 1–2, but still flag mutation_error
+  when the textbook cell clearly requires it.
+
+  Nasal (fy + …) and aspirate (ei-her + …) mutations: if clearly wrong for
+  an obvious trigger in the sentence, set mutation_error and lower
+  grammaticality; do not confuse these with soft.
+
+Return a single JSON object matching this schema. No prose, no code
+fences, no extra keys, no null values.
+
+{
+  "grammaticality":     integer 1..5,
+  "naturalness":        integer 1..5,
+  "target_form_use":    "correct_main_verb"
+                      | "correct_but_not_main_verb"
+                      | "wrong_agreement_or_role"
+                      | "wrong_construction"
+                      | "mentioned_or_quoted_only"
+                      | "absent",
+  "semantic_coherence": integer 1..5,
+  "flags": [
+    "odd_collocation" |
+    "subject_verb_disagreement" |
+    "tense_context_conflict" |
+    "repetition_or_degeneration" |
+    "mixed_language_or_meta_output" |
+    "wrong_construction" |
+    "mutation_error"
+  ],
+  "rationale": string (max 240 characters, written in English)
+}
+
+Scale anchors (Welsh worked examples; use as calibration, not exhaustive
+rules):
+
+grammaticality
+  5 = fully grammatical Welsh.
+      Ex: "Credais y stori." / "Dw i'n credu'r stori."
+  4 = minor slip that does not impede understanding.
+      Ex: "Mae hi yn credu." — missing contraction is fine; a tiny
+      article/agreement slip would also sit here.
+  3 = noticeable errors but meaning recoverable.
+      Ex: "Mae nhw'n credu." — wrong 3sg aux with plural subject.
+  2 = major grammatical errors.
+      Ex: "Fi credu stori ddoe." — uninflected verbnoun as finite.
+  1 = not a valid Welsh sentence / word salad.
+      Ex: "Credu y mae stori fi." — broken order.
+
+naturalness
+  5 = a native would naturally produce this.
+      Ex: "Dw i'n teimlo'n well heddiw."
+  4 = acceptable, slightly marked or bookish.
+      Ex: "Credaf y stori." — synthetic present is grammatical but often
+      more formal/literary than peri in speech.
+  3 = understandable but awkward.
+      Ex: odd word order or stiff calque that a native would rephrase.
+  2 = substantially unnatural; a native would rewrite it.
+      Ex: "Dw i'n gwneud penderfyniad." when a native prefers
+      "Dw i'n penderfynu" / "Rwy'n gwneud penderfyniad" calques badly.
+  1 = broken or incoherent.
+      Ex: "Credaf credaf credaf y stori."
+  NEVER use this axis to penalise pure grammar mistakes; use
+  `grammaticality` for those. Also do NOT use naturalness alone to
+  punish a correct construction that happens to be the marked one for
+  the cell — if Required construction is synthetic and the sentence is
+  a good synthetic, score naturalness fairly for that register.
+
+semantic_coherence
+  5 = coherent, plausible meaning.
+      Ex: "Dangosais y llun iddi."
+  4 = coherent, mildly odd content.
+      Ex: "Dw i'n bwyta cerrig." — imaginable but unusual.
+  3 = interpretable but implausible.
+  2 = strained; time/context contradicts the verb.
+      Ex: "Ddoe bydda i'n mynd." — yesterday + future.
+  1 = nonsensical or degenerate.
+
+target_form_use categories:
+  correct_main_verb         = Required construction is used correctly as
+                              the main predicate:
+                              • synthetic: expected finite form (or a
+                                listed alt) is the main verb and agrees.
+                              • periphrastic: correct-tense/person aux +
+                                required particle (yn/'n if asked) + the
+                                lexical verbnoun (soft-mutated when the
+                                construction requires it, e.g. gwneud past)
+                                form the main periphrasis. A correctly
+                                mutated VN still counts here.
+  correct_but_not_main_verb = expected material appears with right
+                              morphology but is subordinate / not the
+                              main predicate.
+  wrong_agreement_or_role   = right construction family, but wrong
+                              person/number/tense conjugation (e.g.
+                              synthetic ending mismatches subject; peri
+                              aux person wrong while VN is present).
+  wrong_construction        = used the other construction family
+                              (synthetic when periphrastic required, or
+                              periphrastic when synthetic required) for
+                              the SAME lexical lemma. Prefer this over
+                              absent when the lemma is clearly realised
+                              in the wrong family. Do NOT use this when
+                              the sentence uses a different lemma
+                              entirely (that is absent).
+  mentioned_or_quoted_only  = form appears in quotes / as vocabulary /
+                              metalinguistic mention only.
+  absent                    = expected form / peri package does not appear
+                              in any usable way (wrong lemma, gibberish,
+                              or unrelated verb). If the sentence uses
+                              another verb's periphrasis or synthetic
+                              form, choose absent — not wrong_construction.
+                              Do NOT choose absent solely because the VN
+                              is soft-mutated in a context that requires
+                              soft mutation.
+
+Flag definitions (assign independently; zero or several allowed):
+  odd_collocation              = lexically odd combinations.
+  subject_verb_disagreement    = subject and finite verb/aux disagree in
+                                 person or number.
+  tense_context_conflict       = time adverbials contradict main tense.
+  repetition_or_degeneration   = degenerate token loops.
+  mixed_language_or_meta_output = non-Welsh spans, </think> tags, or the
+                                 model explains itself instead of
+                                 producing the sentence.
+  wrong_construction           = set this flag ONLY together with
+                                 target_form_use=wrong_construction, when
+                                 the SAME lemma appears in the other
+                                 construction family. In the rationale,
+                                 say which way: "periphrastic but
+                                 synthetic required" or the reverse.
+                                 Do not set this flag for wrong-lemma
+                                 substitutions (those are absent /
+                                 odd_collocation).
+  mutation_error               = wrong or missing initial mutation for a
+                                 clear trigger (e.g. radical VN after
+                                 gwneud past when soft is required; soft
+                                 VN after yn/'n present/future where soft
+                                 is not used; wrong nasal/aspirate after
+                                 an obvious possessive). Can co-occur with
+                                 correct_main_verb if the package is still
+                                 recognisable but mutation is off.
+
+Write `rationale` in English regardless of the sentence language. This
+field is read by an English-speaking annotator. If you cannot produce
+an English rationale, return {"error": "no_english_rationale"} instead.
+
+Be strict but fair. If unsure between two integers, pick the lower one
+for `grammaticality`, `naturalness`, and `semantic_coherence`.
+"""
+
+
+def _is_welsh(constraints: dict[str, Any]) -> bool:
+    lang = str(constraints.get("target_language") or "").strip().casefold()
+    return lang in {"cy", "welsh", "cymraeg"}
+
+
+def _system_prompt_for(constraints: dict[str, Any]) -> str:
+    return WELSH_SYSTEM_PROMPT if _is_welsh(constraints) else SYSTEM_PROMPT
+
+
+def _prompt_version_for(constraints: dict[str, Any]) -> str:
+    return WELSH_PROMPT_VERSION if _is_welsh(constraints) else PROMPT_VERSION
+
+
+def _language_label(constraints: dict[str, Any]) -> str:
+    if _is_welsh(constraints):
+        return "Welsh"
+    lang = constraints.get("target_language")
+    if not lang or str(lang).casefold() in {"es", "spanish"}:
+        return "Spanish"
+    return str(lang)
+
+
 def _build_user_prompt(sentence: str, constraints: dict[str, Any]) -> str:
     """Compact, judge-facing user message. Never include arm/generator info."""
-    parts: list[str] = [f"Target language: {constraints.get('target_language') or 'Spanish'}"]
+    parts: list[str] = [f"Target language: {_language_label(constraints)}"]
+    construction = constraints.get("construction")
+    if construction:
+        parts.append(f"Required construction: {construction}")
     expected_form = constraints.get("expected_form")
     if expected_form:
         parts.append(f"Expected verb form: {expected_form}")
+    expected_form_alts = constraints.get("expected_form_alts")
+    if expected_form_alts:
+        parts.append(f"Expected verb form alternatives: {expected_form_alts}")
+    expected_aux = constraints.get("expected_aux")
+    if expected_aux:
+        parts.append(f"Expected auxiliary: {expected_aux}")
+    expected_aux_alts = constraints.get("expected_aux_alts")
+    if expected_aux_alts:
+        parts.append(f"Expected auxiliary alternatives: {expected_aux_alts}")
+    particle = constraints.get("particle")
+    if particle:
+        parts.append(f"Particle: {particle}")
     for key, label in (
         ("keyword", "Lemma"),
+        ("lemma", "Lemma"),
         ("tense", "Tense"),
         ("person", "Person"),
         ("number", "Number"),
     ):
         val = constraints.get(key)
-        if val:
-            parts.append(f"{label}: {val}")
+        if not val:
+            continue
+        # Prefer keyword over lemma when both exist; skip duplicate Lemma line.
+        if key == "lemma" and constraints.get("keyword"):
+            continue
+        line = f"{label}: {val}"
+        if line not in parts:
+            parts.append(line)
     parts.append("")
     parts.append("Sentence:")
     parts.append(f'"{sentence}"')
@@ -453,14 +712,19 @@ class NaturalnessLlmJudgeEvaluator(BaseEvaluator):
         self._client = OpenAIJudgeClient()
         return self._client
 
-    def _call_with_retry(self, user: str) -> tuple[dict[str, Any] | None, str | None, str]:
+    def _call_with_retry(
+        self,
+        user: str,
+        *,
+        system: str,
+    ) -> tuple[dict[str, Any] | None, str | None, str]:
         """One primary call, one strict retry on parse/schema/language failure."""
         client = self._get_client()
         last_raw = ""
         last_error: str | None = None
         for attempt in (1, 2):
             try:
-                raw = client.complete(SYSTEM_PROMPT, user, model=self._model)
+                raw = client.complete(system, user, model=self._model)
             except Exception as exc:  # pragma: no cover - env dependent
                 return None, f"api_failure: {exc}", ""
             last_raw = raw or ""
@@ -486,18 +750,21 @@ class NaturalnessLlmJudgeEvaluator(BaseEvaluator):
         constraints: dict[str, Any],
     ) -> EvaluationResult:
         text = (sentence or "").strip()
+        cons = constraints or {}
+        prompt_version = _prompt_version_for(cons)
         if not text:
             return EvaluationResult(
                 score=0.0,
                 details={
                     "error": "empty_sentence",
                     "model_id": self._model,
-                    "prompt_version": PROMPT_VERSION,
+                    "prompt_version": prompt_version,
                 },
             )
 
-        user_prompt = _build_user_prompt(text, constraints or {})
-        parsed, err, raw = self._call_with_retry(user_prompt)
+        system = _system_prompt_for(cons)
+        user_prompt = _build_user_prompt(text, cons)
+        parsed, err, raw = self._call_with_retry(user_prompt, system=system)
         if parsed is None:
             return EvaluationResult(
                 score=0.0,
@@ -505,7 +772,7 @@ class NaturalnessLlmJudgeEvaluator(BaseEvaluator):
                     "error": err or "unknown_failure",
                     "raw_response": raw[:2000],
                     "model_id": self._model,
-                    "prompt_version": PROMPT_VERSION,
+                    "prompt_version": prompt_version,
                 },
             )
 
@@ -518,7 +785,7 @@ class NaturalnessLlmJudgeEvaluator(BaseEvaluator):
             "flags": list(parsed["flags"]),
             "rationale": parsed["rationale"],
             "model_id": self._model,
-            "prompt_version": PROMPT_VERSION,
+            "prompt_version": prompt_version,
             "raw_response": raw[:2000],
         }
         return EvaluationResult(score=score, details=details)
@@ -534,4 +801,6 @@ __all__ = [
     "PROMPT_VERSION",
     "SYSTEM_PROMPT",
     "TARGET_FORM_USE_VALUES",
+    "WELSH_PROMPT_VERSION",
+    "WELSH_SYSTEM_PROMPT",
 ]

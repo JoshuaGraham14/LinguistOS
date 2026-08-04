@@ -1,0 +1,9 @@
+# Welsh judge audit — form-inject arm.
+# Matches Spanish Direction 1 inject plain_b: plaintext + gold form injection.
+name: welsh_judge_audit_inject_n1
+method: baseline_hf_form_injected_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short

@@ -1,0 +1,504 @@
+# Welsh naturalness validation stimuli — minimal pairs for smoke-testing
+# naturalness_llm_judge (cy-v1) on synthetic vs periphrastic cells.
+#
+# Labels are authored expectations for gate/smoke. Overwrite human_label
+# after a native/teacher review if needed.
+#
+# Construction fields mirror the Welsh benchmark constraints:
+#   construction / expected_form / expected_aux / particle
+
+version: 1
+prompt_version: cy-v1
+pairs:
+  # --- Category: wrong_construction (syn ↔ peri) ---
+  - pair_id: cy01_syn_vs_peri_past
+    category: wrong_construction
+    construction: synthetic
+    expected_form: credais
+    lemma: credu
+    tense: past
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Credais y stori."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Gwnes i gredu'r stori."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: wrong_construction
+          flags: [wrong_construction]
+    notes: >-
+      Synthetic past required; awkward is grammatical gwneud-past peri of
+      the same lemma. Meaning is fine — construction is the failure.
+
+  - pair_id: cy02_peri_vs_syn_present
+    category: wrong_construction
+    construction: periphrastic
+    expected_form: credu
+    expected_aux: rwyf
+    expected_aux_alts: "wyf|ydwyf|dw|ydw|rwy"
+    particle: yn
+    lemma: credu
+    tense: present
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Dw i'n credu'r stori."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Credaf y stori."
+        human_label:
+          grammaticality: 5
+          naturalness: 4
+          semantic_coherence: 5
+          target_form_use: wrong_construction
+          flags: [wrong_construction]
+    notes: >-
+      Periphrastic present required; awkward is a good synthetic present.
+      Naturalness on awkward can stay high — TFU/flags carry the signal.
+
+  - pair_id: cy03_syn_vs_peri_present
+    category: wrong_construction
+    construction: synthetic
+    expected_form: dangosaf
+    lemma: dangos
+    tense: present
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Dangosaf y llun iddi."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Dw i'n dangos y llun iddi."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: wrong_construction
+          flags: [wrong_construction]
+    notes: >-
+      Synthetic present required. Awkward peri is more colloquial but still
+      wrong_construction for this cell. Preferred naturalness is set to 5
+      so the pair is distinguished by TFU (synthetic present can be marked
+      in speech, but we treat a clean synthetic as fully acceptable here).
+
+  - pair_id: cy04_peri_past_vs_syn
+    category: wrong_construction
+    construction: periphrastic
+    expected_form: ddangos
+    expected_form_alts: dangos
+    expected_aux: gwnes
+    expected_aux_alts: "gwneuthum|gwnaes|gwnesaf"
+    lemma: dangos
+    tense: past
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Gwnes i ddangos y llun."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Dangosais y llun."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: wrong_construction
+          flags: [wrong_construction]
+    notes: >-
+      Periphrastic past (gwneud + soft-mutated VN) required; awkward is
+      synthetic past of the same lemma.
+
+  # --- Category: agreement / wrong conjugation ---
+  - pair_id: cy05_agreement_syn_person
+    category: agreement
+    construction: synthetic
+    expected_form: credais
+    lemma: credu
+    tense: past
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Credais y stori."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Credodd fi y stori."
+        human_label:
+          grammaticality: 1
+          naturalness: 1
+          semantic_coherence: 3
+          target_form_use: wrong_agreement_or_role
+          flags: [subject_verb_disagreement]
+    notes: >-
+      3sg synthetic with 1sg pronoun. Form of the wrong person is present;
+      expected 1sg form is absent as main agreeing verb.
+
+  - pair_id: cy06_agreement_peri_aux
+    category: agreement
+    construction: periphrastic
+    expected_form: credu
+    expected_aux: maen
+    expected_aux_alts: "maent|rydyn|rydynt|ydynt|ŷnt|ydyn|dyn"
+    particle: yn
+    lemma: credu
+    tense: present
+    person: 3rd
+    number: plural
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Maen nhw'n credu'r stori."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Mae nhw'n credu'r stori."
+        human_label:
+          grammaticality: 2
+          naturalness: 2
+          semantic_coherence: 4
+          target_form_use: wrong_agreement_or_role
+          flags: [subject_verb_disagreement]
+    notes: >-
+      Right construction (peri + VN) but wrong aux number (mae vs maen).
+
+  - pair_id: cy07_agreement_invented_form
+    category: agreement
+    construction: synthetic
+    expected_form: teimlodd
+    lemma: teimlo
+    tense: past
+    person: 3rd
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Teimlodd yn well."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Teimleo yn well."
+        human_label:
+          grammaticality: 1
+          naturalness: 1
+          semantic_coherence: 5
+          target_form_use: absent
+          flags: [subject_verb_disagreement]
+    notes: >-
+      Invented conjugation. Meaning recoverable; expected form absent.
+
+  # --- Category: odd collocation ---
+  - pair_id: cy08_collocation_implausible
+    category: odd_collocation
+    construction: periphrastic
+    expected_form: teimlo
+    expected_aux: rwyf
+    expected_aux_alts: "wyf|ydwyf|dw|ydw|rwy"
+    particle: yn
+    lemma: teimlo
+    tense: present
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Dw i'n teimlo'n well heddiw."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Dw i'n teimlo'r wal."
+        human_label:
+          grammaticality: 5
+          naturalness: 2
+          semantic_coherence: 2
+          target_form_use: correct_main_verb
+          flags: [odd_collocation]
+    notes: >-
+      Form/construction intact; only naturalness and coherence drop
+      (implausible object).
+
+  - pair_id: cy09_collocation_calque
+    category: odd_collocation
+    construction: periphrastic
+    expected_form: ennill
+    expected_aux: rwyf
+    expected_aux_alts: "wyf|ydwyf|dw|ydw|rwy"
+    particle: yn
+    lemma: ennill
+    tense: present
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Dw i'n ennill y gêm."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Dw i'n gwneud buddugoliaeth."
+        human_label:
+          grammaticality: 5
+          naturalness: 2
+          semantic_coherence: 4
+          target_form_use: absent
+          flags: [odd_collocation]
+    notes: >-
+      Calque of "make a victory". Awkward uses the wrong lemma so
+      expected_form is absent — mirrors Spanish tomar/hacer.
+
+  # --- Category: role vs mention ---
+  - pair_id: cy10_mention_synthetic
+    category: role_vs_mention
+    construction: synthetic
+    expected_form: credais
+    lemma: credu
+    tense: past
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Credais y stori."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Y gair «credais» yw'r ffurf orffennol."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: mentioned_or_quoted_only
+          flags: []
+    notes: >-
+      Numeric axes match; only target_form_use distinguishes the sides.
+
+  - pair_id: cy11_mention_peri_vn
+    category: role_vs_mention
+    construction: periphrastic
+    expected_form: teimlo
+    expected_aux: mae
+    expected_aux_alts: "ydyw|yw|ydy|ydi"
+    particle: yn
+    lemma: teimlo
+    tense: present
+    person: 3rd
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Mae hi'n teimlo'n well."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "«Teimlo» yw'r berfenw."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: mentioned_or_quoted_only
+          flags: []
+    notes: >-
+      Metalinguistic mention of the verbnoun only.
+
+  # --- Category: repetition ---
+  - pair_id: cy12_repetition
+    category: repetition
+    construction: periphrastic
+    expected_form: chwerthin
+    expected_aux: maen
+    expected_aux_alts: "maent|rydyn|rydynt|ydynt|ŷnt|ydyn|dyn"
+    particle: yn
+    lemma: chwerthin
+    tense: present
+    person: 3rd
+    number: plural
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Maen nhw'n chwerthin gyda'i gilydd."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Maen nhw'n chwerthin chwerthin chwerthin chwerthin."
+        human_label:
+          grammaticality: 2
+          naturalness: 1
+          semantic_coherence: 1
+          target_form_use: correct_main_verb
+          flags: [repetition_or_degeneration]
+    notes: >-
+      Form/construction ok; degenerate loop.
+
+  # --- Category: tense conflict ---
+  - pair_id: cy13_tense_ddoe_future
+    category: tense_conflict
+    construction: periphrastic
+    expected_form: dangos
+    expected_aux: byddaf
+    expected_aux_alts: bydda
+    particle: yn
+    lemma: dangos
+    tense: future
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Bydda i'n dangos y llun yfory."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Bydda i'n dangos y llun ddoe."
+        human_label:
+          grammaticality: 5
+          naturalness: 2
+          semantic_coherence: 2
+          target_form_use: correct_main_verb
+          flags: [tense_context_conflict]
+    notes: >-
+      Future peri intact; "ddoe" (yesterday) contradicts future.
+
+  - pair_id: cy14_tense_yfory_past
+    category: tense_conflict
+    construction: synthetic
+    expected_form: trodd
+    lemma: troi
+    tense: past
+    person: 3rd
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Trodd y cornel yn sydyn."
+        human_label:
+          grammaticality: 5
+          naturalness: 5
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Trodd y cornel yfory."
+        human_label:
+          grammaticality: 5
+          naturalness: 2
+          semantic_coherence: 2
+          target_form_use: correct_main_verb
+          flags: [tense_context_conflict]
+    notes: >-
+      Synthetic past with future adverb "yfory".
+
+  # --- Category: rare but correct ---
+  - pair_id: cy15_rare_but_correct_syn
+    category: rare_but_correct
+    construction: synthetic
+    expected_form: credaf
+    lemma: credu
+    tense: present
+    person: 1st
+    number: singular
+    target_language: cy
+    preferred: natural
+    sentences:
+      natural:
+        text: "Credaf hynny."
+        human_label:
+          grammaticality: 5
+          naturalness: 4
+          semantic_coherence: 5
+          target_form_use: correct_main_verb
+          flags: []
+      awkward:
+        text: "Dw i'n credu hynny."
+        human_label:
+          grammaticality: 5
+          naturalness: 4
+          semantic_coherence: 5
+          target_form_use: wrong_construction
+          flags: [wrong_construction]
+    notes: >-
+      Synthetic present is grammatical but often more formal/literary than
+      peri in speech (naturalness 4 both sides). Preferred is the required
+      synthetic; awkward peri is wrong_construction. PPL may prefer the
+      colloquial peri — documented rare/marked-form limitation.

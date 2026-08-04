@@ -98,3 +98,51 @@ def test_extract_constraints_from_flat_yaml():
         "number": "singular",
         "gender": "masculine",
     }
+
+
+def test_extract_companions_welsh_aux_particle_only():
+    from research.generation.languages import extract_companions
+
+    cs = {
+        "keyword": "credu",
+        "expected_form": "credu",
+        "expected_form_alts": "gredu",
+        "expected_aux": "rwyf",
+        "expected_aux_alts": "dw|rwy",
+        "particle": "yn",
+        "cell_id": "periphrastic_present_1s",
+        "translation": "believe",
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+        "construction": "periphrastic",
+        "tier": "high",
+        "zipf": 5.7,
+    }
+    assert extract_constraints(cs) == {
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+        "construction": "periphrastic",
+    }
+    assert extract_companions(cs) == {
+        "expected_form_alts": "gredu",
+        "expected_aux": "rwyf",
+        "expected_aux_alts": "dw|rwy",
+        "particle": "yn",
+        "cell_id": "periphrastic_present_1s",
+    }
+
+
+def test_extract_companions_spanish_empty():
+    from research.generation.languages import extract_companions
+
+    cs = {
+        "keyword": "comer",
+        "expected_form": "como",
+        "translation": "to eat",
+        "tense": "present",
+        "person": "1st",
+        "number": "singular",
+    }
+    assert extract_companions(cs) == {}

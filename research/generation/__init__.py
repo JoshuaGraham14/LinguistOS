@@ -5,7 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from research.generation.baseline_gpt import BaselineGPTGenerator, FormInjectedGPTGenerator
-from research.generation.baseline_gpt_plain import PlainGPTBGenerator
+from research.generation.baseline_gpt_plain import (
+    FormInjectedPlainGPTBGenerator,
+    PlainGPTBGenerator,
+)
 from research.generation.baseline_hf import (
     BaselineHFGenerator,
     FormInjectedExplicitHFGenerator,
@@ -49,6 +52,8 @@ from research.generation.fewshot_hf import (
     FewShotDynamicHFGenerator,
     FewShotDynamicSoftHFGenerator,
     FewShotStaticHFGenerator,
+    FewShotWelshDynamicHFGenerator,
+    FewShotWelshStaticHFGenerator,
 )
 from research.generation.individual_gpt import IndividualGPTGenerator
 from research.generation.neurologic_hf import (
@@ -66,6 +71,7 @@ GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "baseline_gpt": BaselineGPTGenerator,
     "baseline_gpt_form_injected": FormInjectedGPTGenerator,
     "baseline_gpt_plain_b": PlainGPTBGenerator,
+    "baseline_gpt_form_injected_plain_b": FormInjectedPlainGPTBGenerator,
     "baseline_hf": BaselineHFGenerator,
     "baseline_hf_plain": PlainHFGenerator,
     "baseline_hf_plain_b": PlainHFBGenerator,
@@ -109,5 +115,7 @@ GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "fewshot_hf_static_plain_b": FewShotStaticHFGenerator,
     "fewshot_hf_dynamic_plain_b": FewShotDynamicHFGenerator,
     "fewshot_hf_dynamic_soft_plain_b": FewShotDynamicSoftHFGenerator,
+    "fewshot_hf_welsh_static_plain_b": FewShotWelshStaticHFGenerator,
+    "fewshot_hf_welsh_dynamic_plain_b": FewShotWelshDynamicHFGenerator,
     "individual_gpt": IndividualGPTGenerator,
 }

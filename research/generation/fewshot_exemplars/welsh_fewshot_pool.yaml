@@ -1,0 +1,96 @@
+# Few-shot exemplar pool (Welsh morphology) — transfer / judge audit.
+#
+# Worked (constraint -> natural sentence) demos for plaintext Fix-B prompting.
+# Verbs are DISJOINT from welsh_transfer_n10 audit lemmas:
+#   rhoi, dangos, credu, teimlo, troi, methu, tyfu, paratoi, cyfrannu, chwerthin
+#
+# Includes both synthetic and periphrastic constructions so the model sees
+# the syn↔peri distinction that Spanish does not need.
+language: cy
+description: >-
+  Curated natural Welsh exemplars for few-shot morphology prompting.
+  Disjoint from welsh_transfer_n10 verbs.
+exemplars:
+  # --- synthetic ---
+  - verb: canu
+    translation: to sing
+    tense: past
+    person: 1st
+    number: singular
+    construction: synthetic
+    expected_form: canais
+    sentence: "Canais i ddoe."
+  - verb: gweld
+    translation: to see
+    tense: past
+    person: 1st
+    number: singular
+    construction: synthetic
+    expected_form: gwelais
+    sentence: "Gwelais i'r ffilm."
+  - verb: siarad
+    translation: to speak
+    tense: past
+    person: 3rd
+    number: singular
+    construction: synthetic
+    expected_form: siaradodd
+    sentence: "Siaradodd hi'n glir."
+  - verb: helpu
+    translation: to help
+    tense: present
+    person: 1st
+    number: singular
+    construction: synthetic
+    expected_form: helpaf
+    sentence: "Helpaf fy ffrind."
+  # --- periphrastic ---
+  - verb: canu
+    translation: to sing
+    tense: present
+    person: 1st
+    number: singular
+    construction: periphrastic
+    expected_form: canu
+    expected_aux: dw
+    particle: yn
+    sentence: "Dw i'n canu yn y côr."
+  - verb: siarad
+    translation: to speak
+    tense: present
+    person: 3rd
+    number: singular
+    construction: periphrastic
+    expected_form: siarad
+    expected_aux: mae
+    particle: yn
+    sentence: "Mae hi'n siarad Cymraeg."
+  - verb: mynd
+    translation: to go
+    tense: future
+    person: 1st
+    number: singular
+    construction: periphrastic
+    expected_form: mynd
+    expected_aux: bydda
+    particle: yn
+    sentence: "Bydda i'n mynd yfory."
+  - verb: gweld
+    translation: to see
+    tense: past
+    person: 1st
+    number: singular
+    construction: periphrastic
+    expected_form: weld
+    expected_aux: gwnes
+    sentence: "Gwnes i weld y llun."
+  - verb: gweithio
+    translation: to work
+    tense: imperfect
+    person: 1st
+    number: singular
+    construction: periphrastic
+    expected_form: gweithio
+    expected_aux: roeddwn
+    particle: yn
+    sentence: "Roeddwn i'n gweithio yno."

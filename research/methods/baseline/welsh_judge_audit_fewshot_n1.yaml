@@ -1,0 +1,9 @@
+# Welsh judge audit — few-shot plaintext Fix-B (like Spanish Direction 5,
+# but K=2 with one synthetic + one periphrastic worked example always shown).
+name: welsh_judge_audit_fewshot_n1
+method: fewshot_hf_welsh_static_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short

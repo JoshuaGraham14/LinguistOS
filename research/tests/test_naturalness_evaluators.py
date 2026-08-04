@@ -26,6 +26,8 @@ from research.evaluation.sentence.naturalness_llm_judge import (
     NaturalnessLlmJudgeEvaluator,
     PROMPT_VERSION,
     SYSTEM_PROMPT,
+    WELSH_PROMPT_VERSION,
+    WELSH_SYSTEM_PROMPT,
 )
 
 
@@ -209,6 +211,77 @@ def test_judge_parses_valid_response():
     # Sanity: arm/generator name never leaks into the judge prompt.
     assert "soft" not in call["user"].lower()
     assert "beam" not in call["user"].lower()
+
+
+def test_judge_welsh_uses_construction_prompt():
+    payload = json.dumps(
+        {
+            "grammaticality": 5,
+            "naturalness": 5,
+            "target_form_use": "wrong_construction",
+            "semantic_coherence": 5,
+            "flags": ["wrong_construction"],
+            "rationale": "Periphrastic gwneud past used but synthetic past was required.",
+        }
+    )
+    client = _RecordingClient([payload])
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
+    result = ev.evaluate(
+        "Gwnes i gredu'r stori.",
+        "",
+        {
+            "expected_form": "credais",
+            "keyword": "credu",
+            "construction": "synthetic",
+            "tense": "past",
+            "person": "1st",
+            "number": "singular",
+            "target_language": "cy",
+        },
+    )
+    assert result.score == pytest.approx(1.0)
+    assert result.details["prompt_version"] == WELSH_PROMPT_VERSION
+    assert result.details["target_form_use"] == "wrong_construction"
+    assert result.details["flags"] == ["wrong_construction"]
+    assert len(client.calls) == 1
+    call = client.calls[0]
+    assert call["system"] == WELSH_SYSTEM_PROMPT
+    assert "Required construction: synthetic" in call["user"]
+    assert "Expected verb form: credais" in call["user"]
+    assert "Target language: Welsh" in call["user"]
+
+
+def test_judge_welsh_user_prompt_includes_aux_and_particle():
+    payload = json.dumps(
+        {
+            "grammaticality": 5,
+            "naturalness": 5,
+            "target_form_use": "correct_main_verb",
+            "semantic_coherence": 5,
+            "flags": [],
+            "rationale": "Correct bod present periphrasis with verbnoun credu.",
+        }
+    )
+    client = _RecordingClient([payload])
+    ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
+    ev.evaluate(
+        "Dw i'n credu'r stori.",
+        "",
+        {
+            "expected_form": "credu",
+            "expected_aux": "rwyf",
+            "expected_aux_alts": "dw|rwy",
+            "particle": "yn",
+            "construction": "periphrastic",
+            "keyword": "credu",
+            "target_language": "cy",
+        },
+    )
+    user = client.calls[0]["user"]
+    assert "Required construction: periphrastic" in user
+    assert "Expected auxiliary: rwyf" in user
+    assert "Expected auxiliary alternatives: dw|rwy" in user
+    assert "Particle: yn" in user
 
 
 def test_judge_retries_once_on_parse_failure_then_succeeds():

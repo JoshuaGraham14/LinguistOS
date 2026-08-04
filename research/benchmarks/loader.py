@@ -16,7 +16,11 @@ import yaml
 from sqlalchemy.orm import Session
 
 from research.db.models import Benchmark, ConstraintSet
-from research.generation.languages import extract_constraints, load_language_profile
+from research.generation.languages import (
+    extract_companions,
+    extract_constraints,
+    load_language_profile,
+)
 
 
 _REQUIRED_CS_FIELDS = ("keyword", "translation")
@@ -88,11 +92,14 @@ def _build_and_validate_constraints(
     path: Path,
     index: int,
 ) -> dict[str, Any]:
+    # Validate morph dimensions only; then re-attach companion scaffold keys
+    # (expected_aux / particle / alts / cell_id) so EF matcher + LLM judge see
+    # them. Spanish benchmarks omit companions → identical stored constraints.
     constraints = extract_constraints(cs_data)
     profile = load_language_profile(language)
     hint = f"Benchmark {path.name} constraint_sets[{index}]"
     profile.validate(constraints, path_hint=hint)
-    return constraints
+    return {**constraints, **extract_companions(cs_data)}
 
 
 def _validate_raw(data: dict[str, Any], path: Path) -> None:
