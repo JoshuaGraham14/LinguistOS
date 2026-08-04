@@ -1,0 +1,38 @@
+code: cy
+name: Welsh
+
+dimensions:
+  tense:
+    - present
+    - past
+    - imperfect
+    - future
+  person:
+    - "1st"
+    - "2nd"
+    - "3rd"
+  number:
+    - singular
+    - plural
+  construction:
+    - synthetic
+    - periphrastic
+
+labels:
+  construction: Construction
+
+glosses:
+  tense:
+    present: "Present (presennol)"
+    past: "Past (gorffennol)"
+    imperfect: "Imperfect (amherffaith)"
+    future: "Future (dyfodol)"
+  construction:
+    synthetic: "Synthetic (inflected lexical verb)"
+    periphrastic: "Periphrastic (auxiliary + verbnoun)"
+
+required:
+  - tense
+  - person
+  - number
+  - construction

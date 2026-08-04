@@ -13,12 +13,34 @@ _LANGUAGES_DIR = Path(__file__).resolve().parents[1] / "languages"
 _DEFAULT_REQUIRED = ("tense", "person", "number")
 
 # Benchmark YAML keys that are not morpho-syntactic constraints.
+# ``extract_constraints`` drops these so LanguageProfile.validate only sees
+# dimension fields (tense/person/…/construction).
 SCAFFOLD_KEYS = frozenset({
     "keyword",
     "expected_form",
+    "expected_form_alts",
+    "expected_aux",
+    "expected_aux_alts",
+    "particle",
     "translation",
     "cefr_level",
     "target_language",
+    "cell_id",
+    "match_forms",
+    "tier",
+    "zipf",
+})
+
+# Scaffold keys that must still reach evaluators / prompts / the judge.
+# Re-attached after morph validation (see benchmarks.loader). Spanish YAMLs
+# simply omit them — no behaviour change.
+COMPANION_KEYS = frozenset({
+    "expected_form_alts",
+    "expected_aux",
+    "expected_aux_alts",
+    "particle",
+    "cell_id",
+    "match_forms",
 })
 
 
@@ -134,9 +156,24 @@ def load_language_profile(code: str) -> LanguageProfile:
 
 
 def extract_constraints(cs_data: dict[str, Any]) -> dict[str, Any]:
-    """Pull constraint fields from a flat benchmark constraint-set dict."""
+    """Pull morpho-syntactic constraint fields from a flat YAML constraint-set."""
     return {
         k: v
         for k, v in cs_data.items()
         if k not in SCAFFOLD_KEYS and v is not None
     }
+
+
+def extract_companions(cs_data: dict[str, Any]) -> dict[str, Any]:
+    """Pull evaluator/prompt companion fields (aux, particle, alts, cell_id)."""
+    out: dict[str, Any] = {}
+    for key in COMPANION_KEYS:
+        if key not in cs_data:
+            continue
+        val = cs_data[key]
+        if val is None:
+            continue
+        if isinstance(val, str) and not val.strip():
+            continue
+        out[key] = val
+    return out

@@ -1,0 +1,10 @@
+# Welsh LoRA teacher pool — GPT-5.5 form-inject Fix-B on welsh_transfer_n150.
+# Completions filtered later into lora-form SFT JSONL.
+name: welsh_frontier_gpt55_inject_n150
+method: baseline_gpt_form_injected_plain_b
+samples_per_case: 1
+config:
+  model: gpt-5.5
+  temperature: 0
+  sentence_length: short
+  reasoning_effort: low

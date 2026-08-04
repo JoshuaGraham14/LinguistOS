@@ -1,0 +1,9 @@
+# Welsh judge audit — vanilla arm.
+# Matches Spanish Direction 1 vanilla: plaintext Fix-B prompt, greedy decode.
+name: welsh_judge_audit_vanilla_n1
+method: baseline_hf_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: short

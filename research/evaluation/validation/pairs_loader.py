@@ -21,6 +21,7 @@ CATEGORIES: frozenset[str] = frozenset(
         "repetition",
         "tense_conflict",
         "rare_but_correct",
+        "wrong_construction",
     }
 )
 
@@ -29,6 +30,7 @@ TARGET_FORM_USE_VALUES: frozenset[str] = frozenset(
         "correct_main_verb",
         "correct_but_not_main_verb",
         "wrong_agreement_or_role",
+        "wrong_construction",
         "mentioned_or_quoted_only",
         "absent",
     }
@@ -41,11 +43,18 @@ FLAG_VALUES: frozenset[str] = frozenset(
         "tense_context_conflict",
         "repetition_or_degeneration",
         "mixed_language_or_meta_output",
+        "wrong_construction",
+        "mutation_error",
     }
 )
 
+CONSTRUCTIONS: frozenset[str] = frozenset({"synthetic", "periphrastic"})
+
 DEFAULT_PAIRS_YAML: Path = (
     Path(__file__).resolve().parent / "naturalness_pairs.yaml"
+)
+DEFAULT_WELSH_PAIRS_YAML: Path = (
+    Path(__file__).resolve().parent / "naturalness_pairs_cy.yaml"
 )
 
 
@@ -87,6 +96,11 @@ class ValidationPair:
     natural: PairSentence
     awkward: PairSentence
     notes: str | None
+    construction: str | None = None
+    expected_form_alts: str | None = None
+    expected_aux: str | None = None
+    expected_aux_alts: str | None = None
+    particle: str | None = None
 
     @property
     def preferred_sentence(self) -> PairSentence:
@@ -98,7 +112,7 @@ class ValidationPair:
 
     def constraints_for(self, side: str) -> dict[str, Any]:
         """Build a ``constraints`` dict shaped like the pipeline's evaluator input."""
-        return {
+        out: dict[str, Any] = {
             "keyword": self.lemma,
             "expected_form": self.expected_form,
             "lemma": self.lemma,
@@ -110,6 +124,17 @@ class ValidationPair:
             "pair_id": self.pair_id,
             "pair_side": side,
         }
+        if self.construction:
+            out["construction"] = self.construction
+        if self.expected_form_alts:
+            out["expected_form_alts"] = self.expected_form_alts
+        if self.expected_aux:
+            out["expected_aux"] = self.expected_aux
+        if self.expected_aux_alts:
+            out["expected_aux_alts"] = self.expected_aux_alts
+        if self.particle:
+            out["particle"] = self.particle
+        return out
 
 
 @dataclass(frozen=True)
@@ -200,6 +225,23 @@ def _parse_pair(raw: dict[str, Any]) -> ValidationPair:
         raise ValueError(
             f"{pair_id}: sentences must contain 'natural' and 'awkward' entries"
         )
+    construction_raw = raw.get("construction")
+    construction: str | None = None
+    if construction_raw is not None and str(construction_raw).strip():
+        construction = str(construction_raw).strip()
+        if construction not in CONSTRUCTIONS:
+            raise ValueError(
+                f"{pair_id}: construction={construction!r} not in "
+                f"{sorted(CONSTRUCTIONS)}"
+            )
+
+    def _opt_str(key: str) -> str | None:
+        val = raw.get(key)
+        if val is None:
+            return None
+        text = str(val).strip()
+        return text or None
+
     return ValidationPair(
         pair_id=pair_id,
         category=category,
@@ -213,6 +255,11 @@ def _parse_pair(raw: dict[str, Any]) -> ValidationPair:
         natural=_parse_sentence(sentences["natural"], ctx=f"{pair_id}.natural"),
         awkward=_parse_sentence(sentences["awkward"], ctx=f"{pair_id}.awkward"),
         notes=(str(raw["notes"]).strip() if raw.get("notes") else None),
+        construction=construction,
+        expected_form_alts=_opt_str("expected_form_alts"),
+        expected_aux=_opt_str("expected_aux"),
+        expected_aux_alts=_opt_str("expected_aux_alts"),
+        particle=_opt_str("particle"),
     )
 
 
@@ -251,9 +298,11 @@ def load_validation_pairs(path: Path | None = None) -> ValidationSet:
 
 __all__ = [
     "CATEGORIES",
+    "CONSTRUCTIONS",
     "FLAG_VALUES",
     "TARGET_FORM_USE_VALUES",
     "DEFAULT_PAIRS_YAML",
+    "DEFAULT_WELSH_PAIRS_YAML",
     "HumanLabel",
     "PairSentence",
     "ValidationPair",

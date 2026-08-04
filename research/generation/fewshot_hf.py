@@ -20,6 +20,7 @@ from typing import Any
 from research.generation.baseline_hf import PlainHFBGenerator
 from research.generation.constrained_hf import ConstrainedHFSoftPlainBGenerator
 from research.generation.fewshot import (
+    WELSH_POOL_PATH,
     format_demonstration_block,
     load_exemplar_pool,
     select_exemplars,
@@ -31,8 +32,9 @@ DEFAULT_FEWSHOT_K = 3
 class FewShotPromptMixin:
     """Prepend selected few-shot demonstrations to the base plain prompt.
 
-    Concrete generators set ``_FEWSHOT_MODE`` (``"static"`` | ``"dynamic"``)
-    and ``_FEWSHOT_K``. The exemplar pool is loaded lazily and cached.
+    Concrete generators set ``_FEWSHOT_MODE`` (``"static"`` | ``"dynamic"`` |
+    ``"static_syn_peri"``) and ``_FEWSHOT_K``. The exemplar pool is loaded
+    lazily and cached.
     """
 
     _FEWSHOT_MODE: str = "dynamic"
@@ -119,3 +121,31 @@ class FewShotDynamicSoftHFGenerator(
     @property
     def name(self) -> str:
         return "fewshot_hf_dynamic_soft_plain_b"
+
+
+class FewShotWelshStaticHFGenerator(FewShotPromptMixin, PlainHFBGenerator):
+    """Welsh: always show one synthetic + one periphrastic demo (K=2).
+
+    Same Fix-B plaintext decode as Spanish Direction 1 / 5; only the exemplar
+    pool and selection differ.
+    """
+
+    _FEWSHOT_MODE = "static_syn_peri"
+    _FEWSHOT_K = 2
+    _FEWSHOT_POOL_PATH = str(WELSH_POOL_PATH)
+
+    @property
+    def name(self) -> str:
+        return "fewshot_hf_welsh_static_plain_b"
+
+
+class FewShotWelshDynamicHFGenerator(FewShotPromptMixin, PlainHFBGenerator):
+    """Welsh: construction+tense matched demos (K=2) + Fix-B greedy decode."""
+
+    _FEWSHOT_MODE = "dynamic"
+    _FEWSHOT_K = 2
+    _FEWSHOT_POOL_PATH = str(WELSH_POOL_PATH)
+
+    @property
+    def name(self) -> str:
+        return "fewshot_hf_welsh_dynamic_plain_b"

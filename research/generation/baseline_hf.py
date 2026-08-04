@@ -586,7 +586,7 @@ class PlainHFGenerator(BaselineHFGenerator):
     def _generation_system_prompt(self, lang: str) -> str:
         return (
             f"You are a helpful {lang} language tutor. "
-            "Reply with exactly one Spanish sentence per request."
+            f"Reply with exactly one {lang} sentence per request."
         )
 
     def _parse_generation_raw(self, raw: str) -> tuple[list[dict[str, str]], str]:

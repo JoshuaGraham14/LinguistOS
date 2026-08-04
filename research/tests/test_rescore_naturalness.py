@@ -20,8 +20,10 @@ from research.db.models import (
 )
 from research.evaluation.rescore import (
     PPL_EVALUATOR_NAME,
+    SUPERSEDED_JUDGE_EVALUATOR_NAME,
     rescore_fluency_perplexity,
     rescore_naturalness_judge,
+    rescore_naturalness_judge_for_tense,
 )
 from research.evaluation.sentence.fluency_perplexity import (
     FluencyPerplexityEvaluator,
@@ -29,6 +31,7 @@ from research.evaluation.sentence.fluency_perplexity import (
 )
 from research.evaluation.sentence.naturalness_llm_judge import (
     EVALUATOR_NAME as JUDGE_EVALUATOR_NAME,
+    PROMPT_VERSION,
     LlmJudgeClient,
     NaturalnessLlmJudgeEvaluator,
 )
@@ -248,3 +251,141 @@ def test_judge_rescore_writes_rows_and_preserves_flags(rescore_env):
         assert r.details["flags"] == []
         assert r.details["model_id"] == "gpt-5.4-mini"
     assert len(client.calls) == 3
+
+
+def test_participle_tense_rescore_archives_and_skips_finite(tmp_path, monkeypatch):
+    """Only participle live rows are archived + replaced; finite stay put."""
+    db_path = tmp_path / "participle_rescore.db"
+    monkeypatch.setenv("RESEARCH_DB", str(db_path))
+    from research.db import database as db_mod
+
+    db_mod.engine.dispose()
+    db_mod.engine = db_mod.create_engine_for_path(db_path)
+    db_mod.SessionLocal.configure(bind=db_mod.engine)
+    Base.metadata.create_all(bind=db_mod.engine)
+    init_db()
+
+    session = SessionLocal()
+    try:
+        benchmark = Benchmark(name="part_test", language="es", mock_only=True)
+        method = MethodConfig(
+            name="part_test_method",
+            method="baseline_gpt",
+            samples_per_case=1,
+            config={"model": "stub"},
+        )
+        session.add_all([benchmark, method])
+        session.flush()
+        cs_fin = ConstraintSet(
+            benchmark_id=benchmark.id,
+            keyword="comer",
+            translation="to eat",
+            expected_form="comido",
+            target_language="es",
+            constraints={"tense": "present", "person": "1st", "number": "singular"},
+        )
+        cs_par = ConstraintSet(
+            benchmark_id=benchmark.id,
+            keyword="comer",
+            translation="to eat",
+            expected_form="comido",
+            target_language="es",
+            constraints={"tense": "participle", "person": "1st", "number": "singular"},
+        )
+        session.add_all([cs_fin, cs_par])
+        session.flush()
+        experiment = Experiment(
+            benchmark_id=benchmark.id,
+            method_config_id=method.id,
+            name="part_test__mock",
+            status="completed",
+        )
+        session.add(experiment)
+        session.flush()
+        fin = GeneratedSentence(
+            experiment_id=experiment.id,
+            constraint_set_id=cs_fin.id,
+            sentence="Como pan.",
+            translation="I eat bread.",
+            sample_index=0,
+        )
+        par = GeneratedSentence(
+            experiment_id=experiment.id,
+            constraint_set_id=cs_par.id,
+            sentence="He comido pan.",
+            translation="I have eaten bread.",
+            sample_index=0,
+        )
+        session.add_all([fin, par])
+        session.flush()
+        session.add_all(
+            [
+                SentenceEvaluation(
+                    sentence_id=fin.id,
+                    evaluator_name=JUDGE_EVALUATOR_NAME,
+                    score=0.8,
+                    details={"prompt_version": "v2", "naturalness": 4, "keep": True},
+                ),
+                SentenceEvaluation(
+                    sentence_id=par.id,
+                    evaluator_name=JUDGE_EVALUATOR_NAME,
+                    score=0.2,
+                    details={"prompt_version": "v2", "naturalness": 1, "old": True},
+                ),
+            ]
+        )
+        session.commit()
+
+        client = _StubJudge()
+        ev = NaturalnessLlmJudgeEvaluator(client=client, model="gpt-5.4-mini")
+        stats = rescore_naturalness_judge_for_tense(
+            session,
+            experiment,
+            tense="participle",
+            evaluator=ev,
+            refresh_rollups=False,
+        )
+        assert stats["candidate_sentences"] == 1
+        assert stats["rescored"] == 1
+        assert stats["archived_to_superseded"] == 1
+        assert len(client.calls) == 1
+
+        fin_live = (
+            session.query(SentenceEvaluation)
+            .filter_by(sentence_id=fin.id, evaluator_name=JUDGE_EVALUATOR_NAME)
+            .one()
+        )
+        assert fin_live.details["keep"] is True
+        assert fin_live.details["prompt_version"] == "v2"
+
+        par_arch = (
+            session.query(SentenceEvaluation)
+            .filter_by(
+                sentence_id=par.id,
+                evaluator_name=SUPERSEDED_JUDGE_EVALUATOR_NAME,
+            )
+            .one()
+        )
+        assert par_arch.details["old"] is True
+        assert par_arch.score == pytest.approx(0.2)
+
+        par_live = (
+            session.query(SentenceEvaluation)
+            .filter_by(sentence_id=par.id, evaluator_name=JUDGE_EVALUATOR_NAME)
+            .one()
+        )
+        assert par_live.details["prompt_version"] == PROMPT_VERSION
+        assert par_live.score == pytest.approx(4 / 5)
+
+        # Idempotent second pass
+        stats2 = rescore_naturalness_judge_for_tense(
+            session,
+            experiment,
+            tense="participle",
+            evaluator=NaturalnessLlmJudgeEvaluator(client=_StubJudge()),
+            refresh_rollups=False,
+        )
+        assert stats2["skipped_already_current"] == 1
+        assert stats2["rescored"] == 0
+    finally:
+        session.close()

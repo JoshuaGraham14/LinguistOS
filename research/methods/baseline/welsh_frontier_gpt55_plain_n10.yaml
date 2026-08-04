@@ -1,0 +1,11 @@
+# Welsh frontier ceiling — GPT-5.5 plain Fix-B on welsh_transfer_n10.
+# Prompt-fair with Qwen welsh_judge_audit_vanilla_n1 (baseline_hf_plain_b).
+# Used to sanity-check EF + cy-v2 judge against a strong model on the plain arm.
+name: welsh_frontier_gpt55_plain_n10
+method: baseline_gpt_plain_b
+samples_per_case: 1
+config:
+  model: gpt-5.5
+  temperature: 0
+  sentence_length: short
+  reasoning_effort: low

@@ -244,6 +244,218 @@ def test_expected_form_match_no_substring_inside_longer_word():
     assert result.score == 0.0
 
 
+def test_expected_form_match_accepts_alts_and_requires_aux():
+    ev = ExpectedFormMatchEvaluator()
+    # Primary alt match + aux present.
+    ok = ev.evaluate(
+        sentence="Gwnes i roi llyfr iddo.",
+        translation="I gave him a book.",
+        constraints={
+            "expected_form": "roi",
+            "expected_form_alts": "rhoi",
+            "expected_aux": "gwnes",
+        },
+    )
+    assert ok.score == 1.0
+    assert ok.details["matched_token"] == "roi"
+    assert ok.details["matched_aux"] == "Gwnes"
+
+    # Missing aux fails.
+    bad = ev.evaluate(
+        sentence="Roi llyfr iddo.",
+        translation="Gave him a book.",
+        constraints={
+            "expected_form": "roi",
+            "expected_aux": "gwnes",
+        },
+    )
+    assert bad.score == 0.0
+    assert bad.details["reason"] == "missing_expected_aux"
+
+
+def test_expected_form_match_requires_particle_when_set():
+    ev = ExpectedFormMatchEvaluator()
+    ok = ev.evaluate(
+        sentence="Rwyf yn rhoi anrheg.",
+        translation="I am giving a gift.",
+        constraints={
+            "expected_form": "rhoi",
+            "expected_aux": "rwyf",
+            "particle": "yn",
+            "construction": "periphrastic",
+            "tense": "present",
+        },
+    )
+    assert ok.score == 1.0
+    assert ok.details["matched_particle"] == "yn"
+
+    bad = ev.evaluate(
+        sentence="Rwyf rhoi anrheg.",
+        translation="I giving a gift.",
+        constraints={
+            "expected_form": "rhoi",
+            "expected_aux": "rwyf",
+            "particle": "yn",
+            "construction": "periphrastic",
+            "tense": "present",
+        },
+    )
+    assert bad.score == 0.0
+    assert bad.details["reason"] == "missing_particle"
+
+
+def test_expected_form_match_accepts_soft_mutation_on_peri_past():
+    """Radical gold + soft surface in sentence (gwneud past) should pass."""
+    ev = ExpectedFormMatchEvaluator()
+    ok = ev.evaluate(
+        sentence="Gwnes i gredu'r stori.",
+        translation="I believed the story.",
+        constraints={
+            "expected_form": "credu",
+            "expected_aux": "gwnes",
+            "construction": "periphrastic",
+            "tense": "past",
+            "requires_soft_mutation": True,
+            "target_language": "cy",
+        },
+    )
+    assert ok.score == 1.0
+    assert ok.details["matched_token"] in {"gredu", "gredu'r"}
+    assert ok.details["mutation_policy"] == "soft_optional"
+    assert ok.details["matched_via_mutation"] is True
+    assert "gredu" in ok.details["form_candidates"]
+
+
+def test_expected_form_match_does_not_invent_soft_on_peri_present():
+    """Present peri after yn must not accept soft VN as the gold form."""
+    ev = ExpectedFormMatchEvaluator()
+    bad = ev.evaluate(
+        sentence="Dw i'n gredu'r stori.",
+        translation="I believe the story.",
+        constraints={
+            "expected_form": "credu",
+            "expected_aux": "dw",
+            "expected_aux_alts": "rwyf",
+            "particle": "yn",
+            "construction": "periphrastic",
+            "tense": "present",
+            "target_language": "cy",
+        },
+    )
+    # Soft gredu is not a valid expansion for present; radical credu absent.
+    assert bad.score == 0.0
+    assert bad.details["mutation_policy"] == "none"
+    assert "gredu" not in [c.casefold() for c in bad.details["form_candidates"]]
+
+
+def test_expected_form_match_accepts_clitic_n_as_particle():
+    ev = ExpectedFormMatchEvaluator()
+    ok = ev.evaluate(
+        sentence="Dw i'n rhoi anrheg.",
+        translation="I am giving a gift.",
+        constraints={
+            "expected_form": "rhoi",
+            "expected_aux": "dw",
+            "expected_aux_alts": "rwyf",
+            "particle": "yn",
+            "construction": "periphrastic",
+            "tense": "present",
+            "target_language": "cy",
+        },
+    )
+    assert ok.score == 1.0
+    assert ok.details["matched_particle"] == "i'n"
+
+
+def test_expected_form_match_welsh_colloquial_aux_rydyn_and_wnes():
+    """Spoken / soft aux surfaces should pass without YAML listing."""
+    ev = ExpectedFormMatchEvaluator()
+    rydyn = ev.evaluate(
+        sentence="Rydyn ni'n rhoi bwyd.",
+        translation="We are giving food.",
+        constraints={
+            "expected_form": "rhoi",
+            "expected_aux": "rydym",
+            "expected_aux_alts": "ydym|dan",
+            "particle": "yn",
+            "construction": "periphrastic",
+            "tense": "present",
+            "target_language": "cy",
+            "keyword": "rhoi",
+        },
+    )
+    assert rydyn.score == 1.0
+    assert rydyn.details["matched_aux"].casefold().startswith("rydyn")
+
+    wnes = ev.evaluate(
+        sentence="Wnes i ddangos llun.",
+        translation="I showed a picture.",
+        constraints={
+            "expected_form": "ddangos",
+            "expected_form_alts": "dangos",
+            "expected_aux": "gwnes",
+            "construction": "periphrastic",
+            "tense": "past",
+            "requires_soft_mutation": True,
+            "target_language": "cy",
+            "keyword": "dangos",
+        },
+    )
+    assert wnes.score == 1.0
+    assert wnes.details["matched_aux"].casefold() == "wnes"
+
+
+def test_expected_form_match_welsh_accent_fold_and_oi_variants():
+    """Welsh folds accents; -oi finite variants are accepted for -oi lemmas."""
+    ev = ExpectedFormMatchEvaluator()
+    accent = ev.evaluate(
+        sentence="Paratôdd hi ginio.",
+        translation="She prepared dinner.",
+        constraints={
+            "expected_form": "paratodd",
+            "construction": "synthetic",
+            "tense": "past",
+            "target_language": "cy",
+            "keyword": "paratoi",
+        },
+    )
+    assert accent.score == 1.0
+
+    oi = ev.evaluate(
+        sentence="Troais i'r dde.",
+        translation="I turned right.",
+        constraints={
+            "expected_form": "trois",
+            "construction": "synthetic",
+            "tense": "past",
+            "target_language": "cy",
+            "keyword": "troi",
+        },
+    )
+    assert oi.score == 1.0
+    assert "troais" in {c.casefold() for c in oi.details["form_candidates"]}
+
+
+def test_expected_form_match_oi_does_not_expand_bare_verbnoun():
+    ev = ExpectedFormMatchEvaluator()
+    # Peri VN identical to lemma: do not invent finite -oi endings as required form.
+    result = ev.evaluate(
+        sentence="Mae hi'n paratoaf.",
+        translation="She is prepare-1sg??",
+        constraints={
+            "expected_form": "paratoi",
+            "expected_aux": "mae",
+            "particle": "yn",
+            "construction": "periphrastic",
+            "tense": "present",
+            "target_language": "cy",
+            "keyword": "paratoi",
+        },
+    )
+    assert result.score == 0.0
+    assert "paratoaf" not in [c.casefold() for c in result.details["form_candidates"]]
+
+
 def test_expected_form_match_accent_sensitive():
     result = ExpectedFormMatchEvaluator().evaluate(
         sentence="Ayer comio pasta.",

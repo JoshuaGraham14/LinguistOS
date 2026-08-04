@@ -21,10 +21,10 @@ _MAX_RETRIES = 6
 
 
 def _system_prompt(lang: str) -> str:
-    """Match ``PlainHFGenerator._generation_system_prompt``."""
+    """Match ``PlainHFBGenerator._generation_system_prompt`` (language-aware)."""
     return (
         f"You are a helpful {lang} language tutor. "
-        "Reply with exactly one Spanish sentence per request."
+        f"Reply with exactly one {lang} sentence per request."
     )
 
 
@@ -136,6 +136,8 @@ def _chat_once(
 class PlainGPTBGenerator(BaseGenerator):
     """Fix-B plain OpenAI generator (no form inject)."""
 
+    _INJECT_EXPECTED_FORM = False
+
     def __init__(
         self,
         model: str = _DEFAULT_MODEL,
@@ -149,6 +151,12 @@ class PlainGPTBGenerator(BaseGenerator):
     @property
     def name(self) -> str:
         return "baseline_gpt_plain_b"
+
+    def _resolve_inject_expected_form(self, constraints: dict[str, Any]) -> str | None:
+        if not self._INJECT_EXPECTED_FORM:
+            return None
+        expected = constraints.get("expected_form")
+        return str(expected) if expected else None
 
     def generate(
         self,
@@ -174,4 +182,15 @@ class PlainGPTBGenerator(BaseGenerator):
             model=self._model,
             temperature=self._temperature,
             reasoning_effort=self._reasoning_effort,
+            inject_expected_form=self._resolve_inject_expected_form(constraints),
         )
+
+
+class FormInjectedPlainGPTBGenerator(PlainGPTBGenerator):
+    """Fix-B plain OpenAI generator with gold surface-form injection."""
+
+    _INJECT_EXPECTED_FORM = True
+
+    @property
+    def name(self) -> str:
+        return "baseline_gpt_form_injected_plain_b"

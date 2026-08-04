@@ -72,6 +72,14 @@ def main():
             "Requires OPENAI_API_KEY in research/.env."
         ),
     )
+    parser.add_argument(
+        "--with-cysill",
+        action="store_true",
+        help=(
+            "Enable the opt-in grammar_cysill evaluator (Cysill Ar-lein API). "
+            "Requires CYSILL_API_KEY in research/.env. Rate-limited; not on by default."
+        ),
+    )
     args = parser.parse_args()
 
     optional_names: list[str] = []
@@ -79,6 +87,8 @@ def main():
         optional_names.append("fluency_perplexity")
     if args.with_naturalness_judge:
         optional_names.append("naturalness_llm_judge")
+    if args.with_cysill:
+        optional_names.append("grammar_cysill")
     extra_evaluators = build_optional_evaluators(optional_names) if optional_names else None
 
     mode = "LIVE" if args.live else "MOCK (canned data)"

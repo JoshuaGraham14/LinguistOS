@@ -9,6 +9,7 @@ from research.generation.languages import load_language_profile
 
 LANGUAGE_NAMES: dict[str, str] = {
     "es": "Spanish",
+    "cy": "Welsh",
     "he": "Hebrew",
     "fr": "French",
     "de": "German",
@@ -95,7 +96,29 @@ def _inflection_line(keyword: str, constraints: dict[str, Any]) -> str:
             f'The sentence must contain the past participle of "{keyword}" '
             "— not the bare infinitive.\n"
         )
-    parts: list[str] = []
+    construction = str(constraints.get("construction", "") or "")
+    if construction == "periphrastic":
+        parts: list[str] = []
+        for key in ("tense", "person", "number"):
+            if key in constraints:
+                parts.append(f"{key}={constraints[key]}")
+        spec = ", ".join(parts) if parts else "the constraints above"
+        return (
+            f'The sentence must use the required periphrastic construction for "{keyword}" '
+            f"matching {spec} (person/tense on the auxiliary; lexical verb as verbnoun). "
+            "Do not substitute a synthetic finite form of the lemma.\n"
+        )
+    if construction == "synthetic":
+        parts = []
+        for key in ("tense", "person", "number"):
+            if key in constraints:
+                parts.append(f"{key}={constraints[key]}")
+        spec = ", ".join(parts) if parts else "the constraints above"
+        return (
+            f'The target verb "{keyword}" must appear as a synthetic finite form matching '
+            f"{spec} — not as a periphrastic auxiliary + verbnoun paraphrase.\n"
+        )
+    parts = []
     for key in ("tense", "mood", "person", "number"):
         if key in constraints:
             parts.append(f"{key}={constraints[key]}")
@@ -106,8 +129,26 @@ def _inflection_line(keyword: str, constraints: dict[str, Any]) -> str:
     )
 
 
-def _form_injection_line(keyword: str, expected_form: str) -> str:
-    """Tell the model the exact gold surface form to bind in each sentence."""
+def _form_injection_line(
+    keyword: str,
+    expected_form: str,
+    *,
+    expected_aux: str | None = None,
+    particle: str | None = None,
+) -> str:
+    """Tell the model the exact gold surface form(s) to bind in each sentence."""
+    if expected_aux:
+        bits = [
+            f'the auxiliary "{expected_aux}"',
+            f'the verbnoun/form "{expected_form}"',
+        ]
+        if particle:
+            bits.append(f'the particle "{particle}"')
+        joined = ", ".join(bits[:-1]) + f", and {bits[-1]}" if len(bits) > 1 else bits[0]
+        return (
+            f'Required surface forms: each sentence must include {joined} '
+            f'for the target lemma "{keyword}" — use these surface forms verbatim.\n'
+        )
     return (
         f'Required surface form: the verb "{keyword}" must appear in each sentence '
         f'exactly as "{expected_form}" — use this conjugated surface form verbatim '
@@ -168,11 +209,16 @@ def build_prompt(
     if exercise_type:
         exercise_line = f"Exercise type: {exercise_type}.\n"
 
-    form_line = (
-        _form_injection_line(keyword, inject_expected_form)
-        if inject_expected_form
-        else ""
-    )
+    form_line = ""
+    if inject_expected_form:
+        aux = constraints.get("expected_aux")
+        particle = constraints.get("particle")
+        form_line = _form_injection_line(
+            keyword,
+            inject_expected_form,
+            expected_aux=str(aux) if aux else None,
+            particle=str(particle) if particle else None,
+        )
 
     return (
         f"You generate {lang} example sentences for vocabulary practice.\n"
@@ -303,6 +349,30 @@ def build_prompt_explicit(
     )
 
 
+_SUBJECT_PRONOUN_HINTS: dict[str, str] = {
+    "es": '"yo" or "tú"',
+    "cy": '"fi"/"i" or "ti"',
+}
+
+
+def _full_sentence_require_line(lang: str, *, target_language: str) -> str:
+    """Fix-B length/role line; pronoun examples follow the target language."""
+    pronouns = _SUBJECT_PRONOUN_HINTS.get(
+        (target_language or "").strip().lower(),
+        "a leading subject pronoun",
+    )
+    if pronouns.startswith('"'):
+        pronoun_bit = f"(a leading subject pronoun such as {pronouns} does not count "
+    else:
+        pronoun_bit = f"({pronouns} does not count "
+    return (
+        f"Output requirements: write a complete {lang} sentence of 2–5 words "
+        f"{pronoun_bit}"
+        "toward the length) that uses the target form as the main verb. "
+        "Do NOT output the target form on its own or repeat it.\n"
+    )
+
+
 def build_prompt_plain(
     *,
     keyword: str,
@@ -345,21 +415,23 @@ def build_prompt_plain(
     if exercise_type:
         exercise_line = f"Exercise type: {exercise_type}.\n"
 
-    form_line = (
-        _form_injection_line(keyword, inject_expected_form)
-        if inject_expected_form
-        else ""
-    )
+    form_line = ""
+    if inject_expected_form:
+        aux = constraints.get("expected_aux")
+        particle = constraints.get("particle")
+        form_line = _form_injection_line(
+            keyword,
+            inject_expected_form,
+            expected_aux=str(aux) if aux else None,
+            particle=str(particle) if particle else None,
+        )
 
     scene_line = f"{scene_hint.strip()}\n" if scene_hint else ""
 
     require_line = ""
     if require_full_sentence:
-        require_line = (
-            "Output requirements: write a complete Spanish sentence of 2–5 words "
-            "(a leading subject pronoun such as \"yo\" or \"tú\" does not count "
-            "toward the length) that uses the target form as the main verb. "
-            "Do NOT output the target form on its own or repeat it.\n"
+        require_line = _full_sentence_require_line(
+            lang, target_language=target_language
         )
 
     count_label = "sentence" if num_candidates == 1 else "sentences"

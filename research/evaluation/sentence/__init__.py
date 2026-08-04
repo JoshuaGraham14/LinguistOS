@@ -4,6 +4,7 @@ from typing import Callable
 
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
 from research.evaluation.sentence.clause_count import ClauseCountEvaluator
+from research.evaluation.sentence.cysill import CysillGrammarEvaluator
 from research.evaluation.sentence.expected_form import ExpectedFormMatchEvaluator
 from research.evaluation.sentence.fluency_perplexity import FluencyPerplexityEvaluator
 from research.evaluation.sentence.length_in_band import LengthInBandEvaluator
@@ -12,6 +13,10 @@ from research.evaluation.sentence.naturalness_llm_judge import (
     NaturalnessLlmJudgeEvaluator,
 )
 from research.evaluation.sentence.verb_morphology import VerbMorphologyEvaluator
+
+# LanguageTool has no Welsh grammar pack. For ``cy``, omit LT; Cysill is opt-in
+# only via ``--with-cysill`` (see OPTIONAL_EVALUATORS).
+_LANGUAGES_WITHOUT_LANGUAGETOOL: frozenset[str] = frozenset({"cy"})
 
 # NOTE: VerbMorphologyEvaluator is intentionally *not* in DEFAULT_EVALUATORS.
 # It depends on spaCy's `es_core_news_sm`, which mis-tags common Spanish verb
@@ -27,14 +32,22 @@ DEFAULT_EVALUATORS: list[BaseEvaluator] = [
     ClauseCountEvaluator(),
 ]
 
-# Opt-in evaluators. Cluster generation scripts never enable these because
-# they are expensive (loads a 2B LM or spends OpenAI credits). Wire them in
-# via ``--with-fluency-perplexity`` / ``--with-naturalness-judge``, or via
-# the offline rescore script.
+# Opt-in evaluators. Cluster generation scripts never enable these by default
+# (expensive / rate-limited / credits). Wire them in via CLI flags or offline
+# rescore.
 OPTIONAL_EVALUATORS: dict[str, Callable[[], BaseEvaluator]] = {
     FluencyPerplexityEvaluator().name: FluencyPerplexityEvaluator,
     NaturalnessLlmJudgeEvaluator().name: NaturalnessLlmJudgeEvaluator,
+    CysillGrammarEvaluator().name: CysillGrammarEvaluator,
 }
+
+
+def default_evaluators_for_language(language: str) -> list[BaseEvaluator]:
+    """Default per-sentence evaluators for a benchmark language code."""
+    code = (language or "").strip().lower()
+    if code in _LANGUAGES_WITHOUT_LANGUAGETOOL:
+        return [ev for ev in DEFAULT_EVALUATORS if ev.name != "grammar_languagetool"]
+    return list(DEFAULT_EVALUATORS)
 
 
 def build_optional_evaluators(names: list[str]) -> list[BaseEvaluator]:
@@ -54,6 +67,7 @@ def build_optional_evaluators(names: list[str]) -> list[BaseEvaluator]:
 __all__ = [
     "BaseEvaluator",
     "ClauseCountEvaluator",
+    "CysillGrammarEvaluator",
     "EvaluationResult",
     "ExpectedFormMatchEvaluator",
     "FluencyPerplexityEvaluator",
@@ -64,4 +78,5 @@ __all__ = [
     "DEFAULT_EVALUATORS",
     "OPTIONAL_EVALUATORS",
     "build_optional_evaluators",
+    "default_evaluators_for_language",
 ]
