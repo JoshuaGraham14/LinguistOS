@@ -10,6 +10,7 @@ from research.evaluation.sentence import (
     build_optional_evaluators,
 )
 from research.evaluation.sentence.base import BaseEvaluator, EvaluationResult
+from research.evaluation.sentence.cysill import EVALUATOR_NAME as CYSILL_NAME
 from research.evaluation.sentence.fluency_perplexity import (
     EVALUATOR_NAME as PPL_EVALUATOR_NAME,
     FluencyPerplexityEvaluator,
@@ -34,13 +35,18 @@ class _Dummy(BaseEvaluator):
 
 
 def test_registry_contains_expected_evaluators():
-    assert set(OPTIONAL_EVALUATORS) == {PPL_EVALUATOR_NAME, JUDGE_EVALUATOR_NAME}
+    assert set(OPTIONAL_EVALUATORS) == {
+        PPL_EVALUATOR_NAME,
+        JUDGE_EVALUATOR_NAME,
+        CYSILL_NAME,
+    }
 
 
 def test_defaults_do_not_include_optionals():
     names = {ev.name for ev in DEFAULT_EVALUATORS}
     assert PPL_EVALUATOR_NAME not in names
     assert JUDGE_EVALUATOR_NAME not in names
+    assert CYSILL_NAME not in names
 
 
 def test_build_optional_evaluators_by_name():

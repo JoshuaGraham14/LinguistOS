@@ -94,20 +94,20 @@ Results land on the cluster at
 
 ## Evaluation note (grammar)
 
-LanguageTool has **no Welsh pack**. For `language: cy` the pipeline:
+LanguageTool has **no Welsh pack**, so `cy` runs omit `grammar_languagetool`.
 
-1. Omits `grammar_languagetool`
-2. Enables **`grammar_cysill`** when `CYSILL_API_KEY` is set (Cysill Ar-lein /
-   Techiaith API — spelling, grammar, mutations)
+**Cysill is opt-in only** — it does **not** run unless you pass
+`--with-cysill` (and set `CYSILL_API_KEY` in `research/.env`):
 
 ```bash
-# research/.env
-CYSILL_API_KEY=...   # from https://api.techiaith.org
+python -m research.run_experiment \
+  --benchmark welsh_transfer_n150 \
+  --method ... \
+  --live --with-cysill
 ```
 
-Cysill is rate-limited (often a few hundred requests/hour) and responses are
-cached under `research/.cache/cysill/`. Prefer offline rescoring for large
-grids rather than hammering the API during generation.
+Without that flag, Welsh evaluation is expected-form + length + clause count
+only. Cysill is rate-limited; prefer offline use when you need it.
 
 Auxiliaries used in periphrastic templates (`bod`, `gwneud`) are excluded from
 the target-verb pool.

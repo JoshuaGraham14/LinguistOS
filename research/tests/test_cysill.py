@@ -81,11 +81,12 @@ def test_cysill_skips_non_welsh():
     assert client.calls == []
 
 
-def test_default_evaluators_include_cysill_when_key_set(monkeypatch):
+def test_default_evaluators_never_auto_enable_cysill(monkeypatch):
     monkeypatch.setenv("CYSILL_API_KEY", "test-key")
     names = [e.name for e in default_evaluators_for_language("cy")]
-    assert EVALUATOR_NAME in names
+    assert EVALUATOR_NAME not in names
     assert "grammar_languagetool" not in names
+    assert "expected_form_match" in names
 
 
 def test_default_evaluators_omit_cysill_without_key(monkeypatch):
