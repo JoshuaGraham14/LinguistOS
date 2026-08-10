@@ -71,6 +71,27 @@ Each case row mirrors the Spanish experiment-verb pattern (`lang`, `zipf`,
 `match_forms`. Soft mutation for periphrastic past is applied by
 `research/welsh/mutation.py`.
 
+## OOD eval set (n=36)
+
+Held-out verbs for LoRA transfer eval, parallel to Spanish `lora_ood` n36:
+12 per Zipf tercile, **disjoint from n150**, same Eurfa coverage gate and
+42-cell grid.
+
+```bash
+python -m research.welsh.scripts.select_welsh_ood_verbs
+python -m research.welsh.scripts.build_welsh_cases \
+  --manifest research/welsh/manifests/manifest_welsh_ood_n36.csv \
+  --out research/welsh/manifests/welsh_cases_ood_n36.csv \
+  --summary research/welsh/manifests/welsh_cases_ood_n36_summary.json
+python -m research.welsh.scripts.build_welsh_benchmark \
+  --cases research/welsh/manifests/welsh_cases_ood_n36.csv \
+  --name welsh_transfer_ood_n36 \
+  --out research/benchmarks/welsh_transfer_ood_n36.yaml
+```
+
+Writes `manifest_welsh_ood_n36.csv`, `welsh_cases_ood_n36.csv` (36×42=1512),
+and `welsh_transfer_ood_n36.yaml`.
+
 ## Full transfer benchmark
 
 ```bash

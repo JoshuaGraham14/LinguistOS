@@ -8,6 +8,9 @@ Usage::
     python -m research.welsh.scripts.build_welsh_benchmark
     python -m research.welsh.scripts.build_welsh_benchmark --limit-verbs 2 \\
         --out research/benchmarks/welsh_transfer_n150_smoke.yaml
+    python -m research.welsh.scripts.build_welsh_benchmark \\
+        --construction periphrastic \\
+        --out research/benchmarks/welsh_transfer_n150_peri.yaml
 """
 
 from __future__ import annotations
@@ -75,6 +78,12 @@ def main() -> None:
         default=0,
         help="If >0, keep only the first N unique lemmas (after sort) for smoke subsets.",
     )
+    ap.add_argument(
+        "--construction",
+        choices=("all", "periphrastic", "synthetic"),
+        default="all",
+        help="Keep only one construction family (default: all cells).",
+    )
     ap.add_argument("--skip-validate", action="store_true")
     args = ap.parse_args()
 
@@ -87,15 +96,30 @@ def main() -> None:
             .tolist()
         )
         cases = cases[cases["lemma"].isin(lemmas)].copy()
+    if args.construction != "all":
+        cases = cases[cases["construction"] == args.construction].copy()
 
     rows = build_rows(cases)
     n_verbs = cases["lemma"].nunique()
+    name = args.name
+    if args.limit_verbs:
+        name = f"{name}_v{args.limit_verbs}"
+    if args.construction == "periphrastic":
+        name = f"{name}_peri" if not name.endswith("_peri") else name
+        grid_desc = f"{n_verbs} verbs × 24 periphrastic cells = {len(rows)} constraint sets"
+    elif args.construction == "synthetic":
+        name = f"{name}_syn" if not name.endswith("_syn") else name
+        grid_desc = f"{n_verbs} verbs × 18 synthetic cells = {len(rows)} constraint sets"
+    else:
+        grid_desc = (
+            f"{n_verbs} verbs × 42 cells "
+            f"(3×6 synthetic + 4×6 periphrastic) = {len(rows)} constraint sets"
+        )
     doc = {
-        "name": args.name if not args.limit_verbs else f"{args.name}_v{args.limit_verbs}",
+        "name": name,
         "language": "cy",
         "description": (
-            f"Welsh transfer benchmark: {n_verbs} verbs × 42 cells "
-            f"(3×6 synthetic + 4×6 periphrastic) = {len(rows)} constraint sets. "
+            f"Welsh transfer benchmark: {grid_desc}. "
             "Gold from Eurfa via welsh_cases_n150.csv; soft mutation rule-derived "
             "for periphrastic past."
         ),

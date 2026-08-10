@@ -707,7 +707,8 @@ def test_soft_plain_a_only_has_no_prompt_change():
         explicit_subject_required=False,
         inject_expected_form=None,
     )
-    assert "2–5 words" not in prompt
+    assert "Output requirements:" not in prompt
+    assert "short (2–5 words)" in prompt
 
 
 def test_bias_processor_stops_biasing_after_target_appears():

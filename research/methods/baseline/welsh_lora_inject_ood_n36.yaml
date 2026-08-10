@@ -1,0 +1,10 @@
+# Welsh LoRA OOD — form-inject Fix-B on welsh_transfer_ood_n36.
+# sentence_length by_construction matches Welsh LoRA SFT prompts
+# (syn=short 2–5, peri=short_expanded 4–8).
+name: welsh_lora_inject_ood_n36
+method: baseline_hf_form_injected_plain_b
+samples_per_case: 1
+config:
+  model: Qwen/Qwen3-1.7B
+  temperature: 0
+  sentence_length: by_construction

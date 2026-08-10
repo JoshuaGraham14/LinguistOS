@@ -1,0 +1,12 @@
+# Welsh LoRA teacher — GPT-5.5 form-inject Fix-B, periphrastic cells only.
+# Length band short_expanded (4–8) so aux+yn+VN is not the whole sentence.
+# Completions merge with synthetic from welsh_frontier_gpt55_inject_n150.db
+# into lora-form SFT JSONL.
+name: welsh_frontier_gpt55_inject_n150_peri
+method: baseline_gpt_form_injected_plain_b
+samples_per_case: 1
+config:
+  model: gpt-5.5
+  temperature: 0
+  sentence_length: short_expanded
+  reasoning_effort: low

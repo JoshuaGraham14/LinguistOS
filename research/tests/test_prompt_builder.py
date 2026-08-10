@@ -18,7 +18,7 @@ def test_spanish_prompt_lists_constraints():
     assert "comer" in prompt
     assert "Preterite (pretérito indefinido)" in prompt
     assert "Person: 1st" in prompt
-    assert "medium (5–9 tokens)" in prompt
+    assert "medium (5–9 words)" in prompt
     assert "Constraints:" in prompt
 
 
@@ -228,7 +228,7 @@ def test_build_prompt_plain_matches_json_constraints():
         "Person: 1st",
         "Required surface form",
         '"comimos"',
-        "short (2–5 tokens)",
+        "short (2–5 words)",
     ):
         assert snippet in json_prompt
         assert snippet in plain_prompt
@@ -254,3 +254,46 @@ def test_build_prompt_plain_morphology_hints_matches_4a_overlay():
     assert "presente de indicativo" in prompt
     assert "buscáis" not in prompt
     assert "No JSON" in prompt
+
+
+def test_build_prompt_plain_welsh_peri_uses_expanded_word_band():
+    prompt = build_prompt_plain(
+        keyword="rhoi",
+        translation="give",
+        target_language="cy",
+        constraints={
+            "tense": "present",
+            "person": "1st",
+            "number": "singular",
+            "construction": "periphrastic",
+            "expected_aux": "rwyf",
+            "particle": "yn",
+        },
+        num_candidates=1,
+        sentence_length="short_expanded",
+        require_full_sentence=True,
+    )
+    assert "short_expanded (4–8 words)" in prompt
+    assert "4–8 words" in prompt
+    assert "2–5 words" not in prompt
+
+
+def test_build_prompt_plain_welsh_synthetic_keeps_short_word_band():
+    prompt = build_prompt_plain(
+        keyword="rhoi",
+        translation="give",
+        target_language="cy",
+        constraints={
+            "tense": "past",
+            "person": "1st",
+            "number": "singular",
+            "construction": "synthetic",
+        },
+        num_candidates=1,
+        sentence_length="short",
+        require_full_sentence=True,
+        inject_expected_form="rhoddais",
+    )
+    assert "short (2–5 words)" in prompt
+    assert "2–5 words" in prompt
+    assert "4–8 words" not in prompt

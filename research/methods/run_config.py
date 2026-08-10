@@ -5,7 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from research.db.models import MethodConfig
-from research.evaluation.length_bands import RANDOM_LENGTH, resolve_length_band
+from research.evaluation.length_bands import (
+    BY_CONSTRUCTION_LENGTH,
+    RANDOM_LENGTH,
+    resolve_length_band,
+)
 
 
 @dataclass(frozen=True)
@@ -24,7 +28,7 @@ class MethodRunConfig:
         raw = method_config.config or {}
         sentence_length = str(raw.get("sentence_length", "short"))
         # Validate early so bad YAML fails at experiment start.
-        if sentence_length != RANDOM_LENGTH:
+        if sentence_length not in {RANDOM_LENGTH, BY_CONSTRUCTION_LENGTH}:
             resolve_length_band(sentence_length)
         hf_batch_size = raw.get("hf_batch_size")
         reasoning_effort = raw.get("reasoning_effort")
@@ -41,6 +45,12 @@ class MethodRunConfig:
     def is_random_length(self) -> bool:
         return self.sentence_length == RANDOM_LENGTH
 
-    def resolve_length(self, rng) -> str:
-        """Return a fixed band label, drawing one when ``sentence_length`` is random."""
-        return resolve_length_band(self.sentence_length, rng=rng)
+    @property
+    def is_by_construction_length(self) -> bool:
+        return self.sentence_length == BY_CONSTRUCTION_LENGTH
+
+    def resolve_length(self, rng, *, construction: str | None = None) -> str:
+        """Return a fixed band label (random draw or construction-aware)."""
+        return resolve_length_band(
+            self.sentence_length, rng=rng, construction=construction
+        )
