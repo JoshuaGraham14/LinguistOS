@@ -37,6 +37,19 @@ def test_from_method_config_random():
     assert run.resolve_length(random.Random(42)) in {"short", "medium", "long"}
 
 
+def test_from_method_config_by_construction():
+    mc = MethodConfig(
+        name="welsh_by_construction",
+        method="baseline_hf_plain_b",
+        samples_per_case=1,
+        config={"sentence_length": "by_construction", "model": "Qwen/Qwen3-1.7B"},
+    )
+    run = MethodRunConfig.from_method_config(mc)
+    assert run.is_by_construction_length is True
+    assert run.resolve_length(random.Random(0), construction="periphrastic") == "short_expanded"
+    assert run.resolve_length(random.Random(0), construction="synthetic") == "short"
+
+
 def test_from_method_config_rejects_unknown_length():
     mc = MethodConfig(
         name="bad",

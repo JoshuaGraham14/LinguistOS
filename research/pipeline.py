@@ -293,6 +293,24 @@ def _assert_live_allowed(benchmark: Benchmark, *, live: bool) -> None:
         )
 
 
+def _resolved_sentence_length_for_cs(
+    run_config: MethodRunConfig,
+    cs: ConstraintSet,
+    rng: random.Random | None = None,
+) -> str:
+    """Resolve the length band for one constraint set."""
+    construction = None
+    if isinstance(cs.constraints, dict):
+        construction = cs.constraints.get("construction")
+    if run_config.is_random_length:
+        if rng is None:
+            raise ValueError("rng required for random sentence_length")
+        return run_config.resolve_length(rng)
+    if run_config.is_by_construction_length:
+        return run_config.resolve_length(rng or random.Random(0), construction=construction)
+    return run_config.sentence_length
+
+
 def _generate_live_candidates(
     generator: BaseGenerator,
     *,
@@ -318,7 +336,7 @@ def _generate_live_candidates(
 
     if run_config.is_random_length:
         for _ in range(samples_per_case):
-            resolved = run_config.resolve_length(rng)
+            resolved = _resolved_sentence_length_for_cs(run_config, cs, rng)
             batch = generator.generate(
                 **common,
                 num_candidates=1,
@@ -327,7 +345,7 @@ def _generate_live_candidates(
             for cand in batch:
                 out.append((cand, resolved))
     else:
-        resolved = run_config.sentence_length
+        resolved = _resolved_sentence_length_for_cs(run_config, cs, rng)
         batch = generator.generate(
             **common,
             num_candidates=samples_per_case,
@@ -344,10 +362,12 @@ def _constraint_generation_job(
     *,
     run_config: MethodRunConfig,
     samples_per_case: int,
+    rng: random.Random | None = None,
 ) -> dict[str, Any]:
     constraints = dict(cs.constraints)
     if cs.expected_form is not None:
         constraints["expected_form"] = cs.expected_form
+    resolved = _resolved_sentence_length_for_cs(run_config, cs, rng)
     return {
         "keyword": cs.keyword,
         "translation": cs.translation,
@@ -355,7 +375,7 @@ def _constraint_generation_job(
         "num_candidates": samples_per_case,
         "target_language": cs.target_language,
         "cefr_level": cs.cefr_level,
-        "sentence_length": run_config.sentence_length,
+        "sentence_length": resolved,
         "explicit_subject_required": run_config.explicit_subject_required,
     }
 
@@ -712,7 +732,6 @@ def run_experiment(
                 print(f"    Stored {stored} sentences")
 
             if use_hf_batch:
-                resolved = run_config.sentence_length
                 if cost_warmup and work_queue:
                     warm_chunk = work_queue[: min(hf_batch_size, len(work_queue))]
                     warm_jobs = [
@@ -720,6 +739,7 @@ def run_experiment(
                             cs,
                             run_config=run_config,
                             samples_per_case=samples_needed,
+                            rng=rng,
                         )
                         for cs, _ in warm_chunk
                     ]
@@ -744,6 +764,7 @@ def run_experiment(
                             cs,
                             run_config=run_config,
                             samples_per_case=samples_needed,
+                            rng=rng,
                         )
                         for cs, _ in chunk
                     ]
@@ -754,7 +775,8 @@ def run_experiment(
                     )
                     gen_wall_s += time.perf_counter() - t_gen
                     gen_calls += 1
-                    for (cs, label), candidates in zip(chunk, batches):
+                    for (cs, label), candidates, job in zip(chunk, batches, jobs):
+                        resolved = str(job.get("sentence_length") or run_config.sentence_length)
                         pairs = [(cand, resolved) for cand in candidates]
                         _process_candidate_pairs(cs, label, pairs)
             else:
@@ -776,10 +798,8 @@ def run_experiment(
                         ]
                         candidate_pairs = []
                         for cand in mock_batch:
-                            resolved = (
-                                run_config.resolve_length(rng)
-                                if run_config.is_random_length
-                                else run_config.sentence_length
+                            resolved = _resolved_sentence_length_for_cs(
+                                run_config, cs, rng
                             )
                             candidate_pairs.append((cand, resolved))
                     _process_candidate_pairs(cs, label, candidate_pairs)

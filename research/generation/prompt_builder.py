@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from research.evaluation.length_bands import band_label
+from research.evaluation.length_bands import band_label, get_band
 from research.generation.languages import load_language_profile
 
 LANGUAGE_NAMES: dict[str, str] = {
@@ -355,8 +355,18 @@ _SUBJECT_PRONOUN_HINTS: dict[str, str] = {
 }
 
 
-def _full_sentence_require_line(lang: str, *, target_language: str) -> str:
-    """Fix-B length/role line; pronoun examples follow the target language."""
+def _full_sentence_require_line(
+    lang: str,
+    *,
+    target_language: str,
+    sentence_length: str = "short",
+) -> str:
+    """Fix-B length/role line; pronoun examples follow the target language.
+
+    Length bounds come from ``sentence_length`` (e.g. short → 2–5 words,
+    short_expanded → 4–8 words for Welsh periphrastic).
+    """
+    lo, hi = get_band(sentence_length)
     pronouns = _SUBJECT_PRONOUN_HINTS.get(
         (target_language or "").strip().lower(),
         "a leading subject pronoun",
@@ -366,7 +376,7 @@ def _full_sentence_require_line(lang: str, *, target_language: str) -> str:
     else:
         pronoun_bit = f"({pronouns} does not count "
     return (
-        f"Output requirements: write a complete {lang} sentence of 2–5 words "
+        f"Output requirements: write a complete {lang} sentence of {lo}–{hi} words "
         f"{pronoun_bit}"
         "toward the length) that uses the target form as the main verb. "
         "Do NOT output the target form on its own or repeat it.\n"
@@ -431,7 +441,9 @@ def build_prompt_plain(
     require_line = ""
     if require_full_sentence:
         require_line = _full_sentence_require_line(
-            lang, target_language=target_language
+            lang,
+            target_language=target_language,
+            sentence_length=sentence_length,
         )
 
     count_label = "sentence" if num_candidates == 1 else "sentences"

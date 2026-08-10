@@ -60,7 +60,7 @@ def test_prompt_includes_numeric_length_band():
     prompt = build_prompt(
         "comer", "to eat", _ES_PRETERITE_1PL, 3, sentence_length="medium"
     )
-    assert "medium (5–9 tokens)" in prompt
+    assert "medium (5–9 words)" in prompt
     assert "length band" in prompt
 
 

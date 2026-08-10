@@ -27,9 +27,11 @@ Every preset sets `sentence_length` in `config`:
 
 | Value | Meaning |
 | --- | --- |
-| `short` | 2–5 tokens |
-| `medium` | 5–9 tokens |
-| `long` | 10–16 tokens |
+| `short` | 2–5 words |
+| `short_expanded` | 4–8 words (Welsh periphrastic teacher regen) |
+| `by_construction` | Welsh: peri → `short_expanded`, else `short` (LoRA train/eval match) |
+| `medium` | 5–9 words |
+| `long` | 10–16 words |
 | `random` | Draw short/medium/long per sample at run time |
 
 For `random`, each sentence stores `resolved_sentence_length` in `generation_meta`;
