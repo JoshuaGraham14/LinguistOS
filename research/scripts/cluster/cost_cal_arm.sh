@@ -35,7 +35,9 @@ cd "${PROJECT}"
 : "${RESEARCH_COST_LOG:?Set RESEARCH_COST_LOG}"
 
 # Default batch sizes match prior n150 / LoRA OOD practice.
+# NeuroLogic OOD arms use beam 16 and were timed/evaluated at batch 1.
 case "${METHOD_NAME}" in
+  *neuro*|*neurologic*) HF_BATCH_SIZE="${HF_BATCH_SIZE:-1}" ;;
   *soft*|*hard*|direction_1a_*) HF_BATCH_SIZE="${HF_BATCH_SIZE:-4}" ;;
   *) HF_BATCH_SIZE="${HF_BATCH_SIZE:-16}" ;;
 esac
