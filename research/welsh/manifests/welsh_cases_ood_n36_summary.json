@@ -1,0 +1,22 @@
+{
+  "n_rows": 1512,
+  "n_verbs": 36,
+  "cells_per_verb": 42,
+  "tiers": {
+    "high": 12,
+    "low": 12,
+    "mid": 12
+  },
+  "by_construction_tense": {
+    "periphrastic/future": 216,
+    "periphrastic/imperfect": 216,
+    "periphrastic/past": 216,
+    "periphrastic/present": 216,
+    "synthetic/imperfect": 216,
+    "synthetic/past": 216,
+    "synthetic/present": 216
+  },
+  "soft_mutation_rows": 216,
+  "empty_gold": 0,
+  "empty_aux_on_peri": 0
+}

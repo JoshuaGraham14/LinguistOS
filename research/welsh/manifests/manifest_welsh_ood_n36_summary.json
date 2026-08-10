@@ -1,0 +1,68 @@
+{
+  "experiment": "welsh_transfer_ood",
+  "n_verbs": 36,
+  "per_tier": 12,
+  "seed": 43,
+  "swapped_out": [
+    "callio",
+    "corni",
+    "sgathru",
+    "ymson"
+  ],
+  "swapped_in": [
+    "gweddnewid",
+    "melysu",
+    "ymbaratoi",
+    "ymochel"
+  ],
+  "note": "Surgical swap: keep other 32; curated replacements (not full reseed).",
+  "tiers": {
+    "high": 12,
+    "mid": 12,
+    "low": 12
+  },
+  "lemmas": {
+    "high": [
+      "rhannu",
+      "diogelu",
+      "pleidleisio",
+      "gwrthod",
+      "meddu",
+      "llofnodi",
+      "ymddiheuro",
+      "huno",
+      "goresgyn",
+      "tagu",
+      "esblygu",
+      "diystyru"
+    ],
+    "mid": [
+      "cyfarch",
+      "gweddnewid",
+      "gwrthdroi",
+      "ymresymu",
+      "cyplysu",
+      "arallgyfeirio",
+      "chwyldroi",
+      "cyflyru",
+      "trugarhau",
+      "goddiweddyd",
+      "saern\u00efo",
+      "dodrefnu"
+    ],
+    "low": [
+      "melysu",
+      "ymbaratoi",
+      "andwyo",
+      "cynghreirio",
+      "benthycio",
+      "ymochel",
+      "cymrodeddu",
+      "gwreichioni",
+      "anhrefnu",
+      "buddio",
+      "cerflunio",
+      "anghymhwyso"
+    ]
+  }
+}

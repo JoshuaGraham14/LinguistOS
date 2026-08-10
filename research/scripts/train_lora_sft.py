@@ -44,6 +44,39 @@ def _expand_oversample(rows: list[dict], *, factor: int = 2) -> list[dict]:
     return out
 
 
+def _split_train_val(
+    rows: list[dict],
+    *,
+    val_frac: float,
+    seed: int,
+    stratify_construction: bool = False,
+) -> tuple[list[dict], list[dict]]:
+    """Deterministically split rows, optionally preserving construction balance."""
+    rng = random.Random(seed)
+    if not stratify_construction:
+        shuffled = list(rows)
+        rng.shuffle(shuffled)
+        n_val = max(1, int(len(shuffled) * val_frac))
+        return shuffled[n_val:], shuffled[:n_val]
+
+    groups: dict[str, list[dict]] = {}
+    for row in rows:
+        construction = str((row.get("constraints") or {}).get("construction") or "UNK")
+        groups.setdefault(construction, []).append(row)
+
+    train_rows: list[dict] = []
+    val_rows: list[dict] = []
+    for construction in sorted(groups):
+        group = list(groups[construction])
+        rng.shuffle(group)
+        n_val = max(1, int(len(group) * val_frac))
+        val_rows.extend(group[:n_val])
+        train_rows.extend(group[n_val:])
+    rng.shuffle(train_rows)
+    rng.shuffle(val_rows)
+    return train_rows, val_rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, required=True)
@@ -59,6 +92,11 @@ def main() -> None:
     parser.add_argument("--val-frac", type=float, default=0.05)
     parser.add_argument("--seed", type=int, default=43)
     parser.add_argument("--oversample-factor", type=int, default=2)
+    parser.add_argument(
+        "--stratify-construction",
+        action="store_true",
+        help="Preserve synthetic/periphrastic balance in the train/validation split.",
+    )
     args = parser.parse_args()
 
     import torch
@@ -69,10 +107,15 @@ def main() -> None:
 
     rows = _load_jsonl(args.data)
     rng = random.Random(args.seed)
-    rng.shuffle(rows)
-    n_val = max(1, int(len(rows) * args.val_frac))
-    val_rows = rows[:n_val]
-    train_rows = _expand_oversample(rows[n_val:], factor=args.oversample_factor)
+    raw_train_rows, val_rows = _split_train_val(
+        rows,
+        val_frac=args.val_frac,
+        seed=args.seed,
+        stratify_construction=args.stratify_construction,
+    )
+    train_rows = _expand_oversample(
+        raw_train_rows, factor=args.oversample_factor
+    )
     rng.shuffle(train_rows)
 
     def to_text(r: dict) -> dict:
@@ -120,14 +163,15 @@ def main() -> None:
     config = {
         "model": args.model,
         "data": str(args.data),
-        "n_train_raw": len(rows) - n_val,
+        "n_train_raw": len(raw_train_rows),
         "n_train_expanded": len(train_rows),
-        "n_val": n_val,
+        "n_val": len(val_rows),
         "epochs": args.epochs,
         "lr": args.lr,
         "lora_r": args.lora_r,
         "lora_alpha": args.lora_alpha,
         "oversample_factor": args.oversample_factor,
+        "stratify_construction": args.stratify_construction,
         "seed": args.seed,
     }
     (args.output_dir / "train_config.json").write_text(
