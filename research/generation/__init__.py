@@ -63,6 +63,10 @@ from research.generation.neurologic_hf import (
     NeurologicHFThinPlainBGenerator,
     NeurologicHFThinScenePlainBGenerator,
 )
+from research.welsh.neurologic_hf import (
+    WelshNeurologicHFThinInjectPlainBGenerator,
+    WelshNeurologicHFThinPlainBGenerator,
+)
 
 if TYPE_CHECKING:
     from research.generation.base import BaseGenerator
@@ -112,6 +116,8 @@ GENERATOR_REGISTRY: dict[str, type[BaseGenerator]] = {
     "neurologic_hf_agree_plain_b": NeurologicHFAgreePlainBGenerator,
     "neurologic_hf_thin_scene_plain_b": NeurologicHFThinScenePlainBGenerator,
     "neurologic_hf_agree_scene_plain_b": NeurologicHFAgreeScenePlainBGenerator,
+    "welsh_neurologic_hf_thin_plain_b": WelshNeurologicHFThinPlainBGenerator,
+    "welsh_neurologic_hf_thin_inject_plain_b": WelshNeurologicHFThinInjectPlainBGenerator,
     "fewshot_hf_static_plain_b": FewShotStaticHFGenerator,
     "fewshot_hf_dynamic_plain_b": FewShotDynamicHFGenerator,
     "fewshot_hf_dynamic_soft_plain_b": FewShotDynamicSoftHFGenerator,
