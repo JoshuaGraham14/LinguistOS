@@ -1,0 +1,11 @@
+# Welsh OOD frontier reference — GPT-5.5 plain Fix-B on welsh_transfer_ood_n36.
+# sentence_length by_construction matches Welsh LoRA OOD evals
+# (syn=short 2–5, peri=short_expanded 4–8).
+name: welsh_frontier_gpt55_plain_ood_n36
+method: baseline_gpt_plain_b
+samples_per_case: 1
+config:
+  model: gpt-5.5
+  temperature: 0
+  sentence_length: by_construction
+  reasoning_effort: low
