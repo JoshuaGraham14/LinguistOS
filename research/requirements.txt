@@ -2,6 +2,7 @@ sqlalchemy>=2.0
 openai>=1.50
 python-dotenv>=1.0
 pyyaml>=6.0
+requests>=2.31  # Cysill Ar-lein evaluator HTTP client
 
 # nlp (verb_morphology evaluator + future per-language parsers)
 spacy>=3.7
@@ -11,20 +12,23 @@ verbecc>=1.10  # Spanish verb conjugation for lemma-summed frequency and irregul
 nltk>=3.8  # WordNet verb lemmas for English census
 lemminflect>=0.2.3  # English past/participle for census irregularity + gold forms
 
-# dev / testing
-pytest>=8.0
-ipykernel>=6.0
-
-# analysis / notebooks
-pandas>=2.2
-openpyxl>=3.1  # CorCenCC lemma frequency workbooks (Welsh transfer)
-matplotlib>=3.8
-sacrebleu>=2.4  # self_bleu distribution metric
-
-# future phases
-streamlit>=1.38
-
-# LoRA SFT (Direction 2)
+# local HF generation + LoRA SFT
+torch>=2.2
+transformers>=4.44
 peft>=0.13
 trl>=0.12
 datasets>=2.20
+
+# dev / testing
+pytest>=8.0
+ipykernel>=6.0  # diagnostic figure notebooks
+
+# analysis / figures
+pandas>=2.2
+numpy>=1.26
+openpyxl>=3.1  # CorCenCC lemma frequency workbooks (Welsh transfer)
+matplotlib>=3.8
+seaborn>=0.13  # LoRA matrix heatmaps
+plotly>=5.22  # diagnostic Sankey figures
+Pillow>=10.0  # Sankey PNG crop/pad
+sacrebleu>=2.4  # self_bleu distribution metric

@@ -1,6 +1,6 @@
 # Research Mode
 
-CLI-driven pipeline for running generation experiments against benchmarks, scoring outputs, and storing results in a local SQLite database (`research.db`). Use [`explore.ipynb`](explore.ipynb) to inspect and compare runs.
+CLI-driven pipeline for running generation experiments against benchmarks, scoring outputs, and storing results in a local SQLite database (`research.db`).
 
 Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/api/generate.py) but runs standalone (no FastAPI). See [`docs/plans/research_mode_implementation_plan.md`](../docs/plans/research_mode_implementation_plan.md) for the full design.
 
@@ -13,10 +13,7 @@ Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/
 | `benchmarks/*.yaml` | Reusable constraint-set groups |
 | `methods/` | Generation presets (`baseline/`, `individual/`); see [`methods/README.md`](methods/README.md) |
 | `fixtures/mock_outputs.py` | Canned sentences for mock runs |
-| `explore.ipynb` | Analysis over `research.db` |
-| `explore_live_spanish_basic.ipynb` | Live method comparison (`spanish_basic`) |
-| `explore_live_spanish_challenging.ipynb` | Live method comparison (`spanish_challenging`) |
-| `app.py` | Streamlit stub (not wired to the pipeline) |
+| `merge_databases.py` | Merge per-job SQLite run DBs into canonical `research.db` |
 | `prototyping/` | Ad-hoc live GPT spikes (not part of `run_experiment`); see [`prototyping/README.md`](prototyping/README.md) |
 
 ## Setup
