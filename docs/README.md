@@ -10,7 +10,7 @@
 | [`plans/`](plans/) | Implementation and evaluation plans, session handoffs |
 | [`specs/`](specs/) | System design, product direction, implementation specs |
 | [`gpu/`](gpu/) | GPU cluster access and research playbook (operations, databases, D5 lessons) |
-| [`thesis/`](thesis/) | Thesis framing, claims, supervisor meeting notes |
+| [`thesis/`](thesis/) | Thesis framing and claims |
 | [`archive/`](archive/) | Superseded or point-in-time snapshots |
 
 ## Quick links
