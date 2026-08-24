@@ -22,6 +22,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib.offsetbox import AnchoredOffsetbox, DrawingArea, HPacker, TextArea, VPacker
+from matplotlib.patches import Circle, Rectangle
 
 ROOT = Path(__file__).resolve().parents[2]
 CAL_DIR = ROOT / "research" / "runs" / "cost_cal_sequential"
@@ -41,28 +43,37 @@ ADAPTERS = {
     "B": ("LoRA-no-inject", C_LORA_B, "^", 78),
 }
 
-# arm_label -> (adapter key, decode name, Form %, Main verb %, N)
+# arm_label -> (adapter key, displayed generation configuration, Form %, Main
+# verb %, G, N, S)
 # Quality is the 36-verb held-out set (n = 1,116); see tab:td-combined.
 ARMS = {
-    "base17_vanilla":      ("base", "Vanilla",      22.0, 21.5, 4.52),
-    "base17_inject":       ("base", "Inject",       94.2, 75.7, 3.92),
-    "base17_soft8":        ("base", "Soft",         62.2, 45.8, 3.79),
-    "base17_neuro":        ("base", "Neuro",        78.2, 69.1, 4.29),
-    "base17_neuro_inject": ("base", "Neuro+inject", 99.8, 83.6, 3.96),
-    "loraA_vanilla":       ("A", "Vanilla",         78.3, 77.4, 4.54),
-    "loraA_inject":        ("A", "Inject",          98.3, 96.6, 4.54),
-    "loraA_soft8":         ("A", "Soft",            96.6, 72.0, 3.59),
-    "loraA_neuro":         ("A", "Neuro",           97.9, 94.3, 4.50),
-    "loraA_neuro_inject":  ("A", "Neuro+inject",   100.0, 98.6, 4.54),
-    "loraB_vanilla":       ("B", "Vanilla",         86.3, 86.2, 4.47),
-    "loraB_inject":        ("B", "Inject",          93.8, 92.9, 4.46),
-    "loraB_soft8":         ("B", "Soft",            98.5, 84.7, 3.78),
-    "loraB_neuro":         ("B", "Neuro",           98.8, 96.6, 4.57),
-    "loraB_neuro_inject":  ("B", "Neuro+inject",    99.7, 97.4, 4.50),
+    "base17_vanilla":      ("base", "Greedy",          22.0, 21.5, 4.69, 4.52, 4.78),
+    "base17_inject":       ("base", "Greedy + Inject", 94.2, 75.7, 4.37, 3.92, 4.33),
+    "base17_soft8":        ("base", "Soft",         62.2, 45.8, 4.34, 3.79, 4.14),
+    "base17_neuro":        ("base", "Neuro",        78.2, 69.1, 4.77, 4.29, 4.60),
+    "base17_neuro_inject": ("base", "Neuro + Inject", 99.8, 83.6, 4.43, 3.96, 4.38),
+    "loraA_vanilla":       ("A", "Greedy",           78.3, 77.4, 4.80, 4.54, 4.76),
+    "loraA_inject":        ("A", "Greedy + Inject",  98.3, 96.6, 4.89, 4.54, 4.74),
+    "loraA_soft8":         ("A", "Soft",            96.6, 72.0, 4.47, 3.59, 3.92),
+    "loraA_neuro":         ("A", "Neuro",           97.9, 94.3, 4.90, 4.50, 4.74),
+    "loraA_neuro_inject":  ("A", "Neuro + Inject", 100.0, 98.6, 4.91, 4.54, 4.76),
+    "loraB_vanilla":       ("B", "Greedy",          86.3, 86.2, 4.75, 4.47, 4.74),
+    "loraB_inject":        ("B", "Greedy + Inject", 93.8, 92.9, 4.82, 4.46, 4.72),
+    "loraB_soft8":         ("B", "Soft",            98.5, 84.7, 4.32, 3.78, 4.09),
+    "loraB_neuro":         ("B", "Neuro",           98.8, 96.6, 4.90, 4.57, 4.77),
+    "loraB_neuro_inject":  ("B", "Neuro + Inject",  99.7, 97.4, 4.88, 4.50, 4.70),
 }
 
 # API wall-clock over a network, not on-device compute. Flagged in captions.
 GPT = {"label": "GPT-5.5", "ms": 2642.9, "mv": 99.3, "n": 4.89}
+
+# Configurations recommended in the deployment analysis: real-time with a
+# conjugator, pre-computed generation, and real-time without a conjugator.
+RECOMMENDED = {
+    "loraA_inject",
+    "loraA_neuro_inject",
+    "loraB_vanilla",
+}
 
 
 def load_cost() -> dict[str, dict]:
@@ -93,7 +104,7 @@ def build_rows(cost: dict[str, dict]) -> list[dict]:
 
     base_ms = cost["base17_vanilla"]["ms"]
     rows = []
-    for label, (adapter, decode, form, mv, nat) in ARMS.items():
+    for label, (adapter, decode, form, mv, gram, nat, sem) in ARMS.items():
         c = cost[label]
         rows.append(
             {
@@ -106,7 +117,9 @@ def build_rows(cost: dict[str, dict]) -> list[dict]:
                 "size": ADAPTERS[adapter][3],
                 "form": form,
                 "mv": mv,
+                "g": gram,
                 "n": nat,
+                "s": sem,
                 "ms": c["ms"],
                 "sd": c["sd"],
                 "rel": c["ms"] / base_ms,
@@ -140,13 +153,13 @@ def style_axes(ax) -> None:
 # arm -> (label text, bearing in degrees with 0 = north and clockwise,
 #         leader length in axes fractions)
 F1_LABELS = {
-    "base17_vanilla":      ("Base 1.7B · Vanilla", 25, 0.075),
-    "base17_inject":       ("Base 1.7B · Inject", 145, 0.105),
-    "loraA_vanilla":       ("LoRA-with-inject · Vanilla", 138, 0.085),
-    "base17_soft8":        ("Base 1.7B · Soft", 32, 0.080),
-    "loraA_soft8":         ("LoRA-with-inject · Soft", 182, 0.085),
-    "base17_neuro":        ("Base 1.7B · Neuro", 182, 0.080),
-    "base17_neuro_inject": ("Base 1.7B · Neuro+inject", 234, 0.105),
+    "base17_vanilla":      ("Base 1.7B [Greedy]", 25, 0.075),
+    "base17_inject":       ("Base 1.7B [Greedy + Inject]", 145, 0.105),
+    "loraA_vanilla":       ("LoRA-with-inject [Greedy]", 138, 0.085),
+    "base17_soft8":        ("Base 1.7B [Soft]", 32, 0.080),
+    "loraA_soft8":         ("LoRA-with-inject [Soft]", 182, 0.085),
+    "base17_neuro":        ("Base 1.7B [Neuro]", 182, 0.080),
+    "base17_neuro_inject": ("Base 1.7B [Neuro + Inject]", 234, 0.105),
 }
 
 # Two clusters are too tight for bearings to separate: the adapter NeuroLogic
@@ -154,14 +167,14 @@ F1_LABELS = {
 # adapter arms within 18 ms. Fan both into empty lanes at explicit
 # axes-fraction positions instead.
 F1_FANNED = {
-    "loraA_inject":       ("LoRA-with-inject · Inject", 0.250, 0.975),
-    "loraB_inject":       ("LoRA-no-inject · Inject", 0.250, 0.893),
-    "loraB_vanilla":      ("LoRA-no-inject · Vanilla", 0.250, 0.812),
-    "loraB_soft8":        ("LoRA-no-inject · Soft", 0.250, 0.733),
-    "loraA_neuro_inject": ("LoRA-with-inject · Neuro+inject", 0.845, 0.945),
-    "loraB_neuro_inject": ("LoRA-no-inject · Neuro+inject", 0.845, 0.850),
-    "loraB_neuro":        ("LoRA-no-inject · Neuro", 0.845, 0.755),
-    "loraA_neuro":        ("LoRA-with-inject · Neuro", 0.845, 0.660),
+    "loraA_inject":       ("LoRA-with-inject [Greedy + Inject]", 0.250, 0.975),
+    "loraB_inject":       ("LoRA-no-inject [Greedy + Inject]", 0.250, 0.893),
+    "loraB_vanilla":      ("LoRA-no-inject [Greedy]", 0.250, 0.812),
+    "loraB_soft8":        ("LoRA-no-inject [Soft]", 0.250, 0.733),
+    "loraA_neuro_inject": ("LoRA-with-inject [Neuro + Inject]", 0.845, 0.945),
+    "loraB_neuro_inject": ("LoRA-no-inject [Neuro + Inject]", 0.845, 0.850),
+    "loraB_neuro":        ("LoRA-no-inject [Neuro]", 0.845, 0.755),
+    "loraA_neuro":        ("LoRA-with-inject [Neuro]", 0.845, 0.660),
 }
 
 
@@ -271,7 +284,19 @@ def fig_mainverb_vs_latency(rows: list[dict]) -> None:
 # ── Figure 2: latency ladder ─────────────────────────────────────────────────
 
 def fig_latency_ladder(rows: list[dict]) -> None:
-    ordered = sorted(rows, key=lambda r: r["ms"])
+    base_ms = next(r["ms"] for r in rows if r["label"] == "base17_vanilla")
+    gpt_row = {
+        "label": "gpt55",
+        "display_name": "GPT-5.5",
+        "adapter_name": "GPT-5.5",
+        "decode": "API reference",
+        "colour": C_GPT,
+        "mv": GPT["mv"],
+        "n": GPT["n"],
+        "ms": GPT["ms"],
+        "rel": GPT["ms"] / base_ms,
+    }
+    ordered = sorted([*rows, gpt_row], key=lambda r: r["ms"])
     fig, ax = plt.subplots(figsize=(9.0, 6.0))
     style_axes(ax)
     ax.grid(True, which="major", axis="y", color="none")
@@ -285,32 +310,95 @@ def fig_latency_ladder(rows: list[dict]) -> None:
                 edgecolor="none", zorder=3)
         ax.text(
             r["ms"] * 1.10, y,
-            f"{r['ms']:,.0f} ms   ({r['rel']:.2f}\u00d7)",
+            rf"$\mathbf{{{r['ms']:,.0f}\ \mathsf{{\mathbf{{ms}}}}\ \;({r['rel']:.2f}\times)}}$"
+            f"   [MV {r['mv']:.1f}%; N {r['n']:.2f}]",
             va="center", ha="left", fontsize=8.4, color=C_TEXT, zorder=4,
         )
 
     ax.set_yticks(list(ys))
-    ax.set_yticklabels([f"{r['adapter_name']} \u00b7 {r['decode']}" for r in ordered],
+    ax.set_yticklabels(
+        [r.get("display_name", f"{r['adapter_name']} [{r['decode']}]") for r in ordered],
                        fontsize=8.8, color=C_TEXT)
+    for tick, r in zip(ax.get_yticklabels(), ordered):
+        if r["label"] in RECOMMENDED:
+            tick.set_bbox(
+                dict(boxstyle="square,pad=0.14", facecolor="#fff3a3",
+                     edgecolor="none", alpha=0.85)
+            )
     ax.invert_yaxis()
     ax.set_ylim(len(ordered) - 0.4, -0.6)
 
     ax.set_xlabel(
-        "Latency per sentence (ms, log scale); "
-        "\u00d7 is relative latency vs Base 1.7B vanilla",
+        "Latency per sentence (ms, log scale)",
         fontsize=10.0, color=C_TEXT,
     )
+    ax.set_ylabel("Generation configuration", fontsize=10.0, color=C_TEXT)
     ax.set_xticks([100, 200, 500, 1000, 2000, 5000, 10000])
     ax.set_xticklabels(["100", "200", "500", "1,000", "2,000", "5,000", "10,000"])
 
-    handles = [
-        Line2D([], [], marker="s", color="none", markerfacecolor=c,
-               markersize=9, label=name)
-        for name, c, _, _ in ADAPTERS.values()
-    ]
-    leg = ax.legend(handles=handles, loc="upper right", frameon=True,
-                    fontsize=8.8, framealpha=0.95, edgecolor="#cccccc")
-    leg.get_frame().set_linewidth(0.6)
+    def text_box(text: str, *, highlighted: bool = False) -> TextArea:
+        props = {"color": C_TEXT, "fontsize": 8.8}
+        if highlighted:
+            props["bbox"] = dict(
+                boxstyle="square,pad=0.12", facecolor="#fff3a3",
+                edgecolor="none", alpha=0.85,
+            )
+        return TextArea(text, textprops=props)
+
+    def swatch(colour: str | None = None) -> DrawingArea:
+        area = DrawingArea(11, 11, 0, 0)
+        if colour is not None:
+            area.add_artist(
+                Rectangle((1, 1), 8, 8, facecolor=colour,
+                          edgecolor=C_TEXT, linewidth=0.6)
+            )
+        else:
+            area.add_artist(
+                Circle((5, 5), radius=1.1, facecolor=C_TEXT, edgecolor="none")
+            )
+        return area
+
+    def legend_row(label: str, colour: str | None = None):
+        return HPacker(
+            children=[swatch(colour), text_box(label)],
+            align="center", pad=0, sep=3,
+        )
+
+    highlighted_row = HPacker(
+        children=[
+            swatch(),
+            HPacker(
+                children=[
+                    text_box("Highlighted", highlighted=True),
+                    text_box(" label: recommended configuration"),
+                ],
+                align="center", pad=0, sep=0,
+            ),
+        ],
+        align="center", pad=0, sep=3,
+    )
+
+    legend_box = VPacker(
+        children=[
+            legend_row("Base 1.7B", C_BASE),
+            legend_row("LoRA-with-inject", C_LORA_A),
+            legend_row("LoRA-no-inject", C_LORA_B),
+            legend_row("GPT-5.5", C_GPT),
+            highlighted_row,
+            legend_row("Parentheses (\u00d7): relative latency\nas a multiple of Base 1.7B vanilla"),
+            legend_row("MV: correct main-verb use"),
+            legend_row("N: naturalness"),
+        ],
+        align="left", pad=4, sep=2,
+    )
+    legend = AnchoredOffsetbox(
+        loc="upper right", child=legend_box, pad=0.3, borderpad=0.0,
+        frameon=True, bbox_to_anchor=(1.15, 1.0), bbox_transform=ax.transAxes,
+    )
+    legend.patch.set_alpha(0.95)
+    legend.patch.set_edgecolor("#cccccc")
+    legend.patch.set_linewidth(0.6)
+    ax.add_artist(legend)
 
     save(fig, "cost_latency_ladder")
 
@@ -343,7 +431,7 @@ DOMINATED = [
 
 
 def step_name(row: dict) -> str:
-    return f"{row['adapter_name']} \u00b7 {row['decode']}"
+    return f"{row['adapter_name']} [{row['decode']}]"
 
 
 def fig_marginal_cost(rows: list[dict]) -> None:
@@ -459,15 +547,15 @@ def fig_marginal_cost(rows: list[dict]) -> None:
 # companion quality figure. LoRA-with-inject Soft+inject appears there but is
 # absent here: it was never timed in the controlled calibration.
 GE60_LABELS = {
-    "loraA_vanilla":       ("LoRA-with-inject · Vanilla", 0, 0.062),
-    "loraB_vanilla":       ("LoRA-no-inject · Vanilla", 0, 0.062),
-    "loraB_inject":        ("LoRA-no-inject · Inject", 180, 0.062),
-    "loraA_inject":        ("LoRA-with-inject · Inject", 0, 0.062),
-    "base17_neuro":        ("Base 1.7B · Neuro", 180, 0.070),
-    "base17_neuro_inject": ("Base 1.7B · Neuro+inject", 180, 0.070),
-    "loraA_neuro":         ("LoRA-with-inject · Neuro", 270, 0.075),
-    "loraB_neuro":         ("LoRA-no-inject\nNeuro", 0, 0.075),
-    "loraA_neuro_inject":  ("LoRA-with-inject\nNeuro+inject", 200, 0.090),
+    "loraA_vanilla":       ("LoRA-with-inject [Greedy]", 0, 0.062),
+    "loraB_vanilla":       ("LoRA-no-inject [Greedy]", 0, 0.062),
+    "loraB_inject":        ("LoRA-no-inject [Greedy + Inject]", 180, 0.062),
+    "loraA_inject":        ("LoRA-with-inject [Greedy + Inject]", 0, 0.062),
+    "base17_neuro":        ("Base 1.7B [Neuro]", 180, 0.070),
+    "base17_neuro_inject": ("Base 1.7B [Neuro + Inject]", 180, 0.070),
+    "loraA_neuro":         ("LoRA-with-inject [Neuro]", 270, 0.075),
+    "loraB_neuro":         ("LoRA-no-inject\n[Neuro]", 0, 0.075),
+    "loraA_neuro_inject":  ("LoRA-with-inject\n[Neuro + Inject]", 200, 0.090),
 }
 
 
