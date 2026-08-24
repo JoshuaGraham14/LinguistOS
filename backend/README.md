@@ -1,6 +1,6 @@
 # Backend
 
-FastAPI service exposing the core pipeline engine.
+FastAPI service for the user-facing learning prototype (vocab + sentence practice). Not used by the [`research/`](../research/) experimental framework.
 
 ## Setup
 

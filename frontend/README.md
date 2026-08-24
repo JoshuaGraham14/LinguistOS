@@ -1,6 +1,6 @@
-# Frontend (Learning Mode)
+# Frontend (learning prototype)
 
-Next.js (App Router) + TypeScript + Tailwind.
+Next.js (App Router) + TypeScript + Tailwind UI for the user-facing vocabulary / sentence-practice prototype. Talks to [`backend/`](../backend/); not wired to the [`research/`](../research/) experimental framework.
 
 ## Setup
 

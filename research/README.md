@@ -1,104 +1,96 @@
-# Research Mode
+# Experimental framework
 
-CLI-driven pipeline for running generation experiments against benchmarks, scoring outputs, and storing results in a local SQLite database (`research.db`).
+CLI-driven pipeline for constrained sentence-generation experiments: configure a **benchmark** (what to test) and a **method** (how to generate), run generation, score every sentence with a shared metric suite, and store the run in SQLite for analysis.
 
-Generation logic is adapted from [`backend/app/api/generate.py`](../backend/app/api/generate.py) but runs standalone (no FastAPI). See [`docs/plans/research_mode_implementation_plan.md`](../docs/plans/research_mode_implementation_plan.md) for the full design.
+This is the research artefact used for the technical-method and transfer experiments. Diagnostics in the report largely use their own scripts under `diagnostics/` / `prototyping/`, not this runner. Large runs were executed on a GPU cluster via `scripts/cluster/`; the same CLI works locally if a GPU (or CPU) is available.
 
-## Layout
+## Structure
 
-| Path | Purpose |
-|------|---------|
+| Path | Role |
+|------|------|
 | `run_experiment.py` | CLI entry point |
-| `pipeline.py` | Orchestration: generate → evaluate → metrics |
-| `benchmarks/*.yaml` | Reusable constraint-set groups |
-| `methods/` | Generation presets (`baseline/`, `individual/`); see [`methods/README.md`](methods/README.md) |
-| `fixtures/mock_outputs.py` | Canned sentences for mock runs |
-| `merge_databases.py` | Merge per-job SQLite run DBs into canonical `research.db` |
-| `prototyping/` | Ad-hoc live GPT spikes (not part of `run_experiment`); see [`prototyping/README.md`](prototyping/README.md) |
+| `pipeline.py` | Generate → evaluate → store metrics |
+| `benchmarks/` | YAML benchmarks (constraint grids) |
+| `methods/` | YAML method presets (prompt / decode / LoRA arms) |
+| `generation/` | Generators (HF, GPT, constrained decode, NeuroLogic, few-shot, …) |
+| `evaluation/` | Sentence metrics, roll-ups, optional judges / LanguageTool / Cysill |
+| `db/` | SQLAlchemy models for experiment databases |
+| `diagnostics/` | Diagnostic figure scripts and assets |
+| `welsh/` | Welsh resources (mutation, Eurfa morph bans, transfer helpers) |
+| `scripts/` | Training, plotting, audits; `scripts/cluster/` for Slurm jobs |
+| `merge_databases.py` | Merge per-job run DBs into one `research.db` |
+| `prototyping/` | Early spike scripts (not the main runner) |
 
 ## Setup
 
-From the repo root (or `research/`):
+From the **repository root**:
 
 ```bash
-cd research
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python3 -m spacy download es_core_news_sm   # required for verb_morphology evaluator
+python3 -m venv research/.venv
+source research/.venv/bin/activate
+pip install -r research/requirements.txt
+python3 -m spacy download es_core_news_sm
 ```
 
-`sacrebleu` is required for the `self_bleu` distribution metric (installed via `requirements.txt`).
-
-`grammar_languagetool` uses a local LanguageTool server (downloaded on first use, ~259MB).
-**Java** must be installed (`java -version`). Tests mock LanguageTool and do not need Java.
-
-For live OpenAI runs, copy `.env.example` to `.env` and set `OPENAI_API_KEY`.
-
-To wipe experiment data and recreate an empty schema:
-
-```bash
-python3 -c "from research.db.database import reset_db; reset_db()"
-```
-
-Then reload benchmarks and method configs (see **Adding components** below) before running experiments.
+Copy `research/.env.example` to `research/.env` and set keys as needed. LanguageTool needs Java; tests mock it and do not require Java.
 
 ## Run an experiment
 
-Mock run (no API; uses `fixtures/mock_outputs.py`):
+Always invoke from the repo root so `python -m research.…` resolves:
 
 ```bash
+# Mock (no model call)
 python -m research.run_experiment --benchmark spanish_basic --method baseline_default
-```
 
-Live generation:
-
-```bash
+# Live generation (HF methods use CUDA if available, else MPS/CPU)
 python -m research.run_experiment --benchmark spanish_basic --method baseline_default --live
 ```
 
-Other flags: `--no-eval` (skip per-sentence scoring), `--no-metrics` (skip group metrics and roll-ups).
+Useful flags: `--no-eval`, `--no-metrics`, `--skip-experiment-group-metrics`, `--resume`.
 
-### Method comparison (live)
-
-Run both methods on the same benchmark, then inspect diversity metrics in the live notebooks:
+**Default scoring** covers form match, LanguageTool, length, and clause count. Report-style judge / perplexity scores are opt-in (also how cluster jobs often rescore offline):
 
 ```bash
-python -m research.run_experiment --benchmark spanish_basic --method baseline_default --live
-python -m research.run_experiment --benchmark spanish_basic --method individual_default --live
+python -m research.run_experiment \
+  --benchmark spanish_lora_ood_n36 \
+  --method direction_2_lora_vanilla_ood_n36 \
+  --live \
+  --with-naturalness-judge \
+  --with-fluency-perplexity
 ```
 
-Headline experiment-wide diversity columns: `uniqueness_ratio_experiment`, `self_bleu_experiment`,
-`template_rate_experiment`, `distinct_1_experiment`, `distinct_2_experiment`. Baseline (batched GPT)
-should score higher on uniqueness/distinct-n and lower on self-BLEU/template-rate than individual.
+(`--with-naturalness-judge` needs `OPENAI_API_KEY`; `--with-cysill` is the Welsh grammar opt-in.)
 
-### Length grid (`spanish_basic`, Phase F)
+**Local GPU / LoRA knobs** (same env vars as cluster scripts):
 
-Presets under `methods/baseline/` and `methods/individual/`:
-`{short,medium,long,random,long_explicit}` plus `default`.
-Bands: short 2–5 tokens, medium 5–9, long 10–16; `random` draws per sample.
+| Env | Purpose |
+|-----|---------|
+| `RESEARCH_DB` | Write this run to an isolated SQLite file (default: `research/research.db`) |
+| `LORA_ADAPTER_PATH` | Attach a PEFT adapter for LoRA arms |
+| `HF_BATCH_SIZE` | Batch size (lower for soft / NeuroLogic if VRAM is tight) |
 
 ```bash
-python -m research.run_experiment --benchmark spanish_basic --method baseline_short --live
-python -m research.run_experiment --benchmark spanish_basic --method individual_long --live
+export RESEARCH_DB=research/runs/local_ood_vanilla.db
+export LORA_ADAPTER_PATH=/path/to/adapter
+export HF_BATCH_SIZE=4
+python -m research.run_experiment --benchmark spanish_lora_ood_n36 --method direction_2_lora_vanilla_ood_n36 --live
 ```
 
-Length metrics: `pass_rate::length_in_band`, `mean_token_count_experiment`, `length_cv_experiment`,
-`mean_clauses_experiment`, `mean::clause_count`.
+Merge isolated run DBs when needed:
+
+```bash
+python -m research.merge_databases --target research/research.db research/runs/local_ood_vanilla.db
+```
 
 ## Tests
 
 ```bash
-python -m pytest tests/ -q
+python -m pytest research/tests/ -q
 ```
 
-## Adding components
+## Extending
 
-- **Benchmark:** YAML under `benchmarks/`, loaded on first use.
-  Optional `mock_only: true` marks fixture benchmarks (evaluator regression tests);
-  `run_experiment --live` rejects these. After schema changes, run `reset_db()` and reload.
-  Benchmarks: `spanish_basic` (easy), `spanish_challenging` (live stress-test), `spanish_grammar_probe` (mock fixture).
-- **Method:** Self-contained YAML preset under `methods/baseline/` or `methods/individual/`; CLI uses the preset `name` (e.g. `baseline_long`).
-- **Sentence evaluator:** class under `evaluation/sentence/`, register in `evaluation/sentence/__init__.py` (`DEFAULT_EVALUATORS`).
-- **Distribution metric:** class under `evaluation/distribution/`, register in `evaluation/distribution/__init__.py` (`DEFAULT_GROUP_METRICS`). Diversity metrics: `self_bleu`, `template_rate`, `distinct_1`, `distinct_2` (each with constraint_set + experiment scopes).
-- **Language morph config:** YAML under `evaluation/morph_configs/<lang>.yaml` (maps benchmark tense/person/number → UD features for `verb_morphology`). Adding a new language requires no code changes — drop a file and download the parser model.
+- **Benchmark:** add YAML under `benchmarks/`
+- **Method:** add YAML under `methods/baseline/` (or related); CLI uses the preset `name`
+- **Generator:** implement under `generation/` and register in `generation/__init__.py`
+- **Evaluator:** add under `evaluation/sentence/` (or distribution metrics) and register in the package `__init__`

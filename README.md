@@ -1,36 +1,21 @@
 # LinguistOS
 
-Hybrid morpho-syntactic sentence generation + vocabulary learning system.
+Code for my MSc project on "Morphosyntactically constrained sentence generation for vocabulary practice".
 
-Two modes over one shared pipeline:
-- **Learning Mode** — user-facing vocabulary practice (Next.js)
-- **Research Mode** — evaluation, experimentation, analysis (Streamlit)
+The repository has two separate parts, matching the distinction in the report:
 
-See [docs/specs/hybrid_system_spec.md](docs/specs/hybrid_system_spec.md) for the full specification.
+| Part | Role | Location |
+|------|------|----------|
+| **Experimental framework** | CLI pipeline that runs generation methods on benchmarks, scores outputs with a shared metric suite, and stores results in SQLite experiment databases. This is what produces the technical-method and transfer results. | [`research/`](research/) |
+| **User-facing learning prototype** | Interactive vocabulary / sentence-practice app. Demonstrates how the research could sit inside a learning product. It is **not** connected to the experimental framework and is not used for the reported experiments. | [`frontend/`](frontend/) + [`backend/`](backend/) |
 
 ## Layout
 
 ```
-backend/    FastAPI service + core pipeline engine (the heart of the system)
-frontend/   Next.js + TypeScript + Tailwind (Learning Mode UI)
-research/   Streamlit app (Research Mode UI)
-docs/       Specification, plans, experiment results (see docs/README.md)
-scripts/    Dev/db/setup utilities
+research/   Experimental framework (benchmarks, methods, evaluation, cluster scripts)
+frontend/   Next.js learning prototype UI
+backend/    FastAPI service for the prototype
+docs/       Specs, experiment notes, and report-writing material
 ```
 
-## Quickstart
-
-Each component has its own README with setup instructions:
-- [backend/README.md](backend/README.md)
-- [frontend/README.md](frontend/README.md)
-- [research/README.md](research/README.md)
-
-## Stack
-
-| Layer        | Tech                                  |
-|--------------|---------------------------------------|
-| Frontend     | Next.js, TypeScript, Tailwind         |
-| Research UI  | Streamlit                             |
-| Backend API  | FastAPI (Python)                      |
-| NLP          | spaCy, Stanza, LanguageTool           |
-| Database     | PostgreSQL                            |
+Setup for each part is in its own README: [research](research/README.md), [frontend](frontend/README.md), [backend](backend/README.md).
